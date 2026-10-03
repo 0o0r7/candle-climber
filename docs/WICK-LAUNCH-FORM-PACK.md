@@ -38,7 +38,7 @@
 | **Ticker** (≤16) | `$WICK` | نماد ثابت پروژه از روز اول (README / CC-PLAN)؛ فیت معنایی با مکانیک اصلی بازی (wick = فتیله‌ی کندل) |
 | **Pair tab** | `Classic` (native ETH) | «مسیر مستقیم». ۱۲۰۰ از ۱۲۰۰ لانچ اخیر پلتفرم با ETH بودند؛ تنها روتِ battle-tested. تبریک — پیش‌فرض درفت هم همین است |
 | **Project type** | `Product & Utility` | دقیقاً همان چیزی که هستیم: بازیِ زنده و قابل‌بازی (کف لانچ پلتفرم: «MVP, demo, prototype, or usable flow» — ما از آن بالاتریم) |
-| **Description** | بلوک‌های §7 پایین | نسخه‌ی STANDARD توصیه‌ی اصلی است؛ اگر فیلد کوتاه بود از SHORT |
+| **Description** (سقف دقیقاً **1000**) | بلوک **FORM** در §7 پایین | ⚠️ تأیید زنده 2026-10-04: شمارنده فیلد 1000/1000 است؛ STANDARD قدیمی ۱۲۰۸ کاراکتر بود و وسط جمله بریده می‌شد. حتماً نسخه‌ی FORM (۹۸۵ کاراکتر) را بگذار |
 | **Website** | `https://candle-climber.vercel.app` | بازی زنده و در دسترس — قوی‌ترین برگِ برنده‌ی این فرم |
 | **X (Twitter)** | آدرس اکانت X خودت (اگر ساختی) | طبق قدم صفر |
 | **Telegram / Discord** | خالی | طبق قدم صفر |
@@ -139,9 +139,26 @@ playable level.
 
 ---
 
-## 7️⃣ بلوک‌های Description (انگلیسی — سه نسخه)
+## 7️⃣ بلوک‌های Description (انگلیسی)
 
-### 🔹 SHORT (~۳۰۰ کاراکتر — اگر فیلد محدود بود / بایو X)
+### 🔹 FORM — نسخه‌ی فیلد Description ویزارد (۹۸۵/۱۰۰۰ کاراکتر) — ⭐ توصیه‌ی اصلی
+
+> سقف فیلد دقیقاً 1000 کاراکتر است (تأیید زنده 2026-10-04 — اسکرین‌شات owner، شمارنده 1000/1000).
+> نسخه‌ی زیر ۹۸۵ کاراکتر است، جمله‌ی آخرش کامل است (بریده نمی‌شود) و «earns» به «builds» اصلاح شده (خط قرمز ۱).
+> اگر خواستی چیزی به آن اضافه کنی، فقط با جایگزین — بیش از ۱۵ کاراکتر جا ندارد.
+
+```
+Candle Climber is a live skill platformer built from real market candles. Each day one real symbol's chart (deterministic daily seed, identical worldwide) becomes a mountain: green candles are solid jump pads, red candles crumble, and falling off the bottom means liquidation. Every run ends in a shareable Death Card.
+
+Score is pure skill: runs are verified server-side (HMAC run-tokens, anti-cheat suite) — no self-play reward loops, anti-sybil by design.
+
+$WICK is the game's utility token. Holding it gates summit-tier runs and cosmetics via server-side on-chain balance reads (Balance Gate — base gameplay stays free) and builds airdrop weights from daily streaks, route predictions and archive marathons. After graduation: in-game spend/burn, treasury-funded tournaments and MIRROR mode — $WICK's own chart becomes a playable level. Every trade auto buyback-burns $WICK.
+
+Live now: https://candle-climber.vercel.app
+Built for the vibe builders program on Robinhood Chain testnet.
+```
+
+### 🔹 SHORT (~۳۰۰ کاراکتر — بایو X و هر جای کوتاه)
 
 ```
 The chart is the level. A live skill platformer built from real
@@ -151,7 +168,9 @@ for every climber worldwide, every day. $WICK: summit tiers, airdrop
 weights, auto buyback-burn — and one day, its own chart as a level.
 ```
 
-### 🔹 STANDARD — توصیه‌ی اصلی برای فیلد Description فرم
+### 🔹 STANDARD (۱۲۰۸ کاراکتر — برای فیلد ویزارد **نمی‌گنجد**؛ فقط جاهایی که سقف ندارند)
+
+> در فرم لانچ استفاده نشود — ۲۰۸ کاراکتر اضافه دارد و وسط جمله بریده می‌شد (رخداد واقعی 2026-10-04).
 
 ```
 Candle Climber is a live, playable skill platformer whose levels are
@@ -168,7 +187,7 @@ self-play, anti-sybil by design.
 
 $WICK is the game's utility token. Holding it gates summit-tier runs
 and cosmetics through server-side on-chain balance reads (Balance
-Gate — base gameplay stays free), and earns airdrop weights from
+Gate — base gameplay stays free), and builds airdrop weights from
 daily streaks, route predictions and archive marathons. After
 graduation it unlocks in-game spend/burn, treasury-funded tournaments
 and MIRROR mode — $WICK's own chart becomes a playable level. Every
