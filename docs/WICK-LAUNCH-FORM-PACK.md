@@ -99,6 +99,9 @@
 3. سهم ~۱۰٪ جامعه از روتِ دیگر محقق می‌شود: حساب‌وزنِ ایردراپ (streak / prediction / archive marathon — P4.4) + خزانه‌ی ۲۰٪ برای تورنمنت‌ها. قول ما به جامعه همان می‌ماند، فقط مسیر اجرا درست است.
 
 > DRGN همین ۱۰٪ را برای ۳,۸۷۹ کیف‌پولِ از قبل جمع‌شده رزرو کرد — ما هنوز چنین snapshot ای نداریم.
+>
+> ✅ تأیید زنده 2026-10-04: STEP 4 با سوییچ «Airdrops off» پیش‌فرض می‌آید (دست نزن) و متن خود UI دلیل skip ما را تأیید می‌کند: «...they stay locked in your wallet and are sent to every wallet automatically when the token graduates — and if it never graduates, they stay locked for good».
+> ⚠️ در همین صفحه دکمه‌ی پایین دیگر «Next» نیست — «**Create token · $WICK**» است = امضا و نقطه‌ی بی‌بازگشت. قبل از فشردن، چک‌لیست §5 را کامل کن.
 
 ---
 
