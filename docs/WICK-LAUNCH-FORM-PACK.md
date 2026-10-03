@@ -22,6 +22,31 @@
 | Telegram / Discord | ❌ نداریم | خالی بگذار — خالی بودنِ صادقانه بهتر از لینک مرده است |
 | لوگو | ✅ موجود است | `icon-512.png` (مربع ۵۱۲) — لینک مستقیم: https://candle-climber.vercel.app/icon-512.png |
 
+### 🐦 پرونده‌ی W7 — ساخت اکانت X بازی (۱۵ دقیقه، فقط قبل از امضا)
+
+> تصمیم نهایی 2026-04-10: **X = بساز و در فرم بگذار؛ Telegram/Discord = خالی.**
+> چرا X اجباری است: فیلدها بعد از امضا برای همیشه قفل‌اند، حلقه‌ی اشتراک Death Card و پست showcase روز لانچ به X گره خورده، و کل اکوسیستم vibe/vibe روی X کشف و ترفیع می‌شود.
+> چرا TG/Discord خالی: سرور خالی زشت‌تر از فیلد خالی است؛ وقتی بعداً ساخته شدند، بایوی X و لندینگ بازی (که هر دو قابل‌ویرایش‌اند) لینکشان را حمل می‌کنند — فقط صفحه‌ی توکن بدون آن‌ها می‌ماند که مهم نیست.
+> نکته: اکانت تازه ممکن است چند روز محدودیت‌های سبک داشته باشد — طبیعی است؛ فقط هندل + پین‌توییت برای فرم کافی است، گرم‌کردن اکانت بعد از لانچ انجام می‌شود. فالوور نخر، فالو انبوه نکن (حساسیت anti-sybil بنیان‌گذار).
+
+1. **هندل**: به ترتیب امتحان کن — `@CandleClimber` → `@candle_climber` → `@CandleClimbr` (تمیزترینِ آزاد را بگیر)
+2. **Name**: `Candle Climber` · **Website field**: `https://candle-climber.vercel.app`
+3. **Bio** (سقف X دقیقاً 160 — نسخه‌ی تأییدشده ۱۴۶ کاراکتر):
+```
+The chart is the level. Skill platformer on real market candles — free to play. $WICK: community token on @vibevibefun testnet, no monetary value.
+```
+4. **اولین توییت + پین** (۲۳۰ کاراکتر، یک اسکرین‌شات یا GIF از بازی ضمیمه کن):
+```
+The chart is the level. 🕯️
+
+Climb today's real market chart — green candles hold, red candles crumble, fall and you're liquidated.
+
+Free, no wallet: https://candle-climber.vercel.app
+$WICK · community token on @vibevibefun testnet
+```
+5. **فالو**: `@vibevibefun` (+ بنیان‌گذار) — همین؛ فالو انبوه ممنوع
+6. برگرد به فرم توکن → فیلد X: `https://x.com/<هندل>` → حالا **Create token · $WICK** را بزن
+
 سه نکته‌ی فنی که نباید غافلگیرت کند (از trace زنده‌ی `/create`):
 1. اول از همه مودال **User Agreement** می‌آید (نسخه `2026-08-29-v2-v3`) — قبولش کن، طبیعی است، باگ نیست.
 2. پیش‌نویس فرم خودکار در `localStorage` (کلید `v6-create-draft-app-1`) ذخیره می‌شود — اگر وسط کار مرورگر را بستی، فرم از همان‌جا برمی‌گردد.
