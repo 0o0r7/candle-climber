@@ -63,6 +63,7 @@
 > مدرک مستقل از زیرنویس خود کارت‌ها: «0.32% of each trade» = 16%×2% · «1.2%» = 60%×2% · «0.08%» = 4%×2% — پس اعداد کارت قطعاً «درصد از کل ۲٪»اند و UI هرگز عدد 75 را نشان نخواهد داد؛ نگران تفاوت ظاهری با پک نباش.
 > متن بالای فرم هم anti-snipe را تأیید کرد: «For the first 20 seconds, buys start at a higher tax that falls to your chosen rate» — همان ۲۰ ثانیه‌ی مستند، کاری نداری.
 > **Advanced · treasury wallet**: بازش کن فقط برای دیدن؛ اگر آدرس می‌خواهد **خالی/پیش‌فرض بگذار** تا خزانه به کیف سازنده (deployer) برود — آدرسِ تستی یا اشتباه یعنی قفل شدن بودجه‌ی تورنمنت‌ها بعد از graduation.
+> ↳ تأیید زنده 2026-10-04: بخش باز شد → متن UI: «By default the treasury share goes to the wallet that creates the token. To pay a multisig instead, create a Safe at safe.global and paste its address» و فیلد روی «your wallet · 0x3cF5...f683» (= همان deployer). **دست نزن، Safe نساز** — روی testnet پیچیدگی بی‌فایده است و آدرس اشتباه یعنی خزانه‌ی قفل‌شده برای همیشه.
 
 تقسیم پیشنهادی سهم ۸۰٪ سازنده — الگوی DRGN (لانچ مرجعِ بازی‌محور پلتفرم) با تمرکز روی هولدرها:
 
