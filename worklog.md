@@ -41,3 +41,19 @@ Work Log:
 
 Stage Summary:
 - All three provider options validated live (NVIDIA GLM e2e, Azure gpt-4o e2e); owner equipped to configure Z Code with layered fallbacks.
+---
+Task ID: 53
+Agent: Super Z (main)
+Task: Owner reported Z Code shows Azure provider as green but chat fails with "Connection failed: Resource not found".
+
+Work Log:
+- Path-probed the Azure resource (jthom-mu81q149-eastus2.cognitiveservices.azure.com) WITHOUT any key to map which URL paths exist:
+  - POST /openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21 -> 401 (path valid, auth required)
+  - POST /openai/v1/chat/completions -> 401 (new v1 API path valid)
+  - POST /v1/chat/completions -> 404 Resource not found  <-- matches owner's error exactly
+  - GET /openai/v1/models -> 404 (models list not exposed on this resource)
+- Diagnosis: auth (green) is fine; Z Code is composing an OpenAI-style path (/v1/chat/completions) that does not exist on Azure -> 404.
+- Delivered two fixes (native Azure fields vs OpenAI-compatible base URL .../openai/v1) + self-test curl commands.
+
+Stage Summary:
+- Root cause = URL path composition, NOT key. Fix A: provider type Azure with endpoint=root only, deployment=gpt-4o, api-version=2024-10-21. Fix B: OpenAI-compatible mode with base URL https://...cognitiveservices.azure.com/openai/v1 and model gpt-4o.
