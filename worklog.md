@@ -26,3 +26,18 @@ Work Log:
 
 Stage Summary:
 - Migration stack validated: key1 + NVIDIA NIM GLM family confirmed; Z Code config values handed to owner; corrected test snippet provided.
+
+---
+Task ID: 52
+Agent: Super Z (main)
+Task: Owner asked about NVIDIA token quota sustainability + provided a third key to test (turned out to be Azure OpenAI gpt-4o, not NVIDIA).
+
+Work Log:
+- Azure endpoint tested live: chat completion 200 OK in 1.8s, model gpt-4o-2024-11-20, resource jthom-mu81q149-eastus2.cognitiveservices.azure.com, deployment gpt-4o. Deployments-list endpoint 404 (not exposed on this resource).
+- Honest guidance delivered: NVIDIA free credits are account-tied (new key on same account does NOT reset quota), exact quota visible in NVIDIA build portal usage section; eval credits may not be enough for full agent-driven project work.
+- Three-layer strategy given: NVIDIA glm-5.3-flash (free start) -> z.ai GLM Coding Plan (same-family backbone, built for Z Code) -> Azure gpt-4o (third fallback; different model family, not GLM).
+- Z Code Azure config: needs native Azure provider type (endpoint/deployment/api-version) - plain OpenAI Chat format cannot compose Azure's deployment URL with api-version query; asked for provider-form screenshot to map fields.
+- No key values stored; rotation reminder repeated (third key pasted in chat).
+
+Stage Summary:
+- All three provider options validated live (NVIDIA GLM e2e, Azure gpt-4o e2e); owner equipped to configure Z Code with layered fallbacks.
