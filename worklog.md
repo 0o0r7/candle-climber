@@ -80,3 +80,18 @@ Work Log:
 
 Stage Summary:
 - Owner has a single copy-paste block; next session topic reserved: X (Twitter) launch post + owner's made images.
+---
+Task ID: 57
+Agent: Super Z (main)
+Task: Manus delivered the Candle Current variant (preview + docs + code via owner-uploaded zip). Owner expects independent review and next steps. Vercel project creation failed with 403 (scoped connector, as designed).
+
+Work Log:
+- Unzipped and read all deliverables (VARIANT-ANALYSIS, VARIANT-DESIGN, COMPARISON-MATRIX, TEAM, game.js/index.html/styles.css, worklog copy).
+- Live-verified: preview URL serves the game (title confirmed); original repo UNTOUCHED (origin HEAD = 7d7ab0e = our brief commit); 0o0r7/candle-current is 404 anonymously (private or not created - owner to check logged-in).
+- Red-line audit of shipped code: fully compliant (synthetic tape badge, no-wallet/no-value copy, no earnings verbs, no keys, no copied source).
+- Code findings: forecast depth thinner than advertised (one-beat lookahead; further cells at lane i%3), narrow agency (850ms auto-timer), tap-only mobile input, Google Fonts CDN weakens offline-first.
+- Wrote docs/VARIANT-REVIEW-2026-10-05.md: verification table, red-line audit, code notes, verdict (agree with core, 2 refinements: economy 8v7 too generous to paper-coherence; discoverability critique cross-validated by KB founder-intel), re-prioritized merge-back (wave 1: game-first entry, provenance badge, rank!=recognition), deployment options for the 403 path.
+- Pushed review + worklog to origin.
+
+Stage Summary:
+- Exercise verdict: Candle Climber stays flagship; Candle Current = comprehension experiment + onboarding-mode candidate; merge direction agreed. Owner to pick deploy path (temp grant vs manual static deploy) and then we pivot to X post + owner images.
