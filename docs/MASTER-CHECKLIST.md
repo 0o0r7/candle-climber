@@ -238,11 +238,15 @@ P4–P6 (owner-side actions), visual debt VD-5..7 (LOW, accepted).
   self-hosted); both clients simulate locally, avatar sync ~200ms; matchmaking queue
   ⛓ infra decision (owner ping required for new service spend)
 
-### P4 — $WICK launch (contains growth G1) — heavy owner dependency
-- [ ] **P4.0** 🔒 **O2** Owner: faucet test ETH into launch wallet
-- [ ] **P4.1** 🔒 **O3** Owner: wizard launch per TOKEN-LAUNCHPAD-RESEARCH §9
-  (Product & Utility · native ETH pair · tax 2% holders-heavy · airdrop board ~10% ·
-  minimal opening buy) — one tx, verified on explorer 🧪
+### P4 — $WICK launch (contains growth G1) — launch DONE 2026-10-05, activation wave next
+- [x] **P4.0** 🔒 **O2** Owner: faucet test ETH into launch wallet — DONE (wallet
+  0x3cF5…f683 funded) 🧪
+- [x] **P4.1** 🔒 **O3** Owner: wizard launch per TOKEN-LAUNCHPAD-RESEARCH §9 — DONE
+  2026-10-05T22:22:32Z · launch #5963 · category **Product & Utility** · tax 200 bps ·
+  tx 0x8e78b7fabab4f9a8e7aa4611e299f5a2165e151169be25f38fa46ec62e6e61b1 (status ok,
+  block 129,493,865) · token 0xE2cE0Be4e3D420C1e4b5C46493b3d5e03595216c · curve
+  0x9e00b42b8a9c12acde9974054a05852dc692640c · lifecycle CURVE_TRADING (verified via
+  pad API /v6/launches/{token} + explorer) · pad wizard prebuilt X-share link saved 🧪
 - [ ] **P4.2** Balance Gate tiers — server-side on-chain balance read; wallet identity
   additive to W1 run-tokens (W5 untouched) ⛓ P4.1
 - [ ] **P4.3** Hook **H7 WICK VAULT** ⛓ P4.1 · vault visuals from V4 ⛓ P2.1

@@ -137,3 +137,16 @@ Work Log:
 
 Stage Summary:
 - Both experiments fully verified; remaining scope fits 100M with big headroom; tonight's plan documented with ready-to-paste briefs; security closeout flagged (PAT in chat = revoke after use).
+---
+Task ID: 61
+Agent: Super Z (main)
+Task: Owner pasted $WICK launch artifacts (token page, contract, tx, X-share link, screenshot). Verify the launch and update project state.
+
+Work Log:
+- Verified tx 0x8e78b7fa…61b1 on explorer API: status ok, block 129,493,865, from owner wallet 0x3cF5…f683, to factory 0xe794…Fea0, 2026-10-05T22:22:32Z.
+- Verified token via pad API GET /api/v1/chains/46630/v6/launches/{token}: launch #5963, symbol WICK / "Candle Climber", curve 0x9e00b42b…640c, lifecycle CURVE_TRADING, taxBps 200, metadataURI ipfs://bafkreiff… (full record saved at repo root as wick-launch-record.json — moved to docs/evidence/ in this commit).
+- Confirmed screenshot matches: launch #5963, tax 2%, block number identical, category "Product & Utility".
+- MASTER-CHECKLIST: P4.0 + P4.1 marked DONE with evidence; P4 section header updated to "launch DONE, activation wave next".
+
+Stage Summary:
+- $WICK is LIVE on the vibe/vibe curve (launch #5963, CURVE_TRADING). Project enters the activation wave: P4.2 wallet identity + Balance Gate, P4.4 airdrop weights, P4.5 showcase post, P4.6 ROUTE PREDICTION. Owner next: X post (wizard prebuilt link ready) + Discord showcase post (pack §6) + Vercel env WICK_TOKEN_ADDRESS.
