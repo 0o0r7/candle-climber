@@ -1,7 +1,7 @@
-# MANUS VARIANT BRIEF — paste-ready prompt (2026-10-05)
+# MANUS VARIANT BRIEF — FINAL consolidated prompt (v2, 2026-10-05)
 
-> **Usage:** paste the block below as the FIRST message to Manus (game-creation mode, cloud on).
-> **Verified 2026-10-05:** `0o0r7/candle-climber` is PUBLIC (Manus can clone it). `0o0r7/vibe-ecosystem-kb` is PRIVATE (Manus cannot clone it — the distilled intel already lives in the main repo's `docs/`, so the prompt tells Manus to skip it gracefully).
+> **Usage:** send the block below as ONE single first message to Manus (game-creation mode, cloud on). Nothing else needs to follow — environment, KB access path, and all guardrails are integrated.
+> **Verified 2026-10-05:** `0o0r7/candle-climber` is PUBLIC (cloneable). `0o0r7/vibe-ecosystem-kb` is PRIVATE — reachable via the owner's GitHub connector (fallback: skip).
 
 ---
 
@@ -40,7 +40,7 @@ YOU DECIDE (full freedom — this is where we want your creativity):
 HARD GUARDRAILS (never cross):
 1. Evidence-first: never invent market data, prices, on-chain numbers, or user metrics. Mark anything unverifiable as [UNVERIFIED — NEEDS OWNER INPUT]. No placeholder numbers presented as real.
 2. Content red lines (docs/WICK-LAUNCH-FORM-PACK.md §8): never promise rewards or earnings ("builds airdrop weights", not "earns"); testnet transparency; no gambling tone; no hype with fake numbers.
-3. The original product is READ-ONLY for you, in BOTH surfaces: do not push, do not open PRs, do not modify 0o0r7/candle-climber in any way — and on the Vercel side, do NOT touch, redeploy, or change settings of the existing candle-climber production project (https://candle-climber.vercel.app must stay exactly as it is). Deploy the variant as a brand-new Vercel project with a new name. All output stays as a NEW, separate deliverable.
+3. The original product is READ-ONLY for you, on BOTH surfaces: do not push, do not open PRs, do not modify 0o0r7/candle-climber in any way — and on the Vercel side, do NOT touch, redeploy, or change settings of the existing candle-climber production project (https://candle-climber.vercel.app must stay exactly as it is). Deploy the variant as a brand-new Vercel project with a new name. All output stays as a NEW, separate deliverable.
 4. Deliver a PLAYABLE, deployable browser game: complete start → play → win/lose → retry loop, responsive (desktop + touch), progress persisted locally. A polished complete small game beats an ambitious broken one — cut features, never coherence.
 5. No external paid APIs, no API keys, no secrets. Everything must run from static hosting plus (at most) your own mock data layer.
 6. If a technical or factual unknown would force you to guess something big, stop and ask the owner one consolidated list of questions instead of hallucinating.

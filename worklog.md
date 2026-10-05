@@ -68,3 +68,15 @@ Work Log:
 
 Stage Summary:
 - Manus now has full knowledge surface (main repo + private KB) and a deploy path (Vercel); production game protected on both git and hosting surfaces.
+---
+Task ID: 56
+Agent: Super Z (main)
+Task: Owner confirmed nothing was sent to Manus yet and asked for ONE consolidated prompt (brief + environment + guardrails unified) to send in a single message; will return afterward for the tweet-post and image work.
+
+Work Log:
+- Finalized docs/MANUS-VARIANT-BRIEF.md as v2 consolidated single-message prompt: MISSION / CONTEXT / ENVIRONMENT (connectors) / 3 phases / hard guardrails (incl. live-Vercel protection) / DELIVERABLES / DoD.
+- Fixed header usage note (send as ONE message, no addendum needed) and a typo in guardrail 3.
+- Synced download/MANUS-VARIANT-PROMPT.md; full prompt pasted in chat for direct copy; pushed to origin.
+
+Stage Summary:
+- Owner has a single copy-paste block; next session topic reserved: X (Twitter) launch post + owner's made images.
