@@ -57,3 +57,14 @@ Work Log:
 
 Stage Summary:
 - Root cause = URL path composition, NOT key. Fix A: provider type Azure with endpoint=root only, deployment=gpt-4o, api-version=2024-10-21. Fix B: OpenAI-compatible mode with base URL https://...cognitiveservices.azure.com/openai/v1 and model gpt-4o.
+---
+Task ID: 55
+Agent: Super Z (main)
+Task: Owner connected Manus connectors (GitHub with BOTH repos selected, Vercel, Supabase, Blockscout, Sentry, OpenRouter/OpenAI/Anthropic, HF, browsers, Notion) and reported the KB repo is now accessible to Manus.
+
+Work Log:
+- Updated docs/MANUS-VARIANT-BRIEF.md: new ENVIRONMENT section (connector inventory + usage rules), KB reading path switched to GitHub-connector-first, guardrail 3 extended to cover the LIVE Vercel deployment (original candle-climber project must not be touched/redeployed; variant must be a NEW Vercel project) - previously only the git repo was protected.
+- Synced copy to download/MANUS-VARIANT-PROMPT.md; delivered short Persian addendum block for the owner to paste as a follow-up message in Manus.
+
+Stage Summary:
+- Manus now has full knowledge surface (main repo + private KB) and a deploy path (Vercel); production game protected on both git and hosting surfaces.
