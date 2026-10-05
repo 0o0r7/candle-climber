@@ -95,3 +95,16 @@ Work Log:
 
 Stage Summary:
 - Exercise verdict: Candle Climber stays flagship; Candle Current = comprehension experiment + onboarding-mode candidate; merge direction agreed. Owner to pick deploy path (temp grant vs manual static deploy) and then we pivot to X post + owner images.
+---
+Task ID: 58
+Agent: Super Z (main)
+Task: Owner (framed as a competition test of agent creativity) requested a SECOND Manus prompt: this time Manus must build a completely NEW game from ECOSYSTEM KNOWLEDGE only (founders' taste, platform expectations, goals) - not from the existing product - to test whether a genuine alternative can be created.
+
+Work Log:
+- Wrote docs/MANUS-ALTERNATIVE-BRIEF.md (single-message consolidated prompt): Phase 1 ecosystem study (KB via connector + docs/ only, src/** FORBIDDEN to keep ideation product-independent), Phase 2 synthesize what-the-ecosystem-wants (source-cited), Phase 3 invent new game (hard exclusions: no candlestick platformer, no lane-steering; token relation = Manus's justified choice, on-chain items [UNVERIFIED]).
+- Run-1 lessons baked in: no Vercel attempt (confirmed 403; sandbox preview URL accepted), new-repo push via connector with sandbox-packaging fallback, red lines SS8 as law, read-only protection of both existing products.
+- Deliverables demanded: ECOSYSTEM-STUDY.md, GAME-CONCEPT.md, playable game, ALTERNATIVE-CASE.md (curation stress test + where it would lose to flagship), TEAM.md, 10-line verdict with confidence score.
+- Synced download/MANUS-ALTERNATIVE-PROMPT.md; full prompt pasted in chat; pushed to origin.
+
+Stage Summary:
+- Experiment 2 launched: from-knowledge ideation vs experiment 1's from-product derivation; review will compare both creativity probes honestly.
