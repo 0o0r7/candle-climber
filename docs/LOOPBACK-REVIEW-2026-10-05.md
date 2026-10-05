@@ -59,3 +59,30 @@ Both earlier products tie into a token story from day one. LOOPBACK refuses a to
 3. Address the named risk early: a small authored board pipeline (5–10 boards, weekly cadence) is what separates a toy from a product — cheaper than any marketing.
 4. The X post for any of these products comes later from WICK-LAUNCH-FORM-PACK §6 (founder dialect, cashtag, no hashtags) — LOOPBACK's own hook copy ("Wire the agent. Ship the build.") is compatible and well-written.
 5. Keep all three artifacts alive as a portfolio: flagship (competitive depth), Current (onboarding-mode candidate), LOOPBACK (builder-native alternative + future $PATCH decision slot).
+
+---
+
+## 7. ADDENDUM (2026-10-06): code-level audit complete — verification gap CLOSED
+
+Owner provided repo access; `0o0r7/loopback-game` (private, 2 commits) shallow-cloned and audited. Also confirmed `0o0r7/candle-current` (private) is byte-identical to the already-reviewed Candle Current — the zip's stale files were a red herring, nothing new there.
+
+### Code audit of LOOPBACK (game.js 8.5KB / index.html / styles.css)
+
+**Claims now verified at code level:**
+- Deterministic boards: seeded LCG RNG, three fixed seeds → three fixed boards. TRUE
+- Real puzzle logic: BFS connectivity validation (`reachable` / `boardSolved`), source cell → target cell; ANY valid route compiles (matches the copy promise). TRUE
+- First-frame claim: home screen renders board 1 live behind the CTA (`preview()` at load). TRUE
+- Built-in QA hook: `?qa=1` exposes `runSession()` that applies stored solution masks — explains the "three full sessions" acceptance claim; legitimate self-test. TRUE
+- Red lines in shipped HTML: footer "TESTNET TOKEN: NONE IN V0 · NO MONETARY VALUE CLAIMS", "FREE CORE · NO WALLET · NO FAKE METRICS", "NOT A TOKEN WRAPPER" panel, summary note "no wallet, no reward promise". FULL PASS
+- No keys/APIs/wallet code — localStorage only (Google Fonts CDN = same minor note as Current). PASS
+
+**Found issues (non-blockers):**
+1. `maskFor()` is dead code (always returns 0, never called) — sloppy leftover, harmless.
+2. Mobile rotation is CW-only per tap; CCW requires the ↶ button — minor friction.
+3. Any-valid-route wins = generous puzzle goal; fine for v0, tightens later via target-specific packets.
+
+**Verdict upgrade:** the "credible alternative" claim now stands **VERIFIED at code level**. Remaining unknown is only the feel of play (needs a human 10-second test on a live deploy).
+
+### Final standing of the two Manus experiments
+- Experiment 1 (Candle Current): verified playable, red-lines PASS, quality good — onboarding-mode candidate.
+- Experiment 2 (LOOPBACK): verified at code level, red-lines PASS, strongest strategic thinking (no-token v0) — builder-native alternative, deploy + play-test to finalize.
