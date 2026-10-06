@@ -150,3 +150,16 @@ Work Log:
 
 Stage Summary:
 - $WICK is LIVE on the vibe/vibe curve (launch #5963, CURVE_TRADING). Project enters the activation wave: P4.2 wallet identity + Balance Gate, P4.4 airdrop weights, P4.5 showcase post, P4.6 ROUTE PREDICTION. Owner next: X post (wizard prebuilt link ready) + Discord showcase post (pack §6) + Vercel env WICK_TOKEN_ADDRESS.
+---
+Task ID: 62
+Agent: Super Z (main)
+Task: Owner requested (a) coming-soon hero shell + tester-only access for the not-yet-public build, (b) a safe way to hand infra/service availability to coding agents without exposing secrets.
+
+Work Log:
+- Audited existing secret hygiene: .gitignore excludes .env* except .env.example (verified); code reads 12 env var names; docs/INFRASTRUCTURE.md already maps Student Pack services.
+- Added docs/INFRASTRUCTURE.md section 5: ENV VAR MANIFEST (names only) + agent rules (names from docs, values only from process.env, empty = flag-off, never paste values in chat).
+- Extended .env.example with P4/economy vars (WICK_TOKEN_ADDRESS public reference value committed; wallet + RPC flags commented) and coming-soon gate vars (NEXT_PUBLIC_ACCESS_GATE / ACCESS_KEYS / ACCESS_KEY_SECRET).
+- Fix on local clone: git config core.filemode false (Windows-committed repo showed 259 phantom mode-only diffs on Linux).
+
+Stage Summary:
+- Secrets policy locked: values never enter chat or repo; agents consume the manifest. Task T (coming-soon shell + tester key gate) queued after Task A merge-back (same landing files - no parallel run).
