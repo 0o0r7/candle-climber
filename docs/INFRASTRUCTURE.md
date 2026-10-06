@@ -185,3 +185,27 @@ Owner created the Sentry account + admin token (`sntryu_…`); I did the rest en
 - **Secrets**: auth token lives only in gitignored `.env` (never commit; rotate if leaked).
 - **TODO (UI-only, API refused)**: DSN key hardening — allowedDomains + rate limit under
   Project → Settings → Client Keys (2 minutes, non-blocking).
+
+## 5. ENV VAR MANIFEST — names only, for coding agents (added 2026-10-06)
+
+> **Agent rule:** read NAMES from this table + `.env.example`; read VALUES only from
+> `process.env`. A missing/empty value means the feature stays flag-off — never
+> simulate, never hardcode, and **never paste secret values into any chat**.
+> Values live in exactly two places: local `.env.local` (git-ignored) and the Vercel
+> dashboard. GitHub Actions (if ever needed) → repo/environment Secrets.
+
+| Var name | Service (GitHub Student Pack origin) | Purpose | Owner sets it in |
+|---|---|---|---|
+| `DATABASE_URL` (`MONGODB_URI` alias) | MongoDB Atlas ($50 credits) | Leaderboard persistence (memory fallback if absent) | `.env.local` + Vercel |
+| `RUN_TOKEN_SECRET` | — (generated) | W1 HMAC anti-forge of run tokens | `.env.local` + Vercel |
+| `NEXT_PUBLIC_SITE_URL` | Vercel | Canonical OG/twitter metadata | Vercel |
+| `NEXT_PUBLIC_SENTRY_DSN` | Sentry (student Team) | Client error reporting (public by design) | `.env.local` + Vercel |
+| `SENTRY_AUTH_TOKEN` | Sentry | Build-time release + source-map upload | `.env.local` + Vercel |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | WalletConnect Cloud free tier | E2 wallet layer (flag-off until then) | `.env.local` + Vercel |
+| `NEXT_PUBLIC_ROBINHOOD_RPC_URL` | public testnet RPC (no key) | P4.2 Balance Gate reads | Vercel (after E2) |
+| `WICK_TOKEN_ADDRESS` | — (public on-chain value) | $WICK `0xE2cE…216c` (launch #5963) — committed in `.env.example` | — |
+| `NEXT_PUBLIC_WALLET_ENABLED` | — (flag) | Wallet layer inert when absent | Vercel (after E2 QA) |
+| `NEXT_PUBLIC_ACCESS_GATE` | — (flag) | Coming-soon shell ON when `on` | Vercel |
+| `ACCESS_KEYS` | — (generated) | Comma-separated tester keys; empty = gate fails OPEN | `.env.local` + Vercel |
+| `ACCESS_KEY_SECRET` | — (generated) | HMAC secret for signed tester cookie | `.env.local` + Vercel |
+| `VERCEL_ENV` / `NEXT_PUBLIC_VERCEL_ENV` | Vercel platform | Runtime environment detection | auto — no action |
