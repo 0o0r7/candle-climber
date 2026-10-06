@@ -180,3 +180,17 @@ Work Log:
 
 Stage Summary:
 - Owner can now attach the pinned-tweet media without running anything: primary x-07 GIF (or x-06 mp4), screenshots as alternates. Kit is in-repo (visible on GitHub), mirrored in the sandbox download dir. Remaining for the post itself: owner creates the X account (pack step zero) and pastes the 230-char text.
+
+---
+Task ID: 65
+Agent: main (Super Z)
+Task: Ecosystem intel refresh (Discord delta Oct 3-6 + X timelines Oct 7) to feed the economy decision; member-by-role extraction blocked on Discord token re-paste.
+
+Work Log:
+- Mined 439 fresh Discord msgs (Oct 3-6): verbatim testnet-incentives (5% supply: traders 1.75 / meme 1.5 / utility 1.5 / old creators 0.25), 32 new showcase entries w/ X+GitHub+CA, ZERO WICK mentions (showcase = greenfield), unanswered browser-game request in #builder-help, guild race active (top-100 -> 1000 vibe vibers NFTs).
+- X (page_reader, Oct 7): founder says features "going into mainnet"; founder pain = unfinished projects; NEW ambassador @jumperz; @vibevibefun scam-telegram warning ("no airdrop going on right now"); $FOLK game added leaderboard + "generate volume for both the game and the guild"; Spark repositioned as agent training OS.
+- Tiered X monitoring list (T0 team / T1 builders / T2 community, 66 handles) + GitHub layer.
+- Docs: docs/INTEL-UPDATE-2026-10-07.md (mirror of KB research/vibevibe/2026-10-07-ecosystem-intel-update.md, KB commit cf62dd3).
+
+Stage Summary:
+- Economy sequencing input delivered: (1) P4.5 showcase NOW, (2) join guild system, (3) owner flips NEXT_PUBLIC_WALLET_ENABLED=on -> G4 live-verify, (4) P4.4 weights framed as participation recognition (never "airdrop"), (5) adoption of founder dialect in post copy. No change to ECONOMY-LAWS.
