@@ -9,6 +9,7 @@ import { pickSeed, syntheticCandles, LIMIT, ALL_SYMBOLS, INTERVALS, isInterval, 
 import { utcDateStr } from "@/game/cc/rng";
 import MiniChart from "@/components/cc/MiniChart";
 import ArchiveBrowser from "@/components/cc/ArchiveBrowser";
+import WalletChip from "@/components/cc/WalletChip";
 import { isArchiveDate } from "@/game/cc/archive";
 import { render } from "@/game/cc/render";
 import { renderV2 } from "@/game/cc/render-v2";
@@ -1179,6 +1180,8 @@ export default function GameCanvas() {
       {archOpen && <ArchiveBrowser onClose={() => setArchOpen(false)} />}
 
       <footer className="cc-footer">
+        <WalletChip />
+        <span aria-hidden>·</span>
         <a href="https://testnet.vibevibe.fun/" target="_blank" rel="noopener noreferrer">vibe/vibe testnet</a>
         <span aria-hidden>·</span>
         <a href="https://faucet.testnet.chain.robinhood.com/" target="_blank" rel="noopener noreferrer">faucet</a>
