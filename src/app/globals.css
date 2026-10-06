@@ -310,6 +310,13 @@
   backdrop-filter: blur(6px);
 }
 .cc-chip-lime { color: var(--cc-lime); border-color: rgba(204,255,0,0.25); }
+/* P4.2 wallet badge — cosmetic tiers only (ECONOMY-LAWS: never scored) */
+.cc-wallet-chip { cursor: default; pointer-events: auto; }
+button.cc-wallet-chip { cursor: pointer; }
+.cc-wallet-chip i { font-style: normal; color: var(--cc-faint); }
+.cc-wallet-chip b { margin-right: 4px; }
+.cc-tier-holder { color: #e0b04e; border-color: rgba(224, 176, 78, 0.35); }
+.cc-tier-whale { color: #9db4ff; border-color: rgba(157, 180, 255, 0.4); }
 .cc-chip-score { color: #fff; font-size: 16px; min-width: 72px; text-align: center; }
 .cc-chip-combo { color: var(--cc-ink); background: var(--cc-lime); border-color: var(--cc-lime); }
 
