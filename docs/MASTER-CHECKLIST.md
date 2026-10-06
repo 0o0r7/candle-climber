@@ -247,6 +247,11 @@ P4–P6 (owner-side actions), visual debt VD-5..7 (LOW, accepted).
   block 129,493,865) · token 0xE2cE0Be4e3D420C1e4b5C46493b3d5e03595216c · curve
   0x9e00b42b8a9c12acde9974054a05852dc692640c · lifecycle CURVE_TRADING (verified via
   pad API /v6/launches/{token} + explorer) · pad wizard prebuilt X-share link saved 🧪
+- [x] **P4.M1** Merge-back wave 1 (game-first entry + provenance badge REAL FEED/
+  SYNTHETIC FALLBACK wired to level-source + docs/ECONOMY-LAWS.md) — DONE 2026-10-06 ·
+  branch task-a-merge-back commit 4be4393 (Z Code local) → sandbox-verified on merge
+  aaac187: build ✓ · tests 205/205 ✓ · lint no-new-errors (GameCanvas 9→8) ✓ ·
+  visual acceptance 1280×720 + 390×844 ✓ · fast-forwarded to main 🧪
 - [ ] **P4.2** Balance Gate tiers — server-side on-chain balance read; wallet identity
   additive to W1 run-tokens (W5 untouched) ⛓ P4.1
 - [ ] **P4.3** Hook **H7 WICK VAULT** ⛓ P4.1 · vault visuals from V4 ⛓ P2.1
