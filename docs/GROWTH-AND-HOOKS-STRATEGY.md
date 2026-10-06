@@ -37,6 +37,11 @@ mechanics unlock with transfers (§4).
 
 ## 3. Balance Gate (pre-graduation token hook — the only one that CAN work)
 
+> **AMENDED 2026-10-06 — `docs/ECONOMY-LAWS.md` is supreme:** tier-gated score
+> multipliers / loot-weight advantages in this section are VOID. Tiers gate
+> cosmetics, routes, and archive only (LAW 2); ranked score and base access
+> never change with holdings (LAW 1).
+
 - Player connects wallet in-game; **server reads on-chain $WICK balance** (read-only RPC —
   no transfers, no allowances, nothing that the transfer-lock blocks).
 - Tiers gate run modes/cosmetics, e.g.: Base climb free · ≥ X $WICK unlocks "Summit tier"

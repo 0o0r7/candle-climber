@@ -6,7 +6,7 @@
 // vibe/vibe launch feed — platform-launched tokens become level inputs here,
 // without touching the engine or the API contract.
 import { hashString, mulberry32 } from "./rng";
-import type { Candle } from "./types";
+import type { Candle, SeedInfo } from "./types";
 
 export const WATCHLIST = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "DOGEUSDT", "XRPUSDT", "BNBUSDT"];
 // Stock rails (W3): real weekly candles from stooq — same engine, same rules.
@@ -37,6 +37,21 @@ export function pickSeed(date: string) {
   const rnd = mulberry32(h);
   const symbol = WATCHLIST[Math.floor(rnd() * WATCHLIST.length)];
   return { symbol, rnd };
+}
+
+// Merge-back wave 1 (VARIANT-REVIEW-2026-10-05) — provenance badge. The ONE
+// shared mapping from a terrain seed's source field to the always-visible HUD
+// label. Both seed producers route through this module (the server proxy's
+// feed chain and the client-side offline fallback), so the badge reflects
+// whatever actually served the level and flips the moment a fallback does.
+export function provenanceLabel(
+  source: SeedInfo["source"],
+  symbol: string,
+): { real: boolean; long: string; short: string } {
+  if (source === "synthetic") {
+    return { real: false, long: "SYNTHETIC FALLBACK", short: "SYNTHETIC" };
+  }
+  return { real: true, long: `REAL FEED · ${symbol}`, short: `REAL · ${symbol}` };
 }
 
 // interval-aware synthetic fallback (P3.5): "1w" keeps the legacy seed path
