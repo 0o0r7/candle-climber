@@ -194,3 +194,17 @@ Work Log:
 
 Stage Summary:
 - Economy sequencing input delivered: (1) P4.5 showcase NOW, (2) join guild system, (3) owner flips NEXT_PUBLIC_WALLET_ENABLED=on -> G4 live-verify, (4) P4.4 weights framed as participation recognition (never "airdrop"), (5) adoption of founder dialect in post copy. No change to ECONOMY-LAWS.
+
+---
+Task ID: 65-b
+Agent: main (Super Z)
+Task: Discord token re-pasted by owner -> member-by-role + X-handle extraction closed.
+
+Work Log:
+- Verified token (lonelystranger78); mapped endpoint capability: bulk member REST / members-search / gateway op14 = platform-blocked for user tokens; /users/{id}/profile + /guilds/{id}/members/{uid} = open.
+- 186 posting members profiled + role-fetched: Team=5 (adramelekh.=Admin, covenant11=@wiredwisely, justine1588, bacty123, kriptocrafter), Guild Leader=35 (guild-race cohort), 181 Verified / 116 Builder; corrections: latiblack NOT staff, ricardokarma1 self-styled rank.
+- Final tiered X monitoring list (T0 team / T1 builders / T2 guild-leaders / T3 silent team) committed.
+- Docs: docs/MEMBER-ROLES-X-2026-10-07.md (mirror of KB 3adccf3); economy input deltas: tag @vibevibefun only, guild join = ladder into 35 leaders, single showcase + helpful reply converts #builder-help.
+
+Stage Summary:
+- Owner intel mission fully closed (Discord deep-scan + roles + X handles + monitoring list + economy input). No change to ECONOMY-LAWS. Next: owner flips NEXT_PUBLIC_WALLET_ENABLED=on -> G4 live-verify; showcase post remains the highest-leverage immediate move.
