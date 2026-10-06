@@ -5,7 +5,7 @@ import { Engine, VIEW_W, VIEW_H } from "@/game/cc/engine";
 import { buildPlatforms } from "@/game/cc/level";
 import { dailyMutation, type Mutation } from "@/game/cc/mutations";
 import { marketStats, fmtPct } from "@/game/cc/market";
-import { pickSeed, syntheticCandles, LIMIT, ALL_SYMBOLS, INTERVALS, isInterval, type GameInterval } from "@/game/cc/level-source";
+import { pickSeed, syntheticCandles, LIMIT, ALL_SYMBOLS, INTERVALS, isInterval, provenanceLabel, type GameInterval } from "@/game/cc/level-source";
 import { utcDateStr } from "@/game/cc/rng";
 import MiniChart from "@/components/cc/MiniChart";
 import ArchiveBrowser from "@/components/cc/ArchiveBrowser";
@@ -429,6 +429,16 @@ export default function GameCanvas() {
     );
   }, []);
 
+  // Merge-back wave 1 (game-first entry): the landing surface IS the game. A
+  // fresh engine holds the level's exact start pose; the render loop draws it
+  // behind the entry card without ever stepping it, so the terrain is visible
+  // and playable (tap/Space starts from this same pose) above the fold. startRun
+  // replaces it with the live run engine built from the same data + seed.
+  useEffect(() => {
+    if (phase !== "ready" || !data || !mutation) return;
+    engineRef.current = buildEngine(data, mutation);
+  }, [phase, data, mutation, buildEngine]);
+
   const startRun = useCallback(() => {
     if (!data || !mutation || data.candles.length === 0) return;
     unlockAudio();
@@ -482,7 +492,9 @@ export default function GameCanvas() {
 
   // main loop
   useEffect(() => {
-    if (phase !== "running" && phase !== "dead" && phase !== "graduated") return;
+    // "ready" renders the game-first attract pose (wave 1): draw only — the
+    // fixed-step block below never advances the engine until a run starts.
+    if (phase !== "ready" && phase !== "running" && phase !== "dead" && phase !== "graduated") return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -500,9 +512,14 @@ export default function GameCanvas() {
       // Portrait: the band is bottom-weighted (62% of the leftover above it)
       // so the climber reads with sky overhead and crumble debris keeps
       // falling through the open space below the band.
+      // Wave 1 (game-first entry): on the READY landing surface the band
+      // weights the other way (30%) so the level + climber sit ABOVE the
+      // bottom-anchored entry card instead of behind it. Play phases keep the
+      // tuned 62%; landscape leftovers ≈ 0 make this a no-op on desktop.
+      const weight = phase === "ready" ? 0.3 : 0.62;
       const s = Math.min(rect.width / VIEW_W, rect.height / VIEW_H);
       const ox = (rect.width - VIEW_W * s) / 2;
-      const oy = (rect.height - VIEW_H * s) * 0.62;
+      const oy = (rect.height - VIEW_H * s) * weight;
       fitRef.current = { dpr, w: rect.width, h: rect.height };
       ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * ox, dpr * oy);
     };
@@ -539,7 +556,7 @@ export default function GameCanvas() {
       const bot = vsBotRef.current ? botRef.current : null;
       // P7.2: ghost replay — position lookup by the human engine's own clock
       const gv: GhostView | null =
-        ghostOnRef.current && ghostRef.current && (phase === "running" || phase === "dead" || phase === "graduated")
+        ghostOnRef.current && ghostRef.current && (phase === "ready" || phase === "running" || phase === "dead" || phase === "graduated")
           ? ghostViewAt(ghostRef.current, e.time)
           : null;
       if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv);
@@ -752,6 +769,10 @@ export default function GameCanvas() {
   };
 
   const seedLabel = data ? `${data.seed.symbol} · ${data.seed.date}` : "";
+  // Merge-back wave 1: provenance badge state — flips whenever the seed the
+  // level-source pipeline produced changes source (feed chain downgrade on the
+  // server, or the client's offline synthetic fallback).
+  const prov = data ? provenanceLabel(data.seed.source, data.seed.symbol) : null;
   const stats = useMemo(() => marketStats(data?.candles ?? []), [data]);
   const weatherChip = v2 && weather && (weather.wind >= 0.15 || weather.fog >= 0.3)
     ? `${weather.windLabel} · ${weather.fogLabel}`
@@ -766,6 +787,30 @@ export default function GameCanvas() {
       {/* HUD */}
       <div className="cc-hud">
         <div className="cc-hud-left">
+          {/* Merge-back wave 1: provenance badge — always-visible terrain-source
+              truth (REAL FEED <symbol> / SYNTHETIC FALLBACK), driven by the seed
+              the level-source pipeline produced. Flips the moment a fallback
+              serves; synthetic terrain is unscored (honest, per pack §8). */}
+          <div
+            className={`cc-chip cc-prov${prov ? (prov.real ? " cc-prov-real" : " cc-prov-synth") : " cc-prov-pending"}`}
+            role="status"
+            title={
+              prov
+                ? prov.real
+                  ? "today's terrain was built from the real feed that served this level"
+                  : "live feeds unreachable — deterministic synthetic terrain; scoring disabled"
+                : "resolving terrain source…"
+            }
+          >
+            {prov ? (
+              <>
+                <span className="cc-prov-long">{prov.long}</span>
+                <span className="cc-prov-short">{prov.short}</span>
+              </>
+            ) : (
+              "SOURCE …"
+            )}
+          </div>
           <div className="cc-chip cc-chip-lime">{seedLabel}</div>
           {mutation && mutation.id !== "clean" && phase !== "loading" && (
             <div className="cc-chip cc-chip-mut" title={mutation.tagline}>{mutation.name}</div>
@@ -805,104 +850,23 @@ export default function GameCanvas() {
         )}
 
         {phase === "ready" && data && mutation && (
-          <div className="cc-overlay">
-            <div className="cc-panel">
-              <h1 className="cc-title">CANDLE<span>CLIMBER</span></h1>
+          // Merge-back wave 1 (game-first entry, VARIANT-REVIEW-2026-10-05):
+          // the landing card anchors to the bottom of the LIVE terrain preview
+          // (the canvas now renders the level's start pose) with ONE primary
+          // CTA. Every secondary panel — stats, mutation, how-to, timeframe,
+          // rival/ghost toggles, duel entry, roster, archive, report, top-3 —
+          // folds below the interaction into "WAYS TO PLAY". Reordered and
+          // de-emphasized only; no feature removed.
+          <div className="cc-overlay cc-overlay-ready">
+            <div className="cc-panel cc-panel-entry">
+              <h1 className="cc-title cc-title-entry">CANDLE <span>CLIMBER</span></h1>
               <p className="cc-tag">the chart is the level</p>
               <div className="cc-daily">
                 <span className="cc-daily-label" title={archive ? "Real history — practice terrain" : "Levels reset at 00:00 UTC"}>{archive ? "ARCHIVE CHART · PRACTICE" : "TODAY'S CHART · UTC"}</span>
                 <span className="cc-daily-symbol">{data.seed.symbol}</span>
                 <span className="cc-daily-src">{data.seed.source === "binance" || data.seed.source === "stooq" || data.seed.source === "yahoo" ? "live data" : data.seed.source === "vibe-launch" ? "vibe launch" : "synthetic"}</span>
               </div>
-              {stats && (
-                <div className="cc-realmove">
-                  <MiniChart candles={data.candles} />
-                  <div className="cc-realmove-row">
-                    <span>
-                      REAL MOVE <b className={stats.changePct >= 0 ? "up" : "down"}>{fmtPct(stats.changePct)}</b>
-                    </span>
-                    <span className="cc-realmove-sep">·</span>
-                    <span>
-                      DIFFICULTY <b className={stats.difficulty === "BRUTAL" ? "down" : "up"}>{stats.difficulty}</b>
-                    </span>
-                  </div>
-                </div>
-              )}
-              <div className="cc-mut-banner" title={mutation.tagline}>
-                <span className="cc-mut-label">MUTATION</span>
-                <span className={mutation.id === "clean" ? "cc-mut-name" : "cc-mut-name hot"}>{mutation.name}</span>
-                <span className="cc-mut-tag">{mutation.tagline}</span>
-              </div>
-              <div className="cc-howto">
-                <p><b className="lime">GREEN</b> candles hold. <b className="coral">RED</b> candles crumble.</p>
-                <p>Tap = hop · <b className="lime">HOLD</b> Space = higher jump · release early = short.</p>
-                <p><b className="lime">SHIFT</b> = RUSH — faster climb, +25% gains while held.</p>
-                {archive ? (
-                  <p className="cc-next-level">famous days are famous difficulty — nobody designed this on purpose.</p>
-                ) : (
-                  <p className="cc-next-level">One chart. Every player. Daily.</p>
-                )}
-              </div>
-              {/* P3.5 timeframe selector — owner proposal. Crypto dailies only:
-                  stock rails have no intraday feed, launch terrain is derived,
-                  archive stays weekly (V1) — all three hide the chips. */}
-              {!archive && !duel && data.seed.source !== "stooq" && data.seed.source !== "yahoo" && data.seed.source !== "vibe-launch" && (
-                <div className="cc-tf-row" role="group" aria-label="Chart timeframe">
-                  {INTERVALS.map((iv) => (
-                    <button
-                      key={iv}
-                      className={`cc-tf-chip${tf === iv ? " cc-tf-on" : ""}`}
-                      onClick={() => changeTf(iv)}
-                      aria-pressed={tf === iv}
-                    >
-                      {iv.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {/* P7.1 rival bot — local SOLO/VS toggle. Default SOLO: existing
-                  behavior + QA flows are 100% unchanged; choice persists. The
-                  rival is a local headless engine — zero network, never scored. */}
-              <div className="cc-tf-row" role="group" aria-label="Rival bot">
-                <button
-                  className={`cc-tf-chip${!vsBot ? " cc-tf-on" : ""}`}
-                  onClick={() => changeVsBot(false)}
-                  aria-pressed={!vsBot}
-                >
-                  SOLO
-                </button>
-                <button
-                  className={`cc-tf-chip${vsBot ? " cc-tf-on" : ""}`}
-                  onClick={() => changeVsBot(true)}
-                  aria-pressed={vsBot}
-                >
-                  VS BOT
-                </button>
-              </div>
-              {vsBot && (
-                <p className="cc-vs-note" aria-live="polite">
-                  RIVAL: <b>{rivalName}</b> · {rivalPers.label} — local bot, never scored
-                </p>
-              )}
-              {/* P7.2 ghost replay — best submitted run on this terrain, replayed
-                  translucently with the recorded climber's skin. Render-only. */}
-              <div className="cc-tf-row" role="group" aria-label="Ghost replay">
-                <button
-                  className={`cc-tf-chip${ghostOn ? " cc-tf-on" : ""}`}
-                  onClick={() => changeGhost(!ghostOn)}
-                  aria-pressed={ghostOn}
-                >
-                  {ghostOn ? "GHOST ON" : "GHOST OFF"}
-                </button>
-              </div>
-              {ghostOn && !archive && (
-                <p className="cc-vs-note" aria-live="polite">
-                  GHOST: {duel
-                    ? `${duel.name}'s run · ${duel.candlesPassed} candles — the climb to beat`
-                    : ghostEntry ? `${getChar(ghostEntry.charId).name} · ${ghostEntry.candlesPassed} candles` : "no run recorded yet — be the first"}
-                </p>
-              )}
-              {/* P7.3 async duel — invitation banner (deep link / typed code) */}
+              {/* P7.3: a duel deep link IS the landing context — stays above the fold */}
               {duel && (
                 <div className="cc-duel-banner" role="status">
                   <span className="cc-duel-head">DUEL · {duel.name} SET THE BAR</span>
@@ -910,94 +874,189 @@ export default function GameCanvas() {
                   <span className="cc-duel-note">same chart · {duel.date === utcDateStr() ? "live terrain" : "archive terrain — practice duel"} · record {tallyLabel(duelTally)}</span>
                 </div>
               )}
-              {!duel && !archive && (
-                <div className="cc-tf-row">
-                  {codeOpen ? (
-                    <div className="cc-duel-code-row">
-                      <input
-                        className={`cc-input cc-input-code${codeErr ? " cc-input-err" : ""}`}
-                        placeholder="CODE"
-                        maxLength={6}
-                        value={codeInput}
-                        aria-label="Duel code"
-                        onChange={(e) => { setCodeInput(e.target.value.toUpperCase()); setCodeErr(false); }}
-                      />
-                      <button
-                        className="cc-tf-chip"
-                        onClick={() => { void loadDuel(codeInput).then((ok) => { if (!ok) setCodeErr(true); }); }}
-                      >
-                        RACE
-                      </button>
-                    </div>
-                  ) : (
-                    <button className="cc-tf-chip" onClick={() => setCodeOpen(true)}>GOT A DUEL CODE?</button>
-                  )}
-                </div>
-              )}
-              {codeErr && <p className="cc-vs-note" aria-live="polite">NO SUCH DUEL — CHECK THE CODE</p>}
-              {/* P3.12 character select — roster row on the ready flow.
-                  Portraits are the sprites' own frame0; selection persists
-                  (CC_CHAR_KEY) and feeds renderV2 via charIdRef. Decor-only:
-                  no gameplay/physics reads anywhere in the pipeline. */}
-              <div className="cc-char-block">
-                <div className="cc-char-label">CHOOSE YOUR CLIMBER</div>
-                <div className="cc-char-row" role="radiogroup" aria-label="Character select">
-                  {rosterList().map((c) => (
-                    <button
-                      key={c.id}
-                      role="radio"
-                      aria-checked={charId === c.id}
-                      title={`${c.name} — ${c.blurb}`}
-                      className={`cc-char-chip${charId === c.id ? " cc-char-on" : ""}`}
-                      onClick={() => pickChar(c.id)}
-                    >
-                      {c.sheet ? (
-                        <img src={`/cc/chars/${c.id}/frame0.png`} alt="" width={34} height={48} loading="lazy" />
-                      ) : (
-                        <span className="cc-char-classic" aria-hidden>▚</span>
-                      )}
-                      <span className="cc-char-name">{c.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="cc-btn-row">
-                <button className="cc-btn cc-btn-start" onClick={startRun}>START CLIMB</button>
-                <button className="cc-btn cc-btn-ghost" onClick={() => setArchOpen(true)}>ARCHIVE →</button>
-              </div>
+              <button className="cc-btn cc-btn-start cc-cta" onClick={startRun}>START CLIMB</button>
               {best > 0 && <p className="cc-best">PERSONAL BEST <b>{best.toLocaleString()}</b></p>}
-              {!archive && report && (
-                <div className="cc-report cc-report-fold">
-                  <button
-                    className="cc-report-toggle"
-                    onClick={() => setReportOpen((o) => !o)}
-                    aria-expanded={reportOpen}
-                  >
-                    <span className="cc-report-arrow" aria-hidden>{reportOpen ? "▾" : "▸"}</span>
-                    DAILY REPORT · {report.date} · {report.symbol}
-                  </button>
-                  {reportOpen && (
-                    <>
-                      {report.narrative.map((line, i) => (
-                        <p key={i} className="cc-report-line">{line}</p>
+              <details className="cc-more">
+                <summary className="cc-more-summary">
+                  <span className="cc-more-arrow" aria-hidden>▸</span> WAYS TO PLAY
+                </summary>
+                <div className="cc-more-body">
+                  {stats && (
+                    <div className="cc-realmove">
+                      <MiniChart candles={data.candles} />
+                      <div className="cc-realmove-row">
+                        <span>
+                          REAL MOVE <b className={stats.changePct >= 0 ? "up" : "down"}>{fmtPct(stats.changePct)}</b>
+                        </span>
+                        <span className="cc-realmove-sep">·</span>
+                        <span>
+                          DIFFICULTY <b className={stats.difficulty === "BRUTAL" ? "down" : "up"}>{stats.difficulty}</b>
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  <div className="cc-mut-banner" title={mutation.tagline}>
+                    <span className="cc-mut-label">MUTATION</span>
+                    <span className={mutation.id === "clean" ? "cc-mut-name" : "cc-mut-name hot"}>{mutation.name}</span>
+                    <span className="cc-mut-tag">{mutation.tagline}</span>
+                  </div>
+                  <div className="cc-howto">
+                    <p><b className="lime">GREEN</b> candles hold. <b className="coral">RED</b> candles crumble.</p>
+                    <p>Tap = hop · <b className="lime">HOLD</b> Space = higher jump · release early = short.</p>
+                    <p><b className="lime">SHIFT</b> = RUSH — faster climb, +25% gains while held.</p>
+                    {archive ? (
+                      <p className="cc-next-level">famous days are famous difficulty — nobody designed this on purpose.</p>
+                    ) : (
+                      <p className="cc-next-level">One chart. Every player. Daily.</p>
+                    )}
+                  </div>
+                  {/* P3.5 timeframe selector — owner proposal. Crypto dailies only:
+                      stock rails have no intraday feed, launch terrain is derived,
+                      archive stays weekly (V1) — all three hide the chips. */}
+                  {!archive && !duel && data.seed.source !== "stooq" && data.seed.source !== "yahoo" && data.seed.source !== "vibe-launch" && (
+                    <div className="cc-tf-row" role="group" aria-label="Chart timeframe">
+                      {INTERVALS.map((iv) => (
+                        <button
+                          key={iv}
+                          className={`cc-tf-chip${tf === iv ? " cc-tf-on" : ""}`}
+                          onClick={() => changeTf(iv)}
+                          aria-pressed={tf === iv}
+                        >
+                          {iv.toUpperCase()}
+                        </button>
                       ))}
-                      <button className="cc-report-copy" onClick={copyReport}>{reportCopied ? "COPIED ✓" : "COPY EPISODE"}</button>
-                    </>
+                    </div>
+                  )}
+                  {/* P7.1 rival bot — local SOLO/VS toggle. Default SOLO: existing
+                      behavior + QA flows are 100% unchanged; choice persists. The
+                      rival is a local headless engine — zero network, never scored. */}
+                  <div className="cc-tf-row" role="group" aria-label="Rival bot">
+                    <button
+                      className={`cc-tf-chip${!vsBot ? " cc-tf-on" : ""}`}
+                      onClick={() => changeVsBot(false)}
+                      aria-pressed={!vsBot}
+                    >
+                      SOLO
+                    </button>
+                    <button
+                      className={`cc-tf-chip${vsBot ? " cc-tf-on" : ""}`}
+                      onClick={() => changeVsBot(true)}
+                      aria-pressed={vsBot}
+                    >
+                      VS BOT
+                    </button>
+                  </div>
+                  {vsBot && (
+                    <p className="cc-vs-note" aria-live="polite">
+                      RIVAL: <b>{rivalName}</b> · {rivalPers.label} — local bot, never scored
+                    </p>
+                  )}
+                  {/* P7.2 ghost replay — best submitted run on this terrain, replayed
+                      translucently with the recorded climber's skin. Render-only. */}
+                  <div className="cc-tf-row" role="group" aria-label="Ghost replay">
+                    <button
+                      className={`cc-tf-chip${ghostOn ? " cc-tf-on" : ""}`}
+                      onClick={() => changeGhost(!ghostOn)}
+                      aria-pressed={ghostOn}
+                    >
+                      {ghostOn ? "GHOST ON" : "GHOST OFF"}
+                    </button>
+                  </div>
+                  {ghostOn && !archive && (
+                    <p className="cc-vs-note" aria-live="polite">
+                      GHOST: {duel
+                        ? `${duel.name}'s run · ${duel.candlesPassed} candles — the climb to beat`
+                        : ghostEntry ? `${getChar(ghostEntry.charId).name} · ${ghostEntry.candlesPassed} candles` : "no run recorded yet — be the first"}
+                    </p>
+                  )}
+                  {/* P7.3 async duel entry (typed code) — secondary to the climb */}
+                  {!duel && !archive && (
+                    <div className="cc-tf-row">
+                      {codeOpen ? (
+                        <div className="cc-duel-code-row">
+                          <input
+                            className={`cc-input cc-input-code${codeErr ? " cc-input-err" : ""}`}
+                            placeholder="CODE"
+                            maxLength={6}
+                            value={codeInput}
+                            aria-label="Duel code"
+                            onChange={(e) => { setCodeInput(e.target.value.toUpperCase()); setCodeErr(false); }}
+                          />
+                          <button
+                            className="cc-tf-chip"
+                            onClick={() => { void loadDuel(codeInput).then((ok) => { if (!ok) setCodeErr(true); }); }}
+                          >
+                            RACE
+                          </button>
+                        </div>
+                      ) : (
+                        <button className="cc-tf-chip" onClick={() => setCodeOpen(true)}>GOT A DUEL CODE?</button>
+                      )}
+                    </div>
+                  )}
+                  {codeErr && <p className="cc-vs-note" aria-live="polite">NO SUCH DUEL — CHECK THE CODE</p>}
+                  {/* P3.12 character select — roster row. Portraits are the sprites'
+                      own frame0; selection persists (CC_CHAR_KEY) and feeds renderV2
+                      via charIdRef. Decor-only: no gameplay/physics reads anywhere. */}
+                  <div className="cc-char-block">
+                    <div className="cc-char-label">CHOOSE YOUR CLIMBER</div>
+                    <div className="cc-char-row" role="radiogroup" aria-label="Character select">
+                      {rosterList().map((c) => (
+                        <button
+                          key={c.id}
+                          role="radio"
+                          aria-checked={charId === c.id}
+                          title={`${c.name} — ${c.blurb}`}
+                          className={`cc-char-chip${charId === c.id ? " cc-char-on" : ""}`}
+                          onClick={() => pickChar(c.id)}
+                        >
+                          {c.sheet ? (
+                            <img src={`/cc/chars/${c.id}/frame0.png`} alt="" width={34} height={48} loading="lazy" />
+                          ) : (
+                            <span className="cc-char-classic" aria-hidden>▚</span>
+                          )}
+                          <span className="cc-char-name">{c.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="cc-btn-row">
+                    <button className="cc-btn cc-btn-ghost" onClick={() => setArchOpen(true)}>ARCHIVE →</button>
+                  </div>
+                  {!archive && report && (
+                    <div className="cc-report cc-report-fold">
+                      <button
+                        className="cc-report-toggle"
+                        onClick={() => setReportOpen((o) => !o)}
+                        aria-expanded={reportOpen}
+                      >
+                        <span className="cc-report-arrow" aria-hidden>{reportOpen ? "▾" : "▸"}</span>
+                        DAILY REPORT · {report.date} · {report.symbol}
+                      </button>
+                      {reportOpen && (
+                        <>
+                          {report.narrative.map((line, i) => (
+                            <p key={i} className="cc-report-line">{line}</p>
+                          ))}
+                          <button className="cc-report-copy" onClick={copyReport}>{reportCopied ? "COPIED ✓" : "COPY EPISODE"}</button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  {topBoard.length > 0 && (
+                    <div className="cc-board cc-board-mini">
+                      <div className="cc-board-title">TOP 3 TODAY</div>
+                      {topBoard.slice(0, 3).map((e, i) => (
+                        <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
+                          <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
+                          <span className="cc-board-name">{e.name}</span>
+                          <span className="cc-board-score">{e.score.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
-              )}
-              {topBoard.length > 0 && (
-                <div className="cc-board cc-board-mini">
-                  <div className="cc-board-title">TOP 3 TODAY</div>
-                  {topBoard.slice(0, 3).map((e, i) => (
-                    <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
-                      <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
-                      <span className="cc-board-name">{e.name}</span>
-                      <span className="cc-board-score">{e.score.toLocaleString()}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              </details>
             </div>
           </div>
         )}

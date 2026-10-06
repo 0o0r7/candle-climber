@@ -1183,3 +1183,76 @@
   opacity: 0.7;
   pointer-events: none;
 }
+
+/* ---- Merge-back wave 1 (VARIANT-REVIEW-2026-10-05): game-first entry ----
+   The landing surface IS the game. The ready phase renders the level's start
+   pose on the canvas (engine built, never stepped) and anchors ONE entry card
+   with a single primary CTA at the bottom; every secondary panel folds below
+   the interaction into "WAYS TO PLAY". Death/graduation/loading surfaces and
+   all engine/physics behavior are untouched — this block is presentation only. */
+
+.cc-overlay-ready {
+  align-items: flex-end;
+  /* clears the HUD row above and the platform-links footer + mute chip below */
+  padding: 76px 16px calc(max(12px, env(safe-area-inset-bottom)) + 48px);
+  background: transparent;
+  backdrop-filter: none;
+  pointer-events: none; /* the terrain behind the card stays tap-to-start */
+}
+.cc-panel-entry {
+  pointer-events: auto;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100dvh - 150px);
+  padding: 18px 20px 12px;
+}
+.cc-title-entry { font-size: clamp(24px, 5vw, 34px); }
+.cc-title-entry span { display: inline; }
+.cc-cta {
+  width: 100%;
+  font-size: 18px;
+  padding: 14px 22px;
+  margin-top: 14px;
+}
+.cc-more { margin-top: 8px; }
+.cc-more-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--cc-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--cc-faint);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.cc-more-summary::-webkit-details-marker { display: none; }
+.cc-more-summary:hover { color: var(--cc-lime); background: rgba(204, 255, 0, 0.05); }
+.cc-more-arrow { display: inline-block; transition: transform 0.15s ease; }
+.cc-more[open] .cc-more-arrow { transform: rotate(90deg); }
+.cc-more-body { margin-top: 4px; }
+/* mobile: the footer lifts above the mute chip on ≤640px — lift the card too */
+@media (max-width: 640px) {
+  .cc-overlay-ready { padding-bottom: calc(max(12px, env(safe-area-inset-bottom)) + 78px); }
+  .cc-panel-entry .cc-tag { margin-top: 4px; }
+  .cc-panel-entry .cc-daily { margin-top: 10px; padding: 9px 12px; }
+  .cc-panel-entry .cc-daily-symbol { font-size: 18px; }
+}
+
+/* Provenance badge (wave 1): always-visible terrain-source truth, first chip
+   of the HUD. Real feed = the climber-green; synthetic fallback = honest amber.
+   Long label on wide screens, symbol-preserving compact label on small ones. */
+.cc-prov-real { color: var(--cc-up); border-color: rgba(91, 208, 138, 0.35); }
+.cc-prov-synth {
+  color: #FFD24A;
+  border-color: rgba(255, 210, 74, 0.4);
+  background: rgba(255, 210, 74, 0.08);
+}
+.cc-prov-pending { opacity: 0.55; }
+.cc-prov .cc-prov-short { display: none; }
+@media (max-width: 640px) {
+  .cc-prov .cc-prov-long { display: none; }
+  .cc-prov .cc-prov-short { display: inline; }
+}
