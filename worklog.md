@@ -163,3 +163,20 @@ Work Log:
 
 Stage Summary:
 - Secrets policy locked: values never enter chat or repo; agents consume the manifest. Task T (coming-soon shell + tester key gate) queued after Task A merge-back (same landing files - no parallel run).
+---
+Task ID: 64
+Agent: Super Z (sandbox)
+Task: Produce the X (Twitter) pinned-post visual assets demanded by WICK-LAUNCH-FORM-PACK §4 ("یک اسکرین‌شات یا GIF از بازی") — real captures from the real game, per owner directive.
+
+Work Log:
+- Pulled latest main (af1e69..a7488b4: P4.2 wallet gate merge included).
+- Verified live prod healthy from sandbox: 200 OK, /api/candles source=binance → REAL FEED captures possible without local build.
+- Reused the repo's own player-bot logic (scripts/e2e-gamer-bot.ts): headless Chrome 154 via agent-browser drove the LIVE deployment (variable jump bursts + RUSH, death-retry), while recording.
+- Captured against https://candle-climber.vercel.app/?renderer=v2 on 2026-10-06: chart DOGEUSDT, mutation CANDLE RAIN, weather STORM·CLEAR, provenance badge REAL FEED visible in every frame.
+- Kit assembled in docs/assets/x-launch/ (unretouched): x-01 ready-desktop 1920×1080, x-02 gameplay-desktop 1920×1080 (+15 float, score 15), x-03 LIQUIDATED card (score 115, streak ×3, PB 123), x-04 ready-mobile 1170×2532, x-05 gameplay-mobile (score 80), x-06 gameplay clip mp4 29s 1280×720 H.264 faststart (climb → LIQUIDATED → retry → climb), x-07 gameplay loop GIF 5s 800px 12fps (the pack's literal ask).
+- Engineering note: agent-browser's recorder dropped frames badly at 1080p (encoder fell >500ms behind) and its raw webm had a broken tail that hung full-length decodes; fixed by slicing the stream into 5s segments, verifying each, then concat -c copy (34s verified, nb_frames=1020) and cutting to 29s. GIF built from the healthy 5-10s window with palettegen/paletteuse.
+- WICK-LAUNCH-FORM-PACK.md §4: added a pointer line right under the pinned-tweet block directing the owner to docs/assets/x-launch/ + README selection guide.
+- Red lines respected: zero edits/retouching of captures, no numbers invented (115/80/15 are real bot scores), README repeats the no-monetary-claims rule for the post.
+
+Stage Summary:
+- Owner can now attach the pinned-tweet media without running anything: primary x-07 GIF (or x-06 mp4), screenshots as alternates. Kit is in-repo (visible on GitHub), mirrored in the sandbox download dir. Remaining for the post itself: owner creates the X account (pack step zero) and pastes the 230-char text.

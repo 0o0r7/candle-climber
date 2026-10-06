@@ -44,6 +44,7 @@ Climb today's real market chart — green candles hold, red candles crumble, fal
 Free, no wallet: https://candle-climber.vercel.app
 $WICK · community token on @vibevibefun testnet
 ```
+   📎 **پیوست آماده است** → `docs/assets/x-launch/` — کیت کپچر 2026-10-06 از **پروداکشن لایو** (بدون دستکاری): GIF ۵ ثانیه‌ای `x-07-gameplay-loop-800px.gif` با قوس «بالا رفتن → LIQUIDATED» (همان چیزی که این قدم می‌خواهد)، ویدئو ۲۹ ثانیه‌ای H.264 `x-06-gameplay-clip-1280x720.mp4`، و ۵ اسکرین‌شات دسکتاپ/موبایل با بج REAL FEED. راهنمای انتخاب: README همان پوشه.
 5. **فالو**: `@vibevibefun` (+ بنیان‌گذار) — همین؛ فالو انبوه ممنوع
 6. برگرد به فرم توکن → فیلد X: `https://x.com/<هندل>` → حالا **Create token · $WICK** را بزن
 
