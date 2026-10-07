@@ -275,7 +275,10 @@ post live → owner confirmation → P5.
 **Gate G5:** 7 consecutive daily-report posts · referral traffic measurable in board
 metadata → owner confirmation → P6.
 
-### P6 — Graduation & token economy (contains growth G2) — ⛓ the 5-ETH meter itself
+### P6 — Graduation & token economy (contains growth G2) — ⛓ the 4-ETH meter itself
+> (RECONCILED 2026-10-08: $WICK launched via legacy factory 0xe7942178… → per-launch
+> target = 4 ETH net per its own launch record + live pad API; the 5-ETH figure is the
+> CURRENT-factory policy, not ours. See ECONOMY-CHECKLIST §0 + TOKEN-LAUNCHPAD-RESEARCH §5.)
 - [ ] **P6.1** Graduation-day event runtime (Merkle delivery comms, celebration scene —
   ART V4) — build BEORE the meter fills
 - [ ] **P6.2** Hook **H6 MIRROR** — $WICK's own chart as a level ⛓ graduation
@@ -290,7 +293,7 @@ owner confirmation → mainnet watch (CC-PLAN D11–14).
 
 | ID | Item | Blocks | Owner action |
 |---|---|---|---|
-| **O1** | `DATABASE_URL` set in the **Vercel dashboard** (already present in local `.env` since 2026-09-30) | H3 full · H4 full · P4.4 durability · E9 | add env var in Vercel → redeploy |
+| **O1** | ~~`DATABASE_URL` set in the **Vercel dashboard**~~ ✅ **CLOSED 2026-10-08** — agent probe: prod `/api/leaderboard` → `store:"mongo"`, `dbError:null`; Atlas serving in production (var targets `production`; preview/dev stay on memory fallback) | ~~H3 full · H4 full · P4.4 durability · E9~~ — unblocked | ~~add env var in Vercel → redeploy~~ none — closed |
 | **O2** | Faucet test ETH | P4.0 | wallet action |
 | **O3** | W6 wizard launch signature | all of P4 | wallet action (§9 checklist ready) |
 | **O4** | W7 X account | P5.1 | account creation |

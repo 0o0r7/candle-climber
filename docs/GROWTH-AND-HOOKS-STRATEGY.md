@@ -7,8 +7,14 @@
 
 ## 1. Goal and hard constraints (from verified platform mechanics)
 
-Goal: reach 5-ETH graduation on genuine demand, then convert graduation into a durable
-economy. Constraints that shape every design decision below:
+Goal: reach the 4-ETH graduation target on genuine demand, then convert graduation into a
+durable economy. (RECONCILED 2026-10-08: $WICK's launch record sets `targetPairUnits` =
+4.0 ETH exactly — docs/evidence/wick-launch-record.json — and the pad API live pull agrees
+(0.0997/4.000 ETH on 2026-10-07). Root cause of the old "5-ETH" prose: the platform's
+CURRENT policy is 5 ETH net on factory 0x40f1…DF59, but $WICK launched via the legacy
+factory 0xe7942178… where per-launch targets are 4 ETH (TOKEN-LAUNCHPAD-RESEARCH §5,
+"4 vs 5 ETH gotcha"). The launch's own record wins; 4 ETH is canonical for $WICK.)
+Constraints that shape every design decision below:
 
 | Constraint | Consequence for design |
 |---|---|
@@ -29,7 +35,12 @@ daily-return hook (H1–H5 below)
    → visible public progress bar on the token page = collective climb
    → graduation: Merkle airdrop board auto-delivers to the community
    → post-grad economy: in-game spend/burn, treasury-funded tournaments
-   → creator fee: 50% payout + 50% $WICK buyback-to-burn (deflation narrative)
+   → creator fee rails (RECONCILED 2026-10-08, per launch record `weights`):
+     tax 200 bps on every trade → 75% redistributed to holders (holdersBps 7500) ·
+     20% creator/cash (cashBps 2000) · 5% burn (burnBps 500). The deflation
+     narrative lives in the 5% burn share + graduation burn, NOT a 50% split.
+     (Old "50% payout + 50% buyback-to-burn" prose was written before the wizard
+     revealed the real fee-weight options; the chain is the source of truth.)
 ```
 
 The pre-graduation token mechanic is the **Balance Gate** (§3). The post-graduation
@@ -58,8 +69,9 @@ mechanics unlock with transfers (§4).
 - **In-game spend/burn:** run entries, revives, cosmetics, tournament tickets — burned or
   routed to treasury. Now legal because transfers are unlocked.
 - **Treasury tournaments:** creator fee payout share funds recurring prize pools.
-- **Buyback narrative:** every trade auto-buys-and-burns $WICK (fee rails) — the game can
-  surface the live burn counter as a feature ("the game eats its own supply").
+- **Burn narrative:** every trade's 2% fee sends 5% of itself to burn (fee rails) and
+  75% to current holders — the game can surface the live burn counter as a feature
+  ("the game eats its own supply") and the holder yield as the hold-through signal.
 - **Mirror + Wick Vault** activate (H6/H7).
 
 ## 5. Rejected approach (do not re-propose)

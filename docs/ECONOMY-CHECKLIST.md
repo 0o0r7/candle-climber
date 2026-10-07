@@ -17,25 +17,24 @@
 | Lifecycle | `CURVE_TRADING`, not graduated | pre-grad rules apply: no transfers, hold-or-buy only |
 | Graduation meter | **0.0997 ETH / 4.000 ETH = 2.49%** | 2 days post-launch, near-flat → demand engine is THE bottleneck |
 | `transfersUnlocked` | false | in-game spend/burn illegal until graduation (P6.3 stays gated) |
-| Fee config (launch record) | taxBps 200 · weights 75% holders / 20% cash / 5% burn | docs say "50% payout + 50% buyback-burn" — **reconcile (E0.1)** |
-| Graduation target | `targetPairUnits` = 4 ETH | strategy prose says "5-ETH graduation" — **reconcile (E0.2)** |
-| P4.2 Balance Gate | code merged (`a7488b4`, cosmetic-only) — **not activated** | activation = env flip + QA (E2.1) |
+| Fee config (launch record) | taxBps 200 · weights 75% holders / 20% cash / 5% burn | docs said "50% payout + 50% buyback-burn" — **RECONCILED 2026-10-08 (E0.1 ✅)**: docs now match the chain (GROWTH §2/§4) |
+| Graduation target | `targetPairUnits` = 4 ETH | strategy prose said "5-ETH" — **RECONCILED 2026-10-08 (E0.2 ✅)**: $WICK launched via LEGACY factory `0xe7942178…` → per-launch target 4 ETH is canonical; 5 ETH = current-factory policy (TOKEN-LAUNCHPAD-RESEARCH §5) |
+| P4.2 Balance Gate | code merged (`a7488b4`, cosmetic-only) — **ACTIVATING** | `NEXT_PUBLIC_WALLET_ENABLED=on` set on Vercel via API 2026-10-08 (all targets) — goes live with next deploy |
 | Platform incentives | 5% supply: traders 1.75% · meme 1.5% · **utility 1.5%** · old creators 0.25% | $WICK qualifies as utility (MVP live); nothing guaranteed (E0.5/E5.4) |
 | Awareness | zero WICK mentions in 439-msg Discord corpus (Oct 3–6) | organic discovery ≈ 0 → E5 is load-bearing |
-| Durability | O1 (`DATABASE_URL` in Vercel) still open in owner register | blocks durable weights/leaderboard (E0.3) |
+| Durability | **CLOSED 2026-10-08 (E0.3 ✅)**: prod `/api/leaderboard` returns `store:"mongo"`, `dbError:null` — DATABASE_URL is set and Atlas is serving | E2.2/E2.5/E4.1/E5.5 are DURABLE from day one |
 
 ## E0 — Verify & reconcile the numbers (no code, this week)
 
-- [ ] **E0.1** Fee-split reconciliation: on-chain weights (75% holders / 20% cash /
-  5% burn per launch record) vs prose narrative ("creator fee: 50% payout + 50%
-  $WICK buyback-to-burn", GROWTH §2). Fix the docs to match the chain; note what
-  "holders 75%" actually pays out (platform mechanic) in one plain paragraph. ⛓ none
-- [ ] **E0.2** Graduation-target reconciliation: pad record `targetPairUnits` = 4 ETH
-  vs "5-ETH graduation" in GROWTH §1 / pack. Decide the canonical number, fix all
-  prose, and record it in `docs/evidence/`. ⛓ none
-- [ ] **E0.3** O1 check: is `DATABASE_URL` actually set in the **Vercel dashboard**
-  (all targets) and is the leaderboard persisting? Owner 2-min dashboard check or
-  Vercel API; then tick O1 in MASTER-CHECKLIST. Blocks E2.2 durability. 🔒 owner ⛓ E2.2
+- [x] **E0.1** 2026-10-08 — Fee-split reconciliation: chain = 75/20/5 (launch record weights
+  holdersBps 7500 / cashBps 2000 / burnBps 500) → GROWTH §2 loop + §4 burn narrative corrected
+  with dated note; deflation narrative now anchored on the 5% burn share. ⛓ none
+- [x] **E0.2** 2026-10-08 — Graduation-target reconciliation: $WICK factory = legacy
+  `0xe7942178…` → 4 ETH canonical (launch record + live pad API agree); MASTER-CHECKLIST P6
+  heading + GROWTH §1 fixed with provenance note. ⛓ none
+- [x] **E0.3** 2026-10-08 — O1 verified via prod probe: `/api/leaderboard` → `store:"mongo"`,
+  `dbError:null`. DATABASE_URL live on Vercel production; O1 CLOSED in MASTER-CHECKLIST.
+  (Note: var targets `production` only — acceptable; preview/dev use memory fallback.) 🔒→✅
 - [ ] **E0.4** Weekly live snapshot ritual: run
   `python3 /home/z/my-project/scripts/verify-econ-state.py "<pad URL>"` → append
   meter %, lifecycle, holders/tx deltas to this file's §0 table (or evidence log).
@@ -149,8 +148,8 @@
 
 | ID | Action | Unblocks |
 |---|---|---|
-| O1 | `DATABASE_URL` in Vercel dashboard → redeploy | E2.2 durability, E4.1, E5.5, H3/H4 full |
-| O-W | WalletConnect project id + env flip (E2.1) | P4.2 tick, G4 |
+| ~~O1~~ | ~~`DATABASE_URL` in Vercel dashboard~~ ✅ **CLOSED 2026-10-08** — verified live: prod `/api/leaderboard` returns `store:"mongo"`, `dbError:null` | ~~E2.2 durability, E4.1, E5.5, H3/H4 full~~ — all unblocked |
+| ~~O-W~~ | ~~WalletConnect project id + env flip (E2.1)~~ ✅ **CLOSED 2026-10-08** — `NEXT_PUBLIC_WALLET_ENABLED=on` set on Vercel (all targets) by agent via API; WalletConnect id NOT needed (shipped implementation = injected provider only, zero new deps) | P4.2 tick (after deploy QA), G4 |
 | O-X | X account + showcase post + Daily Report cadence | P5.1, G5 |
 | O-G | Guild creation + wiredwisely reply | E5.2 |
 | O-I | Incentives submission (if applicable) | E5.4 |

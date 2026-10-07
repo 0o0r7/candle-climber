@@ -236,3 +236,20 @@ Work Log:
 
 Stage Summary:
 - Economy phase has one canonical execution tracker now. Meter at 2.49% confirms demand is the bottleneck. Sprint A unblocked: E0 reconcile + E1 paper spec (agent) / showcase post + guild creation (owner, Task-67 assets).
+
+---
+Task ID: 69
+Agent: Super Z (main)
+Task: Owner granted full Vercel access (no-confirm continuous work) -> execute the economy phase: activate the Balance Gate, reconcile the numbers, write the economy spec, ship the weights ledger, full debug pass.
+
+Work Log:
+- Infra timeline re-anchored from docs (owner request): DB = MongoDB Atlas (student credits), test/debug = Sentry student Team + GitHub Actions + W5 bun suite, visual/real-device = BrowserStack/LambdaTest + qa/visual-sweep sweeps. Recalled via INFRASTRUCTURE.md after sandbox reset.
+- Vercel API (owner token, stored 0600, never displayed): project prj_0107dZ… READY; env names read; set NEXT_PUBLIC_WALLET_ENABLED=on (201, all targets) — E2.1/O-W CLOSED; WalletConnect id NOT needed (shipped impl = injected provider only). POST /api/wallet prod-verified live on-chain read (0xdEaD → 164,944 $WICK → whale tier).
+- E0.3/O1 CLOSED via prod probe: /api/leaderboard → store:"mongo", dbError:null — DATABASE_URL live, Atlas serving; weights ledger durable from day one.
+- E0.1/E0.2 reconciled against the launch record: fee rails = 75% holders / 20% cash / 5% burn (docs corrected in GROWTH §1/§2/§4 with dated notes); grad target = 4 ETH canonical — $WICK launched via LEGACY factory 0xe7942178… (5 ETH = current-factory policy; TOKEN-LAUNCHPAD-RESEARCH §5 gotcha). MASTER-CHECKLIST P6 heading fixed.
+- E1.1–E1.5: docs/WICK-ECONOMY-SPEC.md v1 — verified constants, supply/value-flow, thesis, LAW-2-tagged sinks/faucets ledger, demand funnel (10/50/200 DAU; assumptions labeled), weights formula §7 (streak min(N,10)/day, wallet snapshot cap 600 [PROVISIONAL], identity↔wallet anomalies >2 flagged, Merkle snapshot at E2.5), post-grad lanes v0.
+- E2.2 shipped: src/lib/weights.ts (pure: nextStreakDays/runPoints/normalizeWallet/snapshotFromRows + utcDate authority), src/lib/weights-store.ts (Memory+Mongo, unique index name+date = DB-level idempotency, recordClassicRun one-stop), /api/weights GET (name summary + snapshot=1 board, read-only BY DESIGN — no write path), leaderboard POST wiring (fire-and-forget, LAW 1: never observable in the game response), GameCanvas sends optional address from WalletChip localStorage.
+- W5 +25 tests (test/weights.test.ts): chain math incl. month/year boundaries, points cap, same-day dedupe, backfill linking, snapshot cap + anomaly flags + order-independence. Gates: bun 230/230 · tsc clean · eslint clean · build green (/api/weights in output).
+
+Stage Summary:
+- Balance Gate ACTIVATED (env live with this deploy) + weights ledger shipped durable — the two pre-grad rails from Sprint A/B are in. Owner register: O1 + O-W closed by agent; remaining owner-only = O-X (X account), O-G (guild), O-I (incentives), O-S (numbers sign-off — provisional defaults shippable). Next: E2.3 route prediction + E2.6 burn-counter feed, E2.4 vault, E2.5 Merkle rehearsal.
