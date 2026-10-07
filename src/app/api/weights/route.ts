@@ -26,7 +26,7 @@ export async function GET(req: Request) {
           flagged: snap.wallets.filter((w) => w.flagged).map((w) => w.wallet),
           meta: {
             cap: WALLET_SNAPSHOT_CAP,
-            status: "accruing", // snapshot/claim flow ships with E2.5 (Merkle rehearsal)
+            status: "accruing", // Merkle rehearsal: GET /api/airdrop (E2.5) · board: /airdrop
             numbers: "provisional — docs/WICK-ECONOMY-SPEC.md §7",
             laws: "docs/ECONOMY-LAWS.md",
           },

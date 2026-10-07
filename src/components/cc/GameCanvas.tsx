@@ -10,6 +10,7 @@ import { utcDateStr } from "@/game/cc/rng";
 import MiniChart from "@/components/cc/MiniChart";
 import ArchiveBrowser from "@/components/cc/ArchiveBrowser";
 import WalletChip from "@/components/cc/WalletChip";
+import PredictionPanel from "@/components/cc/PredictionPanel";
 import { WALLET_ADDRESS_KEY } from "@/lib/wallet";
 import { isArchiveDate } from "@/game/cc/archive";
 import { render } from "@/game/cc/render";
@@ -146,6 +147,17 @@ export default function GameCanvas() {
   const [codeInput, setCodeInput] = useState("");
   const [codeErr, setCodeErr] = useState(false);
 
+  // E2 economy hooks (LAW 1: display-only — the game never reads these):
+  // E2.3 practice lane note (archive run banked 0.5 weight), E2.4 vault state,
+  // E2.6 burn-counter line. nameRef mirrors `name` for the death-path POSTs.
+  const nameRef = useRef("");
+  const [practiceNote, setPracticeNote] = useState<string | null>(null);
+  const [vaultMsg, setVaultMsg] = useState<string | null>(null);
+  const [vaultBusy, setVaultBusy] = useState(false);
+  const [hasWallet, setHasWallet] = useState(false);
+  const [burn, setBurn] = useState<string | null>(null);
+  useEffect(() => { nameRef.current = name; }, [name]);
+
   // P7.3: load a duel challenge by code (deep link ?duel= or a typed code).
   // On success it pins the terrain refs BEFORE the loader effect runs (the
   // deep-link path holds `booted` until this settles → exactly one fetch).
@@ -268,6 +280,11 @@ export default function GameCanvas() {
             .then((r) => r.json())
             .then((rp: ReportResp) => { if (alive) setReport(rp); })
             .catch(() => {});
+          // E2.6: burn counter — the "the game eats its own supply" line
+          fetch("/api/burn")
+            .then((r) => r.json())
+            .then((b: { ok?: boolean; burned?: string }) => { if (alive && b.ok) setBurn(b.burned ?? null); })
+            .catch(() => {});
           // P7.2: best submitted ghost for THIS terrain (champion first)
           fetch(`/api/ghosts?symbol=${d.seed.symbol}&date=${d.seed.date}&interval=${tf}`)
             .then((r) => r.json())
@@ -345,6 +362,45 @@ export default function GameCanvas() {
   const rivalPers = useMemo(() => personalityForCharId(rivalCharId), [rivalCharId]);
   const rivalName = getChar(rivalCharId).name;
 
+  // E2.4: the vault sits at the peak-wick candle — the terrain's tallest high.
+  // A run that PASSED that candle index may open it (server re-verifies token,
+  // tier and the one-per-day cap; client check is display-only).
+  const peakIdx = useMemo(() => {
+    if (!data || data.candles.length === 0) return -1;
+    let pi = 0;
+    for (let i = 1; i < data.candles.length; i++) {
+      if (data.candles[i].h > data.candles[pi].h) pi = i;
+    }
+    return pi;
+  }, [data]);
+  const reachedPeak = !archive && result != null && peakIdx >= 0 && result.candlesPassed >= peakIdx;
+
+  const openVault = useCallback(async () => {
+    if (!data?.runToken || vaultBusy) return;
+    setVaultBusy(true);
+    try {
+      const res = await fetch("/api/vault", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          runToken: data.runToken,
+          name,
+          address: localStorage.getItem(WALLET_ADDRESS_KEY) ?? undefined,
+        }),
+      });
+      const r = (await res.json()) as { ok?: boolean; error?: string; grant?: { cosmetic?: string } };
+      setVaultMsg(
+        res.status === 409 ? "VAULT ALREADY OPENED TODAY"
+        : r.ok ? `VAULT OPENED · +1 WEIGHT · ${String(r.grant?.cosmetic ?? "").toUpperCase().replace("-", " ")} TRAIL TODAY`
+        : String(r.error ?? "VAULT LOCKED").toUpperCase(),
+      );
+    } catch {
+      setVaultMsg("VAULT UNAVAILABLE");
+    } finally {
+      setVaultBusy(false);
+    }
+  }, [data, name, vaultBusy]);
+
   const buildEngine = useCallback((d: CandleData, mut: Mutation) => {
     const plats = buildPlatforms(d.candles, d.seed.date + d.seed.symbol);
     return new Engine(
@@ -382,6 +438,28 @@ export default function GameCanvas() {
         },
         onDeath: (r) => {
           sfx.death();
+          setHasWallet(!!localStorage.getItem(WALLET_ADDRESS_KEY));
+          // E2.3 practice lane: a run on PAST terrain banks 0.5 weight (server
+          // verifies the signed archive token; 2/day cap). Fire-and-forget,
+          // display-only — never blocks or alters the run's end state (LAW 1).
+          if (d.seed.date < utcDateStr() && d.runToken) {
+            void fetch("/api/practice", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({
+                runToken: d.runToken,
+                name: nameRef.current,
+                address: localStorage.getItem(WALLET_ADDRESS_KEY) ?? undefined,
+              }),
+            })
+              .then((res) => res.json())
+              .then((p: { ok?: boolean; banked?: number }) => {
+                if (p?.ok && typeof p.banked === "number") {
+                  setPracticeNote(`PRACTICE · +${p.banked} WEIGHT BANKED TODAY`);
+                }
+              })
+              .catch(() => {});
+          }
           // H3 WRECKAGE: freeze this death into the device's local map —
           // the exact fall point, visible to future climbers of this level
           const eng = engineRef.current;
@@ -467,6 +545,8 @@ export default function GameCanvas() {
     setRank(null);
     setGraduated(false);
     setWorld2(false);
+    setPracticeNote(null);
+    setVaultMsg(null);
     setPhase("running");
     lastRef.current = performance.now();
     accRef.current = 0;
@@ -1049,6 +1129,12 @@ export default function GameCanvas() {
                       )}
                     </div>
                   )}
+                  {!archive && <PredictionPanel name={name} />}
+                  {burn && (
+                    <p className="cc-burn-line" title="cumulative $WICK sent to the irrecoverable burn address">
+                      SUPPLY BURNED · {burn} WICK
+                    </p>
+                  )}
                   {topBoard.length > 0 && (
                     <div className="cc-board cc-board-mini">
                       <div className="cc-board-title">TOP 3 TODAY</div>
@@ -1094,6 +1180,12 @@ export default function GameCanvas() {
                 <button className="cc-btn" onClick={startRun}>RETRY</button>
               </div>
               <p className="cc-grad-next">world 2: the climb continues · gains ×2</p>
+              {reachedPeak && (
+                <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
+                  {vaultBusy ? "…" : "OPEN WICK VAULT"}
+                </button>
+              )}
+              {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
               {rank !== null && <p className="cc-rank">GLOBAL RANK #{rank} TODAY</p>}
             </div>
           </div>
@@ -1165,6 +1257,13 @@ export default function GameCanvas() {
                 )}
                 <button className="cc-btn cc-btn-start" onClick={startRun}>RETRY</button>
               </div>
+              {archive && practiceNote && <p className="cc-vault-note" role="status">{practiceNote}</p>}
+              {reachedPeak && (
+                <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
+                  {vaultBusy ? "…" : "OPEN WICK VAULT"}
+                </button>
+              )}
+              {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
               {board.length > 0 && (
                 <div className="cc-board">
                   <div className="cc-board-title">TOP 10 · {data?.seed.symbol}</div>
@@ -1192,6 +1291,8 @@ export default function GameCanvas() {
         <a href="https://faucet.testnet.chain.robinhood.com/" target="_blank" rel="noopener noreferrer">faucet</a>
         <span aria-hidden>·</span>
         <a href="https://discord.gg/vibevibebuilders" target="_blank" rel="noopener noreferrer">discord</a>
+        <span aria-hidden>·</span>
+        <a href="/airdrop">airdrop board</a>
         <span aria-hidden>·</span>
         <span>no real funds</span>
       </footer>

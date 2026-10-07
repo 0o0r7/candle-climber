@@ -8,6 +8,11 @@ import {
   runPoints,
   snapshotFromRows,
   utcDate,
+  PRACTICE_POINTS,
+  PRACTICE_DAILY_CAP,
+  PREDICTION_DAILY_CAP,
+  VAULT_POINTS,
+  type WeightEventKind,
   type WeightRow,
   type WalletSnapshot,
 } from "@/lib/weights";
@@ -21,10 +26,26 @@ export interface RunRecord {
   ts: number;
 }
 
+/**
+ * E2.3/E2.4 ledger events (spec §7.2 rows 2/3/5). One folded row per
+ * (name, date, kind): practice ACCUMULATES 0.5/run up to the 2/day cap;
+ * prediction and vault are unique inserts (duplicate → null).
+ */
+export interface WeightEvent {
+  name: string;
+  date: string; // UTC date the weight accrues on (today for practice/vault, target date for prediction)
+  kind: WeightEventKind;
+  points: number; // server-computed — never client-sent
+  wallet: string | null;
+  ts: number;
+  meta?: { runs?: number; symbol?: string; tier?: string }; // practice run count / context
+}
+
 export interface IdentitySummary {
   name: string;
   streakDays: number;
-  totalPoints: number;
+  totalPoints: number; // runs + events — the distribution-relevant total
+  eventPoints: number; // E2.3/E2.4 lanes only (practice/prediction/vault)
   lastRunDate: string | null;
   wallet: string | null;
 }
@@ -33,7 +54,11 @@ export interface WeightsStore {
   readonly kind: "memory" | "mongo";
   /** Returns the stored record, or null when the same-day event was a duplicate. */
   recordRun(rec: RunRecord): Promise<RunRecord | null>;
-  /** Attach/refresh a wallet link for the identity (idempotent). */
+  /** Folded practice row: +0.5 per call, capped at PRACTICE_DAILY_CAP. Returns the stored row. */
+  addPractice(name: string, date: string, wallet: string | null, ts: number): Promise<WeightEvent>;
+  /** Unique event insert (prediction/vault) — null when (name, date, kind) already exists. */
+  recordEvent(ev: WeightEvent): Promise<WeightEvent | null>;
+  /** Attach/refresh a wallet link for the identity across runs AND events (idempotent). */
   linkWallet(name: string, wallet: string): Promise<void>;
   summary(name: string): Promise<IdentitySummary>;
   /** Per-wallet snapshot rows (bounded read) + capped/anomaly-flagged totals. */
@@ -46,6 +71,7 @@ export interface WeightsStore {
 export class MemoryWeightsStore implements WeightsStore {
   readonly kind = "memory" as const;
   private rows: RunRecord[] = [];
+  private events: WeightEvent[] = [];
 
   async recordRun(rec: RunRecord): Promise<RunRecord | null> {
     if (this.rows.some((r) => r.name === rec.name && r.date === rec.date)) return null;
@@ -53,33 +79,63 @@ export class MemoryWeightsStore implements WeightsStore {
     return rec;
   }
 
+  async addPractice(name: string, date: string, wallet: string | null, ts: number): Promise<WeightEvent> {
+    const i = this.events.findIndex((e) => e.name === name && e.date === date && e.kind === "practice");
+    if (i === -1) {
+      const row: WeightEvent = {
+        name, date, kind: "practice", points: PRACTICE_POINTS, wallet, ts, meta: { runs: 1 },
+      };
+      this.events.push(row);
+      return row;
+    }
+    const row = { ...this.events[i] };
+    row.meta = { ...(row.meta ?? {}), runs: (row.meta?.runs ?? 0) + 1 };
+    row.points = Math.min((row.meta.runs ?? 0) * PRACTICE_POINTS, PRACTICE_DAILY_CAP);
+    if (wallet && !row.wallet) row.wallet = wallet;
+    row.ts = ts;
+    this.events[i] = row;
+    return row;
+  }
+
+  async recordEvent(ev: WeightEvent): Promise<WeightEvent | null> {
+    if (ev.kind === "practice") return this.addPractice(ev.name, ev.date, ev.wallet, ev.ts);
+    if (this.events.some((e) => e.name === ev.name && e.date === ev.date && e.kind === ev.kind)) return null;
+    this.events.push({ ...ev });
+    return ev;
+  }
+
   async linkWallet(name: string, wallet: string): Promise<void> {
     for (let i = this.rows.length - 1; i >= 0; i--) {
       if (this.rows[i].name === name && !this.rows[i].wallet) this.rows[i].wallet = wallet;
+    }
+    for (const e of this.events) {
+      if (e.name === name && !e.wallet) e.wallet = wallet;
     }
   }
 
   async summary(name: string): Promise<IdentitySummary> {
     const mine = this.rows.filter((r) => r.name === name);
+    const evts = this.events.filter((e) => e.name === name);
+    const eventPoints = evts.reduce((s, e) => s + e.points, 0);
     if (mine.length === 0) {
-      return { name, streakDays: 0, totalPoints: 0, lastRunDate: null, wallet: null };
+      return { name, streakDays: 0, totalPoints: eventPoints, eventPoints, lastRunDate: null, wallet: evts.at(-1)?.wallet ?? null };
     }
     const last = mine.reduce((a, b) => (a.date > b.date ? a : b));
     return {
       name,
       streakDays: last.streakDays,
-      totalPoints: mine.reduce((s, r) => s + r.points, 0),
+      totalPoints: mine.reduce((s, r) => s + r.points, 0) + eventPoints,
+      eventPoints,
       lastRunDate: last.date,
-      wallet: last.wallet ?? null,
+      wallet: last.wallet ?? evts.at(-1)?.wallet ?? null,
     };
   }
 
   async snapshot(cap: number): Promise<{ rowCount: number; wallets: WalletSnapshot[] }> {
-    const rows: WeightRow[] = this.rows.map((r) => ({
-      name: r.name,
-      points: r.points,
-      wallet: r.wallet,
-    }));
+    const rows: WeightRow[] = [
+      ...this.rows.map((r) => ({ name: r.name, points: r.points, wallet: r.wallet })),
+      ...this.events.map((e) => ({ name: e.name, points: e.points, wallet: e.wallet, kind: e.kind })),
+    ];
     return { rowCount: rows.length, wallets: snapshotFromRows(rows, cap) };
   }
 }
@@ -88,12 +144,14 @@ export class MemoryWeightsStore implements WeightsStore {
 
 const MONGO_DB = "candleclimber";
 const MONGO_COLL = "weights_runs";
+const MONGO_EVENTS = "weights_events"; // E2.3/E2.4: practice/prediction/vault rows
 const SNAPSHOT_READ_LIMIT = 20_000; // bounded v1 read; aggregation replaces this if it ever binds
 
 class MongoWeightsStore implements WeightsStore {
   readonly kind = "mongo" as const;
   lastError: string | undefined;
   private coll: import("mongodb").Collection<RunRecord> | null = null;
+  private evColl: import("mongodb").Collection<WeightEvent> | null = null;
   private connecting: Promise<import("mongodb").Collection<RunRecord> | null> | null = null;
   private disabled = false;
 
@@ -108,10 +166,15 @@ class MongoWeightsStore implements WeightsStore {
           serverSelectionTimeoutMS: 4000,
         });
         await client.connect();
-        const coll = client.db(MONGO_DB).collection<RunRecord>(MONGO_COLL);
+        const db = client.db(MONGO_DB);
+        const coll = db.collection<RunRecord>(MONGO_COLL);
         // idempotency at the DB level: one run event per identity per UTC date
         await coll.createIndex({ name: 1, date: 1 }, { unique: true });
         this.coll = coll;
+        // E2.3/E2.4 events: one folded row per identity per UTC date per kind
+        const evColl = db.collection<WeightEvent>(MONGO_EVENTS);
+        await evColl.createIndex({ name: 1, date: 1, kind: 1 }, { unique: true });
+        this.evColl = evColl;
         return coll;
       } catch (err) {
         const msg = (err as Error).message;
@@ -136,28 +199,86 @@ class MongoWeightsStore implements WeightsStore {
     }
   }
 
+  async addPractice(name: string, date: string, wallet: string | null, ts: number): Promise<WeightEvent> {
+    const coll = await this.connect();
+    if (!coll || !this.evColl) {
+      // fail-open mirror of the memory path so callers always get a row back
+      return { name, date, kind: "practice", points: PRACTICE_POINTS, wallet, ts, meta: { runs: 1 } };
+    }
+    try {
+      // Pipeline update: fold runs into ONE row per (name, date, "practice") —
+      // points = min(runs × 0.5, 2/day). Race-safe enough at v1 scale; the cap
+      // is re-derived from meta.runs on every write, so a lost update can only
+      // undercount, never exceed the cap.
+      const res = await this.evColl.findOneAndUpdate(
+        { name, date, kind: "practice" },
+        [
+          {
+            $set: {
+              name,
+              date,
+              kind: "practice" as const,
+              wallet: { $ifNull: ["$wallet", wallet] },
+              ts,
+              meta: { runs: { $add: [{ $ifNull: ["$meta.runs", 0] }, 1] } },
+            },
+          },
+          {
+            $set: {
+              points: { $min: [{ $multiply: ["$meta.runs", PRACTICE_POINTS] }, PRACTICE_DAILY_CAP] },
+            },
+          },
+        ],
+        { upsert: true, returnDocument: "after" },
+      );
+      return (res as unknown as WeightEvent) ?? {
+        name, date, kind: "practice", points: PRACTICE_POINTS, wallet, ts, meta: { runs: 1 },
+      };
+    } catch (err) {
+      this.lastError = (err as Error).message;
+      console.error("[weights] addPractice failed:", this.lastError);
+      return { name, date, kind: "practice", points: 0, wallet, ts, meta: { runs: 0 } };
+    }
+  }
+
+  async recordEvent(ev: WeightEvent): Promise<WeightEvent | null> {
+    if (ev.kind === "practice") return this.addPractice(ev.name, ev.date, ev.wallet, ev.ts);
+    const coll = await this.connect();
+    if (!coll || !this.evColl) return null; // unavailable ledger = no event (never blocks the game)
+    try {
+      await this.evColl.insertOne({ ...ev });
+      return ev;
+    } catch (err) {
+      if ((err as { code?: number }).code === 11000) return null; // duplicate (name, date, kind)
+      throw err;
+    }
+  }
+
   async linkWallet(name: string, wallet: string): Promise<void> {
     const coll = await this.connect();
     if (!coll) return;
-    await coll.updateMany({ name, $or: [{ wallet: null }, { wallet: { $exists: false } }] }, {
-      $set: { wallet },
-    });
+    const linkQ = { name, $or: [{ wallet: null }, { wallet: { $exists: false } }] };
+    await coll.updateMany(linkQ, { $set: { wallet } });
+    if (this.evColl) await this.evColl.updateMany(linkQ, { $set: { wallet } });
   }
 
   async summary(name: string): Promise<IdentitySummary> {
     const coll = await this.connect();
-    if (!coll) return { name, streakDays: 0, totalPoints: 0, lastRunDate: null, wallet: null };
+    if (!coll) return { name, streakDays: 0, totalPoints: 0, eventPoints: 0, lastRunDate: null, wallet: null };
     const mine = await coll.find({ name }).toArray();
+    const evts = this.evColl ? await this.evColl.find({ name }).toArray() : [];
+    const eventPoints = evts.reduce((s, e) => s + e.points, 0);
     if (mine.length === 0) {
-      return { name, streakDays: 0, totalPoints: 0, lastRunDate: null, wallet: null };
+      return { name, streakDays: 0, totalPoints: eventPoints, eventPoints, lastRunDate: null, wallet: evts.at(-1)?.wallet ?? null };
     }
     const last = mine.reduce((a, b) => (a.date > b.date ? a : b));
     return {
       name,
       streakDays: last.streakDays,
-      totalPoints: mine.reduce((s, r) => s + r.points, 0),
+      totalPoints: mine.reduce((s, r) => s + r.points, 0) + eventPoints,
+      eventPoints,
       lastRunDate: last.date,
-      wallet: last.wallet ?? null,
+      wallet: last.wallet ?? evts.at(-1)?.wallet ?? null,
     };
   }
 
@@ -168,7 +289,17 @@ class MongoWeightsStore implements WeightsStore {
       .find({}, { projection: { name: 1, points: 1, wallet: 1, _id: 0 } })
       .limit(SNAPSHOT_READ_LIMIT)
       .toArray();
-    return { rowCount: rows.length, wallets: snapshotFromRows(rows as WeightRow[], cap) };
+    const evRows = this.evColl
+      ? await this.evColl
+          .find({}, { projection: { name: 1, points: 1, wallet: 1, kind: 1, _id: 0 } })
+          .limit(SNAPSHOT_READ_LIMIT)
+          .toArray()
+      : [];
+    const all: WeightRow[] = [
+      ...(rows as WeightRow[]),
+      ...evRows.map((e) => ({ name: e.name, points: e.points, wallet: e.wallet, kind: e.kind })),
+    ];
+    return { rowCount: all.length, wallets: snapshotFromRows(all, cap) };
   }
 }
 
@@ -215,4 +346,40 @@ export async function recordClassicRun(
   const saved = await store.recordRun(rec);
   if (!saved && wallet) await store.linkWallet(name, wallet); // same-day re-run still links
   return saved;
+}
+
+/** E2.3 practice lane: a verified ARCHIVE run banks 0.5 weight, capped 2/day. */
+export async function recordPracticeRun(
+  name: string,
+  wallet: string | null,
+  now: number = Date.now(),
+): Promise<WeightEvent> {
+  return getWeights().addPractice(name, utcDate(now), wallet, now);
+}
+
+/** E2.3 prediction lane: scored call lands its points on the TARGET date. */
+export async function recordPredictionPoints(
+  name: string,
+  date: string,
+  points: number,
+  wallet: string | null,
+  meta: { symbol?: string } = {},
+  now: number = Date.now(),
+): Promise<WeightEvent | null> {
+  return getWeights().recordEvent({
+    name, date, kind: "prediction", points: Math.max(0, Math.min(PREDICTION_DAILY_CAP, points)),
+    wallet, ts: now, meta,
+  });
+}
+
+/** E2.4 vault lane: one grant per identity per day (weights + cosmetic). */
+export async function recordVaultGrant(
+  name: string,
+  wallet: string | null,
+  meta: { tier?: string } = {},
+  now: number = Date.now(),
+): Promise<WeightEvent | null> {
+  return getWeights().recordEvent({
+    name, date: utcDate(now), kind: "vault", points: VAULT_POINTS, wallet, ts: now, meta,
+  });
 }
