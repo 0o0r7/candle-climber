@@ -35,10 +35,12 @@
 - [x] **E0.3** 2026-10-08 — O1 verified via prod probe: `/api/leaderboard` → `store:"mongo"`,
   `dbError:null`. DATABASE_URL live on Vercel production; O1 CLOSED in MASTER-CHECKLIST.
   (Note: var targets `production` only — acceptable; preview/dev use memory fallback.) 🔒→✅
-- [ ] **E0.4** Weekly live snapshot ritual: run
-  `python3 /home/z/my-project/scripts/verify-econ-state.py "<pad URL>"` → append
-  meter %, lifecycle, holders/tx deltas to this file's §0 table (or evidence log).
-  Owner sees days-to-graduation trend, not vibes.
+- [x] **E0.4** 2026-10-07 — RITUAL ESTABLISHED + first run: scripts/verify-econ-state.py
+  (pad API `/api/v1/chains/46630/v6/launches/{token}` + prod /api/burn) → first snapshot:
+  lifecycle CURVE_TRADING · graduated false · meter 0.1574/4.0 ETH = **3.94%** (up from
+  2.49% at Oct-07 writing) · remaining 3.8426 ETH · burned 254,293 WICK. Evidence line +
+  raw dump in docs/evidence/. Re-run weekly: `python3
+  /home/z/my-project/scripts/verify-econ-state.py --append`.
 - [ ] **E0.5** Incentive eligibility pass: confirm $WICK's fit for the **utility
   track (1.5%)** — MVP live, demo flow, usable product all true — and check the
   application/submission path + any deadline on the platform/Discord. Output:
@@ -182,3 +184,6 @@
 *Sources: pad API live pull 2026-10-07 · docs/ECONOMY-LAWS.md · docs/MASTER-CHECKLIST.md ·
 docs/GROWTH-AND-HOOKS-STRATEGY.md · docs/INTEL-UPDATE-2026-10-07.md (incentives verbatim) ·
 docs/evidence/wick-launch-record.json · worklog Tasks 61–67.*
+
+- **E0.4 snapshot 2026-10-07 20:52 UTC** — lifecycle `CURVE_TRADING` · transfers `?` · meter `None/4000000000000000000 ETH` · burned `254,293.162` WICK (raw: docs/evidence/econ-snapshot-latest.json)
+- **E0.4 snapshot 2026-10-07 20:53 UTC** — lifecycle `CURVE_TRADING` · graduated `False` · meter `0.1574/4.0 ETH = 3.94%` · burned `254,293.162` WICK (raw: docs/evidence/econ-snapshot-latest.json)
