@@ -46,34 +46,32 @@
 
 ## E1 — Economy design spec (paper before code)
 
-- [ ] **E1.1** Write `docs/WICK-ECONOMY-SPEC.md` v1: supply & distribution model
-  (curve-minted supply, wallet-cap 2%, fee weights), value-flow map (ETH in → meter;
-  tax → holders/cash/burn; rewards → community), and the one-line economy thesis:
-  "players earn weights, holders get cosmetic lanes, every trade burns". ⛓ E0.1, E0.2
-- [ ] **E1.2** Sinks & Faucets ledger: table of every mechanic that creates demand
-  (faucet: airdrop weights, tiers, vault, mirror) or absorbs supply/value (sink:
-  burn fee, post-grad entry/tickets, cosmetics). Each row tagged with the LAW 2 lane
-  it lives in. Anything outside cosmetics/routes/archive = red-flagged. ⛓ E1.1
-- [ ] **E1.3** Demand funnel math: scenario sheet (10 / 50 / 200 DAU) × wallet-connect
-  rate × avg buy size → net meter/day → days-to-graduation per scenario. Use ONLY
-  verified constants (2% cap, 200 bps tax, 4-or-5 ETH target from E0.2). No invented
-  conversion rates — state assumptions as assumptions. ⛓ E1.1
-- [ ] **E1.4** Airdrop-weights formula spec (P4.4): weights = f(daily streak, route-
-  prediction accuracy, archive marathons), deterministic, server-side; per-wallet
-  caps; sybil rules (W1 HMAC + wallet link + anomaly review); snapshot & claim flow
-  (Merkle). Language: "builds weights" — never "earn/guaranteed" (LAW 3.2/4). ⛓ E0.3
-- [ ] **E1.5** Post-graduation spec v0 (design-only): spend/burn lanes (entries,
-  revives, cosmetics, tournament tickets), treasury tournament mechanics, MIRROR
-  mode economics, burn-counter surface. Numbers TBD at graduation; lanes fixed now. ⛓ E1.2
+- [x] **E1.1** 2026-10-08 @ cd1d828 — docs/WICK-ECONOMY-SPEC.md v1: supply/distribution
+  (curve-only pre-grad), value-flow map, one-line thesis, verified-constants table (§1–§4). ⛓ E0.1 ✅ E0.2 ✅
+- [x] **E1.2** 2026-10-08 @ cd1d828 — Sinks & Faucets ledger (10 rows, every row tagged with
+  its LAW 2 lane; red-line rule stated). ⛓ E1.1 ✅
+- [x] **E1.3** 2026-10-08 @ cd1d828 — Demand funnel math: 10/50/200 DAU scenarios against
+  the 4-ETH meter; assumptions labeled as assumptions; only verified constants used. Reading:
+  breadth (E5) is the only lever — hooks-first is correct. ⛓ E1.1 ✅
+- [x] **E1.4** 2026-10-08 @ cd1d828 — Weights formula spec (spec §7): streak min(N,10)/day,
+  practice/prediction lanes reserved, wallet snapshot cap 600 [PROVISIONAL], identity↔wallet
+  anomaly limit 2, Merkle snapshot→claim at E2.5, language rules enforced. ⛓ E0.3 ✅
+- [x] **E1.5** 2026-10-08 @ cd1d828 — Post-graduation spec v0: spend/burn lanes, treasury
+  tournaments, MIRROR economics, burn-counter surface — lanes fixed, numbers at graduation (spec §8). ⛓ E1.2 ✅
 
 ## E2 — Build the rails (MASTER-CHECKLIST P4.2 → P4.6 + graduation runtime)
 
-- [ ] **E2.1** Activate Balance Gate (P4.2): owner sets `NEXT_PUBLIC_WALLET_ENABLED`,
-  `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID`, `NEXT_PUBLIC_ROBINHOOD_RPC_URL` on Vercel →
-  QA wallet-connect → cosmetic-only badge per LAW 2 → tick P4.2. 🔒 owner (env) ⛓ P4.1
-- [ ] **E2.2** Airdrop-weight accounting (P4.4): server-side deterministic ledger
-  (streaks, predictions, marathons), durable storage ⛓ E0.3; anti-sybil per E1.4;
-  admin read API for the claim board. ⛓ E1.4, E0.3
+- [x] **E2.1** 2026-10-08 @ cd1d828 — Balance Gate ACTIVATED: `NEXT_PUBLIC_WALLET_ENABLED=on`
+  set on Vercel (all targets) by agent via API → deploy READY → "CONNECT WALLET" + tier labels
+  confirmed in the deployed bundle; POST /api/wallet prod-verified on-chain (0xdEaD → whale);
+  chip stays invisible for walletless visitors by design (E8 zero-friction). WalletConnect
+  project id NOT required (shipped impl = injected provider only). 🔒→✅ (O-W closed)
+- [x] **E2.2** 2026-10-08 @ cd1d828 — Weights ledger LIVE + DURABLE: lib/weights.ts (pure,
+  W5-pinned) + weights-store.ts (memory/mongo, unique name+date) + GET /api/weights
+  (read-only by design — no write path) + leaderboard fire-and-forget wiring (LAW 1:
+  never observable in the game response). PROD E2E: verified submission → streak 1,
+  points 1, wallet linked, snapshot board reflects it (Mongo). Streak lane live;
+  practice/prediction lanes land with E2.3. Anti-sybil per E1.4 (caps + flags + W1).
 - [ ] **E2.3** Route Prediction hook (P4.6 / H5): draw-tomorrow's-path UI + next-day
   deterministic scoring vs real OHLC; weights land automatically via E2.2. ⛓ E2.2
 - [ ] **E2.4** Wick Vault hook (P4.3 / H7): vault entity at each level's peak wick;

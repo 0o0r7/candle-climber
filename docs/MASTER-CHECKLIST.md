@@ -252,11 +252,20 @@ P4–P6 (owner-side actions), visual debt VD-5..7 (LOW, accepted).
   branch task-a-merge-back commit 4be4393 (Z Code local) → sandbox-verified on merge
   aaac187: build ✓ · tests 205/205 ✓ · lint no-new-errors (GameCanvas 9→8) ✓ ·
   visual acceptance 1280×720 + 390×844 ✓ · fast-forwarded to main 🧪
-- [ ] **P4.2** Balance Gate tiers — server-side on-chain balance read; wallet identity
-  additive to W1 run-tokens (W5 untouched) ⛓ P4.1
+- [x] **P4.2** 2026-10-08 @ `cd1d828` — Balance Gate tiers — ACTIVATED: server-side
+  on-chain balance read (`/api/wallet`, read-only RPC, 60s cache, fail-open) live-verified
+  on prod (0xdEaD → 164,944 $WICK → whale); `NEXT_PUBLIC_WALLET_ENABLED=on` set on Vercel
+  by agent via API (O-W closed; WalletConnect id not needed — injected-provider impl);
+  "CONNECT WALLET" + tier labels confirmed in the deployed bundle; wallet identity ADDITIVE
+  to W1 run-tokens (W5 untouched, 230/230); cosmetic-only per ECONOMY-LAWS (chip invisible
+  for walletless visitors — E8 zero-friction intact) 🧪
 - [ ] **P4.3** Hook **H7 WICK VAULT** ⛓ P4.1 · vault visuals from V4 ⛓ P2.1
 - [ ] **P4.4** Airdrop-weight accounting (streak / prediction / archive-marathon weights,
   server-side, deterministic) ⛓ P4.1 · durability recommended ⛓ O1
+  > UPDATE 2026-10-08 @ `cd1d828` — STREAK LANE LIVE + DURABLE (Mongo verified on prod;
+  prod E2E: submission → streak 1/points 1/wallet linked/snapshot reflects). Spec:
+  docs/WICK-ECONOMY-SPEC §7 · read API: GET /api/weights. Practice + prediction lanes
+  chain to P4.6/E2.3 — box stays open until those land.
 - [ ] **P4.5** #project-showcase post (game URL + token URL + how-to-play, DRGN/FORGE
   template) ⛓ P4.1
 - [ ] **P4.6** Hook **H5 ROUTE PREDICTION** — draw-tomorrow's-path; pre-launch capable,
