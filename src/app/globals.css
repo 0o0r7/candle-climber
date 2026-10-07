@@ -1263,3 +1263,171 @@ button.cc-wallet-chip { cursor: pointer; }
   .cc-prov .cc-prov-long { display: none; }
   .cc-prov .cc-prov-short { display: inline; }
 }
+
+/* ---- E2 economy hooks (E2.3 prediction · E2.4 vault · E2.5 board · E2.6 burn) ----
+   Display-only surfaces (LAW 1): none of these ever affect score/rank/access. */
+.cc-pred {
+  margin: 12px auto 0;
+  width: 100%;
+  max-width: 440px;
+  text-align: left;
+  background: rgba(204, 255, 0, 0.035);
+  border: 1px solid rgba(204, 255, 0, 0.16);
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+.cc-pred-body { margin-top: 8px; }
+.cc-pred-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 6px 0;
+}
+.cc-pred-label {
+  font-family: var(--cc-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--cc-faint);
+  width: 44px;
+  flex: none;
+}
+.cc-pred-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.cc-pred-chip {
+  font-family: var(--cc-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #AEB6BC;
+  background: transparent;
+  border: 1px solid var(--cc-hairline);
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.cc-pred-chip:hover { color: var(--cc-lime); border-color: rgba(204, 255, 0, 0.3); }
+.cc-pred-chip.cc-pred-on {
+  color: #0A0C10;
+  background: var(--cc-lime);
+  border-color: var(--cc-lime);
+}
+.cc-pred-lock {
+  margin-top: 8px;
+  width: 100%;
+  font-family: var(--cc-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #0A0C10;
+  background: var(--cc-lime);
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+.cc-pred-lock:disabled { opacity: 0.4; cursor: default; }
+.cc-pred-note {
+  margin-top: 8px;
+  font-family: var(--cc-mono);
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: 0.06em;
+  color: var(--cc-faint);
+}
+.cc-vault-note {
+  margin: 8px auto 0;
+  font-family: var(--cc-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--cc-lime);
+  text-align: center;
+}
+.cc-burn-line {
+  margin: 10px auto 0;
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+  font-family: var(--cc-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--cc-faint);
+}
+
+/* E2.5 airdrop board page (/airdrop) */
+.cc-airdrop {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 20px 80px;
+  color: #D8DEE3;
+}
+.cc-airdrop-title {
+  font-family: var(--cc-mono);
+  font-size: 20px;
+  letter-spacing: 0.2em;
+  color: var(--cc-lime);
+}
+.cc-airdrop-sub {
+  font-family: var(--cc-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--cc-faint);
+  margin: 6px 0 24px;
+}
+.cc-airdrop-card {
+  border: 1px solid var(--cc-hairline);
+  border-radius: 12px;
+  background: rgba(204, 255, 0, 0.03);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.cc-airdrop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  line-height: 2;
+}
+.cc-airdrop-k {
+  font-family: var(--cc-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--cc-faint);
+}
+.cc-airdrop-mono { font-family: var(--cc-mono); font-size: 11px; }
+.cc-airdrop-lookup { display: flex; gap: 8px; align-items: center; }
+.cc-airdrop-input {
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  color: #D8DEE3;
+  background: transparent;
+  border: 1px solid var(--cc-hairline);
+  border-radius: 8px;
+  padding: 6px 10px;
+  width: 280px;
+  max-width: 60vw;
+}
+.cc-airdrop-btn {
+  font-family: var(--cc-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #0A0C10;
+  background: var(--cc-lime);
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+.cc-airdrop-btn:disabled { opacity: 0.4; cursor: default; }
+.cc-airdrop-proof { font-family: var(--cc-mono); font-size: 11px; line-height: 1.8; }
+.cc-airdrop-note {
+  font-family: var(--cc-mono);
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--cc-faint);
+}

@@ -15,6 +15,14 @@ export const RUN_DAILY_CAP = 10; // one run event per identity per UTC date (ide
 export const WALLET_SNAPSHOT_CAP = 600; // per-wallet cap at snapshot time (60 days × 10)
 export const WALLET_IDENTITY_LIMIT = 2; // >2 identities per wallet = anomaly flag
 
+// E2.3/E2.4 lanes (spec §7.2 rows 2/3/5) — same [PROVISIONAL] regime as above.
+export type WeightEventKind = "practice" | "prediction" | "vault";
+export const PRACTICE_POINTS = 0.5; // per verified archive run
+export const PRACTICE_DAILY_CAP = 2; // per identity per UTC accrual day (spec §7.2)
+export const PREDICTION_DAILY_CAP = 10; // one scored call per identity per target date, ≤ 10
+export const VAULT_POINTS = 1; // WICK Vault grant
+export const VAULT_DAILY_CAP = 1; // one vault open per identity per UTC day
+
 /* --------------------------------- date math ---------------------------------- */
 
 /** UTC YYYY-MM-DD for a timestamp (single authority for "today" in the ledger). */
@@ -63,6 +71,7 @@ export interface WeightRow {
   name: string;
   points: number;
   wallet?: string | null;
+  kind?: string; // "run" rows omit it; events carry practice/prediction/vault
 }
 
 export interface WalletSnapshot {
