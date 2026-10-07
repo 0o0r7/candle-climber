@@ -72,22 +72,39 @@
   never observable in the game response). PROD E2E: verified submission → streak 1,
   points 1, wallet linked, snapshot board reflects it (Mongo). Streak lane live;
   practice/prediction lanes land with E2.3. Anti-sybil per E1.4 (caps + flags + W1).
-- [ ] **E2.3** Route Prediction hook (P4.6 / H5): draw-tomorrow's-path UI + next-day
-  deterministic scoring vs real OHLC; weights land automatically via E2.2. ⛓ E2.2
-- [ ] **E2.4** Wick Vault hook (P4.3 / H7): vault entity at each level's peak wick;
-  server verifies balance tier on open; grants cosmetics/weights only (LAW 2). ⛓ E2.1
-- [ ] **E2.5** Merkle airdrop board pre-build (P6.1 first half): eligibility export
-  from E2.2 ledger → Merkle tree → claim page → **testnet rehearsal** BEFORE the
-  meter fills. ⛓ E2.2
-- [ ] **E2.6** Burn-counter feed: read burn fee events from the curve/tax rails →
-  public API + UI shell now; HUD live at P6.5 ("the game eats its own supply"). ⛓ none
+- [x] **E2.3** 2026-10-08 @ 4b3997b — Route Prediction LIVE: /api/prediction (lock-one-call-per-day,
+  symbol+date server-pinned from the rotation, tiered 4/3/3 scoring vs the REAL closed daily
+  candle, lazy idempotent scorer, Mongo-unique per identity/target) + TOMORROW'S MARKET panel
+  in the ready screen + practice lane (/api/practice: verified ARCHIVE token → 0.5, folded
+  2/day cap; wired to archive deaths client-side). PROD E2E: call locked for 2026-10-08
+  ETHUSDT (dup→409), archive run banked +0.5, events visible in /api/weights. W5: prediction
+  + weights-events suites. ⛓ E2.2 ✅
+- [x] **E2.4** 2026-10-08 @ 4b3997b — WICK Vault LIVE (server rails + panel hook): /api/vault
+  verifies (1) signed token for TODAY's classic 1w level, (2) on-chain tier ≥ holder via shared
+  wick-balance read, (3) unique (name,date,"vault") ledger insert → +1 weight + cosmetic trail
+  (gold=whale, ember=holder); one open/day. Client: peak-wick candle computed from terrain,
+  run that passed it sees OPEN WICK VAULT on death/graduation panels. PROD E2E: 0xdEaD
+  (whale) opened → gold-trail, dup→409. In-terrain chest sprite = P4.3 visual polish (hook +
+  rails complete). ⛓ E2.1 ✅
+- [x] **E2.5** 2026-10-08 @ 4b3997b — Merkle airdrop REHEARSAL live: pure merkle lib
+  (WebCrypto SHA-256, isomorphic; deterministic roots, proofs verified server AND in-browser)
+  + /api/airdrop (root over current snapshot, flagged wallets excluded, per-wallet proof) +
+  public /airdrop board page with wallet lookup + local proof verification. PROD E2E: root
+  announced, 0xdEaD proof verified (points 2 after vault grant, board updated). Real snapshot
+  freezes + publishes salt/root at graduation (E6.1). ⛓ E2.2 ✅
+- [x] **E2.6** 2026-10-08 @ 4b3997b — Burn-counter feed live: /api/burn reads cumulative
+  0x…dEaD balance via public RPC (5-min cache, fail-open) + SUPPLY BURNED line on the ready
+  screen. PROD verified: 164,944.787 WICK burned. Fee-EVENT attribution (tax vs curve per
+  day) = post-grad polish (P6.5 HUD). ⛓ none
 
 ## E3 — Laws & safety gates (run with every E2 item)
 
 - [ ] **E3.1** LAW 5.1 review gate: every PR touching scoring/leaderboard/wallet/
   cosmetics states which laws apply and how it complies — in the PR description.
-- [ ] **E3.2** Language sweep before any ship: "weights" not "earn/guaranteed";
-  testnet stated plainly; no gambling texture (pack §8 / LAW 4).
+- [x] **E3.2** 2026-10-08 @ 4b3997b — Language sweep applied to the E2.3–E2.6 ship: every new
+  surface ("builds airdrop weights" wording, tier breakdowns, /airdrop rehearsal copy, /api
+  meta blocks) states testnet plainly, never "earn/guaranteed"; no gambling texture. Applies
+  to: prediction panel + API meta, practice + vault responses, airdrop board page, burn line.
 - [ ] **E3.3** Anti-sybil audit: W1 HMAC + W5 anti-cheat + wallet-linked weights +
   per-wallet caps; document residual risks and review triggers.
 - [ ] **E3.4** Token-page/metadata copy re-verified against laws after any edit
