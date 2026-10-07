@@ -13,6 +13,10 @@ import { isInterval } from "@/game/cc/level-source";
 // W5: pure validation core (shape + anti-cheat caps) extracted to
 // src/lib/board-validation.ts — contract pinned by test/leaderboard-contract.test.ts.
 import { validateSubmission } from "@/lib/board-validation";
+// E2.2 airdrop-weights ledger (P4.4): verified submissions on today's classic
+// level build weights — best-effort, NEVER awaited in the game response (LAW 1).
+import { recordClassicRun } from "@/lib/weights-store";
+import { normalizeWallet } from "@/lib/weights";
 
 /* per-IP rate limit: 20 submissions / minute / instance */
 const hits = new Map<string, number[]>();
@@ -50,7 +54,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "slow down" }, { status: 429 });
   }
   try {
-    const body = (await req.json()) as Partial<BoardEntry> & { runToken?: unknown };
+    const body = (await req.json()) as Partial<BoardEntry> & {
+      runToken?: unknown;
+      address?: unknown; // E2.2: optional wallet link for the weights ledger
+    };
 
     // run token: mandatory, signature-verified (timingSafeEqual), shape-checked
     const tok = verifyRunToken(body.runToken);
@@ -69,6 +76,13 @@ export async function POST(req: Request) {
 
     const store = getBoard();
     const rank = await store.add(verdict.entry);
+    // E2.2: ledger fire-and-forget — a weights failure must never fail the score
+    // submission or even be observable in this response (ECONOMY-LAWS LAW 1).
+    void recordClassicRun(
+      verdict.entry.name,
+      verdict.entry.date,
+      normalizeWallet(body.address),
+    ).catch(() => {});
     return NextResponse.json({ ok: true, rank, store: store.kind });
   } catch {
     return NextResponse.json({ error: "bad request" }, { status: 400 });

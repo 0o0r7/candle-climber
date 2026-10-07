@@ -10,6 +10,7 @@ import { utcDateStr } from "@/game/cc/rng";
 import MiniChart from "@/components/cc/MiniChart";
 import ArchiveBrowser from "@/components/cc/ArchiveBrowser";
 import WalletChip from "@/components/cc/WalletChip";
+import { WALLET_ADDRESS_KEY } from "@/lib/wallet";
 import { isArchiveDate } from "@/game/cc/archive";
 import { render } from "@/game/cc/render";
 import { renderV2 } from "@/game/cc/render-v2";
@@ -635,6 +636,10 @@ export default function GameCanvas() {
           name: finalName, score: result.score, candlesPassed: result.candlesPassed,
           bestStreak: result.bestStreak, mutation: mutation?.id,
           symbol: data.seed.symbol, date: data.seed.date,
+          // E2.2: optional wallet link so the run also builds airdrop weights.
+          // Display-only value from WalletChip — absent = ledger stays identity-only.
+          // (JSON.stringify drops undefined — the field is simply absent when unlinked.)
+          address: localStorage.getItem(WALLET_ADDRESS_KEY) ?? undefined,
           runToken: data.runToken,
         }),
       });
