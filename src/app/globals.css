@@ -1252,6 +1252,9 @@ button.cc-wallet-chip { cursor: pointer; }
    of the HUD. Real feed = the climber-green; synthetic fallback = honest amber.
    Long label on wide screens, symbol-preserving compact label on small ones. */
 .cc-prov-real { color: var(--cc-up); border-color: rgba(91, 208, 138, 0.35); }
+/* W6: stock terrain anchored to the official Robinhood Chain price — shape is
+   derived, so it is tinted differently from a genuine OHLC feed. */
+.cc-prov-onchain { color: #9AD7FF; border-color: rgba(154, 215, 255, 0.4); background: rgba(154, 215, 255, 0.07); }
 .cc-prov-synth {
   color: #FFD24A;
   border-color: rgba(255, 210, 74, 0.4);

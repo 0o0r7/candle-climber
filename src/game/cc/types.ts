@@ -12,11 +12,32 @@ export interface Candle {
   v?: number;
 }
 
+/** W6: the official Robinhood Chain read that backs a stock level. `verified`
+ *  means the served terrain's final price AGREES with the live Chainlink feed
+ *  (or WAS anchored to it) and the quote is fresh — never a fabricated claim. */
+export interface OnchainVerification {
+  chainId: number; // 4663 (mainnet — where the production feeds live)
+  feed: string; // Chainlink feed proxy address that was read
+  feedSource: 'directory' | 'snapshot';
+  price: number; // official USD price of one token
+  decimals: number; // feed decimals, read on-chain
+  updatedAt: number; // unix seconds of the round
+  ageSec: number; // now - updatedAt
+  stale: boolean; // older than the staleness bound
+  roundId: string;
+  anchorPrice: number | null; // last close of the served terrain
+  deltaPct: number | null; // terrain close vs official price, %
+  verified: boolean; // fresh AND terrain agrees with the official price
+}
+
 export interface SeedInfo {
   date: string; // UTC YYYY-MM-DD
   symbol: string; // e.g. BTCUSDT / TSLA / launch ticker
   interval: string; // e.g. 1w; "derived" for vibe-launch terrain
-  source: 'binance' | 'stooq' | 'yahoo' | 'vibe-launch' | 'synthetic';
+  source: 'binance' | 'stooq' | 'yahoo' | 'vibe-launch' | 'robinhood' | 'synthetic';
+  /** Present for stock levels when the official mainnet Chainlink feed was
+   *  read; absent when the ticker has no official feed or the read failed. */
+  onchain?: OnchainVerification;
 }
 
 export interface CandleData {
