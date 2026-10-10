@@ -143,6 +143,15 @@ def run_session(cfg, lt_user, lt_key):
         WebDriverWait(d, 60).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-char-chip"))
         )
+        # G2 de-clutter: the roster (and everything else) folded into the
+        # "WAYS TO PLAY" <details> — expand it or the chips are display:none
+        # (present in DOM but .text empty → venom never found).
+        try:
+            d.execute_script(
+                "const x=document.querySelector('.cc-more');if(x)x.open=true;")
+            time.sleep(0.6)
+        except Exception:
+            pass
         chips = d.find_elements(By.CSS_SELECTOR, ".cc-char-chip")
         check("page_title", "candle" in (d.title or "").lower(), d.title)
         check("char_chips_rendered", len(chips) >= 14, f"{len(chips)} chips")
