@@ -29,7 +29,9 @@ export async function GET(req: Request) {
   // 2000 = memory store's hard cap; for Mongo it is a sane M0-sized window.
   // P3.5: the narrative describes the CLASSIC board ("1w") only — per-tf
   // boards stay unmixed so episode figures never blend timeframes.
-  const entries = await store.top(date, 2000, "1w");
+  // Option B: the report narrates the WHOLE day's play ("all" lanes) — guest
+  // and official runs are both real climbs; lanes only matter for ranking.
+  const entries = await store.top(date, 2000, "1w", "all");
 
   const rep = aggregateDay(entries);
   const tomorrowSymbol = pickSeed(

@@ -131,6 +131,18 @@ reach while wallets capture the committed. Buy/hold remains *wanted*, never *req
 **Build consequence (queued):** classic board renamed guest board + official wallet-bound
 board + season scaffolding. Economy-facing build → LAW 5.1 applies.
 
+**Build shipped 2026-10-10 (same day).** The queued consequence landed: `src/lib/seasons.ts`
+(append-only season registry, S1 opens 2026-10-10), two-lane `leaderboard-store`
+(guest = legacy semantics byte-preserved; official = best-run-per-wallet per date+interval),
+lane stamping in `board-validation` (lane decided ONLY by the normalized wallet — a malformed
+address degrades to guest, play never blocked), `?board=` on GET + `board`/`season` in the
+POST response, masked wallets on public reads, honest UI labels (OFFICIAL · wallet-bound /
+GUEST · typed names, unofficial). Contract pinned by `test/official-board.test.ts` (13 pins;
+suite 304/304). Law compliance (5.1): score math untouched (1.1), play free & walletless
+(1.2 substance), skill-only scoreboard (1.3), language per LAW 4. Known limit, queued:
+official-lane wallet ownership is shape-validated (client-provided address) — cryptographic
+signature verification is the next identity hardening step, recorded in the build council doc.
+
 ---
 *Adopted: 2026-10-06 · Source: VARIANT-REVIEW-2026-10-05 merge-back wave 1 ·
 Related: `docs/GROWTH-AND-HOOKS-STRATEGY.md`, `docs/WICK-LAUNCH-FORM-PACK.md` §8,

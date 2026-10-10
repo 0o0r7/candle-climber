@@ -11,7 +11,7 @@ import MiniChart from "@/components/cc/MiniChart";
 import ArchiveBrowser from "@/components/cc/ArchiveBrowser";
 import WalletChip from "@/components/cc/WalletChip";
 import PredictionPanel from "@/components/cc/PredictionPanel";
-import { WALLET_ADDRESS_KEY } from "@/lib/wallet";
+import { WALLET_ADDRESS_KEY, isValidAddress } from "@/lib/wallet";
 import { isArchiveDate } from "@/game/cc/archive";
 import { render } from "@/game/cc/render";
 import { renderV2 } from "@/game/cc/render-v2";
@@ -42,6 +42,10 @@ interface BoardEntry {
   mutation?: string;
   date: string;
   ts?: number;
+  interval?: string;
+  wallet?: string | null; // masked short form on GET responses (0x1234…abcd)
+  board?: "guest" | "official";
+  season?: string | null;
 }
 // H4 DAILY REPORT — aggregated over real submissions by /api/report
 interface ReportResp {
@@ -87,8 +91,13 @@ export default function GameCanvas() {
   const [best, setBest] = useState(0);
   const [name, setName] = useState("");
   const [rival, setRival] = useState(""); // P3.1: optional rival X handle for the death-card challenge stamp
-  const [board, setBoard] = useState<BoardEntry[]>([]);
-  const [topBoard, setTopBoard] = useState<BoardEntry[]>([]);
+  const [board, setBoard] = useState<BoardEntry[]>([]); // guest lane (classic board)
+  const [topBoard, setTopBoard] = useState<BoardEntry[]>([]); // guest top (rival context)
+  // Option B (LAW 1.2 dated note, 2026-10-10): official wallet-bound board —
+  // fetched only when a wallet is linked; both lanes stay labeled on the panel.
+  const [officialBoard, setOfficialBoard] = useState<BoardEntry[]>([]);
+  const [officialSeason, setOfficialSeason] = useState<string | null>(null);
+  const [submittedBoard, setSubmittedBoard] = useState<"guest" | "official" | null>(null);
   const [rank, setRank] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [muted, setMutedState] = useState(false);
@@ -155,6 +164,12 @@ export default function GameCanvas() {
   const [vaultMsg, setVaultMsg] = useState<string | null>(null);
   const [vaultBusy, setVaultBusy] = useState(false);
   const [hasWallet, setHasWallet] = useState(false);
+  // Option B: lane selection at boot — a SAVED wallet puts this device on the
+  // official lane for board context (read-only UI choice; score math untouched,
+  // LAW 1.3: skill-only scoreboard).
+  useEffect(() => {
+    if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) setHasWallet(true);
+  }, []);
   const [burn, setBurn] = useState<string | null>(null);
   useEffect(() => { nameRef.current = name; }, [name]);
 
@@ -275,6 +290,17 @@ export default function GameCanvas() {
             .then((r) => r.json())
             .then((b) => { if (alive) setTopBoard(b.entries ?? []); })
             .catch(() => {});
+          // Option B: official lane loads only for wallet-linked devices
+          if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) {
+            fetch(`/api/leaderboard?date=${d.seed.date}&interval=${tf}&board=official`)
+              .then((r) => r.json())
+              .then((b) => {
+                if (!alive) return;
+                setOfficialBoard(b.entries ?? []);
+                if (b.season) setOfficialSeason(b.season);
+              })
+              .catch(() => {});
+          }
           // H4: yesterday's episode for the ready screen (cliffhanger loop)
           fetch("/api/report")
             .then((r) => r.json())
@@ -725,9 +751,21 @@ export default function GameCanvas() {
       });
       const j = await res.json();
       if (typeof j.rank === "number") setRank(j.rank);
+      if (j.board === "official" || j.board === "guest") setSubmittedBoard(j.board);
       const b = await fetch(`/api/leaderboard?date=${data.seed.date}&interval=${tf}`).then((r) => r.json());
       setBoard(b.entries ?? []);
       setTopBoard(b.entries ?? []);
+      // Option B: refresh the official lane too (the run landed there when a
+      // wallet is linked — best run per wallet is kept server-side)
+      if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) {
+        await fetch(`/api/leaderboard?date=${data.seed.date}&interval=${tf}&board=official`)
+          .then((r) => r.json())
+          .then((ob) => {
+            setOfficialBoard(ob.entries ?? []);
+            if (ob.season) setOfficialSeason(ob.season);
+          })
+          .catch(() => {});
+      }
       // P7.2: submit the run's ghost with the SAME verified run-token
       // (best-effort — a ghost failure must never fail the score submission;
       // the ghost is cosmetic and the next load simply replays nothing).
@@ -801,7 +839,9 @@ export default function GameCanvas() {
 
   const downloadCard = async () => {
     if (!result || !data) return;
-    const top = topBoard[0];
+    // Option B: the card's rival reads THIS device's lane (official with a
+    // linked wallet — empty official lane = no rival stamped, never guest rows)
+    const top = (hasWallet ? officialBoard : topBoard)[0];
     const rivalGap = top && top.score > result.score ? top.score - result.score : 0;
     // P3.1: honor the typed rival handle — invalid input simply omits the stamp
     const challenge = normalizeRivalTag(rival);
@@ -865,7 +905,11 @@ export default function GameCanvas() {
     : null;
   const canSubmit = Boolean(data?.runToken) && !archive; // archive = practice (H1)
   const unscoredMsg = archive ? ARCHIVE_MSG : UNSCORED_MSG;
-  const top = topBoard[0];
+  // Option B: rival/lead context follows THIS device's lane (official with a
+  // linked wallet, guest otherwise) — both boards stay labeled on the panel.
+  const myLane = hasWallet ? officialBoard : topBoard;
+  const miniOfficial = hasWallet && officialBoard.length > 0;
+  const top = myLane[0];
   const rivalGap = result && top && top.score > result.score ? top.score - result.score : 0;
 
   return (
@@ -1155,10 +1199,10 @@ export default function GameCanvas() {
                       SUPPLY BURNED · {burn} WICK
                     </p>
                   )}
-                  {topBoard.length > 0 && (
+                  {(miniOfficial || topBoard.length > 0) && (
                     <div className="cc-board cc-board-mini">
-                      <div className="cc-board-title">TOP 3 TODAY</div>
-                      {topBoard.slice(0, 3).map((e, i) => (
+                      <div className="cc-board-title">{miniOfficial ? "OFFICIAL · TOP 3 TODAY" : "GUEST · TOP 3 TODAY"}</div>
+                      {(miniOfficial ? officialBoard : topBoard).slice(0, 3).map((e, i) => (
                         <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
                           <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
                           <span className="cc-board-name">{e.name}</span>
@@ -1206,7 +1250,7 @@ export default function GameCanvas() {
                 </button>
               )}
               {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
-              {rank !== null && <p className="cc-rank">GLOBAL RANK #{rank} TODAY</p>}
+              {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
             </div>
           </div>
         )}
@@ -1231,14 +1275,14 @@ export default function GameCanvas() {
                   TOP TODAY: <b>{top.name}</b> · {top.score.toLocaleString()} — you were <b>{rivalGap.toLocaleString()}</b> pts behind
                 </p>
               )}
-              {rivalGap === 0 && topBoard.length > 0 && <p className="cc-rival cc-rival-lead">YOU LEAD THE DAILY CHART. FLEX IT.</p>}
+              {rivalGap === 0 && myLane.length > 0 && <p className="cc-rival cc-rival-lead">YOU LEAD THE DAILY CHART. FLEX IT.</p>}
               {verdict && <p className="cc-vs-verdict" role="status">{verdict}</p>}
               {duelCode && (
                 <p className="cc-duel-live" role="status">
                   DUEL LIVE · <b>{duelCode}</b> · {duelCopied ? "INVITATION COPIED ✓" : "SHARE THE CODE"}
                 </p>
               )}
-              {rank !== null && <p className="cc-rank">GLOBAL RANK #{rank} TODAY</p>}
+              {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
               <div className="cc-death-actions">
                 <input
                   className="cc-input"
@@ -1284,9 +1328,28 @@ export default function GameCanvas() {
                 </button>
               )}
               {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
+              {officialBoard.length > 0 && (
+                <div className="cc-board cc-board-official">
+                  <div className="cc-board-title">OFFICIAL · {data?.seed.symbol}</div>
+                  <div className="cc-board-sub">
+                    wallet-bound · best run per wallet{officialSeason ? ` · season ${officialSeason}` : ""}
+                  </div>
+                  {officialBoard.slice(0, 10).map((e, i) => (
+                    <div key={`off-${e.ts ?? i}-${e.wallet ?? e.name}`} className="cc-board-row">
+                      <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
+                      <span className="cc-board-name">
+                        {e.name}
+                        {e.wallet ? <i className="cc-board-wallet">{e.wallet}</i> : null}
+                      </span>
+                      <span className="cc-board-score">{e.score.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               {board.length > 0 && (
                 <div className="cc-board">
-                  <div className="cc-board-title">TOP 10 · {data?.seed.symbol}</div>
+                  <div className="cc-board-title">GUEST · {data?.seed.symbol}</div>
+                  <div className="cc-board-sub">typed names · unofficial · play stays free & walletless</div>
                   {board.slice(0, 10).map((e, i) => (
                     <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
                       <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
