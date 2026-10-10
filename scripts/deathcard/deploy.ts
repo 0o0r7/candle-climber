@@ -180,7 +180,7 @@ const minterNow = await decodeFn(sel("minter()"), true);
 console.log("final state:", { owner: finalOwner, minter: minterNow });
 
 // ------------------------------------------------------------------ record
-const rec = { address, chainId: CHAIN_ID, txHash, deployedAt: new Date().toISOString(), deployer: minter, owner: finalOwner, minter: minterNow, name, symbol };
+const rec = { address, chainId: CHAIN_ID, deployBlock: Number(bytesToBigint(hexQuantityToBytes(receipt.blockNumber as string))), txHash, deployedAt: new Date().toISOString(), deployer: minter, owner: finalOwner, minter: minterNow, name, symbol };
 writeFileSync(join(ROOT, "src/lib/deathcard/address.json"), JSON.stringify(rec, null, 2) + "\n");
 console.log("recorded → src/lib/deathcard/address.json (commit this)");
 console.log("\nmint calldata self-check (first mint):");
