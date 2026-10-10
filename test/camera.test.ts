@@ -1,17 +1,22 @@
 /// <reference types="bun-types" />
-// CAMERA-FRAME contract (owner report 2026-10-11: "high jump pushes the
-// candles and the playfield out of the screen frame").
-// Pins the asymmetric camera follow in engine.ts:
-//  1. A full hold-jump must NEVER slide the takeoff platform out of the frame
-//     bottom (hard CAM_GROUND_STRIP guarantee, base AND low-G mutation mods).
-//  2. The player must NEVER exit the top of the frame during the arc.
-//  3. While rising INSIDE the frame the camera holds still (terrain read).
-//  4. After landing higher, the camera re-centers (the floor never freezes it).
-//  5. Falling deaths still trigger (the floor must not break the fell check).
+// CAMERA-FRAME contract v2 (owner report 2026-10-11, two passes:
+// "high jump pushes the candles/playfield out of the frame" → fixed with the
+// asymmetric follow → "STILL exits the bottom on very high jumps" → fixed with
+// the capped rise budget + renderer zoom contract).
+// Engine pins:
+//  1. The takeoff platform can NEVER slide out of the frame bottom
+//     (hard CAM_GROUND_STRIP floor), base AND low-G mutation mods.
+//  2. The camera drifts up at most CAM_RISE_BUDGET px per airborne arc —
+//     the terrain barely moves while the player arcs (zoom covers the rest,
+//     render-only, see GameCanvas + render-v2 CamZoom).
+//  3. While the player top is still below the engage line, the camera never
+//     moves up at all.
+//  4. After a full jump the camera re-centers (budget/floor never freeze it).
+//  5. Falling deaths still trigger with the floor in place.
 import { describe, test, expect } from "bun:test";
 import {
   Engine, VIEW_W, VIEW_H,
-  CAM_TOP_WINDOW, CAM_GROUND_STRIP,
+  CAM_RISE_ENGAGE, CAM_RISE_BUDGET, CAM_RISE_RATE, CAM_GROUND_STRIP,
 } from "@/game/cc/engine";
 import { buildPlatforms, PLATFORM_W } from "./../src/game/cc/level";
 import { syntheticCandles } from "@/game/cc/level-source";
@@ -31,31 +36,32 @@ function settle(e: Engine) {
   expect(e.grounded).toBe(true);
 }
 
-/** Full hold-jump arc: returns the worst frame violations over the whole arc. */
+/** Full hold-jump arc: worst frame violations + camera drift over the arc. */
 function holdJumpArc(e: Engine) {
   const takeoff = e.groundPlat!;
+  const camY0 = e.camY;
   e.press(); // jumpHeld stays true through the entire rise (max-height jump)
   let worstPlatformDepth = -Infinity; // >0 ⇒ takeoff top below the frame bottom
-  let playerAbove = -Infinity;        // >0 ⇒ player top above the frame top
+  let camRise = 0;                    // total upward camera drift during the arc
   for (let i = 0; i < 150; i++) { // 2.5s > rise + fall of any reachable arc
     e.step(DT);
     if (e.dead) break;
     worstPlatformDepth = Math.max(worstPlatformDepth, takeoff.y - e.camY - VIEW_H);
-    playerAbove = Math.max(playerAbove, -(e.py - e.camY));
+    camRise = Math.max(camRise, camY0 - e.camY);
     if (e.vy > 0 && e.py + 40 > takeoff.y + 8) break; // landed back / below takeoff
   }
-  return { worstPlatformDepth, playerAbove };
+  return { worstPlatformDepth, camRise };
 }
 
-describe("camera-frame (owner report 2026-10-11)", () => {
+describe("camera-frame v2 (owner report 2026-10-11)", () => {
   test("full hold-jump keeps the takeoff platform in frame (base mods, 5 daily seeds)", () => {
     for (const date of ["2026-10-11", "2026-10-10", "2026-10-09", "2026-10-08", "2026-10-07"]) {
       const e = dailyEngine(date, BASE_MODS);
       settle(e);
-      const { worstPlatformDepth, playerAbove } = holdJumpArc(e);
-      // a CAM_GROUND_STRIP-wide strip of the takeoff platform stays visible
+      const { worstPlatformDepth, camRise } = holdJumpArc(e);
       expect(worstPlatformDepth).toBeLessThanOrEqual(-CAM_GROUND_STRIP);
-      expect(playerAbove).toBeLessThanOrEqual(0);
+      // terrain barely moves: the whole arc drifts at most one budget
+      expect(camRise).toBeLessThanOrEqual(CAM_RISE_BUDGET + 1);
     }
   });
 
@@ -63,30 +69,37 @@ describe("camera-frame (owner report 2026-10-11)", () => {
     for (const date of ["2026-10-11", "2026-10-10", "2026-10-09", "2026-10-08", "2026-10-07"]) {
       const e = dailyEngine(date, LOW_G);
       settle(e);
-      const { worstPlatformDepth, playerAbove } = holdJumpArc(e);
+      const { worstPlatformDepth, camRise } = holdJumpArc(e);
       expect(worstPlatformDepth).toBeLessThanOrEqual(-CAM_GROUND_STRIP);
-      expect(playerAbove).toBeLessThanOrEqual(0);
+      expect(camRise).toBeLessThanOrEqual(CAM_RISE_BUDGET + 1);
     }
   });
 
-  test("rising inside the frame holds the camera still (terrain read)", () => {
+  test("upward camera motion is rate-limited and only near the top edge", () => {
     const e = dailyEngine("2026-10-11", BASE_MODS);
     settle(e);
     const camY0 = e.camY;
     e.press();
-    // first phase of the rise: player between the anchor (52%) and the top
-    // window (30%) — the camera must never move UP (terrain stays put); a
-    // residual settle DOWN from the pre-jump pose is allowed
+    let moved = false;
     for (let i = 0; i < 60; i++) {
       e.step(DT);
       if (e.vy >= 0) break;
-      if (e.py >= e.camY + VIEW_H * CAM_TOP_WINDOW) {
-        expect(e.camY).toBeGreaterThanOrEqual(camY0 - 1e-9);
-      } else break;
+      if (e.camY < camY0 - 1e-9) {
+        moved = true;
+        const drop = camY0 - e.camY; // px the camera moved up this tick
+        // rate-limited: never a snap, at most one tick of CAM_RISE_RATE
+        expect(drop).toBeLessThanOrEqual(CAM_RISE_RATE * DT + 1e-9);
+        // engage contract: the engine fires on its PRE-move player position —
+        // reconstruct it (py - (camY + drop)) and require it near the top edge
+        const preMoveP = e.py - (e.camY + drop);
+        expect(preMoveP).toBeLessThan(CAM_RISE_ENGAGE + 20);
+        break;
+      }
     }
+    expect(moved).toBe(true); // a full hold-jump DOES eventually use the drift
   });
 
-  test("after a full jump the camera re-centers (floor never freezes it)", () => {
+  test("after a full jump the camera re-centers (budget never freezes it)", () => {
     const plats: Platform[] = [];
     for (let i = 0; i < 40; i++) {
       plats.push({
@@ -96,7 +109,7 @@ describe("camera-frame (owner report 2026-10-11)", () => {
     }
     const e = new Engine(plats, { onDeath: () => {}, onScore: () => {} }, BASE_MODS, "flat-recenter");
     settle(e);
-    e.press(); // full hold-jump on a flat runway: floor binds at apex, then
+    e.press(); // full hold-jump on a flat runway
     for (let i = 0; i < 150 && !(e.vy > 0 && e.py + 40 >= -8); i++) e.step(DT);
     for (let i = 0; i < 240; i++) e.step(DT); // settle back to the anchor
     expect(e.grounded).toBe(true);

@@ -51,7 +51,8 @@ export function drawSummit(ctx: CanvasRenderingContext2D, x: number, y: number, 
 export function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, camX: number, camY: number) {
   const x = p.x - camX;
   const y = p.y - camY;
-  if (x > VIEW_W + 40 || x + p.w < -40) return;
+  // generous bounds: the camera zoom-out can reveal up to ~700px extra world
+  if (x > VIEW_W + 700 || x + p.w < -700) return;
   if (p.state === "gone" || p.w === 0) {
     // a summit that landed on a gap candle still shows its marker
     if (p.summit) drawSummit(ctx, x, y, p.w);
@@ -231,18 +232,35 @@ function drawBackdrop(ctx: CanvasRenderingContext2D, camX: number, camY: number)
   ctx.fillRect(0, VIEW_H - 130, VIEW_W, 130);
 }
 
-export function render(ctx: CanvasRenderingContext2D, e: Engine, seedStr = "", mutationId?: string, rival?: RivalBot | null, ghost?: GhostView | null) {
+/** CAMERA-FRAME zoom (see render-v2 CamZoom) — same ground-pinned contract. */
+export interface CamZoom {
+  z: number;
+  px: number;
+  py: number;
+}
+
+export function render(ctx: CanvasRenderingContext2D, e: Engine, seedStr = "", mutationId?: string, rival?: RivalBot | null, ghost?: GhostView | null, cam?: CamZoom) {
   ctx.save();
   const sx = e.shake > 0 ? (Math.random() - 0.5) * e.shake : 0;
   const sy = e.shake > 0 ? (Math.random() - 0.5) * e.shake : 0;
   ctx.translate(sx, sy);
   drawBackdrop(ctx, e.camX, e.camY);
+  // ---- CAMERA-FRAME zoom: world layers zoom about the ground-line pivot;
+  // backdrop + ticker stay screen-space
+  ctx.save();
+  if (cam && cam.z < 0.999) {
+    ctx.translate(cam.px, cam.py);
+    ctx.scale(cam.z, cam.z);
+    ctx.translate(-cam.px, -cam.py);
+  }
   // P3.2 candle-rain: decor layer behind the playfield (never occludes caps)
   if (mutationId === "rain") drawCandleRain(ctx, e, seedStr, VIEW_W, VIEW_H);
 
-  // visible platforms only
-  const i0 = Math.max(0, Math.floor(e.camX / CANDLE_W) - 2);
-  const i1 = Math.min(e.plats.length - 1, Math.ceil((e.camX + VIEW_W) / CANDLE_W) + 2);
+  // visible platforms only — widened by the zoom margin
+  const zm = cam && cam.z < 0.999 ? Math.ceil(VIEW_W * (1 / cam.z - 1)) + 8 : 0;
+  const padC = 2 + Math.ceil(zm / CANDLE_W);
+  const i0 = Math.max(0, Math.floor(e.camX / CANDLE_W) - padC);
+  const i1 = Math.min(e.plats.length - 1, Math.ceil((e.camX + VIEW_W) / CANDLE_W) + padC);
   for (let i = i0; i <= i1; i++) drawPlatform(ctx, e.plats[i], e.camX, e.camY);
 
   drawHints(ctx, e);
@@ -252,6 +270,7 @@ export function render(ctx: CanvasRenderingContext2D, e: Engine, seedStr = "", m
   // P7.1: translucent rival ghost — decor only, drawn over the playfield
   if (ghost) drawGhost(ctx, e.camX, e.camY, ghost);
   if (rival) drawRival(ctx, e, rival);
+  ctx.restore(); // ---- end camera zoom
 
   // progress candle ticker (top center, in-canvas)
   const passed = e.plats[Math.min(e.candlesPassed, e.plats.length - 1)];
