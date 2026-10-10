@@ -14,6 +14,10 @@
 //              never flood the official board; rank math scopes to its own lane.
 // A guest row never appears on the official board and vice versa — same
 // "no board mixing" promise P3.5 already made for timeframes.
+// E4.4 (2026-10-10): store failures on this path are economy-path alerts too —
+// a leaderboard write failure loses BOTH a score and a weights-lane trigger.
+import { captureError } from "@/lib/telemetry";
+
 export interface BoardEntry {
   name: string;
   score: number;
@@ -28,16 +32,30 @@ export interface BoardEntry {
   board?: "guest" | "official"; // absent on legacy rows ⇒ treated as guest
   wallet?: string | null; // lowercase address on official rows; null on guest
   season?: string | null; // seasonOf(date) on new rows (pre-season dates ⇒ null)
+  ref?: string; // E5.5: opaque referral stamp (sanitizeRef-bounded); metadata only
 }
 
 export type BoardFilter = "guest" | "official" | "all";
 
 const IV = (e: Pick<BoardEntry, "interval">) => e.interval ?? "1w";
 
+/** E4.1 ops-dashboard lane aggregates — COUNTS ONLY, zero names/addresses. */
+export interface LaneStats {
+  guestRows: number; // every guest submission ever stored (legacy included)
+  officialRows: number; // best-run-per-wallet records
+  distinctGuests: number; // distinct guest names
+  distinctWallets: number; // distinct official-lane wallets
+  todayGuest: number;
+  todayOfficial: number;
+  topRefs: { ref: string; count: number }[]; // E5.5: top referral stamps, last 7d
+}
+
 export interface BoardStore {
   readonly kind: "memory" | "mongo";
   add(entry: BoardEntry): Promise<number>; // returns rank (1-based) within the entry's own lane + interval
   top(date: string | null, n: number, interval?: string, board?: BoardFilter): Promise<BoardEntry[]>;
+  /** E4.1: privacy-safe lane aggregates for the /ops page (counts only). */
+  laneStats(now: number): Promise<LaneStats>;
   /** last connection error when a backing store is down (diagnostics) */
   readonly lastError?: string;
 }
@@ -116,6 +134,31 @@ export class MemoryStore implements BoardStore {
       .sort((a, b) => b.score - a.score)
       .slice(0, n);
   }
+
+  async laneStats(now: number): Promise<LaneStats> {
+    const today = new Date(now).toISOString().slice(0, 10);
+    const week = new Date(now - 7 * 86_400_000).toISOString().slice(0, 10);
+    const guest = this.rows.filter((r) => r.board !== "official");
+    const official = this.rows.filter((r) => r.board === "official");
+    const refCount = new Map<string, number>();
+    for (const r of this.rows) {
+      if (!r.ref) continue;
+      const d = new Date(r.ts).toISOString().slice(0, 10);
+      if (d >= week && d <= today) refCount.set(r.ref, (refCount.get(r.ref) ?? 0) + 1);
+    }
+    return {
+      guestRows: guest.length,
+      officialRows: official.length,
+      distinctGuests: new Set(guest.map((r) => r.name)).size,
+      distinctWallets: new Set(official.map((r) => r.wallet).filter((w): w is string => !!w)).size,
+      todayGuest: guest.filter((r) => r.date === today).length,
+      todayOfficial: official.filter((r) => r.date === today).length,
+      topRefs: [...refCount.entries()]
+        .map(([ref, count]) => ({ ref, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5),
+    };
+  }
 }
 
 /* ----------------------------------- mongo ---------------------------------- */
@@ -156,6 +199,7 @@ class MongoStore implements BoardStore {
         const msg = (err as Error).message;
         console.error("[leaderboard] mongo unavailable, falling back to memory:", msg);
         this.lastError = msg;
+        captureError(err, { lane: "leaderboard", op: "mongo-connect", store: this.kind }); // E4.4 P2
         this.disabled = true;
         return null;
       }
@@ -233,6 +277,43 @@ class MongoStore implements BoardStore {
     const lane = board === "official" ? OFFICIAL_Q : board === "all" ? {} : GUEST_Q;
     const q = { ...lane, ...(date ? { date } : {}), ...ivq };
     return coll.find(q).sort({ score: -1 }).limit(n).toArray();
+  }
+
+  async laneStats(now: number): Promise<LaneStats> {
+    const coll = await this.connect();
+    if (!coll) {
+      return { guestRows: 0, officialRows: 0, distinctGuests: 0, distinctWallets: 0, todayGuest: 0, todayOfficial: 0, topRefs: [] };
+    }
+    const today = new Date(now).toISOString().slice(0, 10);
+    const weekMs = now - 7 * 86_400_000;
+    const week = new Date(weekMs).toISOString().slice(0, 10);
+    const [guestRows, officialRows, distinctGuests, distinctWallets, todayGuest, todayOfficial, refAgg] =
+      await Promise.all([
+        coll.countDocuments(GUEST_Q),
+        coll.countDocuments(OFFICIAL_Q),
+        coll.distinct("name", GUEST_Q),
+        coll.distinct("wallet", { ...OFFICIAL_Q, wallet: { $type: "string", $ne: null } }),
+        coll.countDocuments({ ...GUEST_Q, date: today }),
+        coll.countDocuments({ ...OFFICIAL_Q, date: today }),
+        // E5.5 rollup: top referral stamps across the last 7 UTC dates (ts is ms)
+        coll
+          .aggregate<{ _id: string; count: number }>([
+            { $match: { ref: { $type: "string", $exists: true }, ts: { $gte: weekMs, $lte: now } } },
+            { $group: { _id: "$ref", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 5 },
+          ])
+          .toArray(),
+      ]);
+    return {
+      guestRows,
+      officialRows,
+      distinctGuests: distinctGuests.length,
+      distinctWallets: distinctWallets.length,
+      todayGuest,
+      todayOfficial,
+      topRefs: refAgg.map((r) => ({ ref: r._id, count: r.count })),
+    };
   }
 }
 

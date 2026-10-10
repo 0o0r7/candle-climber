@@ -16,6 +16,8 @@ import {
   type WeightRow,
   type WalletSnapshot,
 } from "@/lib/weights";
+// E4.4: ledger write errors are P2 alerts, never silent (spec §9)
+import { captureError } from "@/lib/telemetry";
 
 export interface RunRecord {
   name: string;
@@ -50,6 +52,17 @@ export interface IdentitySummary {
   wallet: string | null;
 }
 
+/** E4.1 ops-dashboard aggregates — COUNTS ONLY, zero identities/addresses. */
+export interface WeightsStats {
+  runRows: number; // classic-run events (one per identity per UTC date)
+  eventRows: number; // practice/prediction/vault rows
+  identities: number; // distinct names across runs ∪ events
+  linkedWallets: number; // distinct non-null wallets
+  totalPoints: number; // sum over both collections
+  todayRuns: number; // run rows stamped today (UTC)
+  weekRuns: number; // run rows within the last 7 UTC dates
+}
+
 export interface WeightsStore {
   readonly kind: "memory" | "mongo";
   /** Returns the stored record, or null when the same-day event was a duplicate. */
@@ -63,6 +76,8 @@ export interface WeightsStore {
   summary(name: string): Promise<IdentitySummary>;
   /** Per-wallet snapshot rows (bounded read) + capped/anomaly-flagged totals. */
   snapshot(cap: number): Promise<{ rowCount: number; wallets: WalletSnapshot[] }>;
+  /** E4.1: privacy-safe aggregates for the /ops page (counts only). */
+  stats(now: number): Promise<WeightsStats>;
   readonly lastError?: string;
 }
 
@@ -138,6 +153,33 @@ export class MemoryWeightsStore implements WeightsStore {
     ];
     return { rowCount: rows.length, wallets: snapshotFromRows(rows, cap) };
   }
+
+  async stats(now: number): Promise<WeightsStats> {
+    const names = new Set<string>();
+    const wallets = new Set<string>();
+    let totalPoints = 0;
+    for (const r of this.rows) {
+      names.add(r.name);
+      if (r.wallet) wallets.add(r.wallet);
+      totalPoints += r.points;
+    }
+    for (const e of this.events) {
+      names.add(e.name);
+      if (e.wallet) wallets.add(e.wallet);
+      totalPoints += e.points;
+    }
+    const today = utcDate(now);
+    const week = new Date(now - 7 * 86_400_000).toISOString().slice(0, 10);
+    return {
+      runRows: this.rows.length,
+      eventRows: this.events.length,
+      identities: names.size,
+      linkedWallets: wallets.size,
+      totalPoints,
+      todayRuns: this.rows.filter((r) => r.date === today).length,
+      weekRuns: this.rows.filter((r) => r.date >= week && r.date <= today).length,
+    };
+  }
 }
 
 /* ----------------------------------- mongo ----------------------------------- */
@@ -180,6 +222,9 @@ class MongoWeightsStore implements WeightsStore {
         const msg = (err as Error).message;
         console.error("[weights] mongo unavailable, falling back to memory:", msg);
         this.lastError = msg;
+        // E4.4: weights going memory-only is a P2 alert (spec §9) — events would
+        // silently reset on restart, which is exactly the trust failure to surface
+        captureError(err, { lane: "weights", op: "mongo-connect", store: this.kind });
         this.disabled = true;
         return null;
       }
@@ -195,6 +240,7 @@ class MongoWeightsStore implements WeightsStore {
       return rec;
     } catch (err) {
       if ((err as { code?: number }).code === 11000) return null; // duplicate same-day event
+      captureError(err, { lane: "weights", op: "recordRun", store: this.kind }); // E4.4 P2
       throw err;
     }
   }
@@ -237,6 +283,7 @@ class MongoWeightsStore implements WeightsStore {
     } catch (err) {
       this.lastError = (err as Error).message;
       console.error("[weights] addPractice failed:", this.lastError);
+      captureError(err, { lane: "weights", op: "addPractice", store: this.kind }); // E4.4 P2
       return { name, date, kind: "practice", points: 0, wallet, ts, meta: { runs: 0 } };
     }
   }
@@ -250,6 +297,7 @@ class MongoWeightsStore implements WeightsStore {
       return ev;
     } catch (err) {
       if ((err as { code?: number }).code === 11000) return null; // duplicate (name, date, kind)
+      captureError(err, { lane: "weights", op: "recordEvent", kind: ev.kind, store: this.kind }); // E4.4 P2
       throw err;
     }
   }
@@ -300,6 +348,40 @@ class MongoWeightsStore implements WeightsStore {
       ...evRows.map((e) => ({ name: e.name, points: e.points, wallet: e.wallet, kind: e.kind })),
     ];
     return { rowCount: all.length, wallets: snapshotFromRows(all, cap) };
+  }
+
+  async stats(now: number): Promise<WeightsStats> {
+    const coll = await this.connect();
+    if (!coll) {
+      return { runRows: 0, eventRows: 0, identities: 0, linkedWallets: 0, totalPoints: 0, todayRuns: 0, weekRuns: 0 };
+    }
+    const today = utcDate(now);
+    const week = new Date(now - 7 * 86_400_000).toISOString().slice(0, 10);
+    const [runRows, eventRows, identities, evNames, linkedWallets, evWallets, pointsAgg, evPointsAgg, todayRuns, weekRuns] =
+      await Promise.all([
+        coll.countDocuments({}),
+        this.evColl ? this.evColl.countDocuments({}) : Promise.resolve(0),
+        coll.distinct("name"),
+        this.evColl ? this.evColl.distinct("name") : Promise.resolve([] as string[]),
+        coll.distinct("wallet", { wallet: { $type: "string", $ne: null } }),
+        this.evColl ? this.evColl.distinct("wallet", { wallet: { $type: "string", $ne: null } }) : Promise.resolve([] as string[]),
+        coll.aggregate<{ total: number }>([{ $group: { _id: null, total: { $sum: "$points" } } }]).toArray(),
+        this.evColl
+          ? this.evColl.aggregate<{ total: number }>([{ $group: { _id: null, total: { $sum: "$points" } } }]).toArray()
+          : Promise.resolve([] as { total: number }[]),
+        coll.countDocuments({ date: today }),
+        coll.countDocuments({ date: { $gte: week, $lte: today } }),
+      ]);
+    const walletSet = new Set([...linkedWallets, ...evWallets]);
+    return {
+      runRows,
+      eventRows,
+      identities: new Set([...identities, ...evNames]).size,
+      linkedWallets: walletSet.size,
+      totalPoints: (pointsAgg[0]?.total ?? 0) + (evPointsAgg[0]?.total ?? 0),
+      todayRuns,
+      weekRuns,
+    };
   }
 }
 

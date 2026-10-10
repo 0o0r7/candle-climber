@@ -9,6 +9,7 @@ import {
   DEFAULT_RPC_URL,
   type WalletTier,
 } from "@/lib/wallet";
+import { captureError } from "@/lib/telemetry"; // E4.4: wallet API failures alert (P3)
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +52,10 @@ async function readBalance(address: string): Promise<WalletQuery> {
     if (json?.error) throw new Error(String(json.error?.message || "rpc error"));
     const wei = decodeHexQuantity(String(json.result ?? "0x0"));
     return { ok: true, address, tier: balanceToTier(wei), balance: wei.toString() };
-  } catch {
+  } catch (err) {
+    // E4.4: badge reads are fail-open, but a dead RPC also kills vault tier checks —
+    // surface it (P3-level: degraded, not game-breaking)
+    captureError(err, { lane: "wallet", op: "balance-read", rpc: new URL(rpc).host });
     return { ok: false, address, tier: "none", balance: "0", error: "rpc-unavailable" };
   }
 }

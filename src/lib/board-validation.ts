@@ -34,13 +34,26 @@ export function sanitizeName(raw: unknown): string {
 }
 
 /**
+ * E5.5 referral attribution (Gate G5: "referral traffic measurable in board
+ * metadata"): the `ref` stamp is OPAQUE METADATA — it never touches score, lane,
+ * or identity decisions (the ownership proof does not bind it). Bounded to a
+ * URL/terminal-safe alphabet so it can ride share links and board reads safely;
+ * anything else is omitted (fail-open, like the rival tag).
+ */
+export function sanitizeRef(raw: unknown): string | undefined {
+  if (typeof raw !== "string") return undefined; // a number/object is not a ref
+  const m = raw.match(/^[A-Za-z0-9_-]{1,24}$/);
+  return m ? m[0] : undefined;
+}
+
+/**
  * Validate a submission body against the already-verified token payload.
  * Same checks, same order, same error strings/statuses as the original
  * route logic (W1), byte-for-byte — this is a mechanical move only.
  * `now` defaults to Date.now() and is injectable for tests.
  */
 export function validateSubmission(
-  body: Partial<BoardEntry> & { runToken?: unknown },
+  body: Partial<BoardEntry> & { runToken?: unknown; ref?: unknown },
   tok: RunTokenPayload,
   now: number = Date.now(),
   wallet: string | null = null,
@@ -62,6 +75,8 @@ export function validateSubmission(
     wallet,
     board: wallet ? "official" : "guest",
     season: seasonOf(tok.date), // official records are season-scoped (guest rows carry it too — informational)
+    // E5.5: opaque referral stamp — metadata only, never a ranking/lane input
+    ...(sanitizeRef(body.ref) ? { ref: sanitizeRef(body.ref) } : {}),
   };
 
   // shape validation

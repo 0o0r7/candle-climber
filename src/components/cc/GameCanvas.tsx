@@ -70,6 +70,16 @@ const VS_KEY = "cc_vsbot_v1"; // P7.1: remembered SOLO / VS BOT choice (default 
 const GHOST_KEY = "cc_ghost_v1"; // P7.2: remembered ghost replay toggle (default ON)
 const DUEL_TALLY_KEY = "cc_duel_v1"; // P7.3: local duel W-L-D tally (no server identity exists)
 const CC_CHAR_KEY = CHAR_KEY; // P3.12: remembered character id ("default" = procedural)
+const REF_KEY = "cc_ref_v1"; // E5.5: referral attribution — last ?ref= landing param on this device
+// E5.5: every traveling text carries a measurable link. The ref is the sharer's
+// sanitized name ("cc" fallback) — Gate G5's "referral traffic measurable in
+// board metadata" runs through exactly this loop: share link → ?ref= landing →
+// REF_KEY → POST body ref → board row → /ops rollup.
+const GAME_URL = "https://candle-climber.vercel.app";
+const shareRef = (raw: string): string => {
+  const m = (raw.toLowerCase().match(/[a-z0-9_-]+/g) ?? []).join("").slice(0, 24);
+  return `?ref=${m || "cc"}`;
+};
 const UNSCORED_MSG = "offline terrain — scoring disabled";
 const ARCHIVE_MSG = "practice — archive terrain is unscored";
 
@@ -256,6 +266,10 @@ export default function GameCanvas() {
     // P7.3: ?duel=CODE deep link — hold the loader until the duel resolves so
     // the terrain fetches exactly once (the duel's terrain, not the default).
     const duelParam = (params.get("duel") ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
+    // E5.5: ?ref= landing attribution — persisted device-wide; every later
+    // submission stamps it onto its board row (opaque, sanitized, server-clamped)
+    const refParam = params.get("ref");
+    if (refParam && /^[A-Za-z0-9_-]{1,24}$/.test(refParam)) localStorage.setItem(REF_KEY, refParam);
     if (DUEL_CODE_RE.test(duelParam)) {
       void loadDuel(duelParam).finally(() => setBooted(true));
     } else {
@@ -799,6 +813,7 @@ export default function GameCanvas() {
           // LAW 1.2 hardening: ownership proof (absent = guest lane, by design)
           signature: signature,
           ts: proofTs,
+          ref: localStorage.getItem(REF_KEY) ?? undefined, // E5.5: opaque referral stamp
           runToken: data.runToken,
         }),
       });
@@ -882,7 +897,7 @@ export default function GameCanvas() {
         setDuelCode(j.code);
         const tag = normalizeRivalTag(rival);
         if (rival.trim()) localStorage.setItem(RIVAL_KEY, rival.trim());
-        const link = duelUrl(window.location.origin, j.code);
+        const link = `${duelUrl(window.location.origin, j.code)}${shareRef(finalName)}`; // E5.5: invite carries the ref
         const text = tag
           ? `${tag} you're up — beat ${result.score} on today's ${data.seed.symbol} chart: ${link}`
           : `beat my ${result.score} on today's ${data.seed.symbol} chart: ${link}`;
@@ -927,10 +942,11 @@ export default function GameCanvas() {
     a.download = `candle-climber-${result.score}.png`;
     a.click();
     URL.revokeObjectURL(url);
-    // P3.1: the mockery loop — share text tags the rival so their audience sees it
+    // P3.1: the mockery loop — share text tags the rival so their audience sees it.
+    // E5.5: the text also carries a measurable game link (sharer's name as ref).
     const shareText = challenge
-      ? `${challenge} you're up — beat ${result.score} on today's ${data.seed.symbol} chart`
-      : "Candle Climber";
+      ? `${challenge} you're up — beat ${result.score} on today's ${data.seed.symbol} chart — ${GAME_URL}${shareRef(name)}`
+      : `Candle Climber — ${GAME_URL}${shareRef(name)}`;
     if (navigator.share && navigator.canShare?.({ files: [new File([blob], "card.png", { type: "image/png" })] })) {
       try {
         await navigator.share({ files: [new File([blob], "card.png", { type: "image/png" })], title: shareText });
@@ -947,9 +963,10 @@ export default function GameCanvas() {
   };
 
   // H4: the report is designed to travel — copy the episode verbatim
+  // E5.5: the copied text lands on a ?ref= link so episode-driven visits count
   const copyReport = () => {
     if (!report) return;
-    const text = `CANDLE CLIMBER — DAILY REPORT ${report.date}\n${report.narrative.join("\n")}\nhttps://candle-climber.vercel.app`;
+    const text = `CANDLE CLIMBER — DAILY REPORT ${report.date}\n${report.narrative.join("\n")}\n${GAME_URL}${shareRef(name)}`;
     navigator.clipboard?.writeText(text).then(() => {
       setReportCopied(true);
       setTimeout(() => setReportCopied(false), 1600);

@@ -10,6 +10,7 @@ import { verifyRunToken } from "@/lib/run-token";
 import { utcDate, normalizeWallet, PRACTICE_POINTS, PRACTICE_DAILY_CAP } from "@/lib/weights";
 import { sanitizeName } from "@/lib/board-validation";
 import { recordPracticeRun } from "@/lib/weights-store";
+import { weightsFrozen, WEIGHTS_FROZEN_RESPONSE } from "@/lib/graduation"; // E6.1
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,11 @@ export async function POST(req: Request) {
     const tok = verifyRunToken(body.runToken);
     if (!tok) {
       return NextResponse.json({ error: "invalid run token" }, { status: 403 });
+    }
+    // E6.1 snapshot freeze: honest pause (archive runs keep playing — the event
+    // simply is not banked during the graduation snapshot window)
+    if (weightsFrozen()) {
+      return NextResponse.json(WEIGHTS_FROZEN_RESPONSE, { status: 503 });
     }
     if (tok.date >= utcDate()) {
       // today's terrain scores via the leaderboard lane, not practice
