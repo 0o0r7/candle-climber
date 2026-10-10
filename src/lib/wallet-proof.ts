@@ -16,7 +16,7 @@
 // server runtime alike.
 import { recoverPublicKey } from "@noble/secp256k1";
 import { keccak_256 } from "@noble/hashes/sha3.js";
-import { buildProofMessage, type ProofFields } from "@/lib/proof-message";
+import { buildProofMessage, buildMintProofMessage, type ProofFields } from "@/lib/proof-message";
 import { isValidAddress } from "@/lib/wallet";
 
 /** Clock-skew + replay window for the client timestamp inside the message. */
@@ -54,21 +54,16 @@ function concat(...parts: Uint8Array[]): Uint8Array {
   return out;
 }
 
-/**
- * Verify a personal_sign ownership proof.
- *   signature — 0x-prefixed 65-byte hex (r‖s‖v), v = 27/28 (some providers emit 0/1)
- *   fields    — the submission's CLAMPED values (same numbers the entry stores);
- *               the message is rebuilt from them, so a tampered body invalidates
- *               the proof even when the signature itself is genuine
- *   clientTs  — the "Run time" value inside the signed message (ms epoch)
- *   now       — server clock, injectable for tests
- */
-export function verifyOfficialProof(
+/** Shared EIP-191 gate: shape → freshness → keccak envelope → key recovery →
+ *  address comparison. `messageBuilder` selects the purpose's canonical
+ *  template (board proof vs Death Card mint) — everything else is identical,
+ *  audited, and pinned by the same test files. */
+function verifyPersonalSignProof(
   wallet: string,
   signature: unknown,
-  fields: ProofFields,
+  message: string,
   clientTs: unknown,
-  now: number = Date.now(),
+  now: number,
 ): ProofVerdict {
   if (!isValidAddress(wallet)) return { ok: false, reason: "wallet" };
   if (typeof clientTs !== "number" || !Number.isInteger(clientTs)) {
@@ -80,8 +75,7 @@ export function verifyOfficialProof(
   }
 
   // EIP-191: keccak256("\x19Ethereum Signed Message:\n" + len(bytes) + bytes)
-  const msg = buildProofMessage(fields, clientTs);
-  const msgBytes = new TextEncoder().encode(msg);
+  const msgBytes = new TextEncoder().encode(message);
   const prefix = new TextEncoder().encode(`\x19Ethereum Signed Message:\n${msgBytes.length}`);
   const hash = keccak_256(concat(prefix, msgBytes));
 
@@ -109,4 +103,38 @@ export function verifyOfficialProof(
   return recovered === wallet.toLowerCase()
     ? { ok: true }
     : { ok: false, reason: "address-mismatch" };
+}
+
+/**
+ * Verify a personal_sign ownership proof.
+ *   signature — 0x-prefixed 65-byte hex (r‖s‖v), v = 27/28 (some providers emit 0/1)
+ *   fields    — the submission's CLAMPED values (same numbers the entry stores);
+ *               the message is rebuilt from them, so a tampered body invalidates
+ *               the proof even when the signature itself is genuine
+ *   clientTs  — the "Run time" value inside the signed message (ms epoch)
+ *   now       — server clock, injectable for tests
+ */
+export function verifyOfficialProof(
+  wallet: string,
+  signature: unknown,
+  fields: ProofFields,
+  clientTs: unknown,
+  now: number = Date.now(),
+): ProofVerdict {
+  return verifyPersonalSignProof(wallet, signature, buildProofMessage(fields, Number(clientTs)), clientTs, now);
+}
+
+/**
+ * Verify a Death Card MINT authorization (purpose-separated from the board
+ * proof — a different canonical template, so neither signature can be replayed
+ * into the other's route). Same clamps, same freshness window, same recovery.
+ */
+export function verifyMintProof(
+  wallet: string,
+  signature: unknown,
+  fields: ProofFields,
+  clientTs: unknown,
+  now: number = Date.now(),
+): ProofVerdict {
+  return verifyPersonalSignProof(wallet, signature, buildMintProofMessage(fields, Number(clientTs)), clientTs, now);
 }
