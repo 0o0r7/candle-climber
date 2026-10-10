@@ -38,6 +38,7 @@ import { recordClassicRun } from "@/lib/weights-store";
 import { normalizeWallet } from "@/lib/weights";
 import { shortAddress } from "@/lib/wallet";
 import { currentSeason } from "@/lib/seasons";
+import { weightsFrozen } from "@/lib/graduation"; // E6.1: snapshot freeze etiquette
 
 const BOARDS: BoardFilter[] = ["guest", "official", "all"];
 
@@ -153,13 +154,18 @@ export async function POST(req: Request) {
     const rank = await store.add(verdict.entry);
     // E2.2: ledger fire-and-forget — a weights failure must never fail the score
     // submission or even be observable in this response (ECONOMY-LAWS LAW 1).
-    void recordClassicRun(verdict.entry.name, verdict.entry.date, wallet).catch(() => {});
+    // E6.1 freeze etiquette: during the graduation snapshot the operator pauses
+    // weight events (WEIGHTS_FROZEN=1) — the score STILL saves and ranks; only
+    // the ledger write is skipped, and the honest flag lets the UI say so.
+    const frozen = weightsFrozen();
+    if (!frozen) void recordClassicRun(verdict.entry.name, verdict.entry.date, wallet).catch(() => {});
     return NextResponse.json({
       ok: true,
       rank,
       board: verdict.entry.board,
       season: verdict.entry.season,
       store: store.kind,
+      ...(frozen ? { weightsFrozen: true } : {}),
       // honest degrade note — only when an official run was claimed but the
       // ownership proof did not verify (reason is safe to surface: the client
       // knows what it signed; nothing about OTHERS' submissions leaks)

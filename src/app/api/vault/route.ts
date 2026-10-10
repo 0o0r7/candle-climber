@@ -13,6 +13,7 @@ import { utcDate, normalizeWallet, VAULT_POINTS } from "@/lib/weights";
 import { sanitizeName } from "@/lib/board-validation";
 import { recordVaultGrant } from "@/lib/weights-store";
 import { readWickTier } from "@/lib/wick-balance";
+import { weightsFrozen, WEIGHTS_FROZEN_RESPONSE } from "@/lib/graduation"; // E6.1
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,11 @@ export async function POST(req: Request) {
     if (tok.date !== utcDate() || tok.interval !== "1w") {
       // the vault is a TODAY-classic concept — archive/other tfs do not open it
       return NextResponse.json({ error: "vault opens on today's classic level" }, { status: 400 });
+    }
+    // E6.1 snapshot freeze: the vault stays shut during the snapshot window —
+    // honest pause, the run still happened and still scores on the board
+    if (weightsFrozen()) {
+      return NextResponse.json(WEIGHTS_FROZEN_RESPONSE, { status: 503 });
     }
     const wallet = normalizeWallet(body.address);
     if (!wallet) {
