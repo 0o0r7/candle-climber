@@ -158,6 +158,30 @@ substance). Route-level contract pinned by `test/official-proof-route.test.ts` (
 handler, no mocks) + `test/wallet-proof.test.ts` (tamper matrix, freshness window,
 v-notation, fail-closed shapes); suite 329/329.
 
+**Economy build-out shipped 2026-10-10 (owner directive: "finish all coding phases,
+visuals last").** The remaining non-visual economy items closed in one pass, all inside
+existing lanes (LAW 5.1 gate: docs/PR-CHECKLIST.md):
+- **E4.4** — economy-path failures now ALERT (spec §9 was a promise): weights/leaderboard
+  store failures + wallet/burn RPC reads capture to Sentry (warning-level, fail-open
+  gameplay untouched) via `src/lib/telemetry.ts`.
+- **E5.5** — referral attribution: share texts + episode copy + duel invites carry
+  `?ref=<sanitized name>`; landings persist device-wide and stamp board rows. The ref is
+  OPAQUE METADATA — it never touches score, lane, or weights (1.1/1.3 intact); G5's
+  "referral traffic measurable in board metadata" now has a concrete loop + /ops rollup.
+- **E6.2** — graduation gate FAIL-CLOSED (`src/lib/graduation.ts`): post-grad lanes
+  (mirror/spend-burn/tournaments/burn-HUD) are staged and open ONLY on a positive pad-API
+  `graduated` flag or the post-tx operator override; an API outage can never look like a
+  graduation. Numbers stay uncoded until the council signs them at T (spec §8 rule held).
+- **E6.1** — weights-freeze etiquette: `WEIGHTS_FROZEN=1` pauses weight EVENTS with
+  honest 503s while SCORES keep flowing (1.2 substance: play never blocked); prediction
+  calls stay open and score idempotently after the unfreeze — no points invented, none
+  lost. Runbook: `docs/council/2026-10-10-GRADUATION-RUNBOOK.md`.
+- **E4.1** — `/ops` internal dashboard (noindex, aggregate counts only, zero PII).
+- Compliance sweep #3 on the launch copy: "archive marathons" → "archive runs" (the
+  shipped lane is per-run practice, E2.3 — no marathon mechanic exists to promise).
+- Anti-sybil residual register: `docs/council/2026-10-10-ANTI-SYBIL-AUDIT.md`.
+- Suite 329 → 346 (`test/e5-e6.test.ts` pins gate truth table + all four freeze paths).
+
 ---
 *Adopted: 2026-10-06 · Source: VARIANT-REVIEW-2026-10-05 merge-back wave 1 ·
 Related: `docs/GROWTH-AND-HOOKS-STRATEGY.md`, `docs/WICK-LAUNCH-FORM-PACK.md` §8,

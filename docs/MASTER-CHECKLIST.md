@@ -163,12 +163,13 @@ determinism invariants intact (W5). Owner confirmation in chat required → then
 - [x] **P3.15** **Cosmetic fix from mobile QA** — `TODAY&apos;S` rendered literally
   (HTML entity inside a JS string literal, not JSX text) → real apostrophe; found in
   LambdaTest emulation screenshot; bun test 126/126, tsc+lint+build green (2026-10-02)
-- [ ] **P3.4** ✅ **O5 RESOLVED by owner himself 2026-10-02**: mascot V2 = our own VIBES
+- [x] **P3.4** ✅ **O5 RESOLVED by owner himself 2026-10-02**: mascot V2 = our own VIBES
   pipeline (owner reviewed VIBES-CONTACT-SHEET + venom-variants). Final directives:
   (a) 03_superwick + 06_pump-bubble rejected & archived in `rejected/`; (b) venom final
   design = `MASCOT/VIBES/venom-variants/venom-v3-half-fused.png`; (c) USE ALL OTHER
   characters — VIBES (cop/bull/frost) + all MASCOT root concepts — "همشون خوبن و با کیفیت".
-  Game integration lands as P3.11–P3.14 below.
+  Game integration landed as P3.11–P3.14 — TICKED 2026-10-10 (resolution predates this
+  bookkeeping pass; nothing further exists under O5).
 - [x] **P3.11** **Character roster → game sprites (14 chars)** — DONE 2026-10-02. 4-frame
   96px transparent sheets via proven pipeline (image-edit side-profile prompt + magenta/green-key
   postprocess + alpha-erosion + column-split): 5 existing (trader frame0 restored from manifest
@@ -259,17 +260,20 @@ P4–P6 (owner-side actions), visual debt VD-5..7 (LOW, accepted).
   "CONNECT WALLET" + tier labels confirmed in the deployed bundle; wallet identity ADDITIVE
   to W1 run-tokens (W5 untouched, 230/230); cosmetic-only per ECONOMY-LAWS (chip invisible
   for walletless visitors — E8 zero-friction intact) 🧪
-- [ ] **P4.3** Hook **H7 WICK VAULT** ⛓ P4.1 · vault visuals from V4 ⛓ P2.1
-- [ ] **P4.4** Airdrop-weight accounting (streak / prediction / archive-marathon weights,
-  server-side, deterministic) ⛓ P4.1 · durability recommended ⛓ O1
-  > UPDATE 2026-10-08 @ `cd1d828` — STREAK LANE LIVE + DURABLE (Mongo verified on prod;
-  prod E2E: submission → streak 1/points 1/wallet linked/snapshot reflects). Spec:
-  docs/WICK-ECONOMY-SPEC §7 · read API: GET /api/weights. Practice + prediction lanes
-  chain to P4.6/E2.3 — box stays open until those land.
+- [x] **P4.3** Hook **H7 WICK VAULT** — RAILS COMPLETE 2026-10-08 @ `4b3997b` (E2.4: server
+  verify chain token+tier+unique-insert, /api/vault, client peak-wick detection, PROD E2E
+  0xdEaD whale gold-trail, dup→409) — REMAINING: in-terrain chest sprite = VISUAL polish,
+  deferred to the visual phase by owner directive 2026-10-10 🧪
+- [x] **P4.4** Airdrop-weight accounting — COMPLETE 2026-10-10: streak lane (E2.2) +
+  practice lane (E2.3) + prediction lane (E2.3) + vault lane (E2.4) all LIVE + durable
+  (Mongo); official-lane submissions now link the PROOF-VERIFIED wallet; snapshot tooling
+  = E2.5 + freeze etiquette (E6.1). Box was open only until those lanes landed — they did.
 - [ ] **P4.5** #project-showcase post (game URL + token URL + how-to-play, DRGN/FORGE
-  template) ⛓ P4.1
-- [ ] **P4.6** Hook **H5 ROUTE PREDICTION** — draw-tomorrow's-path; pre-launch capable,
-  weights land with P4.4 ⛓ O1 (weights)
+  template) ⛓ P4.1 🔒 owner (E5.1; copy + media kit ready)
+- [x] **P4.6** Hook **H5 ROUTE PREDICTION** — LIVE 2026-10-08 @ `4b3997b` (E2.3:
+  /api/prediction lock-one-per-day, server-pinned rotation symbol+tomorrow date, tiered
+  4/3/3 lazy idempotent scoring vs REAL closed candle, Mongo-unique; TOMORROW'S MARKET
+  panel; PROD E2E dup→409 + weights visible) — weights landed with P4.4 ✅
 
 **Gate G4:** token contract verified on explorer · Balance Gate live on prod · showcase
 post live → owner confirmation → P5.
@@ -288,12 +292,21 @@ metadata → owner confirmation → P6.
 > (RECONCILED 2026-10-08: $WICK launched via legacy factory 0xe7942178… → per-launch
 > target = 4 ETH net per its own launch record + live pad API; the 5-ETH figure is the
 > CURRENT-factory policy, not ours. See ECONOMY-CHECKLIST §0 + TOKEN-LAUNCHPAD-RESEARCH §5.)
-- [ ] **P6.1** Graduation-day event runtime (Merkle delivery comms, celebration scene —
-  ART V4) — build BEORE the meter fills
+> PRE-GRAD RUNTIME BUILT 2026-10-10 (before the meter fills, per checklist rule):
+> graduation gate fail-closed (E6.2), weights-freeze etiquette (E6.1), Merkle delivery
+> rehearsal live (E2.5), runbook docs/council/2026-10-10-GRADUATION-RUNBOOK.md,
+> watch plan 2026-10-10-MAINNET-WATCH-PLAN.md (E6.3), KPI targets (E4.2).
+> REMAINING here: the celebration scene (ART V4) = VISUAL phase; lanes P6.2–P6.5 =
+> gated on the tx itself.
+- [ ] **P6.1** Graduation-day event runtime — CODE HALF SHIPPED 2026-10-10 (gate + freeze
+  + runbook + Merkle path); celebration scene ⛓ visual phase
 - [ ] **P6.2** Hook **H6 MIRROR** — $WICK's own chart as a level ⛓ graduation
-- [ ] **P6.3** In-game spend/burn (legal once transfers unlock) ⛓ graduation
-- [ ] **P6.4** Treasury-funded tournaments ⛓ graduation
-- [ ] **P6.5** Burn-counter HUD ("the game eats its own supply") ⛓ graduation
+  (STAGED: POST_GRAD_LANES registry + fail-closed gate shipped 2026-10-10)
+- [ ] **P6.3** In-game spend/burn (legal once transfers unlock) ⛓ graduation (STAGED)
+- [ ] **P6.4** Treasury-funded tournaments ⛓ graduation (STAGED)
+- [ ] **P6.5** Burn-counter HUD ("the game eats its own supply") ⛓ graduation — READ PATH
+  LIVE since E2.6 (2026-10-08: /api/burn + SUPPLY BURNED line); fee-EVENT attribution +
+  HUD polish = post-grad (HUD = visual phase)
 
 **Gate G6:** graduation tx confirmed on explorer · Mirror live · burn counter live →
 owner confirmation → mainnet watch (CC-PLAN D11–14).
@@ -323,6 +336,18 @@ owner confirmation → mainnet watch (CC-PLAN D11–14).
 | G6 | P6 | ⬜ pending |
 
 ## 5. Current pointer
+
+> ▶ **UPDATE 2026-10-10 (owner directive: "finish all coding phases, visuals last"):**
+> ALL non-visual, non-owner-blocked coding items are CLOSED in one build-out:
+> wallet identity (2d5a660) + personal_sign hardening (476cbb1) + economy build-out
+> (a906a04: E4.4 sentry-on-economy-paths, E5.5 ?ref= attribution loop, E6.2 fail-closed
+> graduation gate, E6.1 weights-freeze etiquette, E4.1 /ops dashboard) + the doc set
+> (graduation runbook, anti-sybil audit, KPI definitions, PR gate, mainnet watch plan,
+> incentive memo, launch-copy sweep #3). Suite 329→346. REMAINING in the whole repo:
+> (a) the VISUAL/graphics phase — owner-defined final stage (vault sprite, celebration
+> scene, P6.5 HUD polish, VD-4 full CTA already accepted); (b) owner-side P4.5/P5.x
+> (reach); (c) P7.4 realtime (traction-gated); (d) post-grad lanes P6.2–P6.5 (tx-gated;
+> staged). Nothing else is codeable today.
 
 > ▶ **NEXT ACTION (autonomous run, owner directive 2026-10-02):** P3.11 → P3.12 →
 > P3.13 → P3.14 (character system) → P3.3 LambdaTest real-device QA → close Gate

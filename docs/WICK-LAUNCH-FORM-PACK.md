@@ -193,18 +193,18 @@ where $WICK's own chart becomes a playable level.
 
 ## 7️⃣ بلوک‌های Description (انگلیسی)
 
-### 🔹 FORM — نسخه‌ی فیلد Description ویزارد (۹۹۰/۱۰۰۰ کاراکتر) — ⭐ توصیه‌ی اصلی
+### 🔹 FORM — نسخه‌ی فیلد Description ویزارد (۹۸۵/۱۰۰۰ کاراکتر) — ⭐ توصیه‌ی اصلی
 
 > سقف فیلد دقیقاً 1000 کاراکتر است (تأیید زنده 2026-10-04 — اسکرین‌شات owner، شمارنده 1000/1000).
-> نسخه‌ی زیر ۹۹۰ کاراکتر است (بعد از اصلاح حقیقت 2026-10-10)، جمله‌ی آخرش کامل است (بریده نمی‌شود).
-> اگر خواستی چیزی به آن اضافه کنی، فقط با جایگزین — کمتر از ۱۰ کاراکتر جا دارد.
+> نسخه‌ی زیر ۹۸۵ کاراکتر است (بعد از اصلاح حقیقت 2026-10-10 + sweep همین روز: «archive marathons»
+> → «archive runs» — لاینِ واقعی E2.3 رانِ آرشیو است، نه مکانیک مارثون)، جمله‌ی آخرش کامل است.
 
 ```
 Candle Climber is a live skill platformer built from real market candles. Each day one real symbol's chart (deterministic daily seed, identical worldwide) becomes a mountain: green candles are solid jump pads, red candles crumble, and falling off the bottom means liquidation. Every run ends in a shareable Death Card.
 
 Score is pure skill: runs are verified server-side (HMAC run-tokens, anti-cheat suite) — no self-play reward loops, anti-sybil by design.
 
-$WICK is the game's utility token. Holding it opens the cosmetic holder-badge lane via server-side on-chain balance reads (Balance Gate — base gameplay stays free) and builds airdrop weights from daily streaks, route predictions and archive marathons. After graduation: in-game spend/burn, treasury-funded tournaments and MIRROR mode — $WICK's own chart becomes a playable level. Every trade auto-burns part of the supply.
+$WICK is the game's utility token. Holding it opens the cosmetic holder-badge lane via server-side on-chain balance reads (Balance Gate — base gameplay stays free) and builds airdrop weights from daily streaks, route predictions and archive runs. After graduation: in-game spend/burn, treasury-funded tournaments and MIRROR mode — $WICK's own chart becomes a playable level. Every trade auto-burns part of the supply.
 
 Live now: https://candle-climber.vercel.app
 Built for the vibe builders program on Robinhood Chain testnet.
@@ -220,9 +220,9 @@ for every climber worldwide, every day. $WICK: holder badge, airdrop
 weights, auto-burn fee rails — and one day, its own chart as a level.
 ```
 
-### 🔹 STANDARD (۱۲۵۷ کاراکتر — برای فیلد ویزارد **نمی‌گنجد**؛ فقط جاهایی که سقف ندارند)
+### 🔹 STANDARD (۱۲۵۲ کاراکتر — برای فیلد ویزارد **نمی‌گنجد**؛ فقط جاهایی که سقف ندارند)
 
-> در فرم لانچ استفاده نشود — ۲۵۷ کاراکتر اضافه دارد و وسط جمله بریده می‌شد (رخداد واقعی 2026-10-04).
+> در فرم لانچ استفاده نشود — ۲۵۲ کاراکتر اضافه دارد و وسط جمله بریده می‌شد (رخداد واقعی 2026-10-04).
 
 ```
 Candle Climber is a live, playable skill platformer whose levels are
@@ -239,7 +239,7 @@ self-play, anti-sybil by design.
 
 $WICK is the game's utility token. Holding it opens the cosmetic holder-badge lane through server-side on-chain balance reads (Balance
 Gate — base gameplay stays free), and builds airdrop weights from
-daily streaks, route predictions and archive marathons. After
+daily streaks, route predictions and archive runs. After
 graduation it unlocks in-game spend/burn, treasury-funded tournaments
 and MIRROR mode — $WICK's own chart becomes a playable level. Every
 trade already burns part of the supply automatically via the
@@ -268,7 +268,8 @@ What's shipped (live now):
 · Real market data (Binance klines, server-proxied with geo-fallback
   and honest synthetic fallback)
 · Deterministic daily levels + 5-pool daily mutations
-· Global leaderboards, ghost replays, async duels
+· Global leaderboards — typed guest board + wallet-verified official
+  board (personal_sign ownership proofs), ghost replays, async duels
 · Death Cards (1080×1350 PNG / WebShare), PWA install, mobile touch
 · 450+ headless QA rounds; real-device QA on Android
 
@@ -276,7 +277,7 @@ Why $WICK exists:
 Pre-graduation, holding $WICK opens the cosmetic holder-badge lane
 (server-side on-chain balance reads — base game stays free) and
 accumulates airdrop weights from streaks, route predictions and
-archive marathons. Every trade burns supply automatically via the
+archive runs. Every trade burns supply automatically via the
 2% tax rails (75% holders · 20% cash · 5% burn).
 After graduation, transfers unlock and the economy opens: in-game
 burn, treasury-funded tournaments — and MIRROR mode, where $WICK's

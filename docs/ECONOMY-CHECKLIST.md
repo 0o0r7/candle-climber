@@ -41,10 +41,13 @@
   2.49% at Oct-07 writing) · remaining 3.8426 ETH · burned 254,293 WICK. Evidence line +
   raw dump in docs/evidence/. Re-run weekly: `python3
   /home/z/my-project/scripts/verify-econ-state.py --append`.
-- [ ] **E0.5** Incentive eligibility pass: confirm $WICK's fit for the **utility
-  track (1.5%)** — MVP live, demo flow, usable product all true — and check the
-  application/submission path + any deadline on the platform/Discord. Output:
-  one-page eligibility memo (what we submit, when, evidence links). ⛓ none
+- [x] **E0.5** 2026-10-10 — Incentive eligibility pass DONE as a memo:
+  docs/council/2026-10-10-INCENTIVE-ELIGIBILITY-MEMO.md — $WICK qualifies for the
+  **utility track (1.50%)** on the platform's own stated criteria ("MVP, demo, prototype,
+  simulation, or usable flow; ideas alone are not enough" — we are the shipped opposite).
+  Submission path: NO formal application found in the captured corpus — launching IS the
+  intake path; showcase presence is the observable evidence. DEADLINE: none stated.
+  Remaining: owner-facing watch for a formal window (O-I / E5.4). ⛓ owner for submission
 
 ## E1 — Economy design spec (paper before code)
 
@@ -101,29 +104,39 @@
 
 ## E3 — Laws & safety gates (run with every E2 item)
 
-- [ ] **E3.1** LAW 5.1 review gate: every PR touching scoring/leaderboard/wallet/
-  cosmetics states which laws apply and how it complies — in the PR description.
+- [x] **E3.1** 2026-10-10 — LAW 5.1 review gate made mechanical: docs/PR-CHECKLIST.md
+  (copy-into-PR form: surfaces → laws → degrade paths → tests; agent solo-runs record
+  the filled gate in the commit body + worklog, owner pre-approval 2026-10-02 precedent).
 - [x] **E3.2** 2026-10-08 @ 4b3997b — Language sweep applied to the E2.3–E2.6 ship: every new
   surface ("builds airdrop weights" wording, tier breakdowns, /airdrop rehearsal copy, /api
   meta blocks) states testnet plainly, never "earn/guaranteed"; no gambling texture. Applies
   to: prediction panel + API meta, practice + vault responses, airdrop board page, burn line.
-- [ ] **E3.3** Anti-sybil audit: W1 HMAC + W5 anti-cheat + wallet-linked weights +
-  per-wallet caps; document residual risks and review triggers.
+- [x] **E3.3** 2026-10-10 — Anti-sybil audit: docs/council/2026-10-10-ANTI-SYBIL-AUDIT.md —
+  9 shipped layers WITH limits, 6 residual risks documented-not-hidden (guest name-sybil,
+  client-claimed weight-lane wallet links, multi-device, freeze arbitrage = none, ref gaming
+  = inert, platform-side wash trading), 5 review triggers (snapshot caps, anomaly flags,
+  Sentry P2 bursts, ref dominance, score-cluster patterns).
 - [ ] **E3.4** Token-page/metadata copy re-verified against laws after any edit
-  (metadataURI is on IPFS — re-pin carefully if changed).
+  (metadataURI is on IPFS — re-pin carefully if changed). 🔒 owner (re-pin is a wallet/platform action); agent copy-sweep of 2026-10-10 (F4 + "archive runs" fix) keeps the SOURCE texts lawful
 
 ## E4 — Measurement & ops
 
-- [ ] **E4.1** Economy dashboard v0: DAU, wallet-connect rate, holder count, meter
-  ETH, net flow/day, burn total — SimpleAnalytics + Mongo aggregates + RPC reads,
-  one internal page. ⛓ E0.3 for durable aggregates
-- [ ] **E4.2** KPI definitions & targets: D1/D7 retention, connect-rate, buy-
-  conversion (players→holders), streak distribution, days-to-graduation projection.
-  Numbers reviewed weekly (E4.3), never invented (E1.3 rules).
+- [x] **E4.1** 2026-10-10 @ a906a04 — Economy dashboard v0 LIVE: `/ops` (noindex,
+  server-rendered, aggregate-counts-only — zero PII): meter/lifecycle/burn from the pad
+  API + RPC, graduation-gate state, lane counts + top refs, ledger aggregates
+  (weights `stats()` + board `laneStats()`, memory+mongo). Connect-rate slot honest n/a
+  (needs analytics). ⛓ E0.3 ✅
+- [x] **E4.2** 2026-10-10 — KPI definitions & targets: docs/council/2026-10-10-KPI-DEFINITIONS.md
+  — 10 KPIs with EXACT definitions + sources, targets marked PROVISIONAL with labeled
+  assumptions (north star: D7-retained climbers who connect a wallet); v1 honest gaps
+  listed (daily cohorts, pre-grad buy-conversion genuinely unreadable — not faked).
 - [ ] **E4.3** Weekly economy review ritual (owner + agent, 15 min): snapshot (E0.4)
-  → KPI deltas → at most ONE economy change per week (no mid-air edits).
-- [ ] **E4.4** Sentry alerts on economy paths: wallet API failures, weights-ledger
-  write errors, leaderboard write failures. ⛓ E2.1, E2.2
+  → KPI deltas → at most ONE economy change per week (no mid-air edits). 🔒 needs owner cadence
+- [x] **E4.4** 2026-10-10 @ a906a04 — Sentry alerts on economy paths LIVE:
+  src/lib/telemetry.ts (dynamic-import wrapper — tests/runtime safe, warning-level)
+  wired to: weights-store mongo connect/write failures (P2 per spec §9), leaderboard-store
+  connect failure, /api/wallet RPC read failure, /api/burn read failure. Game paths stay
+  fail-open; the ALERT is the point.
 
 ## E5 — Demand activation (mostly owner-facing; assets ready)
 
@@ -135,18 +148,36 @@
   aligns with the real-activity judging criterion. 🔒 owner
 - [ ] **E5.3** Daily Report cadence (H4): auto-aggregate card → X post daily.
   ⛓ P5.1 X account (O4)
-- [ ] **E5.4** Incentives submission (utility track) if E0.5 confirms a path. 🔒 owner
-- [ ] **E5.5** Referral/attribution loop: Death Card share CTA + board-metadata
-  attribution so Gate G5's "referral traffic measurable" can actually pass. ⛓ E0.3
+- [ ] **E5.4** Incentives submission (utility track): E0.5 memo CONFIRMS eligibility
+  (docs/council/2026-10-10-INCENTIVE-ELIGIBILITY-MEMO.md); no formal application window
+  exists yet in the captured corpus — watch for one, submit the TRUTH-TABLE + checklist
+  as evidence when it appears. 🔒 owner
+- [x] **E5.5** 2026-10-10 @ a906a04 — Referral/attribution loop LIVE (Gate G5 evidence path):
+  every traveling text now carries a measurable link — Death Card share text + COPY EPISODE
+  + duel invites append `?ref=<sanitized sharer name>`; landing `?ref=` persists device-wide
+  (cc_ref_v1) and stamps every later submission (board-validation `sanitizeRef`: bounded
+  alphabet, fail-open omit, metadata-only — never a lane/rank/weights input); /ops rollup
+  = top refs (7d). Referral traffic is now MEASURABLE in board metadata, exactly as G5
+  requires. Traffic VOLUME stays the owner's reach lever. ⛓ E0.3 ✅
 
 ## E6 — Graduation readiness (pre-build BEFORE the meter fills)
 
-- [ ] **E6.1** Graduation-day runbook: comms sequence, celebration scene (ART V4),
-  Merkle delivery via E2.5, leaderboard freeze etiquette, X/Discord posts.
-- [ ] **E6.2** Post-grad flags staged: spend/burn lanes, treasury tournaments,
-  MIRROR mode — coded behind a `graduated` gate, flipped only after the tx. ⛓ E1.5
-- [ ] **E6.3** Mainnet watch plan (CC-PLAN D11–14): what we watch, who acts, what
-  "graduation success" means numerically. ⛓ E4.2
+- [x] **E6.1** 2026-10-10 @ a906a04 — Graduation-day runbook + runtime:
+  docs/council/2026-10-10-GRADUATION-RUNBOOK.md (T+0..T+8 sequence, freeze probe commands,
+  comms skeleton, owner decision points) + WEIGHTS_FROZEN freeze etiquette SHIPPED
+  (4 lanes honest-pause, scores keep flowing, prediction calls stay open + idempotent;
+  test/e5-e6.test.ts pins all four) + GRADUATED/PAD_API_URL envs in .env.example.
+  Celebration scene (ART V4) = visual phase.
+- [x] **E6.2** 2026-10-10 @ a906a04 — Post-grad flags STAGED behind a fail-closed gate:
+  src/lib/graduation.ts — `graduationState()` (pad API `graduated`/lifecycle read,
+  15-min cache, OUTAGE ⇒ PRE-GRAD always; env override GRADUATED=1 for post-tx),
+  POST_GRAD_LANES registry (mirror / spend-burn / tournaments / burn-counter-hud =
+  "staged"), weightsFrozen(). Numbers stay uncoded by design (spec §8: at graduation).
+  test/e5-e6.test.ts pins the full truth table.
+- [x] **E6.3** 2026-10-10 — Mainnet watch plan: docs/council/2026-10-10-MAINNET-WATCH-PLAN.md
+  — 8 watched signals with exact sources + cadence, owner/agent split, escalation rule
+  (2 slow weeks ⇒ reach is the lever, economy knobs frozen), "graduation success"
+  numerics (targets labeled), 4 pre-commitments. ⛓ E4.2 ✅
 
 ## Infrastructure mapping (all platforms already available to us)
 
