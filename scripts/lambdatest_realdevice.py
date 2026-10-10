@@ -1,18 +1,26 @@
 #!/usr/bin/env python3
-"""P3.3 — LambdaTest REAL-DEVICE mobile QA for candle-climber.vercel.app.
+"""P3.3 — LambdaTest REAL-DEVICE matrix QA for candle-climber.vercel.app.
 
-Real Pixel 7 (Android 13) + Chrome mobile-web session on the LambdaTest grid:
-boot → character select (venom) → START CLIMB → tap-jump loop → natural death
-card → console log audit → video evidence on the LT dashboard.
+Runs a small device/browser/size matrix on the LambdaTest grid (freemium-safe,
+3 sequential sessions): each session boots prod, selects venom, START CLIMB,
+tap-jump loop, natural death card, console audit, video evidence on LT dashboard.
 
-Evidence: qa/realdevice/rd-*.png + report JSON (screenshots embedded in LT too).
-Credentials come from /home/z/.lt_user + /home/z/.lt_key (0600, never printed).
+Credentials (never printed): env LT_USERNAME + LT_ACCESS_KEY first (GitHub
+Actions secrets — survives sandbox resets), then file fallback
+/home/z/.lt_user + /home/z/.lt_key (0600). Missing both -> exit 2 with a
+clear message.
 
-Exit code 0 = PASS (chips render, run starts, death card reached, 0 SEVERE errors).
+Evidence: $QA_OUT/rd-*.png + aggregate report JSON (per-session files too).
+Env overrides: GAME_URL (default prod), QA_OUT (default /home/z/my-project/qa/realdevice),
+QA_MATRIX (JSON array of {label, caps} to override the default matrix).
+
+Exit code 0 = all sessions PASS (chips render, run starts, death card reached,
+0 SEVERE errors).
 """
 import json
 import sys
 import time
+import os
 from datetime import datetime
 
 from selenium import webdriver
@@ -24,56 +32,88 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 import urllib.parse
 
-PROD = "https://candle-climber.vercel.app"
+PROD = os.environ.get("GAME_URL", "https://candle-climber.vercel.app")
+OUT = os.environ.get("QA_OUT", "/home/z/my-project/qa/realdevice")
 HUB = "https://hub.lambdatest.com/wd/hub"
-STAMP = datetime.now().strftime("%Y%m%d-%H%M%S")
-OUT = "/home/z/my-project/qa/realdevice"
 LT_API = "https://api.lambdatest.com/automation/api/v1"
-
-LT_USER = open("/home/z/.lt_user").read().strip()
-LT_KEY = open("/home/z/.lt_key").read().strip()
-
-report = {"stamp": STAMP, "device": "Pixel 7", "platform": "13", "url": PROD}
-checks = []
+STAMP = datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
-def check(name, ok, detail=""):
-    checks.append({"check": name, "ok": bool(ok), "detail": str(detail)[:300]})
-    print(f"[{'PASS' if ok else 'FAIL'}] {name}: {str(detail)[:160]}")
-    return bool(ok)
+def load_creds():
+    u = os.environ.get("LT_USERNAME", "").strip()
+    k = os.environ.get("LT_ACCESS_KEY", "").strip()
+    if u and k:
+        return u, k, "env"
+    try:
+        u = open("/home/z/.lt_user").read().strip()
+        k = open("/home/z/.lt_key").read().strip()
+        if u and k:
+            return u, k, "file"
+    except OSError:
+        pass
+    return None, None, "missing"
 
 
-def build_driver():
+# Freemium-safe default matrix: 1 real device + 2 desktop browser/size combos.
+DEFAULT_MATRIX = [
+    {
+        "label": "pixel7-real-android13-chrome",
+        "caps": {
+            "platformName": "Android",
+            "browserName": "Chrome",
+            "LT:Options": {
+                "deviceName": "Pixel 7", "platformVersion": "13",
+                "isRealMobile": True, "w3c": True,
+            },
+        },
+    },
+    {
+        "label": "win11-chrome-1440x900",
+        "caps": {
+            "platformName": "Windows 11",
+            "browserName": "Chrome",
+            "browserVersion": "latest",
+            "LT:Options": {"resolution": "1440x900", "w3c": True},
+        },
+    },
+    {
+        "label": "win11-firefox-1280x800",
+        "caps": {
+            "platformName": "Windows 11",
+            "browserName": "Firefox",
+            "browserVersion": "latest",
+            "LT:Options": {"resolution": "1280x800", "w3c": True},
+        },
+    },
+]
+
+
+def build_driver(caps, lt_user, lt_key):
     o = ChromeOptions()
-    o.set_capability("platformName", "Android")
-    o.set_capability("browserName", "Chrome")
-    o.set_capability("LT:Options", {
-        "deviceName": "Pixel 7",
-        "platformVersion": "13",
-        "isRealMobile": True,
-        "w3c": True,
-        "build": "G3-real-device-QA",
-        "name": "P3.3 real-device mobile QA",
-        "video": True,
-        "screenshot": True,
-        "console": True,
-        "network": False,
-        "queueTimeout": 300,
-        "idleTimeout": 180,
-    })
-    hub = (f"https://{urllib.parse.quote(LT_USER)}:{urllib.parse.quote(LT_KEY)}"
+    for k, v in caps.items():
+        if k == "LT:Options":
+            merged = dict(v)
+            merged.update({
+                "build": "G3-real-device-QA",
+                "name": "P3.3 device matrix QA",
+                "video": True, "screenshot": True, "console": True,
+                "network": False, "queueTimeout": 300, "idleTimeout": 180,
+            })
+            o.set_capability(k, merged)
+        else:
+            o.set_capability(k, v)
+    hub = (f"https://{urllib.parse.quote(lt_user)}:{urllib.parse.quote(lt_key)}"
            f"@hub.lambdatest.com/wd/hub")
     return webdriver.Remote(hub, options=o)
 
 
-def shot(d, name):
-    p = f"{OUT}/rd-{name}-{STAMP}.png"
+def shot(d, name, out):
+    p = f"{out}/rd-{name}-{STAMP}.png"
     try:
         d.get_screenshot_as_file(p)
-        report[f"shot_{name}"] = p
         print(f"    screenshot -> {p}")
     except Exception as e:  # noqa: BLE001
-        report[f"shot_{name}"] = f"error: {e}"
+        print(f"    screenshot {name} error: {e}")
 
 
 def tap_canvas(d):
@@ -81,24 +121,32 @@ def tap_canvas(d):
     ActionChains(d).move_to_element(canvas).click().perform()
 
 
-def main():
-    import os
-    os.makedirs(OUT, exist_ok=True)
-    d = build_driver()
+def run_session(cfg, lt_user, lt_key):
+    label = cfg["label"]
+    out = f"{OUT}/{label}"
+    os.makedirs(out, exist_ok=True)
+    report = {"stamp": STAMP, "label": label, "url": PROD,
+              "caps": {k: v for k, v in cfg["caps"].items() if k != "LT:Options"}}
+    checks = []
+
+    def check(name, ok, detail=""):
+        checks.append({"check": name, "ok": bool(ok), "detail": str(detail)[:300]})
+        print(f"[{'PASS' if ok else 'FAIL'}] {label} :: {name}: {str(detail)[:140]}")
+        return bool(ok)
+
+    d = build_driver(cfg["caps"], lt_user, lt_key)
     sid = d.session_id
     report["session_id"] = sid
-    print(f"session: {sid}")
-
+    print(f"[{label}] session: {sid}")
     try:
         d.get(PROD)
         WebDriverWait(d, 60).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-char-chip"))
         )
         chips = d.find_elements(By.CSS_SELECTOR, ".cc-char-chip")
-        names = [c.text.strip() for c in chips]
         check("page_title", "candle" in (d.title or "").lower(), d.title)
-        check("char_chips_rendered", len(chips) >= 14, f"{len(chips)} chips: {names}")
-        shot(d, "01-boot")
+        check("char_chips_rendered", len(chips) >= 14, f"{len(chips)} chips")
+        shot(d, "01-boot", out)
 
         venom = next((c for c in chips if "venom" in c.text.lower()), None)
         if venom:
@@ -107,7 +155,6 @@ def main():
             sel = d.find_elements(By.CSS_SELECTOR, ".cc-char-chip.cc-char-on")
             ok = len(sel) == 1 and "venom" in sel[0].text.lower()
             check("venom_select", ok, sel[0].text.strip() if sel else "none selected")
-            shot(d, "02-selected")
         else:
             check("venom_select", False, "venom chip not found")
 
@@ -121,11 +168,10 @@ def main():
             )
             check("run_started", True, "HUD score chip visible")
         except Exception:
-            gone = EC.invisibility_of_element_located((By.CSS_SELECTOR, ".cc-panel"))
             check("run_started", d.execute_script(
                 "const p=document.querySelector('.cc-panel');return p?getComputedStyle(p).display==='none':true;"),
                 "score chip not found; panel state probed")
-        shot(d, "03-running")
+        shot(d, "03-running", out)
 
         t0 = time.time()
         taps = 0
@@ -150,7 +196,7 @@ def main():
             except Exception:
                 pass
         check("gameplay_then_death_card", dead, f"taps={taps} death-score={score_txt!r}")
-        shot(d, "04-deathcard")
+        shot(d, "04-deathcard", out)
 
         severe = 0
         try:
@@ -173,7 +219,7 @@ def main():
     req = urllib.request.Request(
         f"{LT_API}/sessions/{sid}",
         headers={"Authorization": "Basic " + base64.b64encode(
-            f"{LT_USER}:{LT_KEY}".encode()).decode()})
+            f"{lt_user}:{lt_key}".encode()).decode()})
     try:
         meta = json.load(urllib.request.urlopen(req, timeout=30))
         report["lt_status"] = meta.get("status")
@@ -184,13 +230,48 @@ def main():
 
     report["checks"] = checks
     report["pass"] = all(c["ok"] for c in checks)
-    with open(f"{OUT}/report-real-{STAMP}.json", "w") as f:
+    with open(f"{OUT}/report-real-{label}-{STAMP}.json", "w") as f:
         json.dump(report, f, indent=2)
-    print(f"\nSESSION {sid}\nRESULT: {'PASS' if report['pass'] else 'FAIL'}")
-    for k in ("lt_status", "video_url", "dashboard"):
-        if report.get(k):
-            print(f"{k}: {report[k]}")
-    return 0 if report["pass"] else 1
+    return report
+
+
+def main():
+    lt_user, lt_key, src = load_creds()
+    if not lt_user:
+        print("MISSING CREDS: set env LT_USERNAME + LT_ACCESS_KEY "
+              "(GitHub Actions secrets) or drop /home/z/.lt_user + /home/z/.lt_key")
+        return 2
+    print(f"creds source: {src}")
+    os.makedirs(OUT, exist_ok=True)
+    matrix = DEFAULT_MATRIX
+    raw = os.environ.get("QA_MATRIX", "").strip()
+    if raw:
+        try:
+            matrix = json.loads(raw)
+        except ValueError:
+            print("QA_MATRIX parse failed; using default matrix")
+
+    reports = []
+    for i, cfg in enumerate(matrix):
+        try:
+            reports.append(run_session(cfg, lt_user, lt_key))
+        except Exception as e:  # noqa: BLE001
+            reports.append({"label": cfg.get("label", f"session-{i}"),
+                            "pass": False, "error": str(e)[:300]})
+            print(f"[FAIL] {cfg.get('label')} :: session error: {str(e)[:200]}")
+
+    summary = {"stamp": STAMP, "url": PROD, "sessions": len(reports),
+               "passed": sum(1 for r in reports if r.get("pass")),
+               "results": [{"label": r.get("label"), "pass": r.get("pass"),
+                            "dashboard": r.get("dashboard"),
+                            "video_url": r.get("video_url")} for r in reports]}
+    with open(f"{OUT}/report-real-SUMMARY-{STAMP}.json", "w") as f:
+        json.dump(summary, f, indent=2)
+    print(f"\nMATRIX: {summary['passed']}/{summary['sessions']} sessions PASS")
+    for r in summary["results"]:
+        print(f"  {r['label']}: {'PASS' if r['pass'] else 'FAIL'}"
+              + (f"  dashboard: {r['dashboard']}" if r.get("dashboard") else ""))
+    return 0 if summary["passed"] == summary["sessions"] else 1
 
 
 if __name__ == "__main__":
