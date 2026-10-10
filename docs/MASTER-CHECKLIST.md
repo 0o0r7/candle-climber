@@ -391,6 +391,15 @@ owner confirmation → mainnet watch (CC-PLAN D11–14).
 > tag placeholders (all LOW, accepted). NEXT: idle until owner input — G3 needs ONE
 > owner action (LambdaTest dashboard creds / plan / own phone); P4–P6 owner-blocked.
 >
+> **UPDATE 2026-10-10 (owner find): render-v2 PROMOTION is visual-phase step 0.**
+> The v1/v2 A/B (`?renderer=v2`, P2.1/P2.3/P2.5/P3.13 all DONE) was never promoted
+> to default — owner flagged it as "forgotten". Promotion = flip the default in
+> GameCanvas (`params.get("renderer") === "v2"` → default-on, keep `?renderer=v1`
+> opt-out); render-only, physics/scoring/determinism identical, so safe. NOTE: the
+> param is `renderer=v2`, NOT `render=v2` (wrong param silently shows v1). All
+> remaining visual work (vault sprite, graduation scene, burn HUD, VD-4 CTA) lands
+> on render-v2 as the default face.
+>
 > **UPDATE 2026-10-02 (autonomous run 3): GATE G3 CLOSED — real-device unlock.**
 > Owner forwarded KaneAI freemium email (TestMu AI / LambdaTest) asking whether
 > GitHub-OAuth login could substitute the dashboard password. Answer delivered: PATs
