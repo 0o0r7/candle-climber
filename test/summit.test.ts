@@ -173,7 +173,10 @@ describe("W4 summit + graduation arc", () => {
     const g = milestoneLines({ graduated: true, world2: false });
     expect(g.ribbon).toBe("GRADUATED");
     expect(g.sub).toContain("curve summit reached");
-    expect(g.sub).toContain("5 eth class");
+    expect(g.sub).toContain("summit class");
+    // D14 (council B3): the stale "5 eth" figure is banned from all copy —
+    // the real 4.0 ETH target renders only in live-read meter surfaces.
+    expect(g.sub).not.toContain("5 eth");
     expect(g.world2Line).toBeNull();
     // graduated + world 2 (died after entering the buyback world)
     const w2 = milestoneLines({ graduated: true, world2: true });

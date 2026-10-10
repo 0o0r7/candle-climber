@@ -79,8 +79,10 @@ export function buildPlatforms(candles: Candle[], seedStr: string): Platform[] {
     });
   }
   // W4 graduation arc: the LAST platform of the daily level is the summit —
-  // the "5 ETH graduation" of the bonding-curve climb. Deterministic: purely
+  // the graduation milestone of the bonding-curve climb. Deterministic: purely
   // derived from the seed-derived list above (no extra RNG, no geometry change).
+  // De-numbered per D14 (council B3): the true 4.0 ETH target lives only in
+  // live-read meter surfaces.
   if (plats.length > 0) plats[plats.length - 1].summit = true;
   return plats;
 }
