@@ -12,6 +12,9 @@ import ArchiveBrowser from "@/components/cc/ArchiveBrowser";
 import WalletChip from "@/components/cc/WalletChip";
 import PredictionPanel from "@/components/cc/PredictionPanel";
 import { WALLET_ADDRESS_KEY, isValidAddress } from "@/lib/wallet";
+// LAW 1.2 hardening: official-lane ownership proof — the browser builds the
+// EXACT message the server verifies (isomorphic template, no crypto import)
+import { buildProofMessage } from "@/lib/proof-message";
 import { isArchiveDate } from "@/game/cc/archive";
 import { render } from "@/game/cc/render";
 import { renderV2 } from "@/game/cc/render-v2";
@@ -98,6 +101,9 @@ export default function GameCanvas() {
   const [officialBoard, setOfficialBoard] = useState<BoardEntry[]>([]);
   const [officialSeason, setOfficialSeason] = useState<string | null>(null);
   const [submittedBoard, setSubmittedBoard] = useState<"guest" | "official" | null>(null);
+  // LAW 1.2 hardening: honest lane note — set when a wallet was linked but the
+  // run landed on the guest board (signature skipped/failed/rejected)
+  const [laneNote, setLaneNote] = useState<string | null>(null);
   const [rank, setRank] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [muted, setMutedState] = useState(false);
@@ -266,6 +272,7 @@ export default function GameCanvas() {
     // a timeframe switch invalidates any run state from the previous terrain
     setResult(null);
     setRank(null);
+    setLaneNote(null);
     setGraduated(false);
     setWorld2(false);
     const isArch = archive;
@@ -569,6 +576,7 @@ export default function GameCanvas() {
     setHud({ score: 0, combo: 0, candles: 0 });
     setResult(null);
     setRank(null);
+    setLaneNote(null);
     setGraduated(false);
     setWorld2(false);
     setPracticeNote(null);
@@ -735,6 +743,48 @@ export default function GameCanvas() {
     try {
       const finalName = (name.trim() || "ANON").slice(0, 14);
       localStorage.setItem(NAME_KEY, finalName);
+      // LAW 1.2 hardening — official lane needs an ownership proof: the wallet
+      // personal_signs the canonical run-binding message before the POST. The
+      // clamps here mirror board-validation exactly (the server verifies the
+      // signature against the CLAMPED entry values, byte-for-byte). No provider,
+      // user rejection, or a 30s popup timeout ⇒ post without proof: the run
+      // lands on the honestly-labeled GUEST board and play is never blocked.
+      const walletAddr = localStorage.getItem(WALLET_ADDRESS_KEY);
+      let signature: string | undefined;
+      let proofTs: number | undefined;
+      if (walletAddr && isValidAddress(walletAddr)) {
+        const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+        if (eth) {
+          proofTs = Date.now();
+          const msg = buildProofMessage(
+            {
+              score: Math.floor(result.score),
+              candlesPassed: Math.floor(result.candlesPassed),
+              bestStreak: Math.max(0, Math.min(999, Math.floor(result.bestStreak))),
+              date: data.seed.date,
+              interval: tf,
+              wallet: walletAddr.toLowerCase(),
+            },
+            proofTs,
+          );
+          const msgHex = "0x" + [...new TextEncoder().encode(msg)].map((b) => b.toString(16).padStart(2, "0")).join("");
+          // popup must not pin the panel forever: 30s → give up, post as guest
+          let timer: ReturnType<typeof setTimeout> | null = null;
+          try {
+            const s = (await Promise.race([
+              eth.request({ method: "personal_sign", params: [msgHex, walletAddr] }),
+              new Promise<never>((_, rej) => {
+                timer = setTimeout(() => rej(new Error("sign-timeout")), 30_000);
+              }),
+            ])) as unknown;
+            if (typeof s === "string" && /^0x[0-9a-fA-F]{130}$/.test(s)) signature = s;
+          } catch {
+            // rejected / timed out — guest lane, note below explains honestly
+          } finally {
+            if (timer) clearTimeout(timer);
+          }
+        }
+      }
       const res = await fetch("/api/leaderboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -745,13 +795,25 @@ export default function GameCanvas() {
           // E2.2: optional wallet link so the run also builds airdrop weights.
           // Display-only value from WalletChip — absent = ledger stays identity-only.
           // (JSON.stringify drops undefined — the field is simply absent when unlinked.)
-          address: localStorage.getItem(WALLET_ADDRESS_KEY) ?? undefined,
+          address: walletAddr ?? undefined,
+          // LAW 1.2 hardening: ownership proof (absent = guest lane, by design)
+          signature: signature,
+          ts: proofTs,
           runToken: data.runToken,
         }),
       });
       const j = await res.json();
       if (typeof j.rank === "number") setRank(j.rank);
       if (j.board === "official" || j.board === "guest") setSubmittedBoard(j.board);
+      // honest lane note: server-issued degrade reason, or a plain message when
+      // a linked wallet skipped signing (no provider / popup rejected / timeout)
+      setLaneNote(
+        typeof j.note === "string" && j.note
+          ? j.note
+          : j.board === "guest" && isValidAddress(walletAddr ?? "")
+            ? "no signature — run posted to the GUEST board"
+            : null,
+      );
       const b = await fetch(`/api/leaderboard?date=${data.seed.date}&interval=${tf}`).then((r) => r.json());
       setBoard(b.entries ?? []);
       setTopBoard(b.entries ?? []);
@@ -1251,6 +1313,7 @@ export default function GameCanvas() {
               )}
               {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
               {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
+              {rank !== null && laneNote && <p className="cc-rank cc-rank-note" role="status">{laneNote}</p>}
             </div>
           </div>
         )}
@@ -1283,6 +1346,7 @@ export default function GameCanvas() {
                 </p>
               )}
               {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
+              {rank !== null && laneNote && <p className="cc-rank cc-rank-note" role="status">{laneNote}</p>}
               <div className="cc-death-actions">
                 <input
                   className="cc-input"

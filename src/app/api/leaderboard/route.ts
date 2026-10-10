@@ -9,7 +9,17 @@
 // LAW 1.2 Option B (2026-10-10): two lanes, never mixed —
 //   GET ?board=guest    (default) walletless classic board, legacy rows included
 //   GET ?board=official           wallet-bound records, best run per wallet
-//   POST address=<0x…>            valid wallet ⇒ official lane, else guest lane
+//   POST address=<0x…>            wallet + VALID personal_sign proof ⇒ official
+//                                 lane, anything less ⇒ guest lane (never an error)
+// Hardening (same day, owner-delegated queue): the official lane requires a
+// cryptographic ownership proof — a personal_sign (EIP-191) signature by the
+// claimed wallet's key over the canonical run-binding message (wallet + clamped
+// run fields + token date/interval + client ts, 10-min freshness window).
+// A missing/invalid/stale proof silently degrades the run to the GUEST lane
+// (fail-open, play never blocked — LAW 1.2 substance) and the response carries
+// a one-line honest `note`. Replay safety: every field is inside the signed
+// message, so a signature is single-use by construction; an identical replay
+// is a no-op via best-run-per-wallet dedupe.
 // Public GET responses mask wallets to the chip-style short form; the full
 // address never leaves the server on a read path.
 import { NextResponse } from "next/server";
@@ -19,6 +29,9 @@ import { isInterval } from "@/game/cc/level-source";
 // W5: pure validation core (shape + anti-cheat caps) extracted to
 // src/lib/board-validation.ts — contract pinned by test/leaderboard-contract.test.ts.
 import { validateSubmission } from "@/lib/board-validation";
+// LAW 1.2 hardening: cryptographic wallet-ownership proof for the official lane
+import { verifyOfficialProof } from "@/lib/wallet-proof";
+import type { ProofRejectReason } from "@/lib/wallet-proof";
 // E2.2 airdrop-weights ledger (P4.4): verified submissions on today's classic
 // level build weights — best-effort, NEVER awaited in the game response (LAW 1).
 import { recordClassicRun } from "@/lib/weights-store";
@@ -80,6 +93,8 @@ export async function POST(req: Request) {
     const body = (await req.json()) as Partial<BoardEntry> & {
       runToken?: unknown;
       address?: unknown; // E2.2/Option B: wallet link (official lane + weights ledger)
+      signature?: unknown; // LAW 1.2 hardening: personal_sign ownership proof
+      ts?: unknown; // client ms timestamp inside the signed message
     };
 
     // run token: mandatory, signature-verified (timingSafeEqual), shape-checked
@@ -91,9 +106,42 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "run token expired" }, { status: 403 });
     }
 
-    // Option B lane decision: ONLY the normalized wallet decides the lane —
-    // a malformed address degrades to guest (fail-open, play never blocked)
-    const wallet = normalizeWallet(body.address);
+    // Option B lane decision: ONLY a wallet with a VALID ownership proof lands on
+    // the official lane. A claimed wallet whose proof is absent/invalid/stale
+    // degrades to guest (fail-open — play is never blocked, LAW 1.2 substance);
+    // a malformed address was already guest before the hardening.
+    const claimed = normalizeWallet(body.address);
+    const signature = typeof body.signature === "string" ? body.signature : null;
+    let wallet: string | null = null;
+    let reject: ProofRejectReason | null = null;
+    if (claimed && signature) {
+      // pass 1 (proof input): clamped entry fields the signed message binds to
+      const draft = validateSubmission(body, tok, Date.now(), claimed);
+      if (!draft.ok) {
+        // shape/anti-cheat failures are lane-independent — identical verdict
+        // whether the run claims official or guest
+        return NextResponse.json({ error: draft.error }, { status: draft.status });
+      }
+      const proof = verifyOfficialProof(
+        claimed,
+        signature,
+        // the proof binds EXACTLY these clamped fields (explicit, not a spread —
+        // BoardEntry's optional legacy fields must never silently leak into the
+        // signed message); date/interval come from the verified token payload
+        {
+          score: draft.entry.score,
+          candlesPassed: draft.entry.candlesPassed,
+          bestStreak: draft.entry.bestStreak ?? 0,
+          date: draft.entry.date,
+          interval: draft.entry.interval ?? tok.interval,
+          wallet: claimed,
+        },
+        body.ts,
+        Date.now(),
+      );
+      if (proof.ok) wallet = claimed;
+      else reject = proof.reason;
+    }
 
     // pure validation core (W5): shape checks + terrain-physical anti-cheat caps
     const verdict = validateSubmission(body, tok, Date.now(), wallet);
@@ -112,6 +160,10 @@ export async function POST(req: Request) {
       board: verdict.entry.board,
       season: verdict.entry.season,
       store: store.kind,
+      // honest degrade note — only when an official run was claimed but the
+      // ownership proof did not verify (reason is safe to surface: the client
+      // knows what it signed; nothing about OTHERS' submissions leaks)
+      ...(reject ? { note: `official proof rejected (${reject}) — run posted as guest` } : {}),
     });
   } catch {
     return NextResponse.json({ error: "bad request" }, { status: 400 });

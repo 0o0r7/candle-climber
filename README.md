@@ -93,10 +93,12 @@ src/game/cc/
   deathcard.ts  offscreen-canvas 1080×1350 share card
   sound.ts      WebAudio synth SFX
 src/app/api/candles/route.ts      GET seed + klines (Binance proxy + geo-fallback, cached)
-src/app/api/leaderboard/route.ts  GET top / POST entry (?board=guest|official|all; memory fallback → MongoDB Atlas when DATABASE_URL set)
+src/app/api/leaderboard/route.ts  GET top / POST entry (?board=guest|official|all; official POST requires a valid personal_sign ownership proof — anything less degrades to guest with a note; memory fallback → MongoDB Atlas when DATABASE_URL set)
 src/lib/leaderboard-store.ts      storage adapter: two lanes (guest walletless · official wallet-bound, best run per wallet), env-gated Atlas M0, memoized clients
+src/lib/proof-message.ts          isomorphic canonical proof message (client and server build the exact same bytes)
+src/lib/wallet-proof.ts           server-side EIP-191 personal_sign verification (ECDSA secp256k1 recovery, ±10-min freshness)
 src/lib/seasons.ts                append-only season registry (S1 opened 2026-10-10) — official records are season-stamped
-src/components/cc/GameCanvas.tsx  client shell: canvas + HUD + modals
+src/components/cc/GameCanvas.tsx  client shell: canvas + HUD + modals (+ wallet personal_sign before official submissions)
 ```
 
 ## Docs

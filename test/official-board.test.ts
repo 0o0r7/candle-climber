@@ -7,6 +7,9 @@
 //     date+interval; a worse repeat never overwrites it, a better one replaces.
 //  3. HONEST STAMPING — the lane is decided ONLY by the normalized wallet;
 //     a malformed address degrades to guest (play is never blocked, LAW 1.2).
+//     (Route-level lane authority — official lane additionally requires a
+//     VALID personal_sign ownership proof — is pinned by
+//     test/official-proof-route.test.ts.)
 //  4. SEASON SCAFFOLDING — official records are stamped with seasonOf(date).
 import { describe, test, expect, beforeAll, afterAll } from "bun:test";
 import { signRunToken, verifyRunToken, type RunTokenPayload } from "@/lib/run-token";

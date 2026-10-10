@@ -139,9 +139,24 @@ address degrades to guest, play never blocked), `?board=` on GET + `board`/`seas
 POST response, masked wallets on public reads, honest UI labels (OFFICIAL · wallet-bound /
 GUEST · typed names, unofficial). Contract pinned by `test/official-board.test.ts` (13 pins;
 suite 304/304). Law compliance (5.1): score math untouched (1.1), play free & walletless
-(1.2 substance), skill-only scoreboard (1.3), language per LAW 4. Known limit, queued:
-official-lane wallet ownership is shape-validated (client-provided address) — cryptographic
-signature verification is the next identity hardening step, recorded in the build council doc.
+(1.2 substance), skill-only scoreboard (1.3), language per LAW 4.
+
+**Hardening shipped 2026-10-10 (evening, same-day queue).** The recorded known limit —
+official-lane ownership was shape-validated only — is CLOSED. An official submission now
+requires a cryptographic ownership proof: a `personal_sign` (EIP-191) signature by the
+claimed wallet's key over the canonical run-binding message (`src/lib/proof-message.ts` —
+wallet + clamped score/candles/streak + the VERIFIED token's date/interval + a client
+timestamp with a ±10-minute freshness window), verified server-side by ECDSA
+secp256k1 recovery (`src/lib/wallet-proof.ts`, audited `@noble/secp256k1` + `@noble/hashes`
+primitives — the one justified deviation from the zero-new-dependency convention: a subtle
+bug in hand-rolled recovery would silently accept forged proofs). Every run field sits
+inside the signed message, so a proof is single-use by construction; an identical replay
+is a no-op via best-run-per-wallet dedupe. Fail-open to GUEST, never an error: a missing,
+invalid, or stale proof silently lands the run on the honestly-labeled guest board and the
+POST response carries a one-line `note` — play is never blocked by wallet state (LAW 1.2
+substance). Route-level contract pinned by `test/official-proof-route.test.ts` (real
+handler, no mocks) + `test/wallet-proof.test.ts` (tamper matrix, freshness window,
+v-notation, fail-closed shapes); suite 329/329.
 
 ---
 *Adopted: 2026-10-06 · Source: VARIANT-REVIEW-2026-10-05 merge-back wave 1 ·
