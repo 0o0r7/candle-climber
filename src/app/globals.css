@@ -493,6 +493,13 @@ button.cc-wallet-chip { cursor: pointer; }
   letter-spacing: 0.14em;
   margin-top: 6px;
 }
+/* LAW 1.2 hardening: honest lane note (degraded official claim → guest) */
+.cc-rank-note {
+  color: var(--cc-faint);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
 .cc-death-actions {
   display: flex;
   flex-wrap: wrap;

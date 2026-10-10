@@ -55,7 +55,7 @@ served from a different origin, and Next gates `/_next/*` dev assets and HMR by 
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/          # 200
 curl -s http://localhost:3000/api/candles | head -c 200                  # seed + candles
 curl -s http://localhost:3000/api/leaderboard                            # {"store":"memory"}
-curl -s "http://localhost:3000/api/leaderboard?board=official"           # wallet-bound lane (empty until wallet-linked submissions arrive)
+curl -s "http://localhost:3000/api/leaderboard?board=official"           # wallet-bound lane (only submissions with a VALID personal_sign ownership proof land here)
 curl -s "http://localhost:3000/api/onchain/quote?symbol=TSLA"            # live official Chainlink price (W6)
 curl -s "http://localhost:3000/api/candles?symbol=TSLA" | head -c 400    # seed.onchain verification block
 
@@ -71,5 +71,8 @@ rather than a prebuilt bundle.
 ## Checks (from CI)
 
 ```bash
-docker compose -f docker-compose.base44.yml exec -T web sh -ec "bun run lint && bun test && bunx tsc --noEmit"
+# NOTE: tsc MUST run with the incremental cache disabled — a stale
+# tsconfig.tsbuildinfo can report a silently-passing false "clean" (observed
+# 2026-10-10). The extra seconds are the price of a trustworthy gate.
+docker compose -f docker-compose.base44.yml exec -T web sh -ec "bun run lint && bun test && bunx tsc --noEmit --incremental false"
 ```
