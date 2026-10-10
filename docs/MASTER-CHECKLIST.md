@@ -393,10 +393,16 @@ owner confirmation → mainnet watch (CC-PLAN D11–14).
 >
 > **UPDATE 2026-10-10 (owner find): render-v2 PROMOTION is visual-phase step 0.**
 > The v1/v2 A/B (`?renderer=v2`, P2.1/P2.3/P2.5/P3.13 all DONE) was never promoted
-> to default — owner flagged it as "forgotten". Promotion = flip the default in
-> GameCanvas (`params.get("renderer") === "v2"` → default-on, keep `?renderer=v1`
-> opt-out); render-only, physics/scoring/determinism identical, so safe. NOTE: the
-> param is `renderer=v2`, NOT `render=v2` (wrong param silently shows v1). All
+> to default — owner flagged it as "forgotten". Owner also suspected v2 had stale
+> gameplay feel (old jump/speed/gaps). FORENSICS: tuning (JUMP_V 815, COYOTE .12,
+> BUFFER .16, CAM 148/3.2/400, caps 72, gaps .13) landed 20:43 UTC 09-30 (31f19fd)
+> in the SHARED core (engine.ts + level.ts) — 5h AFTER v2 shipped 15:35 UTC (6b1a699);
+> that 5-hour window is where the stale-v2 memory comes from. Since then physics is
+> provably identical: single Engine.step regardless of renderer (audited every v2
+> gate in GameCanvas — render call + chips only), playfield drawn 1:1 ("v1 geometry,
+> v2 materials"), live prod A/B bot runs PASS on both with identical terrain
+> (screenshots compared). PROMOTION SHIPPED same day: default = v2, `?renderer=v1`
+> = explicit legacy opt-out, chip now marks the opt-out instead of v2. All
 > remaining visual work (vault sprite, graduation scene, burn HUD, VD-4 CTA) lands
 > on render-v2 as the default face.
 >

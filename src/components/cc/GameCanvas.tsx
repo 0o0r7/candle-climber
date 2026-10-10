@@ -121,10 +121,12 @@ export default function GameCanvas() {
   const [report, setReport] = useState<ReportResp | null>(null);
   const [reportCopied, setReportCopied] = useState(false);
   const [reportOpen, setReportOpen] = useState(false); // G2 de-clutter: folded by default
-  // P2.1: v1/v2 renderer A/B — /?renderer=v2 opts into the grammar+parallax+juice
-  // renderer (render-only: physics/scoring/determinism identical). Set client-side
-  // in the load effect to avoid SSR hydration mismatch.
-  const [v2, setV2] = useState(false);
+  // P2.1 A/B → PROMOTED 2026-10-10: render-v2 IS the default face of the game
+  // (owner find: the A/B was never flipped after the 09-30 ship — "forgotten").
+  // render-only: physics/scoring/determinism identical (single Engine.step, shared
+  // level.ts constants). /?renderer=v1 is the explicit legacy opt-out. Set
+  // client-side in the load effect to avoid SSR hydration mismatch.
+  const [v2, setV2] = useState(true);
   // P2.2: H1 ARCHIVE — /?symbol=&date=<past UTC date> plays real history as
   // PRACTICE terrain (submission suppressed; W1 staleness stays authoritative).
   const [archive, setArchive] = useState(false);
@@ -235,7 +237,7 @@ export default function GameCanvas() {
     // /?date=<past UTC date> plays the archive (H1), and /?interval=1h|4h|1d
     // pins the timeframe (P3.5) — famous history as terrain.
     const params = new URLSearchParams(window.location.search);
-    setV2(params.get("renderer") === "v2"); // whitelisted single value
+    setV2(params.get("renderer") !== "v1"); // default v2; only explicit v1 downgrades (promoted 2026-10-10)
     wreckDBRef.current = loadWreckDB(); // H3: this device's death map
     const requested = (params.get("symbol") ?? "").toUpperCase();
     const requestedDate = params.get("date");
@@ -1046,7 +1048,7 @@ export default function GameCanvas() {
           )}
           {graduated && <div className="cc-chip cc-chip-grad">GRADUATED</div>}
           {world2 && <div className="cc-chip cc-chip-grad2">POST-GRAD ×2</div>}
-          {v2 && <div className="cc-chip cc-chip-mut" title="renderer v2 — grammar + parallax + juice">RENDER V2</div>}
+          {!v2 && <div className="cc-chip cc-chip-mut" title="legacy renderer opt-out — /?renderer=v1">RENDER V1 · LEGACY</div>}
           {weatherChip && <div className="cc-chip cc-chip-weather" title="H2 weather — ATR wind · volume fog">{weatherChip}</div>}
           {archive && <div className="cc-chip cc-chip-arch" title="archive terrain — practice only">ARCHIVE</div>}
           {/* P7.1: live rival race — local-only numbers, never submitted */}
