@@ -97,6 +97,41 @@ older design prose. Neither may be amended casually; changes require a dated
 note in this file explaining what changed and why.
 
 ---
+## DATED NOTE 2026-10-10 — LAW 1.2 letter amended: wallet = official competitive identity (Option B)
+
+**Trigger.** Owner challenge (2026-10-10): typed-name identity is too weak for real
+competition; a game with no real economy risks being disposable; economy is the priority.
+Owner then delegated the pending decision in plain words: "خودت تصمیم بگیر — تصمیمی که در
+راستای برطرف کردن نگرانی‌های من و نواقص محصول و تکمیل آن باشد." The council had already
+re-convened on his three arguments (OWNER-BRIEF + STOCK-TOKENS-DEEP-DIVE, same date) and
+graded **Option B** as the recommended lawful path; this note records its adoption under
+the owner's delegation. Per LAW 5.3, this is the dated-note amendment path.
+
+**What changes (letter of 1.2 only).** The old text made the *leaderboard* walletless forever.
+From now on:
+
+- **Guest mode stays exactly as LAW 1.2 promised:** full play — daily level, retry loop,
+  score submission, archive browsing — free, walletless, forever. A typed name lands on the
+  clearly-labeled **guest board**. Nothing behind a paywall or a hold-wall; LAW 1.2's
+  substance (no purchase and no wallet required to PLAY) is untouched.
+- **Official competitive surfaces become wallet-bound:** the official board, seasons,
+  official records, and weights-eligible identities require a connected wallet. Wallet
+  identity strengthens, never gates, play.
+- **What does NOT change:** LAW 1.1 (score math is untouched by holdings), LAW 1.3
+  (skill-only scoreboard), LAW 3 (participation weights), LAW 4 (language red lines).
+
+**Why.** (1) The owner's anonymity-cliff argument matches the council's registered F3
+fracture — a typed name cannot anchor season-long competition or a wallet-keyed weights
+ledger already live in production. (2) The platform itself is wallet-native (builders board
+is wallet-keyed); guest-only identity fights the ecosystem grain. (3) Testnet rehearses
+mechanics that ship to mainnet — identity must be rehearsed now. (4) Reach math stands:
+a hold-wall kills the curious at the top of the funnel; identity-optional play maximizes
+reach while wallets capture the committed. Buy/hold remains *wanted*, never *required*.
+
+**Build consequence (queued):** classic board renamed guest board + official wallet-bound
+board + season scaffolding. Economy-facing build → LAW 5.1 applies.
+
+---
 *Adopted: 2026-10-06 · Source: VARIANT-REVIEW-2026-10-05 merge-back wave 1 ·
 Related: `docs/GROWTH-AND-HOOKS-STRATEGY.md`, `docs/WICK-LAUNCH-FORM-PACK.md` §8,
 `docs/HANDOFF-2026-10-04.md` (P4.2/P4.4).*

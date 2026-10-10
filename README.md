@@ -87,7 +87,7 @@ src/game/cc/
   level.ts      daily seed → symbol + window; candles → platforms
   mutations.ts  5-pool daily mutations → physics modifiers (deterministic)
   market.ts     legibility stats: REAL MOVE %, FRIENDLY/SPICY/BRUTAL
-  level-source.ts  pluggable level feed: Binance today, platform launches tomorrow
+  level-source.ts  pluggable level feed: Binance daily · vibe-launch terrain · Robinhood on-chain price anchors (official), synthetic fallback
   engine.ts     fixed-timestep loop, physics, crumble timers, scoring
   render.ts     canvas renderer (vibe/vibe palette, particles, camera)
   deathcard.ts  offscreen-canvas 1080×1350 share card

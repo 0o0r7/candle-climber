@@ -6,6 +6,13 @@
 > `docs/GROWTH-AND-HOOKS-STRATEGY.md` (اقتصاد توکن) · README.
 > هر عدد و هر ادعا در این بسته از اسناد اثبات‌محورِ خود پروژه می‌آید — هیچ‌چیز حدسی نیست.
 > **زبان فرم انگلیسی است → بلوک‌های «کپی» انگلیسی‌اند؛ توضیح هر فیلد فارسی است.**
+>
+> **🛠 اصلاح حقیقت 2026-10-10 (F4):** عبارت‌های «auto buyback-burns» و «summit-tier»
+> که در بررسی intake (docs/council/2026-10-10-BASE44-EXTERNAL-REVIEW-INTAKE-FA.md، یافته ۱)
+> مغایر مکانیک واقعی و LAW 2 تشخیص داده شدند، با اعداد تأییدشده‌ی
+> WICK-ECONOMY-SPEC جایگزین شدند: مالیات معامله ۲٪ → ۷۵٪ هولدرها · ۲۰٪ صندوق · ۵٪ سوزاندن
+> (اتوماتیک روی فیهیل پلتفرم) و Balance Gate = لِینِ نشان هولدر (کازمتیک).
+> نسخه‌ی docx این بسته قدیمی است — **متن ملاک همین فایل md است.**
 
 ---
 
@@ -175,29 +182,29 @@ climber worldwide. Green candles hold. Red candles crumble. Fall off
 the bottom and you're liquidated. Download your Death Card, come back
 tomorrow for new terrain.
 
-$WICK utility: hold to unlock summit-tier runs (Balance Gate) ·
-airdrop weights from daily streaks & route predictions · every trade
-auto buyback-burns supply. After graduation: in-game burn, treasury
-tournaments — and MIRROR mode, where $WICK's own chart becomes a
-playable level.
+$WICK utility: hold ≥1,000 → holder badge lane (cosmetic, Balance
+Gate) · airdrop weights from daily streaks & route predictions ·
+every trade routes a 2% tax — 75% to holders, 5% auto-burn. After
+graduation: in-game burn, treasury tournaments — and MIRROR mode,
+where $WICK's own chart becomes a playable level.
 ```
 
 ---
 
 ## 7️⃣ بلوک‌های Description (انگلیسی)
 
-### 🔹 FORM — نسخه‌ی فیلد Description ویزارد (۹۸۵/۱۰۰۰ کاراکتر) — ⭐ توصیه‌ی اصلی
+### 🔹 FORM — نسخه‌ی فیلد Description ویزارد (۹۹۰/۱۰۰۰ کاراکتر) — ⭐ توصیه‌ی اصلی
 
 > سقف فیلد دقیقاً 1000 کاراکتر است (تأیید زنده 2026-10-04 — اسکرین‌شات owner، شمارنده 1000/1000).
-> نسخه‌ی زیر ۹۸۵ کاراکتر است، جمله‌ی آخرش کامل است (بریده نمی‌شود) و «earns» به «builds» اصلاح شده (خط قرمز ۱).
-> اگر خواستی چیزی به آن اضافه کنی، فقط با جایگزین — بیش از ۱۵ کاراکتر جا ندارد.
+> نسخه‌ی زیر ۹۹۰ کاراکتر است (بعد از اصلاح حقیقت 2026-10-10)، جمله‌ی آخرش کامل است (بریده نمی‌شود).
+> اگر خواستی چیزی به آن اضافه کنی، فقط با جایگزین — کمتر از ۱۰ کاراکتر جا دارد.
 
 ```
 Candle Climber is a live skill platformer built from real market candles. Each day one real symbol's chart (deterministic daily seed, identical worldwide) becomes a mountain: green candles are solid jump pads, red candles crumble, and falling off the bottom means liquidation. Every run ends in a shareable Death Card.
 
 Score is pure skill: runs are verified server-side (HMAC run-tokens, anti-cheat suite) — no self-play reward loops, anti-sybil by design.
 
-$WICK is the game's utility token. Holding it gates summit-tier runs and cosmetics via server-side on-chain balance reads (Balance Gate — base gameplay stays free) and builds airdrop weights from daily streaks, route predictions and archive marathons. After graduation: in-game spend/burn, treasury-funded tournaments and MIRROR mode — $WICK's own chart becomes a playable level. Every trade auto buyback-burns $WICK.
+$WICK is the game's utility token. Holding it opens the cosmetic holder-badge lane via server-side on-chain balance reads (Balance Gate — base gameplay stays free) and builds airdrop weights from daily streaks, route predictions and archive marathons. After graduation: in-game spend/burn, treasury-funded tournaments and MIRROR mode — $WICK's own chart becomes a playable level. Every trade auto-burns part of the supply.
 
 Live now: https://candle-climber.vercel.app
 Built for the vibe builders program on Robinhood Chain testnet.
@@ -209,13 +216,13 @@ Built for the vibe builders program on Robinhood Chain testnet.
 The chart is the level. A live skill platformer built from real
 candlestick data — green candles hold, red candles crumble, fall and
 you're liquidated. One real market chart becomes the same mountain
-for every climber worldwide, every day. $WICK: summit tiers, airdrop
-weights, auto buyback-burn — and one day, its own chart as a level.
+for every climber worldwide, every day. $WICK: holder badge, airdrop
+weights, auto-burn fee rails — and one day, its own chart as a level.
 ```
 
-### 🔹 STANDARD (۱۲۰۸ کاراکتر — برای فیلد ویزارد **نمی‌گنجد**؛ فقط جاهایی که سقف ندارند)
+### 🔹 STANDARD (۱۲۵۷ کاراکتر — برای فیلد ویزارد **نمی‌گنجد**؛ فقط جاهایی که سقف ندارند)
 
-> در فرم لانچ استفاده نشود — ۲۰۸ کاراکتر اضافه دارد و وسط جمله بریده می‌شد (رخداد واقعی 2026-10-04).
+> در فرم لانچ استفاده نشود — ۲۵۷ کاراکتر اضافه دارد و وسط جمله بریده می‌شد (رخداد واقعی 2026-10-04).
 
 ```
 Candle Climber is a live, playable skill platformer whose levels are
@@ -230,14 +237,13 @@ Score is pure skill. Runs are verified server-side with HMAC
 run-tokens and a dedicated anti-cheat suite — no reward loops tied to
 self-play, anti-sybil by design.
 
-$WICK is the game's utility token. Holding it gates summit-tier runs
-and cosmetics through server-side on-chain balance reads (Balance
+$WICK is the game's utility token. Holding it opens the cosmetic holder-badge lane through server-side on-chain balance reads (Balance
 Gate — base gameplay stays free), and builds airdrop weights from
 daily streaks, route predictions and archive marathons. After
 graduation it unlocks in-game spend/burn, treasury-funded tournaments
 and MIRROR mode — $WICK's own chart becomes a playable level. Every
-trade already buyback-burns $WICK automatically via the platform's
-fee rails.
+trade already burns part of the supply automatically via the
+platform's fee rails (2% tax: 75% holders · 20% cash · 5% burn).
 
 Live and playable now: https://candle-climber.vercel.app
 Built for the vibe builders program on Robinhood Chain testnet.
@@ -267,10 +273,11 @@ What's shipped (live now):
 · 450+ headless QA rounds; real-device QA on Android
 
 Why $WICK exists:
-Pre-graduation, holding $WICK gates summit-tier runs and cosmetics
+Pre-graduation, holding $WICK opens the cosmetic holder-badge lane
 (server-side on-chain balance reads — base game stays free) and
 accumulates airdrop weights from streaks, route predictions and
-archive marathons. Every trade buyback-burns supply automatically.
+archive marathons. Every trade burns supply automatically via the
+2% tax rails (75% holders · 20% cash · 5% burn).
 After graduation, transfers unlock and the economy opens: in-game
 burn, treasury-funded tournaments — and MIRROR mode, where $WICK's
 own price chart becomes a playable level. Pump = smooth ramp. Dump =

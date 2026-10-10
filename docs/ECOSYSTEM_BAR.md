@@ -38,6 +38,30 @@ deliberately sequenced behind product reality.
 
 </details>
 
+<details><summary>Scoreboard v3 (2026-10-10, post PR #1 merge — refresh of the stale v2)</summary>
+
+v2 (2026-09-29) was materially stale: it predated the $WICK launch, the launch route, the
+weights ledger on Mongo, and the on-chain feed integration (PR #1, merged 2026-10-10).
+Re-graded conservatively against live evidence only:
+
+| # | Factor | v3 Verdict | Evidence |
+|---|---|---|---|
+| E1 | Working MVP, instantly playable | 🟢 DONE | live at candle-climber.vercel.app |
+| E2 | "Every launch becomes a level" flywheel | 🟢 SHIPPED (testnet) | vibe-launch terrain live (launch #5963); Robinhood on-chain price anchors merged (PR #1: `robinhood-chain.ts`, `/api/onchain/quote`, anchored terrain, TRUTH-TABLE) |
+| E3 | Token layer on platform rails | 🟢 SHIPPED (testnet) | $WICK live (launchId 5963, meter 2.61% @ 2026-10-10), Balance Gate live, weights ledger on Mongo, burn feed + vault + merkle rehearsal shipped |
+| E4 | On-chain credibility (scores, wallet identity) | 🟡 PARTIAL | on-chain reads + wallet chip + wallet-keyed weights ledger live; wallet-as-OFFICIAL-identity (council Option B) still queued — today a typed name can top the classic board |
+| E5 | X/Twitter viral loop | 🟡 PARTIAL — **now the binding constraint** | loop mechanics complete; reach ~0 (439 msgs / 0 mentions); distribution is owner-side, not code |
+| E6 | Platform-native identity | 🟡 PARTIAL | palette/type locked; mascot still parked |
+| E7 | Fair-play / anti-sybil | 🟢 MEETS+ | HMAC run-tokens, anti-cheat caps, weights ledger anti-sybil; F1 pin test added with PR #1 merge |
+| E8 | Zero-friction onboarding | 🟢 MEETS | free play, no wallet required (LAW 1.2 intact under Option B) |
+| E9 | Always-on daily service | 🟢 SHIPPED | Mongo-backed boards + weights ledger live (v2's "one DATABASE_URL away" resolved) |
+| E10 | Mobile-first quality | 🟡 PARTIAL | headless QA passed; real-device pass still pending |
+
+**v3: 6 green · 4 yellow · 0 red.** The remaining yellows are: wallet-official-identity (build
+queued, decision recorded), reach (owner-side), mascot (owner re-brief), real-device QA.
+
+</details>
+
 ## 1. The factors, reconstructed
 
 ### E1 · Working MVP — the hard gate of the utility/vibecoded track
