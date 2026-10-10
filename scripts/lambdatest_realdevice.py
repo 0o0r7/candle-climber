@@ -262,12 +262,19 @@ def main():
 
     reports = []
     for i, cfg in enumerate(matrix):
-        try:
-            reports.append(run_session(cfg, lt_user, lt_key))
-        except Exception as e:  # noqa: BLE001
-            reports.append({"label": cfg.get("label", f"session-{i}"),
-                            "pass": False, "error": str(e)[:300]})
-            print(f"[FAIL] {cfg.get('label')} :: session error: {str(e)[:200]}")
+        label = cfg.get("label", f"session-{i}")
+        rep = None
+        for attempt in (1, 2):  # grid VMs are flaky — one retry on session error
+            try:
+                rep = run_session(cfg, lt_user, lt_key)
+                rep["attempt"] = attempt
+                break
+            except Exception as e:  # noqa: BLE001
+                print(f"[RETRY {attempt}] {label} :: session error: {str(e)[:160]}")
+                if attempt == 2:
+                    rep = {"label": label, "pass": False, "attempt": 2,
+                           "error": str(e)[:300]}
+        reports.append(rep)
 
     summary = {"stamp": STAMP, "url": PROD, "sessions": len(reports),
                "passed": sum(1 for r in reports if r.get("pass")),
