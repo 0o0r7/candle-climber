@@ -1157,7 +1157,7 @@ export default function GameCanvas() {
           <div className="cc-overlay">
             <div className="cc-panel cc-panel-death">
               <h2 className="cc-grad-headline">GRADUATED</h2>
-              <p className="cc-grad-flavor">curve summit reached · graduation: 5 eth class</p>
+              <p className="cc-grad-flavor">curve summit reached · summit class</p>
               <div className="cc-death-score">
                 <span className="cc-death-num">{result.score.toLocaleString()}</span>
                 <span className="cc-death-sub">

@@ -38,7 +38,7 @@ export function milestoneLines(r: Pick<RunResult, "graduated" | "world2">): Mile
   if (!r.graduated) return { ribbon: null, sub: null, world2Line: null };
   return {
     ribbon: "GRADUATED",
-    sub: "curve summit reached · graduation: 5 eth class",
+    sub: "curve summit reached · summit class",
     world2Line: r.world2 ? "world 2 reached · post-grad ×2" : null,
   };
 }
