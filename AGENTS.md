@@ -55,6 +55,7 @@ served from a different origin, and Next gates `/_next/*` dev assets and HMR by 
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/          # 200
 curl -s http://localhost:3000/api/candles | head -c 200                  # seed + candles
 curl -s http://localhost:3000/api/leaderboard                            # {"store":"memory"}
+curl -s "http://localhost:3000/api/leaderboard?board=official"           # wallet-bound lane (empty until wallet-linked submissions arrive)
 curl -s "http://localhost:3000/api/onchain/quote?symbol=TSLA"            # live official Chainlink price (W6)
 curl -s "http://localhost:3000/api/candles?symbol=TSLA" | head -c 400    # seed.onchain verification block
 

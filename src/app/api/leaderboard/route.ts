@@ -6,8 +6,14 @@
 // GET /api/candles; symbol + date are pinned from the verified token payload
 // (client-claimed symbol/date are ignored), and terrain-imposed physical caps
 // reject impossible candle counts/scores.
+// LAW 1.2 Option B (2026-10-10): two lanes, never mixed —
+//   GET ?board=guest    (default) walletless classic board, legacy rows included
+//   GET ?board=official           wallet-bound records, best run per wallet
+//   POST address=<0x…>            valid wallet ⇒ official lane, else guest lane
+// Public GET responses mask wallets to the chip-style short form; the full
+// address never leaves the server on a read path.
 import { NextResponse } from "next/server";
-import { getBoard, type BoardEntry } from "@/lib/leaderboard-store";
+import { getBoard, type BoardEntry, type BoardFilter } from "@/lib/leaderboard-store";
 import { verifyRunToken, isTokenStale } from "@/lib/run-token";
 import { isInterval } from "@/game/cc/level-source";
 // W5: pure validation core (shape + anti-cheat caps) extracted to
@@ -17,6 +23,19 @@ import { validateSubmission } from "@/lib/board-validation";
 // level build weights — best-effort, NEVER awaited in the game response (LAW 1).
 import { recordClassicRun } from "@/lib/weights-store";
 import { normalizeWallet } from "@/lib/weights";
+import { shortAddress } from "@/lib/wallet";
+import { currentSeason } from "@/lib/seasons";
+
+const BOARDS: BoardFilter[] = ["guest", "official", "all"];
+
+function boardParam(raw: string | null): BoardFilter {
+  return BOARDS.includes(raw as BoardFilter) ? (raw as BoardFilter) : "guest";
+}
+
+/** Public read paths never expose the full address (airdrop-board convention). */
+function maskWallets(entries: BoardEntry[]): BoardEntry[] {
+  return entries.map((e) => (e.wallet ? { ...e, wallet: shortAddress(e.wallet) } : e));
+}
 
 /* per-IP rate limit: 20 submissions / minute / instance */
 const hits = new Map<string, number[]>();
@@ -35,11 +54,15 @@ export async function GET(req: Request) {
   const date = searchParams.get("date");
   // P3.5: boards are per-timeframe ("1w" classic default) — never mixed
   const interval = isInterval(searchParams.get("interval")) ? searchParams.get("interval")! : "1w";
+  // Option B: lane selector — default keeps the classic (guest) board contract
+  const board = boardParam(searchParams.get("board"));
   const store = getBoard();
-  const entries = await store.top(date, 50, interval);
+  const entries = maskWallets(await store.top(date, 50, interval, board));
   return NextResponse.json({
     entries,
     interval,
+    board,
+    ...(board === "official" ? { season: currentSeason() } : {}),
     store: store.kind,
     ...(store.lastError ? { dbError: store.lastError } : {}),
   });
@@ -56,7 +79,7 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as Partial<BoardEntry> & {
       runToken?: unknown;
-      address?: unknown; // E2.2: optional wallet link for the weights ledger
+      address?: unknown; // E2.2/Option B: wallet link (official lane + weights ledger)
     };
 
     // run token: mandatory, signature-verified (timingSafeEqual), shape-checked
@@ -68,8 +91,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "run token expired" }, { status: 403 });
     }
 
+    // Option B lane decision: ONLY the normalized wallet decides the lane —
+    // a malformed address degrades to guest (fail-open, play never blocked)
+    const wallet = normalizeWallet(body.address);
+
     // pure validation core (W5): shape checks + terrain-physical anti-cheat caps
-    const verdict = validateSubmission(body, tok);
+    const verdict = validateSubmission(body, tok, Date.now(), wallet);
     if (!verdict.ok) {
       return NextResponse.json({ error: verdict.error }, { status: verdict.status });
     }
@@ -78,12 +105,14 @@ export async function POST(req: Request) {
     const rank = await store.add(verdict.entry);
     // E2.2: ledger fire-and-forget — a weights failure must never fail the score
     // submission or even be observable in this response (ECONOMY-LAWS LAW 1).
-    void recordClassicRun(
-      verdict.entry.name,
-      verdict.entry.date,
-      normalizeWallet(body.address),
-    ).catch(() => {});
-    return NextResponse.json({ ok: true, rank, store: store.kind });
+    void recordClassicRun(verdict.entry.name, verdict.entry.date, wallet).catch(() => {});
+    return NextResponse.json({
+      ok: true,
+      rank,
+      board: verdict.entry.board,
+      season: verdict.entry.season,
+      store: store.kind,
+    });
   } catch {
     return NextResponse.json({ error: "bad request" }, { status: 400 });
   }

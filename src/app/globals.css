@@ -716,6 +716,22 @@ button.cc-wallet-chip { cursor: pointer; }
 .cc-board-rank.top { color: var(--cc-lime); }
 .cc-board-name { color: #DDE2E5; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cc-board-score { color: var(--cc-up); font-weight: 700; }
+/* Option B identity layer — honest lane labels (LAW 4): the official board is
+   wallet-bound, the guest board says exactly what it is. */
+.cc-board-sub {
+  font-family: var(--cc-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--cc-faint);
+  margin: -4px 0 8px;
+}
+.cc-board-official .cc-board-title { color: var(--cc-lime); }
+.cc-board-wallet {
+  font-style: normal;
+  font-size: 10px;
+  color: var(--cc-faint);
+  margin-left: 8px;
+}
 
 .cc-mute {
   position: absolute;
