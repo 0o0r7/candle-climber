@@ -112,6 +112,8 @@ src/components/cc/GameCanvas.tsx  client shell: canvas + HUD + modals (+ wallet 
 - [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md) — design spec: rules, scoring, virality loop
 - [`docs/ECOSYSTEM_BAR.md`](docs/ECOSYSTEM_BAR.md) — honest scoreboard vs the vibe/vibe ecosystem bar (E1–E10)
 - [`docs/ECONOMY-LAWS.md`](docs/ECONOMY-LAWS.md) — fairness/weights laws (the language rule lives here)
+- [`docs/ECONOMY-CHECKLIST.md`](docs/ECONOMY-CHECKLIST.md) — economy-phase tracker (E0–E6; graduation runbook + watch plan live in `docs/council/`)
+- [`docs/PR-CHECKLIST.md`](docs/PR-CHECKLIST.md) — LAW 5.1 review gate, mechanical form (scoring/leaderboard/wallet/cosmetics PRs)
 - [`docs/INFRASTRUCTURE.md`](docs/INFRASTRUCTURE.md) — zero-cost infra map (Student Pack)
 
 ## Official ecosystem references
