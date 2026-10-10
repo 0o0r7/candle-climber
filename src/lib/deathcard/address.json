@@ -1,0 +1,13 @@
+{
+  "address": "0x3e2735c670ac6d6412a79153602d7e9c58640c64",
+  "chainId": 46630,
+  "deployBlock": 132511064,
+  "txHash": "0x0514b6ca663255003aad23b405a089c18d50f88d136bf4b7cca1684803f6c046",
+  "deployedAt": "2026-10-10T20:27:21.000Z",
+  "deployer": "0xac83679428276ba81ac4ca9d1f5769af179a89bd",
+  "owner": "0x3cf571c7554725a9b929e4dcfa75f433436cf683",
+  "minter": "0xac83679428276ba81ac4ca9d1f5769af179a89bd",
+  "name": "Candle Climber Death Card",
+  "symbol": "CCDC",
+  "recovered": "deploy tx mined 2026-10-10; setOwner completed via handover.ts after the hex-calldata signer fix"
+}

@@ -23,7 +23,7 @@ export type TxFields = {
   gas: bigint; // gas limit
   to: string | null; // null = contract creation
   value: bigint; // wei
-  data: Uint8Array; // calldata / creation code (empty for plain transfers)
+  data: Uint8Array | string; // calldata / creation code (empty for plain transfers) — hex string accepted and normalized
   chainId: number;
 };
 
@@ -101,6 +101,13 @@ export function rlpEncode(item: RlpItem): Uint8Array {
     const len = bigintToBytes(BigInt(item.length));
     return concat(new Uint8Array([0xb7 + len.length]), len, item);
   }
+  if (!Array.isArray(item)) {
+    // Fail LOUD on a hex string or other non-list — the observed live bug was a
+    // string calldata reaching here and dying as "item.map is not a function".
+    throw new Error(
+      `rlpEncode: expected Uint8Array or list, got ${typeof item} — normalize hex strings with hexToBytes() first`,
+    );
+  }
   const payload = concat(...item.map(rlpEncode));
   if (payload.length <= 55) return concat(new Uint8Array([0xc0 + payload.length]), payload);
   const len = bigintToBytes(BigInt(payload.length));
@@ -125,6 +132,13 @@ function addrBytes(to: string | null): Uint8Array {
   return b;
 }
 
+/** Calldata normalizer: accepts hex string ("", "0x…") or raw bytes. */
+function dataBytes(d: Uint8Array | string): Uint8Array {
+  if (typeof d !== "string") return d;
+  if (d === "" || d === "0x") return new Uint8Array(0);
+  return hexToBytes(d); // throws on odd length / non-hex — loud, early
+}
+
 /**
  * Sign a legacy (type-0) transaction with EIP-155 replay protection.
  * Universally accepted — including Arbitrum-Orbit chains (Robinhood Chain
@@ -140,7 +154,7 @@ export function signLegacyTx(tx: TxFields, privKey: Uint8Array): SignedTx {
     bigintToBytes(tx.gas),
     addrBytes(tx.to),
     bigintToBytes(tx.value),
-    tx.data,
+    dataBytes(tx.data),
     bigintToBytes(BigInt(tx.chainId)),
     bigintToBytes(0n),
     bigintToBytes(0n),
@@ -162,7 +176,7 @@ export function signLegacyTx(tx: TxFields, privKey: Uint8Array): SignedTx {
     bigintToBytes(tx.gas),
     addrBytes(tx.to),
     bigintToBytes(tx.value),
-    tx.data,
+    dataBytes(tx.data),
     bigintToBytes(v),
     bigintToBytes(r),
     bigintToBytes(s),

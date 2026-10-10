@@ -112,6 +112,49 @@ describe("EIP-155 canonical example (from the EIP spec)", () => {
   });
 });
 
+describe("hex-string calldata regression (live deploy bug 2026-10-10)", () => {
+  // The setOwner tx signed its calldata as a hex STRING; rlpEncode died with
+  // "item.map is not a function" AFTER the contract had already deployed.
+  // Contract: signLegacyTx must normalize hex-string data to identical bytes.
+  const KEY = new Uint8Array(32).fill(0x46);
+  const base = {
+    nonce: 1n,
+    gasPrice: 20_000_000_000n,
+    gas: 80_000n,
+    to: "0x3535353535353535353535353535353535353535",
+    value: 0n,
+    chainId: 46630,
+  };
+
+  test("data as hex string produces byte-identical signature to Uint8Array", () => {
+    const fromBytes = signLegacyTx(
+      { ...base, data: hexToBytes("0xe2415e53" + "ab".repeat(32)) },
+      KEY,
+    );
+    const fromString = signLegacyTx(
+      { ...base, data: "0xe2415e53" + "ab".repeat(32) },
+      KEY,
+    );
+    expect(fromString.rawHex).toBe(fromBytes.rawHex);
+    expect(fromString.txHash).toBe(fromBytes.txHash);
+    expect(fromString.signingHash).toBe(fromBytes.signingHash);
+  });
+
+  test("empty string / bare 0x data == empty Uint8Array", () => {
+    const empty = signLegacyTx({ ...base, data: new Uint8Array(0) }, KEY);
+    for (const d of ["", "0x"] as const) {
+      const s = signLegacyTx({ ...base, data: d }, KEY);
+      expect(s.rawHex).toBe(empty.rawHex);
+    }
+  });
+
+  test("rlpEncode now fails LOUD on string input (was: item.map is not a function)", () => {
+    expect(() => rlpEncode("0xdeadbeef" as unknown as Uint8Array)).toThrow(
+      /rlpEncode: expected Uint8Array or list, got string/,
+    );
+  });
+});
+
 describe("CCDeathCard mint calldata encoder", () => {
   test("hand-computed exact encoding for a minimal case", () => {
     const to = "0x1111111111111111111111111111111111111111";
