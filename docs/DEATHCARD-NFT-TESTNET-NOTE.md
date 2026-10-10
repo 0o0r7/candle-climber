@@ -4,6 +4,24 @@
 > on testnet for users?"). **Feasibility only — no contract, no route, no promise.**
 > If green-lit it becomes the LAST coding item before the visual phase (owner's call).
 
+## 0. Implementation status (2026-10-10, same day) — build STARTED
+
+Architecture B (server minter) confirmed as the build path. Done today:
+
+| Piece | State |
+|---|---|
+| `contracts/CCDeathCard.sol` — minimal non-upgradeable ERC-721 + Metadata, owner-only `mint(to, runKey, metadata)`, **on-chain mint-once per run key** (`mintedByRun`), inline-JSON `tokenURI` | compiled with solc 0.8.37 (optimizer 200, paris EVM) → ~4.1 KB creation code; canonical selectors verified (`tokenURI` 0xc87b56dd, `owner` 0x8da5cb5b) |
+| `src/lib/deathcard/{abi,bytecode}.json` — committed build artifacts | rebuilt via `bun scripts/deathcard/build-deathcard.ts`; app never imports solc |
+| `src/lib/eth-tx.ts` — raw EIP-155 legacy tx signer (hand RLP + audited @noble primitives, zero heavy deps) + mint calldata encoder + ABI string decoder | **pinned to the canonical EIP-155 spec example** in `test/eth-tx.test.ts` (signing hash daf5a7…, v=37, raw bytes, sender 0x9d8a62f6…); suite 370/370 |
+| Minter wallet (dedicated, mint() is its ONLY power) | generated, key local-only 0600 (`~/.cc-minter-key`), address **0xecee1206b478ee2a0dec7f6e19f69e64f10b05f6** |
+| `scripts/deathcard/deploy.ts` — preflight (chainId/balance) → estimate → sign → send → poll receipt → verify name/symbol/owner → writes `src/lib/deathcard/address.json` | dry-run verified; stops honestly at the funding gate |
+| **Funding blocker (honest finding)** | the official faucet (`faucet.testnet.chain.robinhood.com`) requires **Cloudflare human verification + Google Sign-In** per claim — automation is refused by design (verified in a real browser; Vercel Security Checkpoint on raw HTTP). ONE manual claim by the owner (0.01 testnet ETH, once/24h) unblocks deployment; deploy costs ≈1.5M gas × 0.01 gwei ≈ 0.000015 ETH ≈ **1/700 of one claim**. Users NEVER touch the faucet (server minter pays gas) — only our minter wallet needs this one claim. |
+
+Next steps after funding: deploy → commit `address.json` → claim route
+(`/api/deathcard/claim`: run-token + wallet-proof verification, archive/practice
+exclusion, Mongo idempotency, honest failure copy) → Death Card "MINT (TESTNET)"
+button → e2e real-browser mint proof.
+
 ---
 
 ## 1. What already exists (all shipped, tested, on main)
