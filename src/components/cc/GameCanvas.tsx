@@ -90,7 +90,12 @@ export default function GameCanvas() {
   const lastRef = useRef<number>(0);
   const accRef = useRef<number>(0);
   // V-PHASE V-1: canvas backing-store geometry for the screen-space clear
-  const fitRef = useRef<{ dpr: number; w: number; h: number }>({ dpr: 1, w: 0, h: 0 });
+  const fitRef = useRef<{ dpr: number; w: number; h: number; s: number; ox: number; oy: number }>({ dpr: 1, w: 0, h: 0, s: 1, ox: 0, oy: 0 });
+  // CAMERA-FRAME zoom (render-only): eased each rAF toward the value that
+  // keeps BOTH the player and the takeoff ground line inside the 800×480 band
+  // when a jump is higher than the frame. Pivot = the ground line itself, so
+  // the terrain the player jumped from visually NEVER moves on screen.
+  const camZoomRef = useRef({ z: 1, px: VIEW_W * 0.3, py: VIEW_H * 0.75 });
   const [phase, setPhase] = useState<Phase>("loading");
   const [data, setData] = useState<CandleData | null>(null);
   const [mutation, setMutation] = useState<Mutation | null>(null);
@@ -652,7 +657,7 @@ export default function GameCanvas() {
       const s = Math.min(rect.width / VIEW_W, rect.height / VIEW_H);
       const ox = (rect.width - VIEW_W * s) / 2;
       const oy = (rect.height - VIEW_H * s) * weight;
-      fitRef.current = { dpr, w: rect.width, h: rect.height };
+      fitRef.current = { dpr, w: rect.width, h: rect.height, s, ox, oy };
       ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * ox, dpr * oy);
     };
     resize();
@@ -663,6 +668,7 @@ export default function GameCanvas() {
       if (!e) return;
       let dt = (now - lastRef.current) / 1000;
       lastRef.current = now;
+      const frameDt = Math.min(0.1, dt); // real frame delta — zoom easing only
       dt = Math.min(0.1, dt);
       accRef.current += dt;
       const FIXED = 1 / 60;
@@ -685,14 +691,44 @@ export default function GameCanvas() {
       ctx.setTransform(fit.dpr, 0, 0, fit.dpr, 0, 0);
       ctx.clearRect(0, 0, fit.w, fit.h);
       ctx.restore();
+
+      // CAMERA-FRAME zoom target: needed when the player rises higher than
+      // the band can show while the ground line stays pinned. z keeps the
+      // player top at ≥36px under the frame top; clamped to a readable 0.55.
+      const P = e.py - e.camY;          // player top, screen space
+      const G = e.lastGroundY - e.camY; // takeoff ground line, screen space
+      let zt = 1;
+      if (!e.dead && phase === "running" && P < 52 && G - P > 8) {
+        zt = Math.min(1, Math.max(0.55, (G - 36) / (G - P)));
+      }
+      const cz = camZoomRef.current;
+      cz.z += (zt - cz.z) * Math.min(1, frameDt * 7);
+      if (cz.z > 0.999 && zt >= 0.999) cz.z = 1; // snap fully back when idle
+      cz.px = e.playerScreenX + 17;
+      cz.py = G;
+
       const bot = vsBotRef.current ? botRef.current : null;
       // P7.2: ghost replay — position lookup by the human engine's own clock
       const gv: GhostView | null =
         ghostOnRef.current && ghostRef.current && (phase === "ready" || phase === "running" || phase === "dead" || phase === "graduated")
           ? ghostViewAt(ghostRef.current, e.time)
           : null;
-      if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv);
-      else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv);
+      // per-frame compose: fit → hard clip to the world band → zoom about the
+      // ground-line pivot (clip keeps letterbox clean while zoomed out)
+      ctx.save();
+      ctx.setTransform(fit.dpr * fit.s, 0, 0, fit.dpr * fit.s, fit.dpr * fit.ox, fit.dpr * fit.oy);
+      ctx.beginPath();
+      ctx.rect(0, 0, VIEW_W, VIEW_H);
+      ctx.clip();
+      if (cz.z < 0.999) {
+        ctx.translate(cz.px, cz.py);
+        ctx.scale(cz.z, cz.z);
+        ctx.translate(-cz.px, -cz.py);
+      }
+      const camZoom = cz.z < 0.999 ? { z: cz.z, px: cz.px, py: cz.py } : undefined;
+      if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv, camZoom);
+      else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv, camZoom);
+      ctx.restore();
       rafRef.current = requestAnimationFrame(step);
     };
     rafRef.current = requestAnimationFrame(step);
