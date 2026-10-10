@@ -1,5 +1,10 @@
 # FINAL SPRINT PLAN — 100M GLM-5.3-Flash budget, expiring tonight 19:30 (2026-10-06)
 
+> ⚠️ **HISTORICAL — kept as a record, not current status (marked 2026-10-10).**
+> The budget it planned has expired and the sprint is closed; live tracking moved
+> to [`docs/ECONOMY-CHECKLIST.md`](ECONOMY-CHECKLIST.md). Now-current sources:
+> [`docs/README.md`](README.md) · [`docs/TRUTH-TABLE.md`](TRUTH-TABLE.md).
+
 > Verdict up front: **YES — 100M tokens is enough to finalize, with 3–10x headroom.** The binding constraint is TIME (the grant expires tonight), not volume. This plan time-boxes tonight and burns tokens only where they buy product value.
 
 ## 1. Division of labor (the burn-efficient loop)

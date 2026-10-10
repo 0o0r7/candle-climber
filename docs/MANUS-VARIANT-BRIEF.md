@@ -1,5 +1,9 @@
 # MANUS VARIANT BRIEF — FINAL consolidated prompt (v2, 2026-10-05)
 
+> ⚠️ **HISTORICAL — kept as a record, not current status (marked 2026-10-10).**
+> A one-shot brief for an external agent; no longer active. Now-current sources:
+> [`docs/README.md`](README.md) · [`docs/TRUTH-TABLE.md`](TRUTH-TABLE.md).
+
 > **Usage:** send the block below as ONE single first message to Manus (game-creation mode, cloud on). Nothing else needs to follow — environment, KB access path, and all guardrails are integrated.
 > **Verified 2026-10-05:** `0o0r7/candle-climber` is PUBLIC (cloneable). `0o0r7/vibe-ecosystem-kb` is PRIVATE — reachable via the owner's GitHub connector (fallback: skip).
 

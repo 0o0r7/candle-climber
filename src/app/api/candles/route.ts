@@ -16,7 +16,8 @@
 // PRACTICE (no submission) — see src/game/cc/archive.ts.
 import { NextResponse } from "next/server";
 import { utcDateStr } from "@/game/cc/rng";
-import { pickSeed, syntheticCandles, INTERVAL, LIMIT, WATCHLIST, STOCKS, isInterval } from "@/game/cc/level-source";
+import { pickSeed, syntheticCandles, anchoredCandles, INTERVAL, LIMIT, WATCHLIST, STOCKS, isInterval } from "@/game/cc/level-source";
+import { readOfficialQuote } from "@/lib/robinhood-chain";
 import { isArchiveDate, endOfDayMs, clampCandlesTo, binanceKlinesUrl } from "@/game/cc/archive";
 import { signRunToken } from "@/lib/run-token";
 import { parseStooqCsv } from "@/lib/stooq";
@@ -24,10 +25,15 @@ import { parseYahooChart, yahooChartUrl } from "@/lib/yahoo";
 import { getLaunchOfDay, launchSymbol, vibeLaunchCandles } from "@/lib/vibe-launch";
 import type { Candle, CandleData, SeedInfo } from "@/game/cc/types";
 
-type Source = SeedInfo["source"]; // "binance" | "stooq" | "yahoo" | "vibe-launch" | "synthetic"
+type Source = SeedInfo["source"]; // "binance" | "stooq" | "yahoo" | "vibe-launch" | "robinhood" | "synthetic"
 interface CacheEntry { ts: number; candles: Candle[]; source: Source }
 const cache = new Map<string, CacheEntry>();
 const TTL = 24 * 60 * 60 * 1000; // 24h — closed-candle terrain never changes within its UTC day
+
+// W6: how far a served stock terrain's final close may sit from the official
+// on-chain Chainlink price before the level stops claiming verification. A real
+// weekly OHLC close vs. live spot legitimately differ; 10% is the honesty line.
+const ONCHAIN_MATCH_TOLERANCE_PCT = 10;
 
 // Hosts are tried in order. api.binance.com geo-blocks some datacenter IPs
 // (e.g. US-hosted serverless functions -> HTTP 451), so the official
@@ -209,6 +215,12 @@ export async function GET(req: Request) {
     : pickSeed(date).symbol;
   const isStock = STOCKS.includes(symbol);
 
+  // W6 — the official Robinhood Chain read. TODAY'S level only: an archive date
+  // is a PAST terrain, so comparing it against the current on-chain price would
+  // be meaningless. Stocks only, and a null quote simply changes nothing (the
+  // existing feed chain still decides, and synthetic stays explicitly synthetic).
+  const official = isStock && !isArchive ? await readOfficialQuote(symbol) : null;
+
   // P3.5 timeframe selector: ?interval= is whitelist-checked; the classic
   // weekly level stays the default. ARCHIVE stays daily-only in V1 (the
   // archive pipeline is weekly-shaped by design) and STOCK rails have no
@@ -242,6 +254,12 @@ export async function GET(req: Request) {
       if (live) {
         candles = live;
         if (isStock) source = "stooq";
+      } else if (official) {
+        // W6: no reachable OHLC history for this stock, but the official
+        // on-chain price IS real — anchor the derived shape to it (labeled
+        // "official price", never "live data") instead of going tokenless.
+        candles = anchoredCandles(date, LIMIT, official.price, interval);
+        source = "robinhood";
       } else {
         candles = syntheticCandles(date, LIMIT, interval);
         source = "synthetic";
@@ -250,10 +268,34 @@ export async function GET(req: Request) {
     cache.set(key, { ts: Date.now(), candles, source });
   }
 
-  const data: CandleData = {
-    seed: { date, symbol, interval, source },
-    candles,
-  };
+  const seed: SeedInfo = { date, symbol, interval, source };
+  // W6: attach the official on-chain verification when a feed was read. The
+  // terrain is never ALTERED to match the price — the delta is reported instead,
+  // so a divergence shows up honestly rather than being hidden.
+  if (official) {
+    const anchorPrice = candles[candles.length - 1]?.c ?? null;
+    const deltaPct =
+      anchorPrice !== null && official.price > 0
+        ? ((anchorPrice - official.price) / official.price) * 100
+        : null;
+    seed.onchain = {
+      chainId: official.chainId,
+      feed: official.feed,
+      feedSource: official.feedSource,
+      price: official.price,
+      decimals: official.decimals,
+      updatedAt: official.updatedAt,
+      ageSec: official.ageSec,
+      stale: official.stale,
+      roundId: official.roundId,
+      anchorPrice,
+      deltaPct,
+      verified:
+        !official.stale && deltaPct !== null && Math.abs(deltaPct) <= ONCHAIN_MATCH_TOLERANCE_PCT,
+    };
+  }
+
+  const data: CandleData = { seed, candles };
   // Run tokens are issued for every pinned non-synthetic terrain (binance,
   // stooq, vibe-launch); the synthetic fallback stays tokenless, and tokenless
   // runs are unscored client-side. The token lib is source-agnostic. P3.5:

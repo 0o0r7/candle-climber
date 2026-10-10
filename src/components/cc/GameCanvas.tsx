@@ -878,13 +878,15 @@ export default function GameCanvas() {
               the level-source pipeline produced. Flips the moment a fallback
               serves; synthetic terrain is unscored (honest, per pack §8). */}
           <div
-            className={`cc-chip cc-prov${prov ? (prov.real ? " cc-prov-real" : " cc-prov-synth") : " cc-prov-pending"}`}
+            className={`cc-chip cc-prov${prov ? (prov.kind === "live" ? " cc-prov-real" : prov.kind === "onchain" ? " cc-prov-onchain" : " cc-prov-synth") : " cc-prov-pending"}`}
             role="status"
             title={
               prov
-                ? prov.real
+                ? prov.kind === "live"
                   ? "today's terrain was built from the real feed that served this level"
-                  : "live feeds unreachable — deterministic synthetic terrain; scoring disabled"
+                  : prov.kind === "onchain"
+                    ? "no OHLC history for this stock — the terrain shape is derived and anchored to the official Robinhood Chain on-chain price"
+                    : "live feeds unreachable — deterministic synthetic terrain; scoring disabled"
                 : "resolving terrain source…"
             }
           >
@@ -897,6 +899,24 @@ export default function GameCanvas() {
               "SOURCE …"
             )}
           </div>
+          {/* W6: official Robinhood Chain verification — the live Chainlink feed
+              read on-chain for this stock level. Fresh + terrain agrees = the
+              green check; otherwise the honest delta (or STALE) is shown. */}
+          {data?.seed.onchain && (
+            <div
+              className={`cc-chip ${data.seed.onchain.verified ? "cc-chip-lime" : "cc-chip-mut"}`}
+              title={`official Chainlink feed ${data.seed.onchain.feed} on Robinhood Chain (chain ${data.seed.onchain.chainId}) · round ${data.seed.onchain.roundId} · updated ${new Date(data.seed.onchain.updatedAt * 1000).toISOString()} · resolved from ${data.seed.onchain.feedSource}`}
+            >
+              ON-CHAIN {data.seed.symbol} ${data.seed.onchain.price.toFixed(2)}
+              {data.seed.onchain.verified
+                ? " ✓"
+                : data.seed.onchain.stale
+                  ? " STALE"
+                  : data.seed.onchain.deltaPct !== null
+                    ? ` Δ${data.seed.onchain.deltaPct >= 0 ? "+" : ""}${data.seed.onchain.deltaPct.toFixed(1)}%`
+                    : ""}
+            </div>
+          )}
           <div className="cc-chip cc-chip-lime">{seedLabel}</div>
           {mutation && mutation.id !== "clean" && phase !== "loading" && (
             <div className="cc-chip cc-chip-mut" title={mutation.tagline}>{mutation.name}</div>
@@ -950,7 +970,7 @@ export default function GameCanvas() {
               <div className="cc-daily">
                 <span className="cc-daily-label" title={archive ? "Real history — practice terrain" : "Levels reset at 00:00 UTC"}>{archive ? "ARCHIVE CHART · PRACTICE" : "TODAY'S CHART · UTC"}</span>
                 <span className="cc-daily-symbol">{data.seed.symbol}</span>
-                <span className="cc-daily-src">{data.seed.source === "binance" || data.seed.source === "stooq" || data.seed.source === "yahoo" ? "live data" : data.seed.source === "vibe-launch" ? "vibe launch" : "synthetic"}</span>
+                <span className="cc-daily-src">{data.seed.source === "binance" || data.seed.source === "stooq" || data.seed.source === "yahoo" ? "live data" : data.seed.source === "vibe-launch" ? "vibe launch" : data.seed.source === "robinhood" ? "official on-chain price" : "synthetic"}</span>
               </div>
               {/* P7.3: a duel deep link IS the landing context — stays above the fold */}
               {duel && (
@@ -999,7 +1019,7 @@ export default function GameCanvas() {
                   {/* P3.5 timeframe selector — owner proposal. Crypto dailies only:
                       stock rails have no intraday feed, launch terrain is derived,
                       archive stays weekly (V1) — all three hide the chips. */}
-                  {!archive && !duel && data.seed.source !== "stooq" && data.seed.source !== "yahoo" && data.seed.source !== "vibe-launch" && (
+                  {!archive && !duel && data.seed.source !== "stooq" && data.seed.source !== "yahoo" && data.seed.source !== "vibe-launch" && data.seed.source !== "robinhood" && (
                     <div className="cc-tf-row" role="group" aria-label="Chart timeframe">
                       {INTERVALS.map((iv) => (
                         <button

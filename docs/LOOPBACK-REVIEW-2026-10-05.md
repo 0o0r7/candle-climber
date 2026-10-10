@@ -1,5 +1,10 @@
 # LOOPBACK REVIEW — Manus experiment 2, knowledge-driven ideation (independent audit, 2026-10-05)
 
+> ⚠️ **HISTORICAL — kept as a record, not current status (marked 2026-10-10).**
+> A one-off audit of the Manus loopback experiment; its actions are done or
+> superseded. Now-current sources: [`docs/README.md`](README.md) ·
+> [`docs/TRUTH-TABLE.md`](TRUTH-TABLE.md).
+
 > Reviewer: Super Z (main agent). Inputs: owner-uploaded zip (Manus project export), the four LOOPBACK deliverable docs, Manus's claims. Every verifiable claim re-checked; unverifiable ones flagged.
 
 ## 1. Verification results

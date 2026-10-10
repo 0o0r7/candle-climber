@@ -29,6 +29,7 @@
 | `yahoo`       | "live data"  | yes     | real Yahoo Finance weekly OHLC (stocks, primary) |
 | `stooq`       | "live data"  | yes     | real stooq weekly OHLC (stocks, fallback)|
 | `vibe-launch` | "vibe launch"| yes     | **DERIVED** terrain from real launch metrics — never labeled "live" |
+| `robinhood`   | "official on-chain price" | yes | **DERIVED** shape anchored to the REAL official Chainlink price on Robinhood Chain — never labeled "live" |
 | `synthetic`   | "synthetic"  | no      | deterministic seeded fallback (tokenless)|
 
 ---
@@ -149,7 +150,53 @@
 - **Failure mode**: fetch error, non-OK status, or no valid items → the daily
   **synthetic tokenless path** (same rule as every feed failure).
 
-## 5. Synthetic fallback (not a feed, but part of every failure path)
+## 5. Robinhood Chain on-chain price — official stock anchor (W6)
+
+- **What it is**: the ONLY official, machine-readable stock price on Robinhood
+  Chain — the per-ticker Chainlink `AggregatorV3Interface` feed, read straight
+  from the public MAINNET JSON-RPC (chain **4663**). No key, no vendor, no
+  dependency. Module `src/lib/robinhood-chain.ts`; standalone read
+  `GET /api/onchain/quote?symbol=TSLA`.
+- **Address source**: the Chainlink reference-data directory
+  `https://reference-data-directory.vercel.app/feeds-robinhood-mainnet.json`
+  (6h cache) is the primary resolver, per the docs' rule to read addresses from
+  the directory rather than hardcoding them. A 2026-10-07 verified snapshot
+  (`VERIFIED_STOCK_FEEDS`) is the offline/test fallback. Both are recorded with
+  raw evidence in `docs/ROBINHOOD-CHAIN-INTEGRATION.md`.
+- **Read**: `eth_call` → `latestRoundData()` + `decimals()` (never assumed). The
+  answer is already multiplier-adjusted (ERC-8056), so what is read IS the token
+  price — the multiplier is never applied twice.
+- **Validation (the honesty gate)**: chain must be 4663, answer > 0, round
+  complete (`updatedAt > 0`), not future-dated, within `MAX_QUOTE_AGE_SEC` (7d —
+  stock feeds publish 24/5 and legitimately HOLD their last value through
+  weekends/holidays, so a long market closure must not read as a dead feed). A
+  failed gate yields `null` — never a zero or silently stale price.
+- **Wiring**: stocks only, and TODAY's level only — an archive `?date=` chart is a
+  PAST terrain, so today's price is not comparable and is deliberately skipped.
+  The quote is attached as `seed.onchain`; the served terrain's final close is
+  compared against it (`deltaPct`) and `verified` requires fresh **and**
+  |deltaPct| ≤ 10%. The terrain is never silently rescaled to match a price.
+- **Anchored terrain** (`seed.source = "robinhood"`): when no OHLC feed can serve
+  the stock (Yahoo 429 / stooq anti-bot), the deterministic shape is rescaled so
+  its final close EQUALS the official price. Shape derived, anchor official —
+  labeled `OFFICIAL PRICE · <sym>`, **never** "live data". Server-vouched
+  (`runToken`), so it scores, exactly like the other derived source.
+- **Network split (important)**: the production Chainlink feeds exist on MAINNET
+  only. The testnet faucet Stock Tokens (chain 46630) are REAL ERC-20s but a
+  DIFFERENT contract set with MOCK feeds — used for identity only, never priced.
+- **Cost / license**: free, keyless, public JSON-RPC — one directory fetch
+  (6h cached) plus two `eth_call`s per stock level per UTC day (24h response
+  cache).
+- **Failure mode**: feed unknown (e.g. NFLX has no published feed), RPC error, or
+  failed validation → `seed.onchain` absent and `official: null`. The existing
+  feed chain is unchanged, and synthetic stays explicitly synthetic + tokenless.
+- **Re-verify (repeatable)**: `bun scripts/verify-feeds.ts` walks reachability →
+  every published official feed → testnet identity → two negative controls, and
+  exits 0 (verified) / 1 (feed failure while the chain is up) / 2 (network
+  unreachable) so a transport problem is never reported as a bad feed. Last
+  captured run + its evidence: `docs/ROBINHOOD-CHAIN-INTEGRATION.md` §7.
+
+## 6. Synthetic fallback (not a feed, but part of every failure path)
 
 - **Source**: `src/game/cc/level-source.ts` `syntheticCandles(date, LIMIT)` —
   `mulberry32(hashString("cc-daily-v1:" + date))` over the daily seed; identical

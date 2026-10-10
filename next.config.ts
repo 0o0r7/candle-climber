@@ -12,6 +12,23 @@ const nextConfig: NextConfig = {
     // but a red build locally should stop the ship).
     ignoreBuildErrors: false,
   },
+  // Base44 sandbox preview: the app is served through a proxy on a different
+  // origin (https://3000-<suffix>) and a different Host header, so Next's dev
+  // server must allow those for /_next/* dev assets and HMR. Applied ONLY when
+  // BASE44_PREVIEW_MODE === "1" (the platform sets it in the sandbox); with the
+  // flag unset or any other value the config is unchanged.
+  ...(process.env.BASE44_PREVIEW_MODE === "1"
+    ? {
+        allowedDevOrigins: [
+          ...(process.env.BASE44_PUBLIC_HOST_SUFFIX
+            ? [`3000-${process.env.BASE44_PUBLIC_HOST_SUFFIX}`]
+            : []),
+          ...(process.env.BASE44_SANDBOX_HOST_DOMAIN
+            ? [`.${process.env.BASE44_SANDBOX_HOST_DOMAIN}`]
+            : []),
+        ],
+      }
+    : {}),
   reactStrictMode: false,
   // Emit client-side source maps so @sentry/nextjs can upload them (Next 16
   // does NOT emit .map for client chunks by default — without this the Sentry
