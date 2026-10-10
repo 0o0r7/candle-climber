@@ -28,6 +28,7 @@ next-env.d.ts
 /research/
 /ideation/
 /scripts/*
+!/scripts/deathcard/
 !/scripts/e2e-gamer-bot.ts
 /archive/
 /.zscripts/
