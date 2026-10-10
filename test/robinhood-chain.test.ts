@@ -25,6 +25,7 @@ import {
   ROBINHOOD_TESTNET,
 } from "@/lib/robinhood-chain";
 import { anchoredCandles } from "@/game/cc/level-source";
+import { signRunToken, verifyRunToken } from "@/lib/run-token";
 
 /* ------------------- exact live eth_call payloads (2026-10-07) ------------- */
 
@@ -228,5 +229,34 @@ describe("level-source — official-anchor terrain (W6)", () => {
     // a nonsense anchor falls back to the unanchored shape rather than NaN
     const bad = anchoredCandles("2026-10-07", 12, 0);
     expect(bad.every((c) => Number.isFinite(c.c))).toBe(true);
+  });
+
+  // F1 (2026-10-10, owner-delegated decision): the anchored "robinhood" terrain
+  // stays SCOREABLE — the candles route's pre-existing non-synthetic run-token
+  // gate covers it (vibe-launch precedent: derived-but-real feeds are
+  // scoreable; UI says ON-CHAIN, never "live data"). This pins the lib side of
+  // that contract: a token signed over the exact anchored shape verifies, and
+  // the token lib carries no source discrimination.
+  test("F1: anchored terrain is scoreable — run-token contract accepts it end-to-end", () => {
+    const saved = process.env.RUN_TOKEN_SECRET;
+    process.env.RUN_TOKEN_SECRET = "f1-pin-secret";
+    try {
+      const candles = anchoredCandles("2026-10-07", 220, 376.33);
+      const candleJson = JSON.stringify(candles);
+      const token = signRunToken("TSLA", "2026-10-07", candles.length, candleJson, "1w");
+      expect(typeof token).toBe("string");
+      expect(token.includes(".")).toBe(true);
+      // roundtrip on the identical payload (what the leaderboard does)
+      expect(verifyRunToken(token)).not.toBeNull();
+      // a flipped signature char is rejected (the anti-cheat core)
+      const forged = token.replace(/.$/, (ch) => (ch === "A" ? "B" : "A"));
+      expect(forged).not.toBe(token);
+      expect(verifyRunToken(forged)).toBeNull();
+      // and the anchored terrain itself is anchor-sensitive (not a fixed shape)
+      expect(JSON.stringify(anchoredCandles("2026-10-07", 220, 376.34))).not.toBe(candleJson);
+    } finally {
+      if (saved === undefined) delete process.env.RUN_TOKEN_SECRET;
+      else process.env.RUN_TOKEN_SECRET = saved;
+    }
   });
 });
