@@ -2,6 +2,8 @@ import { describe, expect, it } from "bun:test";
 import {
   DEFAULT_RPC_URL,
   ROBINHOOD_CHAIN_ID,
+  ROBINHOOD_CHAIN_ID_HEX,
+  ROBINHOOD_CHAIN_PARAMS,
   TIER_HOLD_WEI,
   TIER_WHALE_WEI,
   WICK_DECIMALS,
@@ -9,8 +11,10 @@ import {
   balanceToTier,
   decodeHexQuantity,
   encodeBalanceOf,
+  ensureRobinhoodChain,
   formatWick,
   isValidAddress,
+  type EthLikeProvider,
 } from "@/lib/wallet";
 
 // P4.2 (E2) — pure helpers for the cosmetic-only $WICK Balance Gate.
@@ -76,5 +80,175 @@ describe("P4.2 wallet helpers", () => {
     // 0.9999 → truncates to 0.999, never rounds to 1.000
     expect(formatWick(9999n * 10n ** 14n)).toBe("0.999");
     expect(formatWick(TIER_HOLD_WEI)).toBe("1,000");
+  });
+});
+
+// Network auto-setup (owner-reported bug 2026-10-11: connecting never asked the
+// wallet to switch/add Robinhood testnet — it only showed "WRONG NETWORK").
+
+type RpcCall = { method: string; params?: unknown[] };
+
+/** Fake injected provider: records calls, scripted per-method behavior. */
+function fakeProvider(opts: {
+  chain?: string; // starting eth_chainId (default 0x1 = wrong)
+  switchError?: Error; // thrown ONCE by wallet_switchEthereumChain
+  addError?: Error; // thrown ONCE by wallet_addEthereumChain
+  autoSwitchOnAdd?: boolean; // wallet auto-switches after add (MetaMask does)
+  switchLies?: boolean; // switch "succeeds" but chain never changes
+}) {
+  const calls: RpcCall[] = [];
+  let chain = opts.chain ?? "0x1";
+  const prov: EthLikeProvider & { calls: RpcCall[] } = {
+    calls,
+    request: (a: { method: string; params?: unknown[] }) => {
+      calls.push({ method: a.method, params: a.params });
+      if (a.method === "eth_chainId") return Promise.resolve(chain);
+      if (a.method === "wallet_switchEthereumChain") {
+        if (opts.switchError) {
+          const e = opts.switchError;
+          opts.switchError = undefined;
+          return Promise.reject(e);
+        }
+        if (!opts.switchLies) {
+          chain = (a.params?.[0] as { chainId: string }).chainId;
+        }
+        return Promise.resolve(null);
+      }
+      if (a.method === "wallet_addEthereumChain") {
+        if (opts.addError) {
+          const e = opts.addError;
+          opts.addError = undefined;
+          return Promise.reject(e);
+        }
+        if (opts.autoSwitchOnAdd) {
+          chain = (a.params?.[0] as { chainId: string }).chainId;
+        }
+        return Promise.resolve(null);
+      }
+      return Promise.reject(new Error(`unexpected method ${a.method}`));
+    },
+  };
+  return prov;
+}
+
+describe("ensureRobinhoodChain (network switch/add)", () => {
+  it("EIP-3085 params are pinned (drift = wallets add the wrong network)", () => {
+    expect(ROBINHOOD_CHAIN_ID_HEX).toBe("0xb626");
+    expect(ROBINHOOD_CHAIN_PARAMS.chainId).toBe("0xb626");
+    expect(ROBINHOOD_CHAIN_PARAMS.chainName).toBe("Robinhood Chain Testnet");
+    expect(ROBINHOOD_CHAIN_PARAMS.nativeCurrency).toEqual({ name: "Ether", symbol: "ETH", decimals: 18 });
+    expect(ROBINHOOD_CHAIN_PARAMS.rpcUrls).toEqual([DEFAULT_RPC_URL]);
+    expect(ROBINHOOD_CHAIN_PARAMS.blockExplorerUrls).toEqual(["https://explorer.testnet.chain.robinhood.com"]);
+  });
+
+  it("already on 0xb626 → ok with ZERO switch/add prompts", async () => {
+    const eth = fakeProvider({ chain: "0xb626" });
+    const r = await ensureRobinhoodChain(eth);
+    expect(r).toEqual({ ok: true, chainId: "0xb626", added: false, switched: false });
+    expect(eth.calls.map((c) => c.method)).toEqual(["eth_chainId"]);
+  });
+
+  it("wrong chain, wallet knows it → single switch, ok", async () => {
+    const eth = fakeProvider({ chain: "0x1" });
+    const r = await ensureRobinhoodChain(eth);
+    expect(r).toEqual({ ok: true, chainId: "0xb626", added: false, switched: true });
+    expect(eth.calls.map((c) => c.method)).toEqual(["eth_chainId", "wallet_switchEthereumChain", "eth_chainId"]);
+    expect(eth.calls[1].params).toEqual([{ chainId: "0xb626" }]);
+  });
+
+  it("4902 unrecognized chain → add with full EIP-3085 params → auto-switch wallet → ok", async () => {
+    const eth = fakeProvider({ chain: "0x1", autoSwitchOnAdd: true, switchError: Object.assign(new Error("Unrecognized chain"), { code: 4902 }) });
+    const r = await ensureRobinhoodChain(eth);
+    expect(r).toEqual({ ok: true, chainId: "0xb626", added: true, switched: false });
+    expect(eth.calls.map((c) => c.method)).toEqual([
+      "eth_chainId",
+      "wallet_switchEthereumChain",
+      "wallet_addEthereumChain",
+      "eth_chainId",
+    ]);
+    const addParams = eth.calls[2].params as unknown[];
+    expect(addParams).toHaveLength(1);
+    expect(addParams[0]).toEqual(ROBINHOOD_CHAIN_PARAMS);
+  });
+
+  it("wallet adds WITHOUT auto-switching → helper issues one follow-up switch → ok", async () => {
+    const eth = fakeProvider({
+      chain: "0x1",
+      autoSwitchOnAdd: false,
+      switchError: Object.assign(new Error("Unrecognized chain"), { code: 4902 }),
+    });
+    const r = await ensureRobinhoodChain(eth);
+    expect(r).toEqual({ ok: true, chainId: "0xb626", added: true, switched: true });
+    expect(eth.calls.map((c) => c.method)).toEqual([
+      "eth_chainId",
+      "wallet_switchEthereumChain",
+      "wallet_addEthereumChain",
+      "eth_chainId",
+      "wallet_switchEthereumChain",
+      "eth_chainId",
+    ]);
+  });
+
+  it("user rejects the switch (4001) → rejected, and the add-network popup is NEVER fired", async () => {
+    const eth = fakeProvider({ chain: "0x1", switchError: Object.assign(new Error("user rejected"), { code: 4001 }) });
+    const r = await ensureRobinhoodChain(eth);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.reason).toBe("rejected");
+      expect(r.code).toBe(4001);
+      expect(r.message).toContain("rejected");
+    }
+    expect(eth.calls.map((c) => c.method)).toEqual(["eth_chainId", "wallet_switchEthereumChain"]);
+  });
+
+  it("user rejects the ADD (4001) → rejected with honest message", async () => {
+    const eth = fakeProvider({
+      chain: "0x1",
+      switchError: Object.assign(new Error("Unrecognized chain"), { code: 4902 }),
+      addError: Object.assign(new Error("user rejected"), { code: 4001 }),
+    });
+    const r = await ensureRobinhoodChain(eth);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe("rejected");
+  });
+
+  it("-32002 (request popup already open) → pending hard-stop on both switch and add", async () => {
+    const sw = fakeProvider({ chain: "0x1", switchError: Object.assign(new Error("already pending"), { code: -32002 }) });
+    const r1 = await ensureRobinhoodChain(sw);
+    expect(r1.ok).toBe(false);
+    if (!r1.ok) expect(r1.reason).toBe("pending");
+    expect(sw.calls.map((c) => c.method)).toEqual(["eth_chainId", "wallet_switchEthereumChain"]);
+
+    const ad = fakeProvider({
+      chain: "0x1",
+      switchError: Object.assign(new Error("Unrecognized chain"), { code: 4902 }),
+      addError: Object.assign(new Error("already pending"), { code: -32002 }),
+    });
+    const r2 = await ensureRobinhoodChain(ad);
+    expect(r2.ok).toBe(false);
+    if (!r2.ok) expect(r2.reason).toBe("pending");
+  });
+
+  it("switch silently fails (wallet lies) → honest unknown with the FINAL chain id in the message", async () => {
+    const eth = fakeProvider({ chain: "0x1", switchLies: true });
+    const r = await ensureRobinhoodChain(eth);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.reason).toBe("unknown");
+      expect(r.message).toContain("0x1");
+      expect(r.message).toContain("0xb626");
+    }
+  });
+
+  it("never throws — a provider that rejects eth_chainId still returns a failure object", async () => {
+    const eth: EthLikeProvider = {
+      request: () => Promise.reject(new Error("provider locked")),
+    };
+    const r = await ensureRobinhoodChain(eth);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.reason).toBe("unknown");
+      expect(r.message).toContain("provider locked");
+    }
   });
 });

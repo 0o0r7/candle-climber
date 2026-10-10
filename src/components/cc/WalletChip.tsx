@@ -10,6 +10,7 @@ import {
   ROBINHOOD_CHAIN_ID,
   WALLET_ADDRESS_KEY,
   balanceToTier,
+  ensureRobinhoodChain,
   formatWick,
   isValidAddress,
   type WalletTier,
@@ -17,6 +18,9 @@ import {
 
 type EthProvider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  // EIP-1193 event surface (optional — not every injected provider has it).
+  on?: (event: string, cb: (args: unknown) => void) => void;
+  removeListener?: (event: string, cb: (args: unknown) => void) => void;
 };
 
 type ChipState = "idle" | "busy" | "wrongnet" | "rpcdown";
@@ -32,6 +36,7 @@ export default function WalletChip() {
   const [tier, setTier] = useState<WalletTier>("none");
   const [state, setState] = useState<ChipState>("idle");
   const [hasProvider, setHasProvider] = useState(false);
+  const [netMsg, setNetMsg] = useState<string | null>(null); // why the network is wrong
   const queried = useRef<string | null>(null);
 
   const query = useCallback(async (a: string) => {
@@ -61,18 +66,50 @@ export default function WalletChip() {
   useEffect(() => {
     let alive = true;
     // provider/localStorage reads are async callbacks (react-hooks: no sync
-    // setState in effect body) — mount-time one-shot, not a subscription.
+    // setState in effect body) — mount-time one-shot + chainChanged sub.
+    const eth = (window as unknown as { ethereum?: EthProvider }).ethereum;
     void (async () => {
-      const eth = (window as unknown as { ethereum?: EthProvider }).ethereum;
       const saved = localStorage.getItem(WALLET_ADDRESS_KEY);
       if (alive) setHasProvider(!!eth);
       if (alive && isValidAddress(saved)) {
         setAddr(saved);
-        void query(saved);
+        // Boot check is READ-ONLY (eth_chainId): never auto-prompt a switch
+        // popup on page load — the WRONG NETWORK chip click does that.
+        try {
+          const chain = eth
+            ? String(await eth.request({ method: "eth_chainId" })).toLowerCase()
+            : "";
+          if (alive && chain && parseInt(chain, 16) !== ROBINHOOD_CHAIN_ID) {
+            setState("wrongnet");
+            return;
+          }
+        } catch {
+          // fail-open: boot chain check is cosmetic — badge still shows
+        }
+        if (alive) void query(saved);
       }
     })();
+    // User switches networks inside the wallet → the chip follows honestly.
+    const onChainChanged = (c: unknown) => {
+      if (!alive || typeof c !== "string") return;
+      const id = parseInt(c, 16);
+      if (!Number.isFinite(id)) return;
+      if (id !== ROBINHOOD_CHAIN_ID) {
+        setNetMsg(null);
+        setState("wrongnet");
+      } else {
+        setState("idle");
+        const a = localStorage.getItem(WALLET_ADDRESS_KEY);
+        if (isValidAddress(a)) {
+          queried.current = null;
+          void query(a);
+        }
+      }
+    };
+    eth?.on?.("chainChanged", onChainChanged);
     return () => {
       alive = false;
+      eth?.removeListener?.("chainChanged", onChainChanged);
     };
   }, [query]);
 
@@ -82,14 +119,18 @@ export default function WalletChip() {
     setState("busy");
     try {
       const accounts = (await eth.request({ method: "eth_requestAccounts" })) as string[];
-      const chain = (await eth.request({ method: "eth_chainId" })) as string;
-      if (parseInt(chain, 16) !== ROBINHOOD_CHAIN_ID) {
-        setState("wrongnet");
-        return;
-      }
       const a = accounts?.[0];
       if (!isValidAddress(a)) {
         setState("idle");
+        return;
+      }
+      // ASK the wallet to switch — and ADD Robinhood testnet when it's unknown
+      // (EIP-3326 switch + EIP-3085 add). A rejection/ failure never blocks
+      // play; it lands the chip in the honest WRONG NETWORK state.
+      const net = await ensureRobinhoodChain(eth);
+      if (!net.ok) {
+        setNetMsg(net.message);
+        setState("wrongnet");
         return;
       }
       localStorage.setItem(WALLET_ADDRESS_KEY, a);
@@ -107,12 +148,15 @@ export default function WalletChip() {
   if (!hasProvider && !addr) return null;
 
   if (state === "wrongnet") {
+    const tip = netMsg
+      ? `Robinhood Chain testnet (46630) — ${netMsg}. Click to retry the switch/add request.`
+      : "Switch your wallet to Robinhood Chain testnet (46630) — adds the network to your wallet if missing. Cosmetic badge only, never affects rank.";
     return (
       <button
         type="button"
         className="cc-chip cc-wallet-chip"
         onClick={connect}
-        title="Switch your wallet to Robinhood Chain testnet (46630) — cosmetic badge only, never affects rank."
+        title={tip}
       >
         WRONG NETWORK
       </button>
