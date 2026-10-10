@@ -297,8 +297,12 @@ export async function GET(req: Request) {
 
   const data: CandleData = { seed, candles };
   // Run tokens are issued for every pinned non-synthetic terrain (binance,
-  // stooq, vibe-launch); the synthetic fallback stays tokenless, and tokenless
-  // runs are unscored client-side. The token lib is source-agnostic. P3.5:
+  // stooq, yahoo, vibe-launch, robinhood-anchored); the synthetic fallback
+  // stays tokenless, and tokenless runs are unscored client-side. F1 decision
+  // (2026-10-10, owner-delegated): anchored robinhood terrain stays scoreable
+  // per the vibe-launch precedent — derived-but-real feeds are scoreable, and
+  // the UI chip says ON-CHAIN, never "live data". The token lib is
+  // source-agnostic (contract pinned in test/robinhood-chain.test.ts). P3.5:
   // the token binds the timeframe, so per-tf boards stay server-authoritative.
   if (source !== "synthetic") {
     data.runToken = signRunToken(symbol, date, candles.length, JSON.stringify(candles), interval);
