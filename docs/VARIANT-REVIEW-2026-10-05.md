@@ -1,5 +1,11 @@
 # VARIANT REVIEW — Candle Current by Manus (independent audit, 2026-10-05)
 
+> ⚠️ **HISTORICAL — kept as a record, not current status (marked 2026-10-10).**
+> The review that produced merge-back wave 1; wave 1 was **adopted**, so its
+> outcome now lives in [`docs/ECONOMY-LAWS.md`](ECONOMY-LAWS.md) and
+> `src/game/cc/level-source.ts` (provenance badge). Now-current sources:
+> [`docs/README.md`](README.md) · [`docs/TRUTH-TABLE.md`](TRUTH-TABLE.md).
+
 > Reviewer: Super Z (main agent). Inputs: owner-uploaded zip of the Manus deliverables, live preview URL, git remotes. Every claim below was re-verified from evidence, not taken from Manus's report.
 
 ## 1. Verification results (facts, live-checked)

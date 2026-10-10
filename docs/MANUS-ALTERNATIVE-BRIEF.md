@@ -1,5 +1,9 @@
 # MANUS ALTERNATIVE BRIEF — ecosystem-native new game (v1, 2026-10-05)
 
+> ⚠️ **HISTORICAL — kept as a record, not current status (marked 2026-10-10).**
+> A one-shot brief for an external agent; no longer active. Now-current sources:
+> [`docs/README.md`](README.md) · [`docs/TRUTH-TABLE.md`](TRUTH-TABLE.md).
+
 > **Usage:** send the block below as ONE single first message to Manus. Nothing else needs to follow.
 > **Run-1 lessons baked in:** KB reading via GitHub connector CONFIRMED working (Manus cited research/vibevibe/*.md). Vercel project creation CONFIRMED 403 (scoped connector) — this brief does not require Vercel at all; temporary sandbox preview URL is accepted.
 
