@@ -29,6 +29,20 @@ export const PLAYER_H = 40;
 export const CAM_BASE = 148; // was 175 — readable start, learn the chart first
 export const CAM_ACCEL = 3.2; // was 5.5 — the climb heats up slower
 export const CAM_MAX = 400; // was 470 — late-game still tense, no longer frantic
+// CAMERA-FRAME fix (owner report 2026-10-11): a full hold-jump peaks at ≈310px
+// (65% of the view) — the old single-lerp camera chased the rise 1:1 and the
+// takeoff platform + every candle around it slid OUT of the frame bottom
+// (deterministic repro: −92px base, −177px under the low-G mutation).
+// Asymmetric follow, platformer-standard:
+//   · RISING inside the frame (player still below the CAM_TOP_WINDOW line):
+//     the camera holds STILL — terrain keeps its read while the player arcs.
+//   · RISING past the window: gentle catch-up (CAM_RISE_LERP) — the player can
+//     never leave the top of the frame, the world never teleports.
+//   · FALLING / grounded: classic follow (CAM_LERP) — re-centers after landing.
+export const CAM_LERP = 4.2;       // falling/grounded follow (unchanged feel)
+export const CAM_RISE_LERP = 3.0;  // catch-up once the player nears the top
+export const CAM_TOP_WINDOW = 0.3; // player may rise to 30% from the top before the camera follows
+export const CAM_GROUND_STRIP = 24; // takeoff platform keeps this strip visible at the frame bottom
 
 export type SfxName = "jump" | "land" | "crumble" | "milestone" | "victory";
 
@@ -60,6 +74,10 @@ export class Engine {
   rush = false;
   // camera / world
   camX = 0; camY = 0; speed = CAM_BASE;
+  // CAMERA-FRAME fix: y of the last platform the player left the ground from.
+  // The camera may never rise so far that this platform leaves the frame —
+  // "where did I jump from" is terrain the player MUST keep reading.
+  lastGroundY: number;
   time = 0;
   // run stats
   score = 0; candlesPassed = 0; streak = 0; bestStreak = 0;
@@ -91,6 +109,7 @@ export class Engine {
     this.py = start.y - 140;
     this.camY = this.py - VIEW_H * 0.55;
     this.camX = start.x + PLATFORM_W / 2 - VIEW_W * PLAYER_X_FRAC;
+    this.lastGroundY = start.y;
   }
 
   get playerScreenX() { return this.px - this.camX; }
@@ -254,6 +273,7 @@ export class Engine {
           this.grounded = true;
           this.coyote = COYOTE;
           this.groundPlat = p;
+          this.lastGroundY = p.y;
           if (p.summit) this.graduate();
           if (p.crumble && p.state === "solid") { p.state = "crumbling"; p.crumbleT = 0; this.cb.onSfx?.("crumble"); }
           break;
@@ -290,7 +310,18 @@ export class Engine {
       this.die(this.lastLandUp === false ? "crumbled" : "fell");
     }
 
-    this.camY += (this.py - VIEW_H * 0.52 - this.camY) * Math.min(1, dt * 4.2);
+    const desired = this.py - VIEW_H * 0.52;
+    const rising = this.vy < 0 && !this.grounded;
+    const wantUp = desired < this.camY;
+    const k = !wantUp ? CAM_LERP
+      : rising && this.py >= this.camY + VIEW_H * CAM_TOP_WINDOW ? 0
+      : rising ? CAM_RISE_LERP
+      : CAM_LERP;
+    this.camY += (desired - this.camY) * Math.min(1, dt * k);
+    // hard guarantee: the takeoff platform never slides out of the bottom of
+    // the frame (a CAM_GROUND_STRIP-wide strip of it stays visible)
+    const camFloor = this.lastGroundY - VIEW_H + CAM_GROUND_STRIP;
+    if (this.camY < camFloor) this.camY = camFloor;
     if (this.camY > 0) this.camY = 0;
     this.shake = Math.max(0, this.shake - dt * 30);
     this.stepParticles(dt);
