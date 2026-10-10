@@ -2,9 +2,13 @@
 pragma solidity ^0.8.26;
 
 /// @title CCDeathCard — Candle Climber "Death Card" NFT (Robinhood Chain TESTNET demo)
-/// @notice Minimal, non-upgradeable ERC-721 + ERC-721-Metadata. Mint is owner-only
-///         (the key-protected server minter from docs/DEATHCARD-NFT-TESTNET-NOTE.md
-///         architecture B) and idempotent per run key: one card per run, forever.
+/// @notice Minimal, non-upgradeable ERC-721 + ERC-721-Metadata. Mint is gated to
+///         owner() or minter(): minter is the key-protected server automation key
+///         (architecture B, docs/DEATHCARD-NFT-TESTNET-NOTE.md) and ownership is
+///         TRANSFERRABLE via setOwner() so the project's real launch wallet holds
+///         ultimate control — the owner can rotate or revoke the minter at any
+///         time (revocation beats key deletion: reversible, auditable, keeps the
+///         claim UX alive). Idempotent per run key: one card per run, forever.
 ///         Metadata is a string the minter passes — an inline data-URI JSON of the
 ///         run's own honest facts (ticker, terrain source, peak height, UTC date,
 ///         interval, rank). Nothing is invented on-chain; no scarcity or utility
@@ -14,9 +18,14 @@ contract CCDeathCard {
     string public name = "Candle Climber Death Card";
     string public symbol = "CCDC";
 
-    /// Deployer = the server minter EOA. Not upgradeable, not renounced-and-lost:
-    /// the only power is mint() on the testnet demo contract.
-    address public immutable owner;
+    /// Contract admin — starts as the deployer (burner), TRANSFERABLE via
+    /// setOwner() so the $WICK launch wallet (project owner) takes ultimate
+    /// control right after deployment.
+    address public owner;
+
+    /// Automation key allowed to mint() — the server minter EOA. Settable and
+    /// revocable (setMinter(0)) by the owner at any time.
+    address public minter;
 
     uint256 public nextId = 1;
 
@@ -35,9 +44,12 @@ contract CCDeathCard {
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
     event Approval(address indexed tokenOwner, address indexed approved, uint256 indexed tokenId);
     event ApprovalForAll(address indexed tokenOwner, address indexed operator, bool approved);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event MinterChanged(address indexed previousMinter, address indexed newMinter);
 
     constructor() {
         owner = msg.sender;
+        minter = msg.sender;
     }
 
     modifier onlyOwner() {
@@ -45,10 +57,28 @@ contract CCDeathCard {
         _;
     }
 
+    modifier canMint() {
+        require(msg.sender == owner || msg.sender == minter, "NOT_MINTER");
+        _;
+    }
+
+    /// Hand the contract's ultimate control to the project's real wallet.
+    function setOwner(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "ZERO_OWNER");
+        emit OwnershipTransferred(owner, newOwner);
+        owner = newOwner;
+    }
+
+    /// Rotate or revoke (address(0)) the server automation key.
+    function setMinter(address newMinter) external onlyOwner {
+        emit MinterChanged(minter, newMinter);
+        minter = newMinter;
+    }
+
     /// Mint one card for `to`, bound to `runKey`. Reverts on re-mint of the same run.
     function mint(address to, bytes32 runKey, string calldata metadata)
         external
-        onlyOwner
+        canMint
         returns (uint256 id)
     {
         require(mintedByRun[runKey] == 0, "RUN_MINTED");

@@ -5,8 +5,11 @@
 //
 // Usage: bun scripts/deathcard/deploy.ts [--gas-mult 2] [--wait 120]
 // Key:   ~/.cc-minter-key  (or MINTER_KEY env). Preflight refuses to run unfunded.
+// Owner hand-over: set DEATHCARD_OWNER=<launch wallet> to setOwner() the project's
+// real wallet right after deployment (the burner stays as the revocable minter).
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { keccak_256 } from "@noble/hashes/sha3.js";
 import {
   hexToBytes,
   hexQuantityToBytes,
@@ -139,10 +142,45 @@ const owner = await decodeFn("0x8da5cb5b", true); // owner()
 console.log("verify:", { name, symbol, owner });
 
 if (owner.toLowerCase() !== minter.toLowerCase()) throw new Error(`owner ${owner} ≠ minter ${minter}`);
-console.log("owner == minter ✓");
+console.log("owner == minter ✓ (burner starts as admin)");
+
+// ------------------------------------------------- ownership hand-over
+// Owner's plan: the burner deploys, then setOwner() hands ultimate control to
+// the project's real $WICK launch wallet. The burner key is NOT destroyed —
+// it stays as the owner-revocable server minter (architecture B auto-mint);
+// the launch wallet can rotate or revoke it anytime via setMinter().
+const OWNER_TARGET = (process.env.DEATHCARD_OWNER || "").trim();
+const sel = (sig: string) =>
+  "0x" + bytesToHex(keccak_256(new TextEncoder().encode(sig)).slice(0, 4));
+const padAddr = (a: string) => a.toLowerCase().replace(/^0x/, "").padStart(64, "0");
+let finalOwner = owner;
+if (OWNER_TARGET) {
+  if (!/^0x[0-9a-fA-F]{40}$/.test(OWNER_TARGET)) throw new Error(`DEATHCARD_OWNER is not an address: ${OWNER_TARGET}`);
+  const data = sel("setOwner(address)") + padAddr(OWNER_TARGET);
+  const n = bytesToBigint(hexQuantityToBytes((await rpc("eth_getTransactionCount", [minter, "pending"])) as string));
+  const gp = (bytesToBigint(hexQuantityToBytes((await rpc("eth_gasPrice")) as string)) * GAS_MULT) | 0n;
+  const tx = signLegacyTx({ nonce: n, gasPrice: gp, gas: 80_000n, to: address, value: 0n, data, chainId: CHAIN_ID }, key);
+  console.log("setOwner tx:", tx.txHash);
+  const h = (await rpc("eth_sendRawTransaction", [tx.rawHex])) as string;
+  let r: { status?: string } | null = null;
+  for (let i = 0; i < WAIT_S; i++) {
+    await new Promise((res) => setTimeout(res, 1000));
+    r = await rpc("eth_getTransactionReceipt", [h]) as typeof r;
+    if (r) break;
+    if (i % 10 === 9) console.log(`  waiting… ${i + 1}s`);
+  }
+  if (!r) throw new Error(`no setOwner receipt after ${WAIT_S}s — check ${h}`);
+  if (r.status !== "0x1") throw new Error(`setOwner FAILED on-chain: status ${r.status}`);
+  finalOwner = await decodeFn("0x8da5cb5b", true);
+  if (finalOwner.toLowerCase() !== OWNER_TARGET.toLowerCase()) throw new Error(`owner ${finalOwner} ≠ target ${OWNER_TARGET}`);
+  console.log("ownership transferred →", finalOwner, "✓ (burner = owner-revocable minter)");
+}
+
+const minterNow = await decodeFn(sel("minter()"), true);
+console.log("final state:", { owner: finalOwner, minter: minterNow });
 
 // ------------------------------------------------------------------ record
-const rec = { address, chainId: CHAIN_ID, txHash, deployedAt: new Date().toISOString(), deployer: minter, name, symbol };
+const rec = { address, chainId: CHAIN_ID, txHash, deployedAt: new Date().toISOString(), deployer: minter, owner: finalOwner, minter: minterNow, name, symbol };
 writeFileSync(join(ROOT, "src/lib/deathcard/address.json"), JSON.stringify(rec, null, 2) + "\n");
 console.log("recorded → src/lib/deathcard/address.json (commit this)");
 console.log("\nmint calldata self-check (first mint):");
