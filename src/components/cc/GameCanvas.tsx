@@ -14,7 +14,7 @@ import PredictionPanel from "@/components/cc/PredictionPanel";
 import { WALLET_ADDRESS_KEY, isValidAddress } from "@/lib/wallet";
 // LAW 1.2 hardening: official-lane ownership proof — the browser builds the
 // EXACT message the server verifies (isomorphic template, no crypto import)
-import { buildProofMessage } from "@/lib/proof-message";
+import { buildProofMessage, buildMintProofMessage } from "@/lib/proof-message";
 import { isArchiveDate } from "@/game/cc/archive";
 import { render } from "@/game/cc/render";
 import { renderV2 } from "@/game/cc/render-v2";
@@ -121,6 +121,11 @@ export default function GameCanvas() {
   const [laneNote, setLaneNote] = useState<string | null>(null);
   const [rank, setRank] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Death Card mint (TESTNET) — post-death detour, wallet-only, never blocks a
+  // retry. States: idle → signing → sending → confirming → minted | error.
+  const [mintState, setMintState] = useState<"idle" | "signing" | "sending" | "confirming" | "minted" | "error">("idle");
+  const [mintMsg, setMintMsg] = useState<string | null>(null);
+  const [mintUrl, setMintUrl] = useState<string | null>(null);
   const [muted, setMutedState] = useState(false);
   // P2.4: yesterday's episode — honest aggregates over the day's submissions
   const [report, setReport] = useState<ReportResp | null>(null);
@@ -598,6 +603,9 @@ export default function GameCanvas() {
     setResult(null);
     setRank(null);
     setLaneNote(null);
+    setMintState("idle"); // fresh run — the mint detour resets with it
+    setMintMsg(null);
+    setMintUrl(null);
     setGraduated(false);
     setWorld2(false);
     setPracticeNote(null);
@@ -913,6 +921,99 @@ export default function GameCanvas() {
     }
   };
 
+  // Death Card mint (TESTNET) — architecture B: the SERVER minter pays testnet
+  // gas; the wallet only personal_signs the purpose-separated mint message.
+  // Honest states end to end: a rejected/absent provider never blocks play and
+  // every failure says what actually happened. Mirror of the board-proof clamps.
+  const mintDeathCard = async () => {
+    if (!result || !data || !data.runToken || mintState === "signing" || mintState === "sending" || mintState === "confirming") return;
+    const walletAddr = localStorage.getItem(WALLET_ADDRESS_KEY);
+    if (!walletAddr || !isValidAddress(walletAddr)) {
+      setMintState("error");
+      setMintMsg("connect a wallet first — minting is wallet-only (guest play is never affected)");
+      return;
+    }
+    setMintState("signing");
+    setMintMsg(null);
+    try {
+      const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+      if (!eth) throw new Error("no wallet provider in this browser");
+      const ts = Date.now();
+      const msg = buildMintProofMessage(
+        {
+          score: Math.floor(result.score),
+          candlesPassed: Math.floor(result.candlesPassed),
+          bestStreak: Math.max(0, Math.min(999, Math.floor(result.bestStreak))),
+          date: data.seed.date,
+          interval: tf,
+          wallet: walletAddr.toLowerCase(),
+        },
+        ts,
+      );
+      const msgHex = "0x" + [...new TextEncoder().encode(msg)].map((b) => b.toString(16).padStart(2, "0")).join("");
+      // popup must not pin the panel forever: 30s → give up with honest copy
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      let signature: string;
+      try {
+        const s = (await Promise.race([
+          eth.request({ method: "personal_sign", params: [msgHex, walletAddr] }),
+          new Promise<never>((_, rej) => {
+            timer = setTimeout(() => rej(new Error("sign-timeout")), 30_000);
+          }),
+        ])) as unknown;
+        if (typeof s !== "string" || !/^0x[0-9a-fA-F]{130}$/.test(s)) throw new Error("wallet returned no usable signature");
+        signature = s;
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+      setMintState("sending");
+      const res = await fetch("/api/deathcard/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          runToken: data.runToken,
+          address: walletAddr,
+          signature,
+          ts,
+          score: Math.floor(result.score),
+          candlesPassed: Math.floor(result.candlesPassed),
+          bestStreak: Math.max(0, Math.min(999, Math.floor(result.bestStreak))),
+        }),
+      });
+      const j = (await res.json()) as {
+        ok?: boolean; already?: boolean; status?: string; txHash?: string;
+        tokenId?: number; explorerUrl?: string; error?: string; note?: string;
+      };
+      if (!res.ok || !j.ok) {
+        setMintState("error");
+        setMintMsg(j.error ? (j.note ? `${j.error} — ${j.note}` : j.error) : "mint request failed");
+        return;
+      }
+      // mined/pending/already — a pending answer is polled to a final state
+      let final = j;
+      if (final.status === "pending" && final.txHash) {
+        setMintState("confirming");
+        for (let i = 0; i < 30; i++) {
+          await new Promise((r) => setTimeout(r, 2000));
+          const st = await fetch(`/api/deathcard/claim?txHash=${final.txHash}`).then((r) => r.json()) as { status?: string; tokenId?: number; explorerUrl?: string };
+          if (st.status === "mined" || st.status === "failed") { final = { ...j, ...st }; break; }
+        }
+      }
+      if (final.status === "failed") {
+        setMintState("error");
+        setMintMsg("the mint transaction failed on-chain — nothing was charged to you");
+        return;
+      }
+      setMintState("minted");
+      setMintUrl(final.explorerUrl ?? (final.txHash ? `https://explorer.testnet.chain.robinhood.com/tx/${final.txHash}` : null));
+      setMintMsg(final.already ? "already minted — one card per run, forever" : typeof final.tokenId === "number" ? `minted · CCDC #${final.tokenId}` : "minted");
+    } catch (err) {
+      setMintState("error");
+      const m = err instanceof Error ? err.message : "";
+      setMintMsg(m.includes("sign-timeout") ? "signature popup timed out — try again when ready" : m || "mint failed — try again");
+    }
+  };
+
   // P7.3: turn THIS completed run into an async duel — the code IS the
   // invitation (?duel=CODE). The share text rides the P3.1 rivalry tag when
   // one is typed, so the mockery loop and the duel loop are the same loop.
@@ -1021,6 +1122,32 @@ export default function GameCanvas() {
     ? `${weather.windLabel} · ${weather.fogLabel}`
     : null;
   const canSubmit = Boolean(data?.runToken) && !archive; // archive = practice (H1)
+  // Death Card mint gate — wallet-only + today's runs only (the SERVER enforces
+  // both again; this gate just keeps the button honest in the UI).
+  const canMint = canSubmit && hasWallet && data?.seed.source !== "vibe-launch" && data?.seed.date === new Date().toISOString().slice(0, 10);
+  // Death Card mint UI — shared by the dead + graduated panels. The button
+  // lives in the action row, the honest status line right under it. Runs that
+  // can't mint (guest / archive / vibe-launch) simply never see the button.
+  const mintBusy = mintState === "signing" || mintState === "sending" || mintState === "confirming";
+  const mintBtn = canMint ? (
+    <button
+      className="cc-btn"
+      onClick={mintDeathCard}
+      disabled={mintBusy}
+      title="mint this run's Death Card as a TESTNET NFT — free: the server pays testnet gas; wallet-only, one card per run, no value implied"
+    >
+      {mintState === "signing" ? "SIGN…" : mintState === "sending" ? "SENDING…" : mintState === "confirming" ? "CONFIRMING…" : mintState === "minted" ? "MINTED ✓" : "MINT (TESTNET)"}
+    </button>
+  ) : null;
+  const mintNote = canMint && mintMsg ? (
+    <p className="cc-vault-note" role="status">
+      {mintState === "minted" && mintUrl ? (
+        <a href={mintUrl} target="_blank" rel="noreferrer">{mintMsg} ↗</a>
+      ) : (
+        mintMsg
+      )}
+    </p>
+  ) : null;
   const unscoredMsg = archive ? ARCHIVE_MSG : UNSCORED_MSG;
   // Option B: rival/lead context follows THIS device's lane (official with a
   // linked wallet, guest otherwise) — both boards stay labeled on the panel.
@@ -1349,6 +1476,7 @@ export default function GameCanvas() {
               <div className="cc-death-actions">
                 <button className="cc-btn cc-btn-start" onClick={enterWorld2}>WORLD 2 →</button>
                 <button className="cc-btn cc-btn-ghost" onClick={downloadCard}>DEATH CARD ↓</button>
+                {mintBtn}
                 <button
                   className="cc-btn"
                   onClick={submitScore}
@@ -1360,6 +1488,7 @@ export default function GameCanvas() {
                 </button>
                 <button className="cc-btn" onClick={startRun}>RETRY</button>
               </div>
+              {mintNote}
               <p className="cc-grad-next">world 2: the climb continues · gains ×2</p>
               {reachedPeak && (
                 <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
@@ -1428,6 +1557,7 @@ export default function GameCanvas() {
                   {!canSubmit && <span className="sr-only">{unscoredMsg}</span>}
                 </button>
                 <button className="cc-btn cc-btn-ghost" onClick={downloadCard}>DEATH CARD ↓</button>
+                {mintBtn}
                 {canSubmit && data?.seed.source !== "vibe-launch" && !duelCode && (
                   <button
                     className="cc-btn"
@@ -1440,6 +1570,7 @@ export default function GameCanvas() {
                 )}
                 <button className="cc-btn cc-btn-start" onClick={startRun}>RETRY</button>
               </div>
+              {mintNote}
               {archive && practiceNote && <p className="cc-vault-note" role="status">{practiceNote}</p>}
               {reachedPeak && (
                 <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
