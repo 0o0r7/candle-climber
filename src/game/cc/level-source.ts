@@ -47,11 +47,34 @@ export function pickSeed(date: string) {
 export function provenanceLabel(
   source: SeedInfo["source"],
   symbol: string,
-): { real: boolean; long: string; short: string } {
+): { real: boolean; kind: "live" | "onchain" | "synthetic"; long: string; short: string } {
   if (source === "synthetic") {
-    return { real: false, long: "SYNTHETIC FALLBACK", short: "SYNTHETIC" };
+    return { real: false, kind: "synthetic", long: "SYNTHETIC FALLBACK", short: "SYNTHETIC" };
   }
-  return { real: true, long: `REAL FEED · ${symbol}`, short: `REAL · ${symbol}` };
+  // W6: no reachable OHLC for this stock, but the official Chainlink price WAS
+  // read on-chain — the terrain is anchored to that real price. Shape derived,
+  // anchor official: labeled as such, never "live data".
+  if (source === "robinhood") {
+    return { real: true, kind: "onchain", long: `OFFICIAL PRICE · ${symbol}`, short: `ON-CHAIN · ${symbol}` };
+  }
+  return { real: true, kind: "live", long: `REAL FEED · ${symbol}`, short: `REAL · ${symbol}` };
+}
+
+/** W6 stock anchoring: the deterministic terrain shape (identical to the
+ *  synthetic seed for the same date/interval) is rescaled so its final close
+ *  EQUALS the official on-chain price. The shape is derived; the price is real
+ *  and cited. Used only when no real OHLC feed could serve the stock. */
+export function anchoredCandles(
+  date: string,
+  count: number,
+  anchorPrice: number,
+  interval: GameInterval = "1w",
+): Candle[] {
+  const shape = syntheticCandles(date, count, interval);
+  const last = shape[shape.length - 1]?.c;
+  if (!last || !Number.isFinite(anchorPrice) || anchorPrice <= 0) return shape;
+  const k = anchorPrice / last;
+  return shape.map((c) => ({ t: c.t, o: c.o * k, h: c.h * k, l: c.l * k, c: c.c * k }));
 }
 
 // interval-aware synthetic fallback (P3.5): "1w" keeps the legacy seed path
