@@ -120,3 +120,73 @@ describe("W5 buildPlatforms determinism", () => {
     }
   });
 });
+
+// ── Daily rotation v2 (owner report 2026-10-11) ─────────────────────────────
+// The legacy 6-crypto hash pick clustered (XRPUSDT served 2026-10-10 AND
+// 2026-10-11 back-to-back) and the W3 stock rails never entered the daily
+// level. From ROTATION_V2_FROM the daily symbol cycles ALL nine symbols
+// (crypto + stocks) in a fixed shuffled order — no consecutive repeats.
+import {
+  ALL_SYMBOLS,
+  ROTATION_ORDER,
+  ROTATION_V2_FROM,
+  STOCKS,
+  WATCHLIST,
+  pickSeed,
+  rotationSymbol,
+} from "@/game/cc/level-source";
+import { hashString, mulberry32 } from "@/game/cc/rng";
+
+describe("daily rotation v2 (crypto + stocks cycle)", () => {
+  const addDays = (d: string, n: number) =>
+    new Date(Date.parse(d + "T00:00:00Z") + n * 86_400_000).toISOString().slice(0, 10);
+
+  test("cutoff + order pins: ROTATION_ORDER is a pure permutation of ALL_SYMBOLS", () => {
+    expect(ROTATION_V2_FROM).toBe("2026-10-12");
+    expect(ROTATION_ORDER).toHaveLength(ALL_SYMBOLS.length);
+    expect([...ROTATION_ORDER].sort()).toEqual([...ALL_SYMBOLS].sort());
+    // stocks really ride the daily level from the cutoff
+    for (const s of STOCKS) expect(ROTATION_ORDER).toContain(s);
+  });
+
+  test("legacy dates keep the pinned hash pick (run tokens + archive replays stay valid)", () => {
+    expect(pickSeed("2026-10-10").symbol).toBe("XRPUSDT"); // served live, token-pinned
+    expect(pickSeed("2026-10-11").symbol).toBe("XRPUSDT");
+    expect(pickSeed("2026-09-30").symbol).toBe("BNBUSDT");
+    // the whole legacy era (60 days ending the day before the cutoff) stays crypto-only
+    for (let i = 0; i < 60; i++) {
+      expect(WATCHLIST).toContain(pickSeed(addDays("2026-08-13", i)).symbol);
+    }
+  });
+
+  test("v2 era: whitelisted symbols, NO consecutive repeats, every 9-day window covers all 9", () => {
+    let prev = "";
+    for (let i = 0; i < 90; i++) {
+      const s = pickSeed(addDays(ROTATION_V2_FROM, i)).symbol;
+      expect(ALL_SYMBOLS).toContain(s);
+      if (i > 0) expect(s).not.toBe(prev); // the owner-visible bug class: same chart twice in a row
+      prev = s;
+    }
+    for (let w = 0; w + 9 <= 90; w += 9) {
+      const window = new Set<string>();
+      for (let i = w; i < w + 9; i++) window.add(pickSeed(addDays(ROTATION_V2_FROM, i)).symbol);
+      expect([...window].sort()).toEqual([...ALL_SYMBOLS].sort());
+    }
+  });
+
+  test("v2 pick IS the day-index round-robin over ROTATION_ORDER", () => {
+    for (const d of ["2026-10-12", "2026-10-13", "2027-01-01", "2030-05-20"]) {
+      expect(pickSeed(d).symbol).toBe(rotationSymbol(d));
+    }
+  });
+
+  test("symbol versioning NEVER touches the synthetic rng stream (terrains stay byte-identical)", () => {
+    // exactly ONE rnd() draw is consumed inside pickSeed in BOTH eras — the
+    // stream syntheticCandles sees is unchanged for every date
+    for (const d of ["2026-10-11", "2026-10-12", "2026-10-13"]) {
+      const ref = mulberry32(hashString("cc-daily-v1:" + d));
+      ref(); // the legacy symbol draw
+      expect(pickSeed(d).rnd()).toBe(ref());
+    }
+  });
+});

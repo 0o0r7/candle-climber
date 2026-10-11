@@ -317,6 +317,8 @@ button.cc-wallet-chip { cursor: pointer; }
 .cc-wallet-chip b { margin-right: 4px; }
 .cc-tier-holder { color: #e0b04e; border-color: rgba(224, 176, 78, 0.35); }
 .cc-tier-whale { color: #9db4ff; border-color: rgba(157, 180, 255, 0.4); }
+/* disconnect confirm step (owner request 2026-10-11) — hot coral, unmistakable */
+.cc-wallet-disconnect { color: var(--cc-coral, #ff5a5a); border-color: rgba(255, 90, 90, 0.5); }
 .cc-chip-score { color: #fff; font-size: 16px; min-width: 72px; text-align: center; }
 .cc-chip-combo { color: var(--cc-ink); background: var(--cc-lime); border-color: var(--cc-lime); }
 

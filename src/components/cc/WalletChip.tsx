@@ -23,7 +23,11 @@ type EthProvider = {
   removeListener?: (event: string, cb: (args: unknown) => void) => void;
 };
 
-type ChipState = "idle" | "busy" | "wrongnet" | "rpcdown";
+type ChipState = "idle" | "busy" | "wrongnet" | "rpcdown" | "confirm";
+
+// Cross-component broadcast: GameCanvas (official-lane context) and any other
+// listener re-read CC_WALLET_ADDR when the chip connects or disconnects.
+const WALLET_CHANGED_EVENT = "cc-wallet-changed";
 
 export default function WalletChip() {
   // Launch-day default: wallet layer fully INERT unless explicitly enabled
@@ -38,6 +42,7 @@ export default function WalletChip() {
   const [hasProvider, setHasProvider] = useState(false);
   const [netMsg, setNetMsg] = useState<string | null>(null); // why the network is wrong
   const queried = useRef<string | null>(null);
+  const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const query = useCallback(async (a: string) => {
     if (queried.current === a) return; // mount-race guard
@@ -110,6 +115,7 @@ export default function WalletChip() {
     return () => {
       alive = false;
       eth?.removeListener?.("chainChanged", onChainChanged);
+      if (confirmTimer.current) clearTimeout(confirmTimer.current);
     };
   }, [query]);
 
@@ -136,11 +142,49 @@ export default function WalletChip() {
       localStorage.setItem(WALLET_ADDRESS_KEY, a);
       queried.current = null;
       setAddr(a);
+      window.dispatchEvent(new Event(WALLET_CHANGED_EVENT)); // official-lane context follows
       await query(a);
     } catch {
       setState("idle"); // user rejected — stay quiet, play continues
     }
   }, [query, state]);
+
+  // Owner request (2026-10-11): the user must be able to disconnect from inside
+  // the game. Two-step confirm on the badge itself (no menus); clears the saved
+  // address, best-effort wallet_revokePermissions (EIP-... MetaMask — revoke the
+  // eth_accounts permission so the site drops out of the wallet's connected
+  // list; unsupported providers just skip it), then broadcasts the change.
+  const doDisconnect = useCallback(async () => {
+    if (confirmTimer.current) clearTimeout(confirmTimer.current);
+    confirmTimer.current = null;
+    localStorage.removeItem(WALLET_ADDRESS_KEY);
+    queried.current = null;
+    setAddr(null);
+    setWei(null);
+    setTier("none");
+    setNetMsg(null);
+    setState("idle");
+    window.dispatchEvent(new Event(WALLET_CHANGED_EVENT));
+    try {
+      const eth = (window as unknown as { ethereum?: EthProvider }).ethereum;
+      await eth?.request({
+        method: "wallet_revokePermissions",
+        params: [{ eth_accounts: {} }],
+      });
+    } catch {
+      // unsupported/rejected — the app-side disconnect already happened
+    }
+  }, []);
+
+  const onBadgeClick = useCallback(() => {
+    if (state === "confirm") {
+      void doDisconnect();
+      return;
+    }
+    setState("confirm");
+    if (confirmTimer.current) clearTimeout(confirmTimer.current);
+    confirmTimer.current = setTimeout(() => setState("idle"), 5000); // safety revert
+  }, [state, doDisconnect]);
 
   if (!enabled) return null;
 
@@ -184,11 +228,28 @@ export default function WalletChip() {
 
   const short = `${addr.slice(0, 6)}…${addr.slice(-4)}`;
   const label = tier === "whale" ? "WICK WHALE" : tier === "holder" ? "WICK HOLDER" : "NO TIER YET";
+  if (state === "confirm") {
+    return (
+      <button
+        type="button"
+        className="cc-chip cc-wallet-chip cc-wallet-disconnect"
+        onClick={onBadgeClick}
+        title="Click again to disconnect — the badge clears, play continues as guest (ECONOMY-LAWS)."
+      >
+        DISCONNECT?
+      </button>
+    );
+  }
   const tip =
-    "Display-only $WICK badge · holder value is cosmetic (routes/archive) and never changes rank or access — ECONOMY-LAWS.";
+    "Display-only $WICK badge · holder value is cosmetic (routes/archive) and never changes rank or access — ECONOMY-LAWS. Click to disconnect.";
   return (
-    <span className={`cc-chip cc-wallet-chip cc-tier-${tier}`} title={tip}>
+    <button
+      type="button"
+      className={`cc-chip cc-wallet-chip cc-tier-${tier}`}
+      onClick={onBadgeClick}
+      title={tip}
+    >
       {tier !== "none" ? <b>{label}</b> : null} {formatWick(wei)} <i>{short}</i>
-    </span>
+    </button>
   );
 }

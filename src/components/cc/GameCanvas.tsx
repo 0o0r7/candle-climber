@@ -197,6 +197,12 @@ export default function GameCanvas() {
   // LAW 1.3: skill-only scoreboard).
   useEffect(() => {
     if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) setHasWallet(true);
+    // WalletChip connect/disconnect broadcasts — the official-lane context
+    // follows the REAL saved address at all times (never blocks play).
+    const onWalletChanged = () =>
+      setHasWallet(isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY)));
+    window.addEventListener("cc-wallet-changed", onWalletChanged);
+    return () => window.removeEventListener("cc-wallet-changed", onWalletChanged);
   }, []);
   const [burn, setBurn] = useState<string | null>(null);
   useEffect(() => { nameRef.current = name; }, [name]);
