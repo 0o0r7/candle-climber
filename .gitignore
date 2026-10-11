@@ -30,6 +30,7 @@ next-env.d.ts
 /scripts/*
 !/scripts/deathcard/
 !/scripts/e2e-gamer-bot.ts
+!/scripts/trailer/
 /archive/
 /.zscripts/
 /examples/

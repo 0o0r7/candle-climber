@@ -69,6 +69,19 @@ A dev-server response contains `turbopack` / `next-dev` markers and unhashed sou
 modules; the log line `Compiling / ... GET / 200 (compile: 3.8s)` confirms live source
 rather than a prebuilt bundle.
 
+## Marketing assets
+
+The X trailer kit in `docs/assets/x-launch` (the 15s cuts `x-08`…`x-10`) is built by
+`scripts/trailer` — see that folder's README. It runs on the sandbox **host**, not in the
+container: `node scripts/trailer/build.mjs --out docs/assets/x-launch` (needs `ffmpeg` /
+`ffprobe`, and Playwright's chromium from the repo's `node_modules`). The deterministic
+timeline step shells into the web container itself. `scripts/trailer/` is the only `scripts/`
+subtree that is not gitignored — see `.gitignore`.
+
+`docs/` is not served by Next, so to watch or download the finished trailers during
+review, copies of `x-08`…`x-10` (mp4 + poster) live in `public/media/` and open at
+`/media/<file>` on the dev server. Re-copy them after a rebuild (see the kit README).
+
 ## Checks (from CI)
 
 ```bash
