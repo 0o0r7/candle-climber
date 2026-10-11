@@ -20,6 +20,7 @@ import { biomeById, type Biome, type BiomeId } from "./biome";
 import { drawCandleRain } from "./rain";
 import { type Wreck } from "./wreckage";
 import { hashString, mulberry32 } from "./rng";
+import { BEACON_ALPHA, CONFETTI_LIFE, gradConfetti, type GradShard } from "./grad";
 import { getChar, type CharDef } from "./characters";
 import { drawRival } from "./rival/rival-render";
 import { drawGhost } from "./ghost-render";
@@ -40,6 +41,8 @@ interface V2State {
   glow: Record<string, HTMLCanvasElement | null>;
   vignette: CanvasGradient | null;
   amb: { x: number; y: number; sp: number; s: number; a: number; ph: number }[];
+  gradKey: string;       // ART V4: seed the confetti volley was built from
+  gradShards: GradShard[];
 }
 
 const states = new WeakMap<Engine, V2State>();
@@ -92,6 +95,8 @@ function getState(e: Engine, seedStr: string): V2State {
       glow: prev ? prev.glow : {},
       vignette: prev ? prev.vignette : null,
       amb,
+      gradKey: prev ? prev.gradKey : "",
+      gradShards: prev ? prev.gradShards : [],
     };
     states.set(e, st);
   }
@@ -777,6 +782,184 @@ function drawForegroundV2(ctx: CanvasRenderingContext2D, e: Engine, st: V2State,
   ctx.fillRect(0, 0, VIEW_W, VIEW_H);
 }
 
+/* --------------------- ART V4 · Wick Vault sprite (E2.4) -------------------- */
+
+// The vault chest sits ON the peak-wick candle of today's level (the terrain's
+// tallest high — GameCanvas computes peakIdx from the raw candles; here it is
+// display-only, the server re-verifies everything). Wick-world grammar, locked
+// palette: a wax chest with a BENT WICK rising from the lid, tipped by a lime
+// teardrop flame — the vault is a candle creature too. Open state = the run
+// passed the peak candle: lid tips back, a lime light column leaks out. All
+// animation is a pure function of engine time (same seed+time ⇒ same frame).
+function drawVaultV2(ctx: CanvasRenderingContext2D, e: Engine, peakIdx: number, st: V2State) {
+  if (peakIdx < 0 || peakIdx >= e.plats.length) return;
+  const p = e.plats[peakIdx];
+  if (!p || p.state !== "solid" || p.w <= 0) return; // never a chest on a chasm
+  const camX = e.camX, camY = e.camY;
+  const cx = p.x + p.w / 2 - camX;
+  const baseY = p.y - camY;
+  if (cx < -60 || cx > VIEW_W + 60 || baseY < -60 || baseY > VIEW_H + 60) return;
+
+  const opened = e.candlesPassed >= peakIdx + 1; // run passed the peak candle
+  const t = e.time;
+  const pulse = 0.16 + 0.09 * Math.sin(t * 2.4);   // idle heartbeat glow
+  const glowA = opened ? Math.min(0.55, pulse + 0.3) : pulse;
+
+  // glow behind the chest (pre-rendered sprite, 'lighter' — no shadowBlur)
+  blitGlow(ctx, st, "vault", "rgba(204,255,0,0.9)", cx - 46, baseY - 46, 92, 92, glowA);
+
+  const cw = 30, ch = 22;              // chest body
+  const bx = cx - cw / 2;
+  const by = baseY - ch;               // body top
+  const wax = "#1E4D33";               // deep forest-green wax (identity lock)
+  const waxLit = "#2A6A46";
+
+  // light column when opened — leaks from the box upward, gentle sway
+  if (opened) {
+    const beam = ctx.createLinearGradient(0, by - 150, 0, by);
+    beam.addColorStop(0, "rgba(204,255,0,0)");
+    beam.addColorStop(0.7, "rgba(204,255,0,0.14)");
+    beam.addColorStop(1, "rgba(204,255,0,0.30)");
+    ctx.fillStyle = beam;
+    const bw = 26 + Math.sin(t * 1.7) * 3;
+    ctx.fillRect(cx - bw / 2, by - 150, bw, 150);
+  }
+
+  // body — wax slab with a darker seam band and a lime keyhole
+  ctx.fillStyle = wax;
+  roundRect(ctx, bx, by, cw, ch, 4);
+  ctx.fill();
+  ctx.fillStyle = "rgba(14,20,0,0.35)"; // ink seam
+  ctx.fillRect(bx + 2, by + ch - 8, cw - 4, 2);
+  ctx.strokeStyle = "rgba(91,208,138,0.55)"; // up-green edge — trustworthy
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, bx, by, cw, ch, 4);
+  ctx.stroke();
+  // keyhole
+  ctx.fillStyle = opened ? "#CCFF00" : "rgba(204,255,0,0.75)";
+  ctx.beginPath();
+  ctx.arc(cx, by + ch - 12, 2.6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(cx - 1, by + ch - 11, 2, 4);
+
+  // lid — hinged at the back edge; opens backward when the peak was passed
+  const lidH = 9;
+  ctx.save();
+  ctx.translate(bx, by);
+  if (opened) ctx.rotate(-0.55);
+  ctx.fillStyle = waxLit;
+  roundRect(ctx, 0, -lidH, cw, lidH, 3);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(91,208,138,0.7)";
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, 0, -lidH, cw, lidH, 3);
+  ctx.stroke();
+  ctx.restore();
+
+  // the signature: bent black wick from the lid + lime teardrop flame
+  const wx = cx + 3;
+  const wBase = by - (opened ? lidH + 6 : lidH); // lifted lid raises the wick
+  ctx.strokeStyle = "#24282C";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(wx, wBase);
+  ctx.quadraticCurveTo(wx + 5, wBase - 6, wx + 2, wBase - 11);
+  ctx.stroke();
+  // flame (teardrop) — breathes with the pulse, stronger when opened
+  const fl = opened ? 1.35 : 1;
+  ctx.fillStyle = "#CCFF00";
+  ctx.beginPath();
+  ctx.moveTo(wx + 2, wBase - 17 * fl);
+  ctx.quadraticCurveTo(wx + 2 + 4.4 * fl, wBase - 11.5, wx + 2, wBase - 9.4);
+  ctx.quadraticCurveTo(wx + 2 - 4.4 * fl, wBase - 11.5, wx + 2, wBase - 17 * fl);
+  ctx.fill();
+}
+
+/* ---------------- ART V4 · graduation celebration (W4 summit) --------------- */
+
+// Summit celebration, drawn while the GRADUATED panel is up (the simulation is
+// frozen — GameCanvas feeds celebrateT from the RAF clock as an explicit
+// parameter, so the renderer's own "engine time only" contract stays intact).
+//   t 0.0–0.5  staggered wax-confetti volley from the summit cap
+//   t 0.0–1.2  lime light column at full strength
+//   t 0.0–3.2  confetti ballistics (seeded per level — same seed ⇒ same frame)
+//   t >1.2     the column settles into a soft resting beacon (BEACON_ALPHA)
+//   always     9 embers drifting above the summit (sin sway, sin envelope)
+function drawCelebrationV2(
+  ctx: CanvasRenderingContext2D,
+  e: Engine,
+  st: V2State,
+  seedStr: string,
+  celebrateT: number,
+) {
+  if (!(celebrateT > 0)) return;
+  // the summit is the LAST platform of the daily level (level.ts W4 arc)
+  const summit = e.plats.length > 0 ? e.plats[e.plats.length - 1] : null;
+  if (!summit || summit.w <= 0) return;
+  const camX = e.camX, camY = e.camY;
+  const sx = summit.x + summit.w / 2 - camX;
+  const sy = summit.y - camY;
+
+  // light column → resting beacon (behind the player, above the summit cap)
+  const t = celebrateT;
+  const beamA = t < 1.2 ? 0.5 - (t / 1.2) * 0.34 : BEACON_ALPHA;
+  const beam = ctx.createLinearGradient(0, sy - 230, 0, sy);
+  beam.addColorStop(0, "rgba(204,255,0,0)");
+  beam.addColorStop(0.65, `rgba(204,255,0,${beamA * 0.45})`);
+  beam.addColorStop(1, `rgba(204,255,0,${beamA})`);
+  ctx.fillStyle = beam;
+  const bw = 96 + Math.sin(t * 1.4) * 6;
+  ctx.fillRect(sx - bw / 2, sy - 230, bw, 230);
+
+  // embers — 9 motes rising on a loop, subtle
+  for (let k = 0; k < 9; k++) {
+    const ph = (t * 0.35 + k / 9) % 1;
+    const ey = sy - 14 - ph * 150;
+    const ex = sx + Math.sin(t * 1.1 + k * 2.4) * 16;
+    const ea = Math.sin(Math.PI * ph) * 0.32;
+    if (ea <= 0.02) continue;
+    ctx.globalAlpha = ea;
+    ctx.fillStyle = k % 3 === 0 ? "#E0B04E" : "#CCFF00";
+    ctx.beginPath();
+    ctx.arc(ex, ey, 1.6 + (k % 3) * 0.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // confetti volley — deterministic per seed, cached on the renderer state
+  if (st.gradKey !== seedStr) {
+    st.gradKey = seedStr;
+    st.gradShards = gradConfetti(seedStr);
+  }
+  for (const s of st.gradShards) {
+    const ti = t - s.delay;
+    if (ti <= 0) continue;
+    // past life — shard finished (3.2s envelope, CONFETTI_LIFE)
+    if (ti > CONFETTI_LIFE) continue;
+    const x = sx + s.x + s.vx * ti;
+    const y = sy + s.y + s.vy * ti + 0.5 * s.g * ti * ti;
+    if (y > VIEW_H + 20 || x < -20 || x > VIEW_W + 20) continue;
+    const alpha = ti > CONFETTI_LIFE - 0.8 ? Math.max(0, (CONFETTI_LIFE - ti) / 0.8) : 1;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(x, y);
+    ctx.rotate(s.rot + s.spin * ti);
+    ctx.fillStyle = s.color;
+    ctx.fillRect(-s.w / 2, -s.h / 2, s.w, s.h);
+    if (s.wick) {
+      // candle-shard: a wick hairline above the chip — the celebration is
+      // literally made of candles (Wick lives in a world built of wicks)
+      ctx.strokeStyle = "rgba(36,40,44,0.9)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, -s.h / 2);
+      ctx.lineTo(0, -s.h / 2 - 4);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
 /* ------------------------------ H3 · wreckage ------------------------------ */
 
 // Per-device frozen death ghosts (P2.5 minimal): translucent mini-candles at
@@ -826,7 +1009,23 @@ function drawWrecks(ctx: CanvasRenderingContext2D, e: Engine, wrecks: Wreck[]) {
 
 /* --------------------------------- entry ----------------------------------- */
 
-export function renderV2(ctx: CanvasRenderingContext2D, e: Engine, seedStr: string, weather: Weather = NEUTRAL_WEATHER, wrecks: Wreck[] = [], mutationId?: string, charId = "default", rival?: RivalBot | null, ghost?: GhostView | null, biome?: BiomeId | Biome) {
+export function renderV2(
+  ctx: CanvasRenderingContext2D,
+  e: Engine,
+  seedStr: string,
+  weather: Weather = NEUTRAL_WEATHER,
+  wrecks: Wreck[] = [],
+  mutationId?: string,
+  charId = "default",
+  rival?: RivalBot | null,
+  ghost?: GhostView | null,
+  biome?: BiomeId | Biome,
+  // ART V4 (token era): peakIdx = today's peak-wick candle (vault sprite —
+  // display-only, server re-verifies); celebrateT = seconds since the summit
+  // panel opened (RAF-fed by GameCanvas — see drawCelebrationV2).
+  peakIdx = -1,
+  celebrateT = 0,
+) {
   const st = getState(e, seedStr);
   const t = st.terrain;
 
@@ -884,6 +1083,8 @@ export function renderV2(ctx: CanvasRenderingContext2D, e: Engine, seedStr: stri
     if (p && d) drawSlabV2(ctx, e, p, d, e.camX, e.camY, st);
   }
 
+  drawVaultV2(ctx, e, peakIdx, st);
+
   drawHints(ctx, e);
   drawParticles(ctx, e.particles, e.camX, e.camY);
   drawFloats(ctx, e.floats, e.camX, e.camY);
@@ -893,6 +1094,7 @@ export function renderV2(ctx: CanvasRenderingContext2D, e: Engine, seedStr: stri
   if (ghost) drawGhost(ctx, e.camX, e.camY, ghost);
   if (rival) drawRival(ctx, e, rival);
   drawWrecks(ctx, e, wrecks);
+  drawCelebrationV2(ctx, e, st, seedStr, celebrateT);
   drawForegroundV2(ctx, e, st, weather);
   if (bio) {
     drawBiomeParticles(ctx, e, bio, seedStr);

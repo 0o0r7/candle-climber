@@ -1374,16 +1374,107 @@ button.cc-wallet-chip { cursor: pointer; }
   color: var(--cc-lime);
   text-align: center;
 }
+/* P6.5 / ART V4: burn-counter HUD — flame glyph + ember pulse + tabular count.
+   Same honest line (title explains the burn address), dressed for the token era. */
 .cc-burn-line {
-  margin: 10px auto 0;
+  margin: 12px auto 0;
   width: 100%;
   max-width: 440px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-family: var(--cc-mono);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.18em;
   color: var(--cc-faint);
+  padding: 6px 10px;
+  border: 1px solid var(--cc-hairline);
+  border-radius: 999px;
+  background: rgba(22, 25, 28, 0.6);
+}
+.cc-burn-flame {
+  width: 10px;
+  height: 12px;
+  flex: none;
+  color: var(--cc-lime);
+  filter: drop-shadow(0 0 3px rgba(204, 255, 0, 0.6));
+  animation: cc-ember 2.2s ease-in-out infinite;
+}
+.cc-burn-num {
+  color: var(--cc-lime);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 6px rgba(204, 255, 0, 0.35);
+}
+.cc-burn-sep { opacity: 0.5; }
+@keyframes cc-ember {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+
+/* ---- ART V4: GRADUATED panel celebration scene (flame crown + wax confetti).
+   Decoration only, aria-hidden in markup; the summit itself celebrates in-canvas
+   (render-v2 drawCelebrationV2). Honors reduced motion. */
+.cc-grad-scene {
+  position: relative;
+  height: 58px;
+  margin: -6px 0 2px;
+  pointer-events: none;
+  overflow: hidden;
+}
+.cc-grad-flame {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 16px;
+  height: 22px;
+  transform: translateX(-50%);
+  background: radial-gradient(circle at 50% 70%, #f5f7fa 0%, var(--cc-lime) 45%, rgba(204, 255, 0, 0) 72%);
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  filter: drop-shadow(0 0 10px rgba(204, 255, 0, 0.65));
+  transform-origin: 50% 100%;
+  animation: cc-flame 0.9s ease-in-out infinite alternate;
+}
+.cc-grad-flame::before {
+  /* the bent black wick under the flame — the identity signature */
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 2px;
+  height: 9px;
+  background: var(--cc-hairline);
+  transform: translateX(-50%) rotate(8deg);
+}
+.cc-gcf {
+  position: absolute;
+  top: -10px;
+  width: 6px;
+  height: 9px;
+  border-radius: 1px;
+  opacity: 0;
+  animation: cc-gcfall 2.8s linear infinite;
+}
+.cc-grad-scene .gc1 { left: 12%; background: var(--cc-lime); animation-delay: 0s; }
+.cc-grad-scene .gc2 { left: 24%; background: var(--cc-up); animation-delay: 0.5s; }
+.cc-grad-scene .gc3 { left: 38%; background: var(--cc-purple); animation-delay: 1.1s; }
+.cc-grad-scene .gc4 { left: 60%; background: var(--cc-up); animation-delay: 0.3s; }
+.cc-grad-scene .gc5 { left: 76%; background: #e0b04e; animation-delay: 0.9s; }
+.cc-grad-scene .gc6 { left: 88%; background: var(--cc-lime); animation-delay: 1.5s; }
+@keyframes cc-gcfall {
+  0% { transform: translateY(-6px) rotate(0deg); opacity: 0; }
+  12% { opacity: 0.9; }
+  80% { opacity: 0.8; }
+  100% { transform: translateY(64px) rotate(220deg); opacity: 0; }
+}
+@keyframes cc-flame {
+  from { transform: translateX(-50%) scale(1); }
+  to { transform: translateX(-50%) scale(1.08, 0.94); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cc-burn-flame, .cc-grad-flame, .cc-gcf { animation: none; }
+  .cc-gcf { opacity: 0.5; }
 }
 
 /* E2.5 airdrop board page (/airdrop) */

@@ -218,6 +218,14 @@ export default function GameCanvas() {
   const [vaultMsg, setVaultMsg] = useState<string | null>(null);
   const [vaultBusy, setVaultBusy] = useState(false);
   const [hasWallet, setHasWallet] = useState(false);
+  // ART V4: the peak-wick candle index (vault sprite anchor) mirrored into a
+  // ref for the RAF render loop; -1 hides the chest (no data / archive — the
+  // vault never opens on practice terrain, the sprite stays honest).
+  const peakIdxRef = useRef(-1);
+  // ART V4: seconds since the GRADUATED panel opened, fed by the RAF clock as
+  // an explicit render param (the engine is frozen while the panel is up —
+  // engine time cannot drive the celebration without breaking its contract).
+  const celebrateRef = useRef(0);
   // Option B: lane selection at boot — a SAVED wallet puts this device on the
   // official lane for board context (read-only UI choice; score math untouched,
   // LAW 1.3: skill-only scoreboard).
@@ -590,6 +598,11 @@ export default function GameCanvas() {
   }, [data]);
   const reachedPeak = !archive && result != null && peakIdx >= 0 && result.candlesPassed >= peakIdx;
 
+  // ART V4: mirror peakIdx into the render-loop ref (archive ⇒ no chest)
+  useEffect(() => {
+    peakIdxRef.current = archive ? -1 : peakIdx;
+  }, [archive, peakIdx]);
+
   const openVault = useCallback(async () => {
     if (!data?.runToken || vaultBusy) return;
     setVaultBusy(true);
@@ -790,6 +803,7 @@ export default function GameCanvas() {
     setWorld2(false);
     setPracticeNote(null);
     setVaultMsg(null);
+    celebrateRef.current = 0; // ART V4: a fresh run resets the celebration clock
     setPhase("running");
     lastRef.current = performance.now();
     accRef.current = 0;
@@ -861,6 +875,9 @@ export default function GameCanvas() {
       let dt = (now - lastRef.current) / 1000;
       lastRef.current = now;
       dt = Math.min(0.1, dt);
+      // ART V4: the celebration clock runs on the RAF while the GRADUATED
+      // panel is up (the engine itself is frozen — its time must not move).
+      if (phase === "graduated") celebrateRef.current += dt;
       // P2 pause: while paused mid-run, time does NOT accumulate — the
       // fixed-step block (engine + bot + ghost recorder) freezes on the same
       // clock; the render below keeps drawing the frozen frame every RAF.
@@ -900,7 +917,7 @@ export default function GameCanvas() {
       // unclipped, un-zoomed compose (owner: zoom/crop made the frame lag and
       // feel unnatural). Renderers draw under the resize-time fit transform and
       // save/restore internally. (Biome layers ride the v2 renderer — render-only.)
-      if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv, biomeId);
+      if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv, biomeId, peakIdxRef.current, celebrateRef.current);
       else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv);
       rafRef.current = requestAnimationFrame(step);
     };
@@ -1686,7 +1703,14 @@ export default function GameCanvas() {
                   {!archive && <PredictionPanel name={name} />}
                   {burn && (
                     <p className="cc-burn-line" title="cumulative $WICK sent to the irrecoverable burn address">
-                      SUPPLY BURNED · {burn} WICK
+                      {/* P6.5 / ART V4 burn-counter HUD: flame glyph + ember pulse */}
+                      <svg className="cc-burn-flame" viewBox="0 0 12 14" aria-hidden="true" focusable="false">
+                        <path d="M6 0.8 C7.6 3 9.4 4.6 9.4 7.4 A3.4 3.4 0 0 1 2.6 7.4 C2.6 5.6 3.4 4.4 4.2 3.2 C4.9 4 5.4 4.4 5.4 4.4 C5.2 3 5.4 1.8 6 0.8 Z" fill="currentColor" />
+                      </svg>
+                      <span>SUPPLY BURNED</span>
+                      <span className="cc-burn-sep" aria-hidden>·</span>
+                      <b className="cc-burn-num">{burn}</b>
+                      <span>WICK</span>
                     </p>
                   )}
                   {(miniOfficial || topBoard.length > 0) && (
@@ -1712,6 +1736,14 @@ export default function GameCanvas() {
         {phase === "graduated" && result && (
           <div className="cc-overlay">
             <div className="cc-panel cc-panel-death">
+              {/* ART V4: token-era celebration scene — flame crown + wax confetti.
+                  Pure CSS, aria-hidden: the canvas behind the panel carries the
+                  summit beacon; this strip is the panel's own celebration. */}
+              <div className="cc-grad-scene" aria-hidden="true">
+                <i className="cc-gcf gc1" /><i className="cc-gcf gc2" /><i className="cc-gcf gc3" />
+                <i className="cc-gcf gc4" /><i className="cc-gcf gc5" /><i className="cc-gcf gc6" />
+                <span className="cc-grad-flame" />
+              </div>
               <h2 className="cc-grad-headline">GRADUATED</h2>
               <p className="cc-grad-flavor">curve summit reached · summit class</p>
               <div className="cc-death-score">
