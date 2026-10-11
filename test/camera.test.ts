@@ -1,22 +1,26 @@
 /// <reference types="bun-types" />
-// CAMERA-FRAME contract v2 (owner report 2026-10-11, two passes:
-// "high jump pushes the candles/playfield out of the frame" → fixed with the
-// asymmetric follow → "STILL exits the bottom on very high jumps" → fixed with
-// the capped rise budget + renderer zoom contract).
-// Engine pins:
-//  1. The takeoff platform can NEVER slide out of the frame bottom
-//     (hard CAM_GROUND_STRIP floor), base AND low-G mutation mods.
-//  2. The camera drifts up at most CAM_RISE_BUDGET px per airborne arc —
-//     the terrain barely moves while the player arcs (zoom covers the rest,
-//     render-only, see GameCanvas + render-v2 CamZoom).
-//  3. While the player top is still below the engage line, the camera never
-//     moves up at all.
-//  4. After a full jump the camera re-centers (budget/floor never freeze it).
-//  5. Falling deaths still trigger with the floor in place.
+// CAMERA-FRAME contract v3 (owner report 2026-10-11, three passes:
+// "high jump pushes the candles/playfield out of the frame" → asymmetric
+// follow → "STILL exits" → drift budget + render zoom → OWNER REJECTED v2:
+// «تصویر دیگه روان نیست، لگ میزنه، غیر طبیعی شده» — the budget machinery plus
+// the double-applied render zoom broke the frame's smoothness).
+//
+// v3 = the ORIGINAL single-lerp camera with the takeoff-platform guard folded
+// INTO the follow target (Math.max — continuous, no mode switches, no clamps,
+// no render zoom). Engine pins:
+//  1. FEEL: with the guard inactive (short hops), the camY trace is
+//     BIT-IDENTICAL to the original shipped law (reference implemented here).
+//  2. The takeoff platform can NEVER slide out of the frame bottom — a
+//     CAM_GROUND_STRIP strip stays visible through any arc (base + low-G).
+//  3. The player top NEVER leaves the frame top on the same arcs
+//     (geometry: apex margin = VIEW_H - PLAYER_H - STRIP - reach ≥ 29px).
+//  4. SMOOTHNESS: every per-tick camera move is exactly what one lerp can
+//     produce (|ΔcamY| ≤ |desired−camY|·CAM_LERP·dt) — snap clamps forbidden.
+//  5. After a full jump the camera re-centers (nothing freezes it).
+//  6. Falling deaths still trigger; deterministic runs give identical traces.
 import { describe, test, expect } from "bun:test";
 import {
-  Engine, VIEW_W, VIEW_H,
-  CAM_RISE_ENGAGE, CAM_RISE_BUDGET, CAM_RISE_RATE, CAM_GROUND_STRIP,
+  Engine, VIEW_H, CAM_LERP, CAM_GROUND_STRIP,
 } from "@/game/cc/engine";
 import { buildPlatforms, PLATFORM_W } from "./../src/game/cc/level";
 import { syntheticCandles } from "@/game/cc/level-source";
@@ -36,32 +40,64 @@ function settle(e: Engine) {
   expect(e.grounded).toBe(true);
 }
 
-/** Full hold-jump arc: worst frame violations + camera drift over the arc. */
+/** The ORIGINAL shipped camera law (pre-camera-frame), verbatim — including
+ *  the start-of-level anchor clamp (camY may never go positive). */
+function originalCameraStep(e: { py: number; camY: number }, dt: number): number {
+  const desired = e.py - VIEW_H * 0.52;
+  let camY = e.camY + (desired - e.camY) * Math.min(1, dt * CAM_LERP);
+  if (camY > 0) camY = 0;
+  return camY;
+}
+
+/** Full hold-jump arc: worst frame violations across rise + fall. */
 function holdJumpArc(e: Engine) {
   const takeoff = e.groundPlat!;
-  const camY0 = e.camY;
   e.press(); // jumpHeld stays true through the entire rise (max-height jump)
   let worstPlatformDepth = -Infinity; // >0 ⇒ takeoff top below the frame bottom
-  let camRise = 0;                    // total upward camera drift during the arc
+  let minPlayerTop = Infinity;        // <0 ⇒ player top above the frame top
   for (let i = 0; i < 150; i++) { // 2.5s > rise + fall of any reachable arc
     e.step(DT);
     if (e.dead) break;
     worstPlatformDepth = Math.max(worstPlatformDepth, takeoff.y - e.camY - VIEW_H);
-    camRise = Math.max(camRise, camY0 - e.camY);
+    minPlayerTop = Math.min(minPlayerTop, e.py - e.camY);
     if (e.vy > 0 && e.py + 40 > takeoff.y + 8) break; // landed back / below takeoff
   }
-  return { worstPlatformDepth, camRise };
+  return { worstPlatformDepth, minPlayerTop };
 }
 
-describe("camera-frame v2 (owner report 2026-10-11)", () => {
+describe("camera-frame v3 (owner report 2026-10-11, smoothness restored)", () => {
+  test("FEEL: short-hop camY trace is bit-identical to the original law (guard never fires)", () => {
+    for (const date of ["2026-10-11", "2026-10-10", "2026-10-09"]) {
+      const e = dailyEngine(date, BASE_MODS);
+      settle(e); // camera reaches its steady anchor before the compared script
+      let guardFired = false;
+      // NOTE: the engine's camera code consumes the POST-physics py/lastGroundY
+      // of the same step — so the reference reads them AFTER e.step(), paired
+      // with the PRE-step camY. That pair is exactly the law's real input.
+      const checkTick = () => {
+        const camBefore = e.camY;
+        e.step(DT);
+        const guardActive = e.py - VIEW_H * 0.52 < e.lastGroundY - VIEW_H + CAM_GROUND_STRIP;
+        if (guardActive) guardFired = true;
+        else expect(e.camY).toBe(originalCameraStep({ py: e.py, camY: camBefore }, DT));
+      };
+      for (let hop = 0; hop < 6 && !e.dead; hop++) {
+        e.press();
+        e.step(DT); // jump executes (physics+camera in one tick — checked below)
+        e.release(); // immediate cut ⇒ short hop, floor stays inactive
+        for (let i = 0; i < 120 && !e.grounded && !e.dead; i++) checkTick();
+        for (let i = 0; i < 120 && !e.dead; i++) checkTick(); // grounded settle — compared too
+      }
+      expect(guardFired).toBe(false);
+    }
+  });
+
   test("full hold-jump keeps the takeoff platform in frame (base mods, 5 daily seeds)", () => {
     for (const date of ["2026-10-11", "2026-10-10", "2026-10-09", "2026-10-08", "2026-10-07"]) {
       const e = dailyEngine(date, BASE_MODS);
       settle(e);
-      const { worstPlatformDepth, camRise } = holdJumpArc(e);
+      const { worstPlatformDepth } = holdJumpArc(e);
       expect(worstPlatformDepth).toBeLessThanOrEqual(-CAM_GROUND_STRIP);
-      // terrain barely moves: the whole arc drifts at most one budget
-      expect(camRise).toBeLessThanOrEqual(CAM_RISE_BUDGET + 1);
     }
   });
 
@@ -69,37 +105,43 @@ describe("camera-frame v2 (owner report 2026-10-11)", () => {
     for (const date of ["2026-10-11", "2026-10-10", "2026-10-09", "2026-10-08", "2026-10-07"]) {
       const e = dailyEngine(date, LOW_G);
       settle(e);
-      const { worstPlatformDepth, camRise } = holdJumpArc(e);
+      const { worstPlatformDepth } = holdJumpArc(e);
       expect(worstPlatformDepth).toBeLessThanOrEqual(-CAM_GROUND_STRIP);
-      expect(camRise).toBeLessThanOrEqual(CAM_RISE_BUDGET + 1);
     }
   });
 
-  test("upward camera motion is rate-limited and only near the top edge", () => {
-    const e = dailyEngine("2026-10-11", BASE_MODS);
-    settle(e);
-    const camY0 = e.camY;
-    e.press();
-    let moved = false;
-    for (let i = 0; i < 60; i++) {
-      e.step(DT);
-      if (e.vy >= 0) break;
-      if (e.camY < camY0 - 1e-9) {
-        moved = true;
-        const drop = camY0 - e.camY; // px the camera moved up this tick
-        // rate-limited: never a snap, at most one tick of CAM_RISE_RATE
-        expect(drop).toBeLessThanOrEqual(CAM_RISE_RATE * DT + 1e-9);
-        // engage contract: the engine fires on its PRE-move player position —
-        // reconstruct it (py - (camY + drop)) and require it near the top edge
-        const preMoveP = e.py - (e.camY + drop);
-        expect(preMoveP).toBeLessThan(CAM_RISE_ENGAGE + 20);
-        break;
+  test("player top never leaves the frame top on max arcs (base + low-G, 5 daily seeds)", () => {
+    for (const mods of [BASE_MODS, LOW_G]) {
+      for (const date of ["2026-10-11", "2026-10-10", "2026-10-09", "2026-10-08", "2026-10-07"]) {
+        const e = dailyEngine(date, mods);
+        settle(e);
+        const { minPlayerTop } = holdJumpArc(e);
+        expect(minPlayerTop).toBeGreaterThanOrEqual(0);
       }
     }
-    expect(moved).toBe(true); // a full hold-jump DOES eventually use the drift
   });
 
-  test("after a full jump the camera re-centers (budget never freezes it)", () => {
+  test("SMOOTHNESS: every camera move is exactly the single lerp — snaps forbidden", () => {
+    for (const mods of [BASE_MODS, LOW_G]) {
+      const e = dailyEngine("2026-10-11", mods);
+      settle(e);
+      e.press(); // one full hold-jump, watched tick by tick
+      for (let i = 0; i < 150; i++) {
+        const camBefore = e.camY;
+        e.step(DT);
+        if (e.dead) break;
+        // v3 law, recomputed exactly from the engine's real inputs (post-
+        // physics py/lastGroundY + pre-step camY): one lerp toward
+        // max(desired, floor). ANY faster move (snap clamp / drift) fails.
+        const target = Math.max(e.py - VIEW_H * 0.52, e.lastGroundY - VIEW_H + CAM_GROUND_STRIP);
+        const allowed = Math.abs(target - camBefore) * Math.min(1, DT * CAM_LERP) + 1e-9;
+        expect(Math.abs(e.camY - camBefore)).toBeLessThanOrEqual(allowed);
+        if (e.vy > 0 && e.grounded) break;
+      }
+    }
+  });
+
+  test("after a full jump the camera re-centers (nothing freezes it)", () => {
     const plats: Platform[] = [];
     for (let i = 0; i < 40; i++) {
       plats.push({
@@ -118,7 +160,7 @@ describe("camera-frame v2 (owner report 2026-10-11)", () => {
     expect(Math.abs(groundTopScreenY - (VIEW_H * 0.52 + 40))).toBeLessThan(30);
   });
 
-  test("falling deaths still trigger with the camera floor in place", () => {
+  test("falling deaths still trigger with the soft ground guard in place", () => {
     const plats: Platform[] = [];
     for (let i = 0; i < 40; i++) {
       plats.push({
@@ -131,5 +173,23 @@ describe("camera-frame v2 (owner report 2026-10-11)", () => {
     for (let i = 0; i < 600 && !e.dead; i++) e.step(DT);
     expect(e.dead).toBe(true);
     expect(e.deathCause).toBe("fell");
+  });
+
+  test("determinism: identical daily runs produce identical camera traces", () => {
+    const trace = (mods: MutationMods) => {
+      const e = dailyEngine("2026-10-11", mods);
+      settle(e);
+      const out: number[] = [];
+      e.press();
+      for (let i = 0; i < 150; i++) {
+        e.step(DT);
+        out.push(Math.round(e.camY * 1e6) / 1e6);
+        if (e.vy > 0 && e.grounded) break;
+      }
+      return out;
+    };
+    for (const mods of [BASE_MODS, LOW_G]) {
+      expect(trace(mods)).toEqual(trace(mods));
+    }
   });
 });

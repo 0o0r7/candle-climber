@@ -29,23 +29,21 @@ export const PLAYER_H = 40;
 export const CAM_BASE = 148; // was 175 — readable start, learn the chart first
 export const CAM_ACCEL = 3.2; // was 5.5 — the climb heats up slower
 export const CAM_MAX = 400; // was 470 — late-game still tense, no longer frantic
-// CAMERA-FRAME fix v2 (owner report 2026-10-11, second pass): even with the
-// asymmetric follow, the ground still slid toward the frame bottom during very
-// high jumps (reach 310-387px vs a 480px view). Final architecture:
-//   · while RISING, the camera may drift up by at most CAM_RISE_BUDGET px per
-//     airborne arc (CAM_RISE_RATE px/s, engaged only once the player nears the
-//     top margin) — the terrain barely moves;
-//   · the RENDERER covers the remainder with a ground-pinned zoom-out
-//     (render-only, see GameCanvas/render-v2) so neither the player nor the
-//     playfield can leave the frame — geometry math forbids it otherwise;
-//   · hard floor: the takeoff platform strip (CAM_GROUND_STRIP) can never
-//     leave the frame regardless;
-//   · falling/grounded keep the classic CAM_LERP follow (re-center after
-//     landing, chase the fall).
-export const CAM_LERP = 4.2;         // falling/grounded follow (unchanged feel)
-export const CAM_RISE_BUDGET = 100;  // max px the camera drifts up per airborne arc
-export const CAM_RISE_RATE = 240;    // px/s at which that budget is spent
-export const CAM_RISE_ENGAGE = 84;   // player-top screen-y that arms the drift
+// CAMERA-FRAME v3 (owner report 2026-10-11, third pass): the v2 machinery
+// (per-arc drift budget + render-time zoom-out) made the frame lag and feel
+// unnatural — owner: «تصویر دیگه روان نیست و لگ میزنه». Reverted to the ONE
+// law the game shipped with: a single CAM_LERP chase toward `desired`, with
+// the takeoff-platform guard folded INTO the target via Math.max —
+//   desired = max(py - 0.52*VIEW_H, lastGroundY - VIEW_H + CAM_GROUND_STRIP)
+// Math.max is continuous: whenever the guard is inactive (all normal play)
+// the motion is BIT-IDENTICAL to the original camera; on very high jumps
+// (reach up to ~387px vs the 480px view) the camera simply eases into the
+// static floor line and holds the takeoff platform's CAM_GROUND_STRIP strip
+// visible — no drift budget, no rate caps, no mode switches, no snap clamps,
+// and NO render zoom. Geometry: apex player top = 416 - reach ≥ 29px below
+// the frame top even when the camera is pinned at the floor (reach ≤ 416px
+// always fits) — the frame can hold BOTH the player and the terrain.
+export const CAM_LERP = 4.2;         // the original single follow rate
 export const CAM_GROUND_STRIP = 24;  // takeoff platform keeps this strip visible at the frame bottom
 
 export type SfxName = "jump" | "land" | "crumble" | "milestone" | "victory";
@@ -79,13 +77,10 @@ export class Engine {
   // camera / world
   camX = 0; camY = 0; speed = CAM_BASE;
   // CAMERA-FRAME fix: y of the last platform the player left the ground from.
-  // The camera may never rise so far that this platform leaves the frame —
-  // "where did I jump from" is terrain the player MUST keep reading. Also the
-  // renderer's zoom pivot (render-only zoom pins THIS line on screen).
+  // The camera follow target never dips below the line that keeps a
+  // CAM_GROUND_STRIP strip of this platform visible (soft Math.max guard —
+  // see the constant block above; no clamps, no zoom).
   lastGroundY: number;
-  // per-airborne-arc upward drift budget (see CAM_RISE_BUDGET); refilled on
-  // every landing — deterministic, fixed-timestep only
-  riseBudget = CAM_RISE_BUDGET;
   time = 0;
   // run stats
   score = 0; candlesPassed = 0; streak = 0; bestStreak = 0;
@@ -282,7 +277,6 @@ export class Engine {
           this.coyote = COYOTE;
           this.groundPlat = p;
           this.lastGroundY = p.y;
-          this.riseBudget = CAM_RISE_BUDGET;
           if (p.summit) this.graduate();
           if (p.crumble && p.state === "solid") { p.state = "crumbling"; p.crumbleT = 0; this.cb.onSfx?.("crumble"); }
           break;
@@ -319,34 +313,14 @@ export class Engine {
       this.die(this.lastLandUp === false ? "crumbled" : "fell");
     }
 
-    const desired = this.py - VIEW_H * 0.52;
-    const rising = this.vy < 0 && !this.grounded;
-    if (
-      rising &&
-      this.py - this.camY < CAM_RISE_ENGAGE &&
-      this.riseBudget > 0 &&
-      desired < this.camY
-    ) {
-      // airborne rise: capped, rate-limited drift — terrain stays readable
-      const use = Math.min(this.riseBudget, CAM_RISE_RATE * dt, this.camY - desired);
-      this.camY -= use;
-      this.riseBudget -= use;
-    } else if (!rising) {
-      // falling / grounded: classic follow (re-centers after landing)
-      const prevY = this.camY;
-      this.camY += (desired - this.camY) * Math.min(1, dt * CAM_LERP);
-      // airborne upward follow (early-fall apex chase) spends the SAME arc
-      // budget — the total per-arc upward drift can never exceed CAM_RISE_BUDGET
-      if (!this.grounded && this.camY < prevY) {
-        const used = Math.min(this.riseBudget, prevY - this.camY);
-        this.camY = prevY - used;
-        this.riseBudget -= used;
-      }
-    }
-    // hard guarantee: the takeoff platform never slides out of the bottom of
-    // the frame (a CAM_GROUND_STRIP-wide strip of it stays visible)
+    // CAMERA-FRAME v3: the original single-lerp follow. The takeoff-platform
+    // guard lives INSIDE the target (Math.max is continuous — no mode switch,
+    // no velocity discontinuity): normal play tracks py - 0.52*VIEW_H exactly
+    // like the shipped original; a very high arc eases the camera into the
+    // static floor line, holding the takeoff strip visible without any snap.
     const camFloor = this.lastGroundY - VIEW_H + CAM_GROUND_STRIP;
-    if (this.camY < camFloor) this.camY = camFloor;
+    const desired = Math.max(this.py - VIEW_H * 0.52, camFloor);
+    this.camY += (desired - this.camY) * Math.min(1, dt * CAM_LERP);
     if (this.camY > 0) this.camY = 0;
     this.shake = Math.max(0, this.shake - dt * 30);
     this.stepParticles(dt);

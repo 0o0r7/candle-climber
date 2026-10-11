@@ -53,8 +53,10 @@ export const viewport: Viewport = {
   themeColor: "#101214",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // WCAG 1.4.4: pinch-zoom must stay available. The canvas contain-fits and
+  // never crops, and .cc-stage sets touch-action: manipulation so rapid taps
+  // still register as jumps (no double-tap zoom delay) while zoom stays free.
+  userScalable: true,
 };
 
 export default function RootLayout({

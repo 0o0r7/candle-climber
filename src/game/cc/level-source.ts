@@ -35,8 +35,42 @@ export const INTERVAL_MS: Record<GameInterval, number> = {
 export function pickSeed(date: string) {
   const h = hashString("cc-daily-v1:" + date);
   const rnd = mulberry32(h);
-  const symbol = WATCHLIST[Math.floor(rnd() * WATCHLIST.length)];
+  // One rnd() draw ALWAYS (even on v2 days): keeps the synthetic-fallback byte
+  // stream identical to the legacy pick for every date — only the SYMBOL
+  // choice is versioned, never the terrain shape.
+  const legacySymbol = WATCHLIST[Math.floor(rnd() * WATCHLIST.length)];
+  const symbol = date >= ROTATION_V2_FROM ? rotationSymbol(date) : legacySymbol;
   return { symbol, rnd };
+}
+
+// ── Daily rotation v2 (owner report 2026-10-11) ─────────────────────────────
+// The legacy 6-crypto hash pick clustered (XRPUSDT served 2026-10-10 AND
+// 2026-10-11 back-to-back; ETHUSDT 3 of 5 days) and the W3 stock rails never
+// entered the daily level — they were reachable only via deep link. From the
+// cutoff below the daily symbol cycles ALL nine symbols (crypto + stocks) in
+// a fixed deterministic shuffled order: every symbol serves every 9 days and
+// two consecutive days can NEVER repeat. Terrains before the cutoff keep the
+// legacy pick — leaderboard run tokens, archive replays and pinned tests all
+// stay byte-valid (the cutoff pattern mirrors "legacy 1w byte-identical").
+export const ROTATION_V2_FROM = "2026-10-12";
+
+// Fixed shuffle (deterministic across server + every client): Fisher-Yates
+// over ALL_SYMBOLS seeded by a constant — NOT the daily hash, so the order is
+// stable forever and the cycle never depends on when it is evaluated.
+export const ROTATION_ORDER: readonly string[] = (() => {
+  const rnd = mulberry32(hashString("cc-rotation-v2"));
+  const arr = [...ALL_SYMBOLS];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+})();
+
+/** v2 daily schedule: day-index round-robin over the fixed ROTATION_ORDER. */
+export function rotationSymbol(date: string): string {
+  const days = Math.floor(Date.parse(date + "T00:00:00Z") / 86_400_000);
+  return ROTATION_ORDER[((days % ROTATION_ORDER.length) + ROTATION_ORDER.length) % ROTATION_ORDER.length];
 }
 
 // Merge-back wave 1 (VARIANT-REVIEW-2026-10-05) — provenance badge. The ONE

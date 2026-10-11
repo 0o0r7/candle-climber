@@ -113,7 +113,7 @@ export default function GameplayDemo() {
       ctx.beginPath();
       ctx.rect(0, 0, VIEW_W, VIEW_H);
       ctx.clip();
-      renderV2(ctx, pilot.eng, DEMO_SEED, env.weather, [], undefined, DEFAULT_CHAR_ID, null, null, undefined, env.biome);
+      renderV2(ctx, pilot.eng, DEMO_SEED, env.weather, [], undefined, DEFAULT_CHAR_ID, null, null, env.biome);
       ctx.restore();
 
       const fade = playingRef.current ? seamFade(loopT) : 0;

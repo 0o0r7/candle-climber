@@ -14,7 +14,7 @@ import PredictionPanel from "@/components/cc/PredictionPanel";
 import { WALLET_ADDRESS_KEY, isValidAddress } from "@/lib/wallet";
 // LAW 1.2 hardening: official-lane ownership proof — the browser builds the
 // EXACT message the server verifies (isomorphic template, no crypto import)
-import { buildProofMessage } from "@/lib/proof-message";
+import { buildProofMessage, buildMintProofMessage } from "@/lib/proof-message";
 import { isArchiveDate } from "@/game/cc/archive";
 import { render } from "@/game/cc/render";
 import { renderV2 } from "@/game/cc/render-v2";
@@ -37,6 +37,16 @@ import {
 } from "@/game/cc/duel";
 import type { CandleData, RunResult } from "@/game/cc/types";
 import Tutorial from "@/components/cc/Tutorial";
+// P2 self-ghost — this device's OWN best run per terrain (local, cosmetic,
+// same replay path as the server ghost; the fallback when nobody uploaded)
+import {
+  loadSelfGhostDB, recordSelfGhost, selfGhostAsEntry, selfGhostKey,
+  SELF_GHOST_KEY, type SelfGhostDB, type SelfGhostEntry,
+} from "@/game/cc/self-ghost";
+// P2 lifetime stats ledger — honest-local, recorded once per finished run
+import {
+  emptyLedger, loadLedger, recordRun, saveLedger, STATS_KEY, type StatsLedger,
+} from "@/lib/stats-ledger";
 
 type Phase = "loading" | "ready" | "running" | "graduated" | "dead";
 interface BoardEntry {
@@ -93,11 +103,6 @@ export default function GameCanvas() {
   const accRef = useRef<number>(0);
   // V-PHASE V-1: canvas backing-store geometry for the screen-space clear
   const fitRef = useRef<{ dpr: number; w: number; h: number; s: number; ox: number; oy: number }>({ dpr: 1, w: 0, h: 0, s: 1, ox: 0, oy: 0 });
-  // CAMERA-FRAME zoom (render-only): eased each rAF toward the value that
-  // keeps BOTH the player and the takeoff ground line inside the 800×480 band
-  // when a jump is higher than the frame. Pivot = the ground line itself, so
-  // the terrain the player jumped from visually NEVER moves on screen.
-  const camZoomRef = useRef({ z: 1, px: VIEW_W * 0.3, py: VIEW_H * 0.75 });
   const [phase, setPhase] = useState<Phase>("loading");
   const [data, setData] = useState<CandleData | null>(null);
   const [mutation, setMutation] = useState<Mutation | null>(null);
@@ -123,6 +128,11 @@ export default function GameCanvas() {
   const [laneNote, setLaneNote] = useState<string | null>(null);
   const [rank, setRank] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Death Card mint (TESTNET) — post-death detour, wallet-only, never blocks a
+  // retry. States: idle → signing → sending → confirming → minted | error.
+  const [mintState, setMintState] = useState<"idle" | "signing" | "sending" | "confirming" | "minted" | "error">("idle");
+  const [mintMsg, setMintMsg] = useState<string | null>(null);
+  const [mintUrl, setMintUrl] = useState<string | null>(null);
   const [muted, setMutedState] = useState(false);
   // P2.4: yesterday's episode — honest aggregates over the day's submissions
   const [report, setReport] = useState<ReportResp | null>(null);
@@ -181,6 +191,25 @@ export default function GameCanvas() {
   const [codeInput, setCodeInput] = useState("");
   const [codeErr, setCodeErr] = useState(false);
 
+  // P2 pause — a LOOP-level freeze, not an engine feature: the fixed-step
+  // block simply stops while paused, so physics, camera, rival bot and the
+  // ghost recorder all freeze on the same clock. W5 byte-determinism is
+  // untouched (the engine object never learns about pausing).
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const pausePanelRef = useRef<HTMLDivElement | null>(null);
+  const phaseRef = useRef<Phase>("loading"); // blur/visibility handlers read this
+
+  // P2 self-ghost state — refs for the RAF loop, state for the UI note
+  const selfDBRef = useRef<SelfGhostDB>({});
+  const selfGhostRef = useRef<GhostEntry | null>(null); // RAF fallback slot
+  const [selfGhostEntry, setSelfGhostEntry] = useState<SelfGhostEntry | null>(null);
+
+  // P2 lifetime ledger — recorded EXACTLY ONCE per finished run
+  const ledgerRef = useRef<StatsLedger>(emptyLedger());
+  const runRecordedRef = useRef(false);
+  const tfRef = useRef<GameInterval>("1w"); // self-ghost key needs the interval
+
   // E2 economy hooks (LAW 1: display-only — the game never reads these):
   // E2.3 practice lane note (archive run banked 0.5 weight), E2.4 vault state,
   // E2.6 burn-counter line. nameRef mirrors `name` for the death-path POSTs.
@@ -194,16 +223,36 @@ export default function GameCanvas() {
   // LAW 1.3: skill-only scoreboard).
   useEffect(() => {
     if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) setHasWallet(true);
+    // WalletChip connect/disconnect broadcasts — the official-lane context
+    // follows the REAL saved address at all times (never blocks play).
+    const onWalletChanged = () =>
+      setHasWallet(isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY)));
+    window.addEventListener("cc-wallet-changed", onWalletChanged);
+    return () => window.removeEventListener("cc-wallet-changed", onWalletChanged);
   }, []);
   const [burn, setBurn] = useState<string | null>(null);
   const [showTutorial, setShowTutorial] = useState(false);
   const showTutorialRef = useRef(false);
-  useEffect(() => { nameRef.current = name; }, [name]);
   useEffect(() => { showTutorialRef.current = showTutorial; }, [showTutorial]);
   // Tutorial: auto-show for first-time players when the ready screen appears
   useEffect(() => {
     if (phase === "ready") {
       try { if (!localStorage.getItem("cc_tutorial_seen_v1")) setShowTutorial(true); } catch { /* private mode */ }
+    }
+  }, [phase]);
+  // Audit fix (touch UX): the SHIFT = RUSH line is keyboard-only — hide it on
+  // coarse-pointer (touch) devices so mobile players don't see a dead control.
+  const [coarsePointer, setCoarsePointer] = useState(false);
+  useEffect(() => {
+    try { setCoarsePointer(window.matchMedia("(pointer: coarse)").matches); } catch { /* SSR / private mode */ }
+  }, []);
+  // Audit fix (a11y): move focus into the death panel so keyboard/screen-reader
+  // users land in the run-end flow instead of staying on the canvas.
+  const deathPanelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (phase === "dead") {
+      try { deathPanelRef.current?.focus(); } catch { /* noop */ }
+
     }
   }, [phase]);
 
@@ -255,6 +304,8 @@ export default function GameCanvas() {
     const params = new URLSearchParams(window.location.search);
     setV2(params.get("renderer") !== "v1"); // default v2; only explicit v1 downgrades (promoted 2026-10-10)
     wreckDBRef.current = loadWreckDB(); // H3: this device's death map
+    selfDBRef.current = loadSelfGhostDB(localStorage.getItem(SELF_GHOST_KEY)); // P2 self-ghost
+    ledgerRef.current = loadLedger(localStorage.getItem(STATS_KEY)); // P2 stats ledger
     const requested = (params.get("symbol") ?? "").toUpperCase();
     const requestedDate = params.get("date");
     const isArch = isArchiveDate(requestedDate, utcDateStr());
@@ -323,6 +374,7 @@ export default function GameCanvas() {
         wrecksRef.current = wrecksFor(wreckDBRef.current, seedRef.current);
         setData(d);
         setMutation(dailyMutation(d.seed.date + d.seed.symbol));
+        refreshSelfGhost(d); // P2: mirror this terrain's own best ghost (if any)
         setPhase("ready");
         if (!isArch) {
           fetch(`/api/leaderboard?date=${d.seed.date}&interval=${tf}`)
@@ -379,6 +431,7 @@ export default function GameCanvas() {
         wrecksRef.current = wrecksFor(wreckDBRef.current, seedRef.current);
         setData(d);
         setMutation(dailyMutation(d.seed.date + d.seed.symbol));
+        refreshSelfGhost(d); // P2: synthetic terrain gets a self-ghost too
         setPhase("ready");
       });
     return () => { alive = false; };
@@ -416,6 +469,103 @@ export default function GameCanvas() {
     vsBotRef.current = on;
     try { localStorage.setItem(VS_KEY, on ? "1" : "0"); } catch { /* private mode — cosmetic only */ }
     sfx.land();
+  }, []);
+
+  // ---- P2 pause ------------------------------------------------------------
+  useEffect(() => {
+    tfRef.current = tf;
+  }, [tf]);
+
+  // phase mirror + pause teardown: a panel (death/graduated) replaces the
+  // pause overlay — returning to a frozen run from those panels is a trap.
+  useEffect(() => {
+    phaseRef.current = phase;
+    if (phase !== "running" && pausedRef.current) applyPause(false);
+  }, [phase]);
+
+  const applyPause = useCallback((v: boolean) => {
+    if (pausedRef.current === v) return;
+    pausedRef.current = v;
+    setPaused(v);
+    if (v) {
+      // release held inputs so nothing lingers across the freeze
+      engineRef.current?.release();
+      engineRef.current?.releaseRush();
+    } else {
+      // resume from a clean clock — no accumulated frame debt
+      lastRef.current = performance.now();
+      accRef.current = 0;
+    }
+  }, []);
+
+  const togglePause = useCallback(() => {
+    if (phaseRef.current !== "running") return;
+    applyPause(!pausedRef.current);
+  }, [applyPause]);
+
+  // Audit I: tab suspension must not silently kill a live run — hiding the
+  // tab or losing the window auto-pauses. Returning, the player resumes
+  // deliberately (the overlay is waiting, the clock is clean).
+  useEffect(() => {
+    const onHide = () => { if (document.hidden && phaseRef.current === "running") applyPause(true); };
+    const onBlur = () => { if (phaseRef.current === "running") applyPause(true); };
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, [applyPause]);
+
+  // focus lands on the pause dialog so keyboard users are inside it
+  useEffect(() => {
+    if (paused) { try { pausePanelRef.current?.focus(); } catch { /* noop */ } }
+  }, [paused]);
+
+  // ---- P2 self-ghost + ledger ---------------------------------------------
+  // Mirror this terrain's own best (if any) into the RAF fallback slot.
+  const refreshSelfGhost = useCallback((d: CandleData) => {
+    const key = selfGhostKey(d.seed.date, d.seed.symbol, d.seed.interval);
+    const se = selfDBRef.current[key] ?? null;
+    selfGhostRef.current = se ? selfGhostAsEntry(key, se) : null;
+    setSelfGhostEntry(se);
+  }, []);
+
+  // Save a finished run's stream as the device's own ghost when it beats the
+  // stored one (recordSelfGhost keeps the best; double-calls across the
+  // graduation→death path are harmless and pick up the longer final stream).
+  const maybeSaveSelfGhost = useCallback((d: CandleData, candlesPassed: number, score: number) => {
+    const samples = ghostRecRef.current.flush();
+    if (samples.length === 0) return;
+    const key = selfGhostKey(d.seed.date, d.seed.symbol, d.seed.interval);
+    const res = recordSelfGhost(selfDBRef.current, key, {
+      charId: charIdRef.current,
+      candlesPassed,
+      score,
+      ts: Date.now(),
+      samples,
+    });
+    if (!res.saved) return;
+    selfDBRef.current = res.db;
+    try { localStorage.setItem(SELF_GHOST_KEY, JSON.stringify(res.db)); } catch { /* private mode — cosmetic only */ }
+    selfGhostRef.current = selfGhostAsEntry(key, res.db[key]);
+    setSelfGhostEntry(res.db[key]);
+  }, []);
+
+  // P2: a run is recorded into the ledger EXACTLY ONCE — at its true end.
+  // (a) death fires onDeath once; (b) a graduated engine abandoned from the
+  // summit panel never dies — startRun records it before replacing it.
+  const recordFinishedRun = useCallback((r: RunResult, died: boolean) => {
+    if (runRecordedRef.current) return;
+    runRecordedRef.current = true;
+    ledgerRef.current = recordRun(ledgerRef.current, {
+      score: r.score,
+      candlesPassed: r.candlesPassed,
+      bestStreak: r.bestStreak,
+      graduated: r.graduated === true,
+      died,
+    }, Date.now());
+    try { localStorage.setItem(STATS_KEY, saveLedger(ledgerRef.current)); } catch { /* private mode */ }
   }, []);
 
   // P7.1: the rival's skin/personality is deterministic per level seed — the
@@ -542,6 +692,10 @@ export default function GameCanvas() {
           setResult(r);
           setPhase("dead");
           ghostRecRef.current.stop(); // P7.2: stream ends at the death tick
+          // P2: the run's true end — fold it into the lifetime ledger and
+          // save the stream as this device's own ghost when it beats the old one.
+          recordFinishedRun(r, true);
+          maybeSaveSelfGhost(d, r.candlesPassed, r.score);
           setHud({ score: r.score, combo: 0, candles: r.candlesPassed });
           // P7.1: local verdict at death — purely client-side, never submitted.
           // P7.3: the duel verdict is final here; the local W-L-D tally folds once.
@@ -586,6 +740,26 @@ export default function GameCanvas() {
 
   const startRun = useCallback(() => {
     if (!data || !mutation || data.candles.length === 0) return;
+    // P2: RETRY from the summit panel abandons a graduated engine that will
+    // never fire onDeath — record it into the ledger + self-ghost first.
+    // (A run that graduated and CONTINUED records once, at its eventual death.)
+    const prevEng = engineRef.current;
+    if (prevEng && prevEng.graduated && !runRecordedRef.current) {
+      recordFinishedRun(
+        {
+          score: Math.floor(prevEng.score),
+          candlesPassed: prevEng.candlesPassed,
+          bestStreak: prevEng.bestStreak,
+          candleIndex: prevEng.candlesPassed,
+          graduated: true,
+          world2: prevEng.world2,
+        },
+        false,
+      );
+      maybeSaveSelfGhost(data, prevEng.candlesPassed, Math.floor(prevEng.score));
+    }
+    runRecordedRef.current = false; // fresh run — the ledger guard resets
+    applyPause(false); // a restart is always an unpause
     unlockAudio();
     const eng = buildEngine(data, mutation);
     // first-run onboarding hints: show during the player's first 2 runs ever
@@ -609,6 +783,9 @@ export default function GameCanvas() {
     setResult(null);
     setRank(null);
     setLaneNote(null);
+    setMintState("idle"); // fresh run — the mint detour resets with it
+    setMintMsg(null);
+    setMintUrl(null);
     setGraduated(false);
     setWorld2(false);
     setPracticeNote(null);
@@ -616,7 +793,7 @@ export default function GameCanvas() {
     setPhase("running");
     lastRef.current = performance.now();
     accRef.current = 0;
-  }, [data, mutation, buildEngine, rivalCharId]);
+  }, [data, mutation, buildEngine, rivalCharId, recordFinishedRun, maybeSaveSelfGhost, applyPause]);
 
   // W4: from the GRADUATED panel, continue into the post-graduation buyback
   // world — doubled gains, endless procedural sky. The run keeps its score.
@@ -683,9 +860,11 @@ export default function GameCanvas() {
       if (!e) return;
       let dt = (now - lastRef.current) / 1000;
       lastRef.current = now;
-      const frameDt = Math.min(0.1, dt); // real frame delta — zoom easing only
       dt = Math.min(0.1, dt);
-      accRef.current += dt;
+      // P2 pause: while paused mid-run, time does NOT accumulate — the
+      // fixed-step block (engine + bot + ghost recorder) freezes on the same
+      // clock; the render below keeps drawing the frozen frame every RAF.
+      if (!(pausedRef.current && phase === "running")) accRef.current += dt;
       const FIXED = 1 / 60;
       while (accRef.current >= FIXED) {
         // "graduated" pauses the simulation while the celebration panel is up
@@ -707,43 +886,22 @@ export default function GameCanvas() {
       ctx.clearRect(0, 0, fit.w, fit.h);
       ctx.restore();
 
-      // CAMERA-FRAME zoom target: needed when the player rises higher than
-      // the band can show while the ground line stays pinned. z keeps the
-      // player top at ≥36px under the frame top; clamped to a readable 0.55.
-      const P = e.py - e.camY;          // player top, screen space
-      const G = e.lastGroundY - e.camY; // takeoff ground line, screen space
-      let zt = 1;
-      if (!e.dead && phase === "running" && P < 52 && G - P > 8) {
-        zt = Math.min(1, Math.max(0.55, (G - 36) / (G - P)));
-      }
-      const cz = camZoomRef.current;
-      cz.z += (zt - cz.z) * Math.min(1, frameDt * 7);
-      if (cz.z > 0.999 && zt >= 0.999) cz.z = 1; // snap fully back when idle
-      cz.px = e.playerScreenX + 17;
-      cz.py = G;
-
       const bot = vsBotRef.current ? botRef.current : null;
+      // P7.2 + P2 self-ghost: replay priority — duel challenge > champion
+      // ghost (server) > this device's own best (local). One GhostView out.
+      const ghostSrc = ghostRef.current ?? selfGhostRef.current;
       // P7.2: ghost replay — position lookup by the human engine's own clock
       const gv: GhostView | null =
-        ghostOnRef.current && ghostRef.current && (phase === "ready" || phase === "running" || phase === "dead" || phase === "graduated")
-          ? ghostViewAt(ghostRef.current, e.time)
+        ghostOnRef.current && ghostSrc && (phase === "ready" || phase === "running" || phase === "dead" || phase === "graduated")
+          ? ghostViewAt(ghostSrc, e.time)
           : null;
-      // per-frame compose: fit → hard clip to the world band → zoom about the
-      // ground-line pivot (clip keeps letterbox clean while zoomed out)
-      ctx.save();
-      ctx.setTransform(fit.dpr * fit.s, 0, 0, fit.dpr * fit.s, fit.dpr * fit.ox, fit.dpr * fit.oy);
-      ctx.beginPath();
-      ctx.rect(0, 0, VIEW_W, VIEW_H);
-      ctx.clip();
-      if (cz.z < 0.999) {
-        ctx.translate(cz.px, cz.py);
-        ctx.scale(cz.z, cz.z);
-        ctx.translate(-cz.px, -cz.py);
-      }
-      const camZoom = cz.z < 0.999 ? { z: cz.z, px: cz.px, py: cz.py } : undefined;
-      if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv, camZoom, biomeId);
-      else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv, camZoom);
-      ctx.restore();
+      // CAMERA-FRAME v3: the frame problem is solved in the ENGINE (single-lerp
+      // camera with a soft ground-line guard) — the render path is the ORIGINAL
+      // unclipped, un-zoomed compose (owner: zoom/crop made the frame lag and
+      // feel unnatural). Renderers draw under the resize-time fit transform and
+      // save/restore internally. (Biome layers ride the v2 renderer — render-only.)
+      if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv, biomeId);
+      else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv);
       rafRef.current = requestAnimationFrame(step);
     };
     rafRef.current = requestAnimationFrame(step);
@@ -765,6 +923,13 @@ export default function GameCanvas() {
       // G2 owner note: typing a name must never jump or restart the run
       const tag = (ev.target as HTMLElement | null)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA") return;
+      // P2 pause: P or Escape freezes/resumes a live run; while frozen the
+      // game ignores jump/start so nothing moves behind the pause dialog.
+      if (ev.key === "p" || ev.key === "P" || ev.key === "Escape") {
+        if (phase === "running") { ev.preventDefault(); togglePause(); }
+        return;
+      }
+      if (pausedRef.current && phase === "running") return;
       // P3.6 RUSH (desktop): hold Shift = faster climb + 25% gains (opt-in risk)
       if (ev.key === "Shift") {
         engineRef.current?.pressRush();
@@ -792,13 +957,14 @@ export default function GameCanvas() {
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
-  }, [phase, startRun, enterWorld2]);
+  }, [phase, startRun, enterWorld2, togglePause]);
 
   const onPointerDown = (ev: React.PointerEvent) => {
     // G2 owner note: the death/ready panels live inside the stage — never hijack
     // clicks meant for the name input or any other control inside them
     if ((ev.target as HTMLElement | null)?.closest("input,button,a,select,textarea,label")) return;
     ev.preventDefault();
+    if (pausedRef.current && phase === "running") return; // frozen — the pause dialog owns the stage
     if (phase === "ready") { if (!showTutorialRef.current) startRun(); return; }
     engineRef.current?.press();
   };
@@ -929,6 +1095,99 @@ export default function GameCanvas() {
     }
   };
 
+  // Death Card mint (TESTNET) — architecture B: the SERVER minter pays testnet
+  // gas; the wallet only personal_signs the purpose-separated mint message.
+  // Honest states end to end: a rejected/absent provider never blocks play and
+  // every failure says what actually happened. Mirror of the board-proof clamps.
+  const mintDeathCard = async () => {
+    if (!result || !data || !data.runToken || mintState === "signing" || mintState === "sending" || mintState === "confirming") return;
+    const walletAddr = localStorage.getItem(WALLET_ADDRESS_KEY);
+    if (!walletAddr || !isValidAddress(walletAddr)) {
+      setMintState("error");
+      setMintMsg("connect a wallet first — minting is wallet-only (guest play is never affected)");
+      return;
+    }
+    setMintState("signing");
+    setMintMsg(null);
+    try {
+      const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+      if (!eth) throw new Error("no wallet provider in this browser");
+      const ts = Date.now();
+      const msg = buildMintProofMessage(
+        {
+          score: Math.floor(result.score),
+          candlesPassed: Math.floor(result.candlesPassed),
+          bestStreak: Math.max(0, Math.min(999, Math.floor(result.bestStreak))),
+          date: data.seed.date,
+          interval: tf,
+          wallet: walletAddr.toLowerCase(),
+        },
+        ts,
+      );
+      const msgHex = "0x" + [...new TextEncoder().encode(msg)].map((b) => b.toString(16).padStart(2, "0")).join("");
+      // popup must not pin the panel forever: 30s → give up with honest copy
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      let signature: string;
+      try {
+        const s = (await Promise.race([
+          eth.request({ method: "personal_sign", params: [msgHex, walletAddr] }),
+          new Promise<never>((_, rej) => {
+            timer = setTimeout(() => rej(new Error("sign-timeout")), 30_000);
+          }),
+        ])) as unknown;
+        if (typeof s !== "string" || !/^0x[0-9a-fA-F]{130}$/.test(s)) throw new Error("wallet returned no usable signature");
+        signature = s;
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+      setMintState("sending");
+      const res = await fetch("/api/deathcard/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          runToken: data.runToken,
+          address: walletAddr,
+          signature,
+          ts,
+          score: Math.floor(result.score),
+          candlesPassed: Math.floor(result.candlesPassed),
+          bestStreak: Math.max(0, Math.min(999, Math.floor(result.bestStreak))),
+        }),
+      });
+      const j = (await res.json()) as {
+        ok?: boolean; already?: boolean; status?: string; txHash?: string;
+        tokenId?: number; explorerUrl?: string; error?: string; note?: string;
+      };
+      if (!res.ok || !j.ok) {
+        setMintState("error");
+        setMintMsg(j.error ? (j.note ? `${j.error} — ${j.note}` : j.error) : "mint request failed");
+        return;
+      }
+      // mined/pending/already — a pending answer is polled to a final state
+      let final = j;
+      if (final.status === "pending" && final.txHash) {
+        setMintState("confirming");
+        for (let i = 0; i < 30; i++) {
+          await new Promise((r) => setTimeout(r, 2000));
+          const st = await fetch(`/api/deathcard/claim?txHash=${final.txHash}`).then((r) => r.json()) as { status?: string; tokenId?: number; explorerUrl?: string };
+          if (st.status === "mined" || st.status === "failed") { final = { ...j, ...st }; break; }
+        }
+      }
+      if (final.status === "failed") {
+        setMintState("error");
+        setMintMsg("the mint transaction failed on-chain — nothing was charged to you");
+        return;
+      }
+      setMintState("minted");
+      setMintUrl(final.explorerUrl ?? (final.txHash ? `https://explorer.testnet.chain.robinhood.com/tx/${final.txHash}` : null));
+      setMintMsg(final.already ? "already minted — one card per run, forever" : typeof final.tokenId === "number" ? `minted · CCDC #${final.tokenId}` : "minted");
+    } catch (err) {
+      setMintState("error");
+      const m = err instanceof Error ? err.message : "";
+      setMintMsg(m.includes("sign-timeout") ? "signature popup timed out — try again when ready" : m || "mint failed — try again");
+    }
+  };
+
   // P7.3: turn THIS completed run into an async duel — the code IS the
   // invitation (?duel=CODE). The share text rides the P3.1 rivalry tag when
   // one is typed, so the mockery loop and the duel loop are the same loop.
@@ -1037,7 +1296,40 @@ export default function GameCanvas() {
     ? `${weather.windLabel} · ${weather.fogLabel}`
     : null;
   const canSubmit = Boolean(data?.runToken) && !archive; // archive = practice (H1)
+  // Death Card mint gate — wallet-only + today's runs only (the SERVER enforces
+  // both again; this gate just keeps the button honest in the UI).
+  const canMint = canSubmit && hasWallet && data?.seed.source !== "vibe-launch" && data?.seed.date === new Date().toISOString().slice(0, 10);
+  // Death Card mint UI — shared by the dead + graduated panels. The button
+  // lives in the action row, the honest status line right under it. Runs that
+  // can't mint (guest / archive / vibe-launch) simply never see the button.
+  const mintBusy = mintState === "signing" || mintState === "sending" || mintState === "confirming";
+  const mintBtn = canMint ? (
+    <button
+      className="cc-btn"
+      onClick={mintDeathCard}
+      disabled={mintBusy}
+      title="mint this run's Death Card as a TESTNET NFT — free: the server pays testnet gas; wallet-only, one card per run, no value implied"
+    >
+      {mintState === "signing" ? "SIGN…" : mintState === "sending" ? "SENDING…" : mintState === "confirming" ? "CONFIRMING…" : mintState === "minted" ? "MINTED ✓" : "MINT (TESTNET)"}
+    </button>
+  ) : null;
+  const mintNote = canMint && mintMsg ? (
+    <p className="cc-vault-note" role="status">
+      {mintState === "minted" && mintUrl ? (
+        <a href={mintUrl} target="_blank" rel="noreferrer">{mintMsg} ↗</a>
+      ) : (
+        mintMsg
+      )}
+    </p>
+  ) : null;
   const unscoredMsg = archive ? ARCHIVE_MSG : UNSCORED_MSG;
+  // P3.5 gates: timeframe chips show on crypto dailies only — stock rails have
+  // no intraday feed, launch terrain is derived, archive stays weekly (V1).
+  const canPickTf = Boolean(
+    data && !archive && !duel &&
+    data.seed.source !== "stooq" && data.seed.source !== "yahoo" &&
+    data.seed.source !== "vibe-launch" && data.seed.source !== "robinhood",
+  );
   // Option B: rival/lead context follows THIS device's lane (official with a
   // linked wallet, guest otherwise) — both boards stay labeled on the panel.
   const myLane = hasWallet ? officialBoard : topBoard;
@@ -1101,7 +1393,7 @@ export default function GameCanvas() {
           {graduated && <div className="cc-chip cc-chip-grad">GRADUATED</div>}
           {world2 && <div className="cc-chip cc-chip-grad2">POST-GRAD ×2</div>}
           {!v2 && <div className="cc-chip cc-chip-mut" title="legacy renderer opt-out — /?renderer=v1">RENDER V1 · LEGACY</div>}
-          {weatherChip && <div className="cc-chip cc-chip-weather" title="H2 weather — ATR wind · volume fog">{weatherChip}</div>}
+          {weatherChip && <div className="cc-chip cc-chip-weather" title="weather — wind strength follows market volatility · fog follows trading volume">{weatherChip}</div>}
           {biomeId && biomeId !== "temperate" && data && (
             <div className="cc-chip cc-chip-biome" title={`environment biome — derived from today's market conditions`}>
               {deriveBiome(data.candles, data.seed.date + data.seed.symbol).name}
@@ -1116,6 +1408,18 @@ export default function GameCanvas() {
           )}
         </div>
         <div className="cc-hud-right">
+          {/* P2 pause — a real button in the HUD (touch-reachable); the stage
+              pointerdown handler ignores taps on buttons, so it never jumps */}
+          {phase === "running" && (
+            <button
+              className="cc-chip cc-chip-pausebtn"
+              onClick={togglePause}
+              aria-label="Pause game"
+              title={coarsePointer ? "pause" : "pause — P or Esc"}
+            >
+              PAUSE
+            </button>
+          )}
           <div className="cc-chip cc-chip-score">{hud.score.toLocaleString()}</div>
           {hud.combo > 1 && <div className="cc-chip cc-chip-combo">x{(1 + Math.min(hud.combo, 12) * 0.5).toFixed(1)}</div>}
         </div>
@@ -1135,6 +1439,26 @@ export default function GameCanvas() {
 
         {phase === "loading" && (
           <div className="cc-overlay"><div className="cc-panel"><p className="cc-loading">LOADING DAILY CHART…</p></div></div>
+        )}
+
+        {/* P2 pause — the run is frozen mid-air; the chart waits for the player.
+            focus lands on this dialog; RESUME restarts the clock debt-free. */}
+        {paused && phase === "running" && (
+          <div className="cc-overlay">
+            <div className="cc-panel cc-panel-pause" ref={pausePanelRef} tabIndex={-1} role="dialog" aria-label="Game paused">
+              <h2 className="cc-pause-head">PAUSED</h2>
+              <p className="cc-pause-sub">the chart is frozen — camera, rival and ghost all wait for you</p>
+              <div className="cc-death-actions">
+                <button className="cc-btn cc-btn-start" onClick={() => applyPause(false)}>RESUME</button>
+                <button className="cc-btn" onClick={startRun}>RESTART RUN</button>
+              </div>
+              <p className="cc-pause-keys">
+                {coarsePointer
+                  ? "tap RESUME to keep climbing"
+                  : (<>SPACE = jump · SHIFT = rush · <b className="lime">P / ESC</b> = pause</>)}
+              </p>
+            </div>
+          </div>
         )}
 
         {phase === "ready" && data && mutation && (
@@ -1165,20 +1489,36 @@ export default function GameCanvas() {
               <button className="cc-btn cc-btn-start cc-cta" onClick={startRun}>START CLIMB</button>
               <button className="cc-btn cc-btn-ghost cc-tut-reopen" onClick={() => setShowTutorial(true)}>HOW TO PLAY</button>
               {best > 0 && <p className="cc-best">PERSONAL BEST <b>{best.toLocaleString()}</b></p>}
+              {/* Audit RB-1/M-1: the objective, controls, scoring and failure
+                  condition live ABOVE the fold — no expansion required. */}
+              <div className="cc-howto cc-howto-core">
+                <p><b className="lime">GREEN</b> candles hold. <b className="coral">RED</b> candles crack, then crumble under you.</p>
+                <p>Tap = hop · <b className="lime">HOLD</b> Space (or ↑ / W) = higher jump · release early = short.</p>
+                {!coarsePointer && (
+                  <p><b className="lime">SHIFT</b> = RUSH — climb faster, +25% score while held · <b className="lime">P / ESC</b> = pause.</p>
+                )}
+                <p>Every candle you pass pays points — back-to-back GREEN candles build a combo (up to ×7). The camera never stops: fall off the bottom and the run ends.</p>
+                {archive ? (
+                  <p className="cc-next-level">famous days are famous difficulty — nobody designed this on purpose.</p>
+                ) : (
+                  <p className="cc-next-level">Same chart for everyone · resets 00:00 UTC · reach the summit to GRADUATE (world 2: gains ×2).</p>
+                )}
+              </div>
               <details className="cc-more">
                 <summary className="cc-more-summary">
-                  <span className="cc-more-arrow" aria-hidden>▸</span> WAYS TO PLAY
+                  <span className="cc-more-arrow" aria-hidden>▸</span> HOW TO PLAY &amp; OPTIONS
                 </summary>
                 <div className="cc-more-body">
+                  <div className="cc-sec-title">TODAY&apos;S TERRAIN</div>
                   {stats && (
-                    <div className="cc-realmove">
+                    <div className="cc-realmove" title="the price change across this level's chart — the same candles that built the terrain">
                       <MiniChart candles={data.candles} />
                       <div className="cc-realmove-row">
                         <span>
-                          REAL MOVE <b className={stats.changePct >= 0 ? "up" : "down"}>{fmtPct(stats.changePct)}</b>
+                          CHART MOVE <b className={stats.changePct >= 0 ? "up" : "down"}>{fmtPct(stats.changePct)}</b>
                         </span>
                         <span className="cc-realmove-sep">·</span>
-                        <span>
+                        <span title="difficulty tiers come from the chart's swing size — bigger swings make bigger jumps">
                           DIFFICULTY <b className={stats.difficulty === "BRUTAL" ? "down" : "up"}>{stats.difficulty}</b>
                         </span>
                       </div>
@@ -1189,41 +1529,37 @@ export default function GameCanvas() {
                     <span className={mutation.id === "clean" ? "cc-mut-name" : "cc-mut-name hot"}>{mutation.name}</span>
                     <span className="cc-mut-tag">{mutation.tagline}</span>
                   </div>
-                  <div className="cc-howto">
-                    <p><b className="lime">GREEN</b> candles hold. <b className="coral">RED</b> candles crumble.</p>
-                    <p>Tap = hop · <b className="lime">HOLD</b> Space = higher jump · release early = short.</p>
-                    <p><b className="lime">SHIFT</b> = RUSH — faster climb, +25% gains while held.</p>
-                    {archive ? (
-                      <p className="cc-next-level">famous days are famous difficulty — nobody designed this on purpose.</p>
-                    ) : (
-                      <p className="cc-next-level">One chart. Every player. Daily.</p>
-                    )}
-                  </div>
                   {/* P3.5 timeframe selector — owner proposal. Crypto dailies only:
                       stock rails have no intraday feed, launch terrain is derived,
                       archive stays weekly (V1) — all three hide the chips. */}
-                  {!archive && !duel && data.seed.source !== "stooq" && data.seed.source !== "yahoo" && data.seed.source !== "vibe-launch" && data.seed.source !== "robinhood" && (
-                    <div className="cc-tf-row" role="group" aria-label="Chart timeframe">
+                  <div className="cc-sec-title">MODES &amp; EXTRAS</div>
+                  {canPickTf && (
+                    <div className="cc-tf-row" role="group" aria-label="Chart period — recuts the day's chart into candles">
                       {INTERVALS.map((iv) => (
                         <button
                           key={iv}
                           className={`cc-tf-chip${tf === iv ? " cc-tf-on" : ""}`}
                           onClick={() => changeTf(iv)}
                           aria-pressed={tf === iv}
+                          title={iv === "1w" ? "weekly candles — the classic level" : iv === "1d" ? "daily candles" : iv === "4h" ? "4-hour candles" : "1-hour candles"}
                         >
                           {iv.toUpperCase()}
                         </button>
                       ))}
                     </div>
                   )}
+                  {canPickTf && (
+                    <p className="cc-vs-note">CHART PERIOD — recuts the day&apos;s chart into candles. Each period is its own terrain and its own board.</p>
+                  )}
                   {/* P7.1 rival bot — local SOLO/VS toggle. Default SOLO: existing
                       behavior + QA flows are 100% unchanged; choice persists. The
                       rival is a local headless engine — zero network, never scored. */}
-                  <div className="cc-tf-row" role="group" aria-label="Rival bot">
+                  <div className="cc-tf-row" role="group" aria-label="Rival bot — race a local bot or climb solo">
                     <button
                       className={`cc-tf-chip${!vsBot ? " cc-tf-on" : ""}`}
                       onClick={() => changeVsBot(false)}
                       aria-pressed={!vsBot}
+                      title="just you and the chart"
                     >
                       SOLO
                     </button>
@@ -1231,31 +1567,38 @@ export default function GameCanvas() {
                       className={`cc-tf-chip${vsBot ? " cc-tf-on" : ""}`}
                       onClick={() => changeVsBot(true)}
                       aria-pressed={vsBot}
+                      title="race a local bot on the same chart"
                     >
                       VS BOT
                     </button>
                   </div>
+                  <p className="cc-vs-note">VS BOT races a local bot on the same chart — it is never scored.</p>
                   {vsBot && (
                     <p className="cc-vs-note" aria-live="polite">
                       RIVAL: <b>{rivalName}</b> · {rivalPers.label} — local bot, never scored
                     </p>
                   )}
-                  {/* P7.2 ghost replay — best submitted run on this terrain, replayed
-                      translucently with the recorded climber's skin. Render-only. */}
+                  {/* P7.2 + P2 ghost replay — the champion's uploaded climb first,
+                      this device's own best as the local fallback. Render-only. */}
                   <div className="cc-tf-row" role="group" aria-label="Ghost replay">
                     <button
                       className={`cc-tf-chip${ghostOn ? " cc-tf-on" : ""}`}
                       onClick={() => changeGhost(!ghostOn)}
                       aria-pressed={ghostOn}
+                      title="a translucent replay of the best recorded climb on this terrain — cosmetic only, never scored"
                     >
                       {ghostOn ? "GHOST ON" : "GHOST OFF"}
                     </button>
                   </div>
-                  {ghostOn && !archive && (
+                  {ghostOn && (
                     <p className="cc-vs-note" aria-live="polite">
                       GHOST: {duel
                         ? `${duel.name}'s run · ${duel.candlesPassed} candles — the climb to beat`
-                        : ghostEntry ? `${getChar(ghostEntry.charId).name} · ${ghostEntry.candlesPassed} candles` : "no run recorded yet — be the first"}
+                        : ghostEntry
+                          ? `${getChar(ghostEntry.charId).name} · ${ghostEntry.candlesPassed} candles — champion of this terrain`
+                          : selfGhostEntry
+                            ? `your best run · ${selfGhostEntry.candlesPassed} candles — saved on this device only`
+                            : "nothing recorded yet — finish a run and race yourself"}
                     </p>
                   )}
                   {/* P7.3 async duel entry (typed code) — secondary to the climb */}
@@ -1284,12 +1627,16 @@ export default function GameCanvas() {
                     </div>
                   )}
                   {codeErr && <p className="cc-vs-note" aria-live="polite">NO SUCH DUEL — CHECK THE CODE</p>}
+                  {!duel && !archive && (
+                    <p className="cc-vs-note">a duel pins the SAME chart for a friend — make a code from any finished run (DUEL → on the results panel).</p>
+                  )}
                   {/* P3.12 character select — roster row. Portraits are the sprites'
                       own frame0; selection persists (CC_CHAR_KEY) and feeds renderV2
                       via charIdRef. Decor-only: no gameplay/physics reads anywhere. */}
+                  <div className="cc-sec-title">YOUR CLIMBER</div>
                   <div className="cc-char-block">
                     <div className="cc-char-label">CHOOSE YOUR CLIMBER</div>
-                    <div className="cc-char-row" role="radiogroup" aria-label="Character select">
+                    <div className="cc-char-row" role="radiogroup" aria-label="Character select — cosmetic only">
                       {rosterList().map((c) => (
                         <button
                           key={c.id}
@@ -1308,9 +1655,12 @@ export default function GameCanvas() {
                         </button>
                       ))}
                     </div>
+                    <p className="cc-vs-note">looks only — every climber plays exactly the same.</p>
                   </div>
+                  <div className="cc-sec-title">MORE</div>
                   <div className="cc-btn-row">
-                    <button className="cc-btn cc-btn-ghost" onClick={() => setArchOpen(true)}>ARCHIVE →</button>
+                    <button className="cc-btn cc-btn-ghost" onClick={() => setArchOpen(true)} title="famous past days as practice terrain — unscored">PAST CHARTS →</button>
+                    <a className="cc-btn cc-btn-ghost" href="/stats">YOUR STATS →</a>
                   </div>
                   {!archive && report && (
                     <div className="cc-report cc-report-fold">
@@ -1324,6 +1674,7 @@ export default function GameCanvas() {
                       </button>
                       {reportOpen && (
                         <>
+                          <p className="cc-report-line">yesterday&apos;s episode — honest aggregates over the day&apos;s real submissions.</p>
                           {report.narrative.map((line, i) => (
                             <p key={i} className="cc-report-line">{line}</p>
                           ))}
@@ -1373,6 +1724,7 @@ export default function GameCanvas() {
               <div className="cc-death-actions">
                 <button className="cc-btn cc-btn-start" onClick={enterWorld2}>WORLD 2 →</button>
                 <button className="cc-btn cc-btn-ghost" onClick={downloadCard}>DEATH CARD ↓</button>
+                {mintBtn}
                 <button
                   className="cc-btn"
                   onClick={submitScore}
@@ -1384,6 +1736,7 @@ export default function GameCanvas() {
                 </button>
                 <button className="cc-btn" onClick={startRun}>RETRY</button>
               </div>
+              {mintNote}
               <p className="cc-grad-next">world 2: the climb continues · gains ×2</p>
               {reachedPeak && (
                 <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
@@ -1399,8 +1752,8 @@ export default function GameCanvas() {
 
         {phase === "dead" && result && (
           <div className="cc-overlay">
-            <div className="cc-panel cc-panel-death">
-              <h2 className="cc-liquidated">LIQUIDATED</h2>
+            <div className="cc-panel cc-panel-death" ref={deathPanelRef} tabIndex={-1} role="dialog" aria-label="Run ended — results and actions">
+              <h2 className="cc-liquidated" role="alert">LIQUIDATED</h2>
               {result.graduated && (
                 <p className="cc-rival cc-rival-grad">
                   graduated{result.world2 ? " · world 2 reached" : ""}
@@ -1452,6 +1805,7 @@ export default function GameCanvas() {
                   {!canSubmit && <span className="sr-only">{unscoredMsg}</span>}
                 </button>
                 <button className="cc-btn cc-btn-ghost" onClick={downloadCard}>DEATH CARD ↓</button>
+                {mintBtn}
                 {canSubmit && data?.seed.source !== "vibe-launch" && !duelCode && (
                   <button
                     className="cc-btn"
@@ -1464,6 +1818,7 @@ export default function GameCanvas() {
                 )}
                 <button className="cc-btn cc-btn-start" onClick={startRun}>RETRY</button>
               </div>
+              {mintNote}
               {archive && practiceNote && <p className="cc-vault-note" role="status">{practiceNote}</p>}
               {reachedPeak && (
                 <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
@@ -1520,13 +1875,20 @@ export default function GameCanvas() {
         <span aria-hidden>·</span>
         <a href="/airdrop">airdrop board</a>
         <span aria-hidden>·</span>
+        <a href="/stats">stats</a>
+        <span aria-hidden>·</span>
+        <a href="/privacy">privacy</a>
+        <span aria-hidden>·</span>
+        <a href="/terms">terms</a>
+        <span aria-hidden>·</span>
         <span>no real funds</span>
       </footer>
 
       <button
         className="cc-chip cc-mute"
         onClick={toggleMute}
-        aria-label={muted ? "Unmute" : "Mute"}
+        aria-label={muted ? "Turn sound on" : "Mute sound"}
+        aria-pressed={!muted}
       >
         {muted ? "MUTED" : "SOUND ON"}
       </button>

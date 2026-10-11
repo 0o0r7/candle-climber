@@ -42,3 +42,34 @@ export function buildProofMessage(f: ProofFields, clientTs: number): string {
     `Wallet: ${wallet}`,
   ].join("\n");
 }
+
+// ---- Death Card mint proof (TESTNET) ---------------------------------------
+// Purpose-separated from the board proof: a different canonical message means a
+// board signature can never be replayed as a mint request and vice versa. The
+// fields bind the SAME clamped run values + the verified token's date/interval,
+// so the mint signature is also single-use by construction.
+
+/**
+ * The exact string the wallet signs via personal_sign to authorize the server
+ * minter to mint their Death Card. Both sides must produce byte-identical
+ * output — the client mirrors board-validation's clamps before templating.
+ */
+export function buildMintProofMessage(f: ProofFields, clientTs: number): string {
+  const wallet = String(f.wallet).toLowerCase();
+  const score = Math.floor(Number(f.score));
+  const candles = Math.floor(Number(f.candlesPassed));
+  const streak = Math.max(0, Math.min(999, Math.floor(Number(f.bestStreak))));
+  return [
+    "Candle Climber — Death Card mint (TESTNET)",
+    "Sign once to mint this run's Death Card to your wallet.",
+    "Minting is free — the server pays testnet gas. No value is implied.",
+    "",
+    `Score: ${score}`,
+    `Candles passed: ${candles}`,
+    `Best streak: ${streak}`,
+    `Date: ${f.date}`,
+    `Interval: ${f.interval}`,
+    `Run time: ${clientTs}`,
+    `Wallet: ${wallet}`,
+  ].join("\n");
+}

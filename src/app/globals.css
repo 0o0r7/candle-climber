@@ -317,6 +317,8 @@ button.cc-wallet-chip { cursor: pointer; }
 .cc-wallet-chip b { margin-right: 4px; }
 .cc-tier-holder { color: #e0b04e; border-color: rgba(224, 176, 78, 0.35); }
 .cc-tier-whale { color: #9db4ff; border-color: rgba(157, 180, 255, 0.4); }
+/* disconnect confirm step (owner request 2026-10-11) — hot coral, unmistakable */
+.cc-wallet-disconnect { color: var(--cc-coral, #ff5a5a); border-color: rgba(255, 90, 90, 0.5); }
 .cc-chip-score { color: #fff; font-size: 16px; min-width: 72px; text-align: center; }
 .cc-chip-combo { color: var(--cc-ink); background: var(--cc-lime); border-color: var(--cc-lime); }
 
@@ -326,6 +328,9 @@ button.cc-wallet-chip { cursor: pointer; }
   z-index: 10;
   cursor: pointer;
   outline: none;
+  /* viewport is now pinch-zoomable (WCAG 1.4.4): keep rapid taps as jumps,
+     suppress only the double-tap zoom gesture on the playfield itself */
+  touch-action: manipulation;
 }
 .cc-canvas {
   width: 100%;
@@ -676,7 +681,7 @@ button.cc-wallet-chip { cursor: pointer; }
 }
 .cc-char-name {
   font-family: var(--cc-mono);
-  font-size: 7.5px;
+  font-size: 10px; /* audit fix: 7.5px was below legibility minimums */
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--cc-faint);
@@ -1523,6 +1528,158 @@ button.cc-wallet-chip { cursor: pointer; }
   letter-spacing: 0.18em;
   color: var(--cc-faint);
 }
+/* ============ audit-fix pages: /privacy, /terms, branded 404 ============ */
+.cc-page {
+  min-height: 100dvh;
+  background: var(--cc-bg, #101214);
+  display: flex;
+  justify-content: center;
+  padding: 48px 16px 64px;
+}
+.cc-page-card {
+  width: 100%;
+  max-width: 720px;
+  color: #d7dbe2;
+  font-family: var(--cc-mono, monospace);
+}
+.cc-page-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--cc-lime, #ccff00);
+  margin-bottom: 6px;
+}
+.cc-page-code {
+  font-size: 64px;
+  font-weight: 800;
+  color: var(--cc-lime, #ccff00);
+  line-height: 1;
+  margin: 0 0 8px;
+}
+.cc-page-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #fff;
+  margin: 0 0 4px;
+}
+.cc-page-updated {
+  font-size: 10.5px;
+  color: var(--cc-faint, #5e636b);
+  margin-bottom: 26px;
+}
+.cc-page-card h2 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.04em;
+  margin: 26px 0 8px;
+}
+.cc-page-card p, .cc-page-card li {
+  font-size: 13px;
+  line-height: 1.75;
+  color: #b9bec7;
+  margin: 0 0 10px;
+}
+.cc-page-card ul { padding-left: 18px; margin: 0 0 10px; }
+.cc-page-card b { color: #e8ebf0; }
+.cc-page-card a { color: var(--cc-lime, #ccff00); text-decoration: none; }
+.cc-page-card a:hover { text-decoration: underline; }
+.cc-page-foot {
+  margin-top: 30px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+}
+.cc-page-btn {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 10px 18px;
+  background: var(--cc-lime, #ccff00);
+  color: #101214 !important;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  border-radius: 6px;
+  text-decoration: none !important;
+}
+
+/* ================= P2 audit-polish: pause · sections · /stats ================= */
+
+/* grouped section titles inside HOW TO PLAY & OPTIONS (audit D-1) */
+.cc-sec-title {
+  font-family: var(--cc-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--cc-lime);
+  opacity: 0.85;
+  margin: 14px 0 6px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(204, 255, 0, 0.08);
+}
+.cc-sec-title:first-child { margin-top: 4px; border-top: 0; padding-top: 0; }
+
+/* always-visible core how-to (audit RB-1/M-1) — slightly brighter than folded copy */
+.cc-howto-core { margin-top: 12px; }
+.cc-howto-core p { color: #AEB6BC; }
+.cc-howto-core .cc-next-level { color: var(--cc-faint); }
+
+/* pause — HUD button + overlay panel */
+button.cc-chip-pausebtn {
+  cursor: pointer;
+  color: #AEB6BC;
+  pointer-events: auto;
+}
+button.cc-chip-pausebtn:hover { color: var(--cc-lime); border-color: rgba(204, 255, 0, 0.3); }
+.cc-panel-pause { text-align: center; }
+.cc-pause-head {
+  font-family: var(--cc-display);
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--cc-lime);
+  margin: 0 0 4px;
+}
+.cc-pause-sub {
+  font-family: var(--cc-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  color: var(--cc-faint);
+  margin: 0 0 16px;
+}
+.cc-pause-keys {
+  font-family: var(--cc-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--cc-faint);
+  margin: 14px 0 0;
+}
+.cc-pause-keys .lime { color: var(--cc-up); }
+
+/* /stats — per-device lifetime stats page (reuses the audit-fix page frame) */
+.cc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 18px 0 10px;
+}
+.cc-stats-tile {
+  border: 1px solid var(--cc-hairline);
+  border-radius: 10px;
+  background: rgba(204, 255, 0, 0.03);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cc-stats-tile.cc-stats-hi { border-color: rgba(204, 255, 0, 0.3); }
+.cc-stats-k {
+  font-family: var(--cc-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--cc-faint);
+}
 .cc-tut-title {
   font-family: var(--cc-display);
   font-weight: 700;
@@ -2041,3 +2198,64 @@ html { scroll-behavior: smooth; }
   .lp-nav-links { display: none; }
   .lp-hero-stats { gap: 24px; }
 }
+.cc-stats-v {
+  font-family: var(--cc-mono);
+  font-size: 15px;
+  color: #fff;
+}
+.cc-stats-hi .cc-stats-v { color: var(--cc-lime); }
+.cc-stats-note {
+  font-family: var(--cc-mono);
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--cc-faint);
+  margin: 6px 0 14px;
+}
+.cc-stats-note a { color: var(--cc-lime); text-decoration: none; }
+.cc-stats-note a:hover { text-decoration: underline; }
+.cc-stats-card {
+  border: 1px solid var(--cc-hairline);
+  border-radius: 12px;
+  background: rgba(204, 255, 0, 0.03);
+  padding: 12px 14px;
+  margin: 4px 0 16px;
+}
+.cc-stats-card-title {
+  font-family: var(--cc-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--cc-lime);
+  margin-bottom: 6px;
+}
+.cc-stats-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  line-height: 2;
+  color: #d7dbe2;
+}
+.cc-stats-row b { color: #fff; }
+.cc-stats-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+a.cc-btn { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+.cc-stats-wipe {
+  font-family: var(--cc-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--cc-faint);
+  background: transparent;
+  border: 1px solid var(--cc-hairline);
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.cc-stats-wipe:hover { color: var(--cc-down); border-color: rgba(224, 120, 86, 0.4); }

@@ -132,6 +132,13 @@ export default function PredictionPanel({ name }: { name: string }) {
       </button>
       {open && (
         <div className="cc-pred-body">
+          {/* Audit E/J: say exactly what this is and how it is scored — a daily
+              guessing game, never a forecast or trading advice. */}
+          <p className="cc-pred-note">
+            lock ONE call per day (direction · move size · dominant tail) on
+            tomorrow&apos;s rotation symbol — scored against the REAL closed candle.
+            A guessing game, not a forecast.
+          </p>
           {!identity ? (
             <p className="cc-pred-note">SET YOUR CLIMBER NAME ABOVE, THEN LOCK A CALL</p>
           ) : lockedForTomorrow ? (

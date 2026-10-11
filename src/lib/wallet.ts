@@ -56,3 +56,129 @@ export function formatWick(wei: bigint): string {
   const w = whole.toLocaleString("en-US");
   return frac === 0n ? w : `${w}.${frac.toString().padStart(3, "0")}`;
 }
+
+// ── Network auto-setup (wallet_switchEthereumChain / wallet_addEthereumChain) ──
+// The wallet chip must ASK the injected provider to switch to Robinhood Chain
+// testnet on connect — and ADD the chain (EIP-3085) when the wallet doesn't
+// know it yet. Everything is fail-open: a rejected/failed switch never blocks
+// play — it only leaves the cosmetic badge in the honest WRONG NETWORK state.
+
+export const ROBINHOOD_CHAIN_ID_HEX = "0xb626"; // 46630 — verified live via eth_chainId (2026-10-06)
+
+/** EIP-3085 params for adding Robinhood Chain testnet to an injected wallet. */
+export const ROBINHOOD_CHAIN_PARAMS = {
+  chainId: ROBINHOOD_CHAIN_ID_HEX,
+  chainName: "Robinhood Chain Testnet",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: [DEFAULT_RPC_URL],
+  blockExplorerUrls: ["https://explorer.testnet.chain.robinhood.com"],
+} as const;
+
+export type EthLikeProvider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+};
+
+export type ChainEnsureResult =
+  | { ok: true; chainId: string; added: boolean; switched: boolean }
+  | { ok: false; reason: "rejected" | "pending" | "unknown"; message: string; code?: number };
+
+function errCode(e: unknown): number | undefined {
+  if (typeof e === "object" && e !== null && "code" in e) {
+    const c = (e as { code: unknown }).code;
+    if (typeof c === "number") return c;
+  }
+  return undefined;
+}
+
+function errMsg(e: unknown): string {
+  if (typeof e === "object" && e !== null && "message" in e) {
+    const m = (e as { message: unknown }).message;
+    if (typeof m === "string" && m.length > 0) return m;
+  }
+  return "";
+}
+
+async function readChainId(eth: EthLikeProvider): Promise<string> {
+  return String(await eth.request({ method: "eth_chainId" })).toLowerCase();
+}
+
+/**
+ * Bring the injected wallet onto Robinhood Chain testnet — WITHOUT throwing.
+ * Flow (mirrors the battle-tested viem/wagmi sequence):
+ *   1. already on the chain → ok, zero prompts;
+ *   2. wallet_switchEthereumChain → ok;
+ *   3. switch errors (4902 "unrecognized chain", -32603, …) → wallet_addEthereumChain
+ *      with full EIP-3085 params (most wallets auto-switch after add);
+ *   4. verify eth_chainId after every path — one follow-up switch if the wallet
+ *      added without switching — and report the FINAL on-wallet state honestly.
+ * 4001 = user rejected, -32002 = a request popup is already open in the wallet.
+ */
+export async function ensureRobinhoodChain(
+  eth: EthLikeProvider,
+  targetHex: string = ROBINHOOD_CHAIN_ID_HEX,
+): Promise<ChainEnsureResult> {
+  const target = targetHex.toLowerCase();
+  const fail = (
+    reason: "rejected" | "pending" | "unknown",
+    message: string,
+    code?: number,
+  ): ChainEnsureResult => ({ ok: false, reason, message, ...(code !== undefined ? { code } : {}) });
+  // Hard stops from a switch/add attempt; anything else falls through to the
+  // next phase (missing chain → add, per EIP-3326 code 4902 behavior).
+  const switchHardStop = (e: unknown): ChainEnsureResult | null => {
+    const code = errCode(e);
+    if (code === 4001) return fail("rejected", "network switch was rejected in the wallet", code);
+    if (code === -32002) return fail("pending", "a network request is already open in the wallet — approve it there", code);
+    return null;
+  };
+  const addHardStop = (e: unknown): ChainEnsureResult | null => {
+    const code = errCode(e);
+    if (code === 4001) return fail("rejected", "add-network request was rejected in the wallet", code);
+    if (code === -32002) return fail("pending", "an add-network popup is already open in the wallet", code);
+    return null;
+  };
+
+  try {
+    let added = false;
+    let switched = false;
+    if ((await readChainId(eth)) === target) {
+      return { ok: true, chainId: target, added, switched };
+    }
+
+    try {
+      await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: target }] });
+      switched = true;
+    } catch (e) {
+      const hard = switchHardStop(e);
+      if (hard) return hard;
+      // Chain unknown to this wallet (4902 / -32603 / …) → add it explicitly.
+      try {
+        await eth.request({ method: "wallet_addEthereumChain", params: [{ ...ROBINHOOD_CHAIN_PARAMS }] });
+        added = true;
+      } catch (e2) {
+        const hard2 = addHardStop(e2);
+        return hard2 ?? fail("unknown", errMsg(e2) || "add-network failed", errCode(e2));
+      }
+    }
+
+    // Verify — some wallets add WITHOUT auto-switching; one clean follow-up.
+    let final = await readChainId(eth);
+    if (final !== target) {
+      try {
+        await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: target }] });
+        switched = true;
+      } catch (e) {
+        const hard = switchHardStop(e);
+        if (hard) return hard;
+        return fail("unknown", errMsg(e) || "network switch failed", errCode(e));
+      }
+      final = await readChainId(eth);
+    }
+
+    return final === target
+      ? { ok: true, chainId: final, added, switched }
+      : fail("unknown", `wallet still reports chain ${final} (wanted ${target})`);
+  } catch (e) {
+    return fail("unknown", errMsg(e) || "chain check failed", errCode(e));
+  }
+}
