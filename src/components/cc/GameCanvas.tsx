@@ -200,7 +200,21 @@ export default function GameCanvas() {
     return () => window.removeEventListener("cc-wallet-changed", onWalletChanged);
   }, []);
   const [burn, setBurn] = useState<string | null>(null);
+  // Audit fix (touch UX): the SHIFT = RUSH line is keyboard-only — hide it on
+  // coarse-pointer (touch) devices so mobile players don't see a dead control.
+  const [coarsePointer, setCoarsePointer] = useState(false);
+  useEffect(() => {
+    try { setCoarsePointer(window.matchMedia("(pointer: coarse)").matches); } catch { /* SSR / private mode */ }
+  }, []);
   useEffect(() => { nameRef.current = name; }, [name]);
+  // Audit fix (a11y): move focus into the death panel so keyboard/screen-reader
+  // users land in the run-end flow instead of staying on the canvas.
+  const deathPanelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (phase === "dead") {
+      try { deathPanelRef.current?.focus(); } catch { /* noop */ }
+    }
+  }, [phase]);
 
   // P7.3: load a duel challenge by code (deep link ?duel= or a typed code).
   // On success it pins the terrain refs BEFORE the loader effect runs (the
@@ -1188,7 +1202,7 @@ export default function GameCanvas() {
           {graduated && <div className="cc-chip cc-chip-grad">GRADUATED</div>}
           {world2 && <div className="cc-chip cc-chip-grad2">POST-GRAD ×2</div>}
           {!v2 && <div className="cc-chip cc-chip-mut" title="legacy renderer opt-out — /?renderer=v1">RENDER V1 · LEGACY</div>}
-          {weatherChip && <div className="cc-chip cc-chip-weather" title="H2 weather — ATR wind · volume fog">{weatherChip}</div>}
+          {weatherChip && <div className="cc-chip cc-chip-weather" title="weather — wind strength follows market volatility · fog follows trading volume">{weatherChip}</div>}
           {archive && <div className="cc-chip cc-chip-arch" title="archive terrain — practice only">ARCHIVE</div>}
           {/* P7.1: live rival race — local-only numbers, never submitted */}
           {vsBot && botRef.current && !botRef.current.stopped && (
@@ -1272,8 +1286,10 @@ export default function GameCanvas() {
                   </div>
                   <div className="cc-howto">
                     <p><b className="lime">GREEN</b> candles hold. <b className="coral">RED</b> candles crumble.</p>
-                    <p>Tap = hop · <b className="lime">HOLD</b> Space = higher jump · release early = short.</p>
-                    <p><b className="lime">SHIFT</b> = RUSH — faster climb, +25% gains while held.</p>
+                    <p>Tap = hop · <b className="lime">HOLD</b> Space (or ↑ / W) = higher jump · release early = short.</p>
+                    {!coarsePointer && (
+                      <p><b className="lime">SHIFT</b> = RUSH — faster climb, +25% gains while held.</p>
+                    )}
                     {archive ? (
                       <p className="cc-next-level">famous days are famous difficulty — nobody designed this on purpose.</p>
                     ) : (
@@ -1480,8 +1496,8 @@ export default function GameCanvas() {
 
         {phase === "dead" && result && (
           <div className="cc-overlay">
-            <div className="cc-panel cc-panel-death">
-              <h2 className="cc-liquidated">LIQUIDATED</h2>
+            <div className="cc-panel cc-panel-death" ref={deathPanelRef} tabIndex={-1} role="dialog" aria-label="Run ended — results and actions">
+              <h2 className="cc-liquidated" role="alert">LIQUIDATED</h2>
               {result.graduated && (
                 <p className="cc-rival cc-rival-grad">
                   graduated{result.world2 ? " · world 2 reached" : ""}
@@ -1603,13 +1619,18 @@ export default function GameCanvas() {
         <span aria-hidden>·</span>
         <a href="/airdrop">airdrop board</a>
         <span aria-hidden>·</span>
+        <a href="/privacy">privacy</a>
+        <span aria-hidden>·</span>
+        <a href="/terms">terms</a>
+        <span aria-hidden>·</span>
         <span>no real funds</span>
       </footer>
 
       <button
         className="cc-chip cc-mute"
         onClick={toggleMute}
-        aria-label={muted ? "Unmute" : "Mute"}
+        aria-label={muted ? "Turn sound on" : "Mute sound"}
+        aria-pressed={!muted}
       >
         {muted ? "MUTED" : "SOUND ON"}
       </button>

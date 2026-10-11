@@ -328,6 +328,9 @@ button.cc-wallet-chip { cursor: pointer; }
   z-index: 10;
   cursor: pointer;
   outline: none;
+  /* viewport is now pinch-zoomable (WCAG 1.4.4): keep rapid taps as jumps,
+     suppress only the double-tap zoom gesture on the playfield itself */
+  touch-action: manipulation;
 }
 .cc-canvas {
   width: 100%;
@@ -678,7 +681,7 @@ button.cc-wallet-chip { cursor: pointer; }
 }
 .cc-char-name {
   font-family: var(--cc-mono);
-  font-size: 7.5px;
+  font-size: 10px; /* audit fix: 7.5px was below legibility minimums */
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--cc-faint);
@@ -1458,4 +1461,79 @@ button.cc-wallet-chip { cursor: pointer; }
   font-size: 10.5px;
   line-height: 1.7;
   color: var(--cc-faint);
+}
+
+/* ============ audit-fix pages: /privacy, /terms, branded 404 ============ */
+.cc-page {
+  min-height: 100dvh;
+  background: var(--cc-bg, #101214);
+  display: flex;
+  justify-content: center;
+  padding: 48px 16px 64px;
+}
+.cc-page-card {
+  width: 100%;
+  max-width: 720px;
+  color: #d7dbe2;
+  font-family: var(--cc-mono, monospace);
+}
+.cc-page-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--cc-lime, #ccff00);
+  margin-bottom: 6px;
+}
+.cc-page-code {
+  font-size: 64px;
+  font-weight: 800;
+  color: var(--cc-lime, #ccff00);
+  line-height: 1;
+  margin: 0 0 8px;
+}
+.cc-page-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #fff;
+  margin: 0 0 4px;
+}
+.cc-page-updated {
+  font-size: 10.5px;
+  color: var(--cc-faint, #5e636b);
+  margin-bottom: 26px;
+}
+.cc-page-card h2 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.04em;
+  margin: 26px 0 8px;
+}
+.cc-page-card p, .cc-page-card li {
+  font-size: 13px;
+  line-height: 1.75;
+  color: #b9bec7;
+  margin: 0 0 10px;
+}
+.cc-page-card ul { padding-left: 18px; margin: 0 0 10px; }
+.cc-page-card b { color: #e8ebf0; }
+.cc-page-card a { color: var(--cc-lime, #ccff00); text-decoration: none; }
+.cc-page-card a:hover { text-decoration: underline; }
+.cc-page-foot {
+  margin-top: 30px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+}
+.cc-page-btn {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 10px 18px;
+  background: var(--cc-lime, #ccff00);
+  color: #101214 !important;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  border-radius: 6px;
+  text-decoration: none !important;
 }

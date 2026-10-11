@@ -63,6 +63,28 @@ function rateLimited(ip: string): boolean {
   return false;
 }
 
+/* Audit fix: guest-lane identity-flood guard. The run token is deterministic
+ * and SHARED by every player on the same terrain (by design, W1) — so a token
+ * alone cannot identify a submitter, and replaying it under new names was
+ * previously unlimited. Cap DISTINCT guest names per IP per UTC day; the
+ * official lane is already capped by best-run-per-wallet dedupe. In-memory
+ * per instance — same accepted tradeoff as the rate limiter above. */
+const guestNamesByIp = new Map<string, { day: string; names: Set<string> }>();
+const GUEST_NAME_CAP = 8; // generous for humans, hostile to name-flooding
+function guestNameCapExceeded(ip: string, name: string): boolean {
+  const day = new Date().toISOString().slice(0, 10);
+  let rec = guestNamesByIp.get(ip);
+  if (!rec || rec.day !== day) {
+    rec = { day, names: new Set() };
+    guestNamesByIp.set(ip, rec);
+  }
+  if (rec.names.has(name)) return false; // same name again = normal retry
+  if (rec.names.size >= GUEST_NAME_CAP) return true;
+  rec.names.add(name);
+  if (guestNamesByIp.size > 5000) guestNamesByIp.clear();
+  return false;
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const date = searchParams.get("date");
@@ -148,6 +170,15 @@ export async function POST(req: Request) {
     const verdict = validateSubmission(body, tok, Date.now(), wallet);
     if (!verdict.ok) {
       return NextResponse.json({ error: verdict.error }, { status: verdict.status });
+    }
+
+    // Audit fix: one client must not flood the guest board with endless
+    // distinct names (the run token is shared per terrain by design).
+    if (!wallet && guestNameCapExceeded(ip, verdict.entry.name)) {
+      return NextResponse.json(
+        { error: "too many distinct guest names from this client today" },
+        { status: 429 },
+      );
     }
 
     const store = getBoard();
