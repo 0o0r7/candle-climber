@@ -1704,7 +1704,7 @@ html { scroll-behavior: smooth; }
 .lp-hero-bg {
   position: absolute;
   inset: 0;
-  background-image: url('https://media.base44.com/images/public/6aca81e215c7fbeb3279c812/325c49375_banner-v2-liquidation-chase1.png');
+  background-image: url('/landing/banner-v2-liquidation-chase1.jpg');
   background-size: cover;
   background-position: center;
   z-index: 0;

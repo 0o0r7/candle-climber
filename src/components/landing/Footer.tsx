@@ -17,6 +17,8 @@ export default function Footer() {
           <Link href="/play" className="lp-footer-link">PLAY</Link>
           <a href="#how-to-play" className="lp-footer-link">HOW TO PLAY</a>
           <a href="#features" className="lp-footer-link">FEATURES</a>
+          <Link href="/privacy" className="lp-footer-link">PRIVACY</Link>
+          <Link href="/terms" className="lp-footer-link">TERMS</Link>
         </div>
         <p className="lp-footer-copy">
           CANDLE CLIMBER · BUILT FOR THE VIBE/VIBE ECOSYSTEM ON ROBINHOOD CHAIN

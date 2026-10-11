@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const LOGO_URL = "https://media.base44.com/images/public/6aca81e215c7fbeb3279c812/7090b3d8d_emblem-prism-icon.png";
+const LOGO_URL = "/landing/emblem-prism-icon.jpg";
 
 export default function Navbar() {
   return (
