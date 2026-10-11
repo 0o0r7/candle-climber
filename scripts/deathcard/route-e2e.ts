@@ -21,8 +21,10 @@ const hexToBytes = (h: string) => {
   return out;
 };
 
-// throwaway claiming wallet (NOT the minter, NOT the launch wallet)
-const priv = hexToBytes("0x" + "77".repeat(32));
+// Throwaway claiming wallet (NOT the minter, NOT the launch wallet).
+// Override with E2E_THROWAWAY_KEY (64 hex chars) when today's runKey for the
+// default wallet was already minted on-chain (mint-once per runKey ⇒ revert).
+const priv = hexToBytes("0x" + (process.env.E2E_THROWAWAY_KEY ?? "77".repeat(32)));
 const wallet = "0x" + bytesToHex(keccak_256(getPublicKey(priv, false).slice(1)).slice(-20)).toLowerCase();
 console.log("claiming wallet:", wallet);
 
