@@ -19,6 +19,7 @@ import { isArchiveDate } from "@/game/cc/archive";
 import { render } from "@/game/cc/render";
 import { renderV2 } from "@/game/cc/render-v2";
 import { deriveWeather } from "@/game/cc/weather";
+import { deriveBiome, type BiomeId } from "@/game/cc/biome";
 import { recordWreck, wrecksFor, loadWreckDB, saveWreckDB, type WreckDB, type Wreck } from "@/game/cc/wreckage";
 import { makeDeathCard, normalizeRivalTag } from "@/game/cc/deathcard";
 import { rosterList, isValidCharId, DEFAULT_CHAR_ID, CHAR_KEY, getChar } from "@/game/cc/characters";
@@ -35,6 +36,7 @@ import {
   type DuelChallenge, type DuelTally,
 } from "@/game/cc/duel";
 import type { CandleData, RunResult } from "@/game/cc/types";
+import Tutorial from "@/components/cc/Tutorial";
 
 type Phase = "loading" | "ready" | "running" | "graduated" | "dead";
 interface BoardEntry {
@@ -194,7 +196,16 @@ export default function GameCanvas() {
     if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) setHasWallet(true);
   }, []);
   const [burn, setBurn] = useState<string | null>(null);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const showTutorialRef = useRef(false);
   useEffect(() => { nameRef.current = name; }, [name]);
+  useEffect(() => { showTutorialRef.current = showTutorial; }, [showTutorial]);
+  // Tutorial: auto-show for first-time players when the ready screen appears
+  useEffect(() => {
+    if (phase === "ready") {
+      try { if (!localStorage.getItem("cc_tutorial_seen_v1")) setShowTutorial(true); } catch { /* private mode */ }
+    }
+  }, [phase]);
 
   // P7.3: load a duel challenge by code (deep link ?duel= or a typed code).
   // On success it pins the terrain refs BEFORE the loader effect runs (the
@@ -626,6 +637,10 @@ export default function GameCanvas() {
     () => (data ? deriveWeather(data.candles, data.seed.date + data.seed.symbol) : null),
     [data],
   );
+  const biomeId = useMemo<BiomeId | undefined>(
+    () => (data ? deriveBiome(data.candles, data.seed.date + data.seed.symbol).id : undefined),
+    [data],
+  );
 
   // main loop
   useEffect(() => {
@@ -726,7 +741,7 @@ export default function GameCanvas() {
         ctx.translate(-cz.px, -cz.py);
       }
       const camZoom = cz.z < 0.999 ? { z: cz.z, px: cz.px, py: cz.py } : undefined;
-      if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv, camZoom);
+      if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv, camZoom, biomeId);
       else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv, camZoom);
       ctx.restore();
       rafRef.current = requestAnimationFrame(step);
@@ -736,7 +751,7 @@ export default function GameCanvas() {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
     };
-  }, [phase, v2, weather]);
+  }, [phase, v2, weather, biomeId]);
 
   // P3.2: mirror mutation state → ref consumed by the RAF render loop
   useEffect(() => {
@@ -756,6 +771,7 @@ export default function GameCanvas() {
         return;
       }
       if (ev.code === "Space" || ev.code === "ArrowUp" || ev.code === "KeyW") {
+        if (showTutorialRef.current) return; // tutorial handles Space
         ev.preventDefault();
         if (phase === "ready" || phase === "dead") startRun();
         else if (phase === "graduated") {
@@ -783,7 +799,7 @@ export default function GameCanvas() {
     // clicks meant for the name input or any other control inside them
     if ((ev.target as HTMLElement | null)?.closest("input,button,a,select,textarea,label")) return;
     ev.preventDefault();
-    if (phase === "ready") { startRun(); return; }
+    if (phase === "ready") { if (!showTutorialRef.current) startRun(); return; }
     engineRef.current?.press();
   };
   const onPointerUp = () => engineRef.current?.release();
@@ -1086,6 +1102,11 @@ export default function GameCanvas() {
           {world2 && <div className="cc-chip cc-chip-grad2">POST-GRAD ×2</div>}
           {!v2 && <div className="cc-chip cc-chip-mut" title="legacy renderer opt-out — /?renderer=v1">RENDER V1 · LEGACY</div>}
           {weatherChip && <div className="cc-chip cc-chip-weather" title="H2 weather — ATR wind · volume fog">{weatherChip}</div>}
+          {biomeId && biomeId !== "temperate" && data && (
+            <div className="cc-chip cc-chip-biome" title={`environment biome — derived from today's market conditions`}>
+              {deriveBiome(data.candles, data.seed.date + data.seed.symbol).name}
+            </div>
+          )}
           {archive && <div className="cc-chip cc-chip-arch" title="archive terrain — practice only">ARCHIVE</div>}
           {/* P7.1: live rival race — local-only numbers, never submitted */}
           {vsBot && botRef.current && !botRef.current.stopped && (
@@ -1142,6 +1163,7 @@ export default function GameCanvas() {
                 </div>
               )}
               <button className="cc-btn cc-btn-start cc-cta" onClick={startRun}>START CLIMB</button>
+              <button className="cc-btn cc-btn-ghost cc-tut-reopen" onClick={() => setShowTutorial(true)}>HOW TO PLAY</button>
               {best > 0 && <p className="cc-best">PERSONAL BEST <b>{best.toLocaleString()}</b></p>}
               <details className="cc-more">
                 <summary className="cc-more-summary">
@@ -1333,6 +1355,8 @@ export default function GameCanvas() {
             </div>
           </div>
         )}
+
+        {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
 
         {phase === "graduated" && result && (
           <div className="cc-overlay">

@@ -15,6 +15,8 @@ import { CANDLE_W, PLATFORM_W } from "./level";
 import { COLORS, roundRect, drawSummit, drawHints, drawFloats, drawParticles } from "./render";
 import { buildTerrainV2, type TerrainV2, type SlabDecor } from "./terrain-v2";
 import { NEUTRAL_WEATHER, type Weather } from "./weather";
+import { drawBiomeSky, drawBiomeParticles, drawBiomeVignette } from "./biome-render";
+import { biomeById, type Biome, type BiomeId } from "./biome";
 import { drawCandleRain } from "./rain";
 import { type Wreck } from "./wreckage";
 import { hashString, mulberry32 } from "./rng";
@@ -838,7 +840,7 @@ export interface CamZoom {
   py: number;
 }
 
-export function renderV2(ctx: CanvasRenderingContext2D, e: Engine, seedStr: string, weather: Weather = NEUTRAL_WEATHER, wrecks: Wreck[] = [], mutationId?: string, charId = "default", rival?: RivalBot | null, ghost?: GhostView | null, cam?: CamZoom) {
+export function renderV2(ctx: CanvasRenderingContext2D, e: Engine, seedStr: string, weather: Weather = NEUTRAL_WEATHER, wrecks: Wreck[] = [], mutationId?: string, charId = "default", rival?: RivalBot | null, ghost?: GhostView | null, cam?: CamZoom, biome?: BiomeId | Biome) {
   const st = getState(e, seedStr);
   const t = st.terrain;
   // CAMERA-FRAME zoom: extra world visible horizontally when zoomed out
@@ -865,7 +867,12 @@ export function renderV2(ctx: CanvasRenderingContext2D, e: Engine, seedStr: stri
   const ty = sy + (tremAmp > 0.05 ? Math.cos(e.time * 29) * tremAmp * 0.6 : 0);
   ctx.translate(tx, ty);
 
+  // biome: a zone id (game) or an already-blended Biome (landing demo's weather
+  // front — see components/landing/demo-weather.ts). Render-only either way.
+  const bio = biome ? (typeof biome === "string" ? biomeById(biome) : biome) : null;
+  if (bio) drawBiomeSky(ctx, bio);
   drawSkyV2(ctx, e, t, weather);
+  if (bio) drawBiomeSky(ctx, bio); // biome tint over sky too
   // ---- CAMERA-FRAME zoom: world layers zoom about the ground-line pivot;
   // sky (above), foreground/vignette and the ticker (below) stay screen-space
   ctx.save();
@@ -919,6 +926,10 @@ export function renderV2(ctx: CanvasRenderingContext2D, e: Engine, seedStr: stri
   ctx.restore(); // ---- end camera zoom
 
   drawForegroundV2(ctx, e, st, weather);
+  if (bio) {
+    drawBiomeParticles(ctx, e, bio, seedStr);
+    drawBiomeVignette(ctx, bio);
+  }
 
   // progress candle ticker (top center, in-canvas — same as v1)
   const passed = e.plats[Math.min(e.candlesPassed, e.plats.length - 1)];

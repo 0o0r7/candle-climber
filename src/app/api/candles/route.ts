@@ -17,6 +17,7 @@
 import { NextResponse } from "next/server";
 import { utcDateStr } from "@/game/cc/rng";
 import { pickSeed, syntheticCandles, anchoredCandles, INTERVAL, LIMIT, WATCHLIST, STOCKS, isInterval } from "@/game/cc/level-source";
+import { selectDailySymbol } from "@/lib/market-selector";
 import { readOfficialQuote } from "@/lib/robinhood-chain";
 import { isArchiveDate, endOfDayMs, clampCandlesTo, binanceKlinesUrl } from "@/game/cc/archive";
 import { signRunToken } from "@/lib/run-token";
@@ -210,9 +211,17 @@ export async function GET(req: Request) {
   // date — for an archive date that is THAT day's rotation symbol, so the
   // archive browser can list past dailies without any server allow-list.
   const requested = (searchParams.get("symbol") ?? "").toUpperCase();
-  const symbol = WATCHLIST.includes(requested) || STOCKS.includes(requested)
-    ? requested
-    : pickSeed(date).symbol;
+  // Volatility-based daily selection: instead of random watchlist rotation,
+  // fetch 24h ticker stats for all watchlist symbols and pick the one with
+  // the most interesting volatility/volume profile. Falls back to the legacy
+  // seeded rotation if the ticker API is unreachable.
+  let symbol: string;
+  if (WATCHLIST.includes(requested) || STOCKS.includes(requested)) {
+    symbol = requested;
+  } else {
+    const volSymbol = await selectDailySymbol(WATCHLIST, date);
+    symbol = volSymbol ?? pickSeed(date).symbol;
+  }
   const isStock = STOCKS.includes(symbol);
 
   // W6 — the official Robinhood Chain read. TODAY'S level only: an archive date

@@ -1,0 +1,21 @@
+import Link from "next/link";
+
+const LOGO_URL = "https://media.base44.com/images/public/6aca81e215c7fbeb3279c812/7090b3d8d_emblem-prism-icon.png";
+
+export default function Navbar() {
+  return (
+    <nav className="lp-nav">
+      <Link href="/" className="lp-nav-logo">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={LOGO_URL} alt="Candle Climber" />
+        <span className="lp-nav-logo-text">CANDLE CLIMBER</span>
+      </Link>
+      <div className="lp-nav-links">
+        <a href="#how-to-play" className="lp-nav-link">HOW TO PLAY</a>
+        <a href="#features" className="lp-nav-link">FEATURES</a>
+        <Link href="/play" className="lp-nav-link">PLAY</Link>
+      </div>
+      <Link href="/play" className="lp-btn-primary lp-btn-sm">PLAY NOW</Link>
+    </nav>
+  );
+}
