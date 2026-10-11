@@ -1,0 +1,42 @@
+# P3.3 — LambdaTest REAL-DEVICE matrix QA (freemium-safe: 3 sequential sessions)
+# Pixel 7 (Android 13, real) + Windows 11 Chrome 1440x900 + Windows 11 Firefox 1280x800.
+# Credentials live in GitHub Actions SECRETS (survives sandbox resets — owner intent):
+#   Settings → Secrets and variables → Actions → LT_USERNAME / LT_ACCESS_KEY
+# Missing secrets → job fails fast with the script's clear MISSING CREDS message.
+# Manual dispatch + weekly Monday cron (steady device monitoring, low minute burn).
+name: realdevice-qa
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 5 * * 1" # weekly Mondays 05:00 UTC
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install selenium
+        run: python -m pip install --quiet selenium
+
+      - name: Run device matrix QA (prod)
+        run: python scripts/lambdatest_realdevice.py
+        env:
+          LT_USERNAME: ${{ secrets.LT_USERNAME }}
+          LT_ACCESS_KEY: ${{ secrets.LT_ACCESS_KEY }}
+          GAME_URL: https://candle-climber.vercel.app
+          QA_OUT: qa/realdevice
+
+      - name: Upload artifacts (screenshots + reports + dashboard links)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: realdevice-qa
+          path: qa/realdevice/
+          retention-days: 14

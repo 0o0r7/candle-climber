@@ -55,6 +55,8 @@ served from a different origin, and Next gates `/_next/*` dev assets and HMR by 
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/          # 200
 curl -s http://localhost:3000/api/candles | head -c 200                  # seed + candles
 curl -s http://localhost:3000/api/leaderboard                            # {"store":"memory"}
+curl -s "http://localhost:3000/api/leaderboard?board=official"           # wallet-bound lane (only submissions with a VALID personal_sign ownership proof land here)
+curl -s http://localhost:3000/ops                                        # E4.1 economy dashboard (noindex, aggregate counts only)
 curl -s "http://localhost:3000/api/onchain/quote?symbol=TSLA"            # live official Chainlink price (W6)
 curl -s "http://localhost:3000/api/candles?symbol=TSLA" | head -c 400    # seed.onchain verification block
 
@@ -67,8 +69,24 @@ A dev-server response contains `turbopack` / `next-dev` markers and unhashed sou
 modules; the log line `Compiling / ... GET / 200 (compile: 3.8s)` confirms live source
 rather than a prebuilt bundle.
 
+## Marketing assets
+
+The X trailer kit in `docs/assets/x-launch` (the 15s cuts `x-08`…`x-10`) is built by
+`scripts/trailer` — see that folder's README. It runs on the sandbox **host**, not in the
+container: `node scripts/trailer/build.mjs --out docs/assets/x-launch` (needs `ffmpeg` /
+`ffprobe`, and Playwright's chromium from the repo's `node_modules`). The deterministic
+timeline step shells into the web container itself. `scripts/trailer/` is the only `scripts/`
+subtree that is not gitignored — see `.gitignore`.
+
+`docs/` is not served by Next, so to watch or download the finished trailers during
+review, copies of `x-08`…`x-10` (mp4 + poster) live in `public/media/` and open at
+`/media/<file>` on the dev server. Re-copy them after a rebuild (see the kit README).
+
 ## Checks (from CI)
 
 ```bash
-docker compose -f docker-compose.base44.yml exec -T web sh -ec "bun run lint && bun test && bunx tsc --noEmit"
+# NOTE: tsc MUST run with the incremental cache disabled — a stale
+# tsconfig.tsbuildinfo can report a silently-passing false "clean" (observed
+# 2026-10-10). The extra seconds are the price of a trustworthy gate.
+docker compose -f docker-compose.base44.yml exec -T web sh -ec "bun run lint && bun test && bunx tsc --noEmit --incremental false"
 ```

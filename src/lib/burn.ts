@@ -11,6 +11,7 @@ import {
   decodeHexQuantity,
   formatWick,
 } from "@/lib/wallet";
+import { captureError } from "@/lib/telemetry"; // E4.4: chain-read failures alert (P3)
 
 // The canonical Ethereum "dead" address — where the fee rails send burns.
 export const BURN_ADDRESS = "0x000000000000000000000000000000000000dead";
@@ -57,7 +58,8 @@ export async function fetchBurnedWick(): Promise<BurnRead> {
     };
     cached = { t: Date.now(), payload };
     return payload;
-  } catch {
+  } catch (err) {
+    captureError(err, { lane: "burn", op: "burned-read" }); // E4.4: SUPPLY BURNED line degrades honestly
     return { ok: false, burned: "0", burnedWei: "0", ...base, error: "rpc-unavailable" };
   }
 }

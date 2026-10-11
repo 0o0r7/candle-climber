@@ -25,6 +25,7 @@ import {
 import { fetchDailyCandle } from "@/lib/ohlc";
 import { getPredictions, type PredictionRow } from "@/lib/prediction-store";
 import { recordPredictionPoints } from "@/lib/weights-store";
+import { weightsFrozen, WEIGHTS_FROZEN_RESPONSE } from "@/lib/graduation"; // E6.1
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,9 @@ const META = {
  * retry on the next pass. Returns how many calls were scored.
  */
 async function scoreDue(today: string, limit = 25): Promise<number> {
+  // E6.1 snapshot freeze: due calls stay OPEN (idempotent design) and score
+  // after the freeze lifts — marking them now would lose the ledger write.
+  if (weightsFrozen()) return 0;
   const store = getPredictions();
   const due = await store.dueOpen(today, limit);
   let scored = 0;
@@ -147,6 +151,11 @@ export async function POST(req: Request) {
     }
     const name = sanitizeName(body.name);
     const wallet = normalizeWallet(body.address);
+    // E6.1 snapshot freeze: the call itself is not taken (409-free honest pause);
+    // the player can lock the same call after the snapshot window closes.
+    if (weightsFrozen()) {
+      return NextResponse.json(WEIGHTS_FROZEN_RESPONSE, { status: 503 });
+    }
     const row: PredictionRow = {
       name,
       submitDate: today,

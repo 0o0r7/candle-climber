@@ -4,8 +4,13 @@
 // keeps transport concerns (per-IP rate limit, run-token verification +
 // staleness, storage) and hands this function the VERIFIED token payload —
 // client-claimed symbol/date can never reach a stored entry.
+// LAW 1.2 Option B (2026-10-10): the 4th arg is the NORMALIZED wallet (or null
+// from the weights module) — a valid wallet stamps the run onto the official
+// lane; no/invalid wallet stamps the guest lane (fail-open to guest — play is
+// never blocked by wallet state, LAW 1.2 substance).
 import type { BoardEntry } from "@/lib/leaderboard-store";
 import type { RunTokenPayload } from "@/lib/run-token";
+import { seasonOf } from "@/lib/seasons";
 // W4: engine max gain = 10 base (20 post-grad world 2) × combo cap (1 + 12*0.5)
 // = 7 → 70 / 140. Shared with the engine via src/lib/scoring.ts and coupled by
 // test/summit.test.ts.
@@ -29,15 +34,29 @@ export function sanitizeName(raw: unknown): string {
 }
 
 /**
+ * E5.5 referral attribution (Gate G5: "referral traffic measurable in board
+ * metadata"): the `ref` stamp is OPAQUE METADATA — it never touches score, lane,
+ * or identity decisions (the ownership proof does not bind it). Bounded to a
+ * URL/terminal-safe alphabet so it can ride share links and board reads safely;
+ * anything else is omitted (fail-open, like the rival tag).
+ */
+export function sanitizeRef(raw: unknown): string | undefined {
+  if (typeof raw !== "string") return undefined; // a number/object is not a ref
+  const m = raw.match(/^[A-Za-z0-9_-]{1,24}$/);
+  return m ? m[0] : undefined;
+}
+
+/**
  * Validate a submission body against the already-verified token payload.
  * Same checks, same order, same error strings/statuses as the original
  * route logic (W1), byte-for-byte — this is a mechanical move only.
  * `now` defaults to Date.now() and is injectable for tests.
  */
 export function validateSubmission(
-  body: Partial<BoardEntry> & { runToken?: unknown },
+  body: Partial<BoardEntry> & { runToken?: unknown; ref?: unknown },
   tok: RunTokenPayload,
   now: number = Date.now(),
+  wallet: string | null = null,
 ): SubmissionVerdict {
   const entry: BoardEntry = {
     name: sanitizeName(body.name),
@@ -51,6 +70,13 @@ export function validateSubmission(
     date: tok.date,
     interval: tok.interval,
     ts: now,
+    // Option B identity stamp: wallet lane is derived ONLY from the normalized
+    // address — a malformed wallet string degrades to guest, never an error
+    wallet,
+    board: wallet ? "official" : "guest",
+    season: seasonOf(tok.date), // official records are season-scoped (guest rows carry it too — informational)
+    // E5.5: opaque referral stamp — metadata only, never a ranking/lane input
+    ...(sanitizeRef(body.ref) ? { ref: sanitizeRef(body.ref) } : {}),
   };
 
   // shape validation

@@ -25,6 +25,11 @@ export function isValidAddress(a: unknown): a is string {
   return typeof a === "string" && /^0x[0-9a-fA-F]{40}$/.test(a);
 }
 
+/** Chip-style short form (0x1234…abcd) for any PUBLIC wallet display. */
+export function shortAddress(a: string): string {
+  return isValidAddress(a) ? `${a.slice(0, 6)}…${a.slice(-4)}` : a;
+}
+
 /** ERC-20 balanceOf(address) calldata: selector 0x70a08231 + left-padded address. */
 export function encodeBalanceOf(address: string): string {
   if (!isValidAddress(address)) throw new Error("invalid address");

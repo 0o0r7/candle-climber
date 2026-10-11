@@ -11,11 +11,15 @@ import MiniChart from "@/components/cc/MiniChart";
 import ArchiveBrowser from "@/components/cc/ArchiveBrowser";
 import WalletChip from "@/components/cc/WalletChip";
 import PredictionPanel from "@/components/cc/PredictionPanel";
-import { WALLET_ADDRESS_KEY } from "@/lib/wallet";
+import { WALLET_ADDRESS_KEY, isValidAddress } from "@/lib/wallet";
+// LAW 1.2 hardening: official-lane ownership proof — the browser builds the
+// EXACT message the server verifies (isomorphic template, no crypto import)
+import { buildProofMessage } from "@/lib/proof-message";
 import { isArchiveDate } from "@/game/cc/archive";
 import { render } from "@/game/cc/render";
 import { renderV2 } from "@/game/cc/render-v2";
 import { deriveWeather } from "@/game/cc/weather";
+import { deriveBiome, type BiomeId } from "@/game/cc/biome";
 import { recordWreck, wrecksFor, loadWreckDB, saveWreckDB, type WreckDB, type Wreck } from "@/game/cc/wreckage";
 import { makeDeathCard, normalizeRivalTag } from "@/game/cc/deathcard";
 import { rosterList, isValidCharId, DEFAULT_CHAR_ID, CHAR_KEY, getChar } from "@/game/cc/characters";
@@ -32,6 +36,7 @@ import {
   type DuelChallenge, type DuelTally,
 } from "@/game/cc/duel";
 import type { CandleData, RunResult } from "@/game/cc/types";
+import Tutorial from "@/components/cc/Tutorial";
 
 type Phase = "loading" | "ready" | "running" | "graduated" | "dead";
 interface BoardEntry {
@@ -42,6 +47,10 @@ interface BoardEntry {
   mutation?: string;
   date: string;
   ts?: number;
+  interval?: string;
+  wallet?: string | null; // masked short form on GET responses (0x1234…abcd)
+  board?: "guest" | "official";
+  season?: string | null;
 }
 // H4 DAILY REPORT — aggregated over real submissions by /api/report
 interface ReportResp {
@@ -63,6 +72,16 @@ const VS_KEY = "cc_vsbot_v1"; // P7.1: remembered SOLO / VS BOT choice (default 
 const GHOST_KEY = "cc_ghost_v1"; // P7.2: remembered ghost replay toggle (default ON)
 const DUEL_TALLY_KEY = "cc_duel_v1"; // P7.3: local duel W-L-D tally (no server identity exists)
 const CC_CHAR_KEY = CHAR_KEY; // P3.12: remembered character id ("default" = procedural)
+const REF_KEY = "cc_ref_v1"; // E5.5: referral attribution — last ?ref= landing param on this device
+// E5.5: every traveling text carries a measurable link. The ref is the sharer's
+// sanitized name ("cc" fallback) — Gate G5's "referral traffic measurable in
+// board metadata" runs through exactly this loop: share link → ?ref= landing →
+// REF_KEY → POST body ref → board row → /ops rollup.
+const GAME_URL = "https://candle-climber.vercel.app";
+const shareRef = (raw: string): string => {
+  const m = (raw.toLowerCase().match(/[a-z0-9_-]+/g) ?? []).join("").slice(0, 24);
+  return `?ref=${m || "cc"}`;
+};
 const UNSCORED_MSG = "offline terrain — scoring disabled";
 const ARCHIVE_MSG = "practice — archive terrain is unscored";
 
@@ -73,7 +92,12 @@ export default function GameCanvas() {
   const lastRef = useRef<number>(0);
   const accRef = useRef<number>(0);
   // V-PHASE V-1: canvas backing-store geometry for the screen-space clear
-  const fitRef = useRef<{ dpr: number; w: number; h: number }>({ dpr: 1, w: 0, h: 0 });
+  const fitRef = useRef<{ dpr: number; w: number; h: number; s: number; ox: number; oy: number }>({ dpr: 1, w: 0, h: 0, s: 1, ox: 0, oy: 0 });
+  // CAMERA-FRAME zoom (render-only): eased each rAF toward the value that
+  // keeps BOTH the player and the takeoff ground line inside the 800×480 band
+  // when a jump is higher than the frame. Pivot = the ground line itself, so
+  // the terrain the player jumped from visually NEVER moves on screen.
+  const camZoomRef = useRef({ z: 1, px: VIEW_W * 0.3, py: VIEW_H * 0.75 });
   const [phase, setPhase] = useState<Phase>("loading");
   const [data, setData] = useState<CandleData | null>(null);
   const [mutation, setMutation] = useState<Mutation | null>(null);
@@ -87,8 +111,16 @@ export default function GameCanvas() {
   const [best, setBest] = useState(0);
   const [name, setName] = useState("");
   const [rival, setRival] = useState(""); // P3.1: optional rival X handle for the death-card challenge stamp
-  const [board, setBoard] = useState<BoardEntry[]>([]);
-  const [topBoard, setTopBoard] = useState<BoardEntry[]>([]);
+  const [board, setBoard] = useState<BoardEntry[]>([]); // guest lane (classic board)
+  const [topBoard, setTopBoard] = useState<BoardEntry[]>([]); // guest top (rival context)
+  // Option B (LAW 1.2 dated note, 2026-10-10): official wallet-bound board —
+  // fetched only when a wallet is linked; both lanes stay labeled on the panel.
+  const [officialBoard, setOfficialBoard] = useState<BoardEntry[]>([]);
+  const [officialSeason, setOfficialSeason] = useState<string | null>(null);
+  const [submittedBoard, setSubmittedBoard] = useState<"guest" | "official" | null>(null);
+  // LAW 1.2 hardening: honest lane note — set when a wallet was linked but the
+  // run landed on the guest board (signature skipped/failed/rejected)
+  const [laneNote, setLaneNote] = useState<string | null>(null);
   const [rank, setRank] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [muted, setMutedState] = useState(false);
@@ -96,10 +128,12 @@ export default function GameCanvas() {
   const [report, setReport] = useState<ReportResp | null>(null);
   const [reportCopied, setReportCopied] = useState(false);
   const [reportOpen, setReportOpen] = useState(false); // G2 de-clutter: folded by default
-  // P2.1: v1/v2 renderer A/B — /?renderer=v2 opts into the grammar+parallax+juice
-  // renderer (render-only: physics/scoring/determinism identical). Set client-side
-  // in the load effect to avoid SSR hydration mismatch.
-  const [v2, setV2] = useState(false);
+  // P2.1 A/B → PROMOTED 2026-10-10: render-v2 IS the default face of the game
+  // (owner find: the A/B was never flipped after the 09-30 ship — "forgotten").
+  // render-only: physics/scoring/determinism identical (single Engine.step, shared
+  // level.ts constants). /?renderer=v1 is the explicit legacy opt-out. Set
+  // client-side in the load effect to avoid SSR hydration mismatch.
+  const [v2, setV2] = useState(true);
   // P2.2: H1 ARCHIVE — /?symbol=&date=<past UTC date> plays real history as
   // PRACTICE terrain (submission suppressed; W1 staleness stays authoritative).
   const [archive, setArchive] = useState(false);
@@ -155,8 +189,23 @@ export default function GameCanvas() {
   const [vaultMsg, setVaultMsg] = useState<string | null>(null);
   const [vaultBusy, setVaultBusy] = useState(false);
   const [hasWallet, setHasWallet] = useState(false);
+  // Option B: lane selection at boot — a SAVED wallet puts this device on the
+  // official lane for board context (read-only UI choice; score math untouched,
+  // LAW 1.3: skill-only scoreboard).
+  useEffect(() => {
+    if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) setHasWallet(true);
+  }, []);
   const [burn, setBurn] = useState<string | null>(null);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const showTutorialRef = useRef(false);
   useEffect(() => { nameRef.current = name; }, [name]);
+  useEffect(() => { showTutorialRef.current = showTutorial; }, [showTutorial]);
+  // Tutorial: auto-show for first-time players when the ready screen appears
+  useEffect(() => {
+    if (phase === "ready") {
+      try { if (!localStorage.getItem("cc_tutorial_seen_v1")) setShowTutorial(true); } catch { /* private mode */ }
+    }
+  }, [phase]);
 
   // P7.3: load a duel challenge by code (deep link ?duel= or a typed code).
   // On success it pins the terrain refs BEFORE the loader effect runs (the
@@ -204,7 +253,7 @@ export default function GameCanvas() {
     // /?date=<past UTC date> plays the archive (H1), and /?interval=1h|4h|1d
     // pins the timeframe (P3.5) — famous history as terrain.
     const params = new URLSearchParams(window.location.search);
-    setV2(params.get("renderer") === "v2"); // whitelisted single value
+    setV2(params.get("renderer") !== "v1"); // default v2; only explicit v1 downgrades (promoted 2026-10-10)
     wreckDBRef.current = loadWreckDB(); // H3: this device's death map
     const requested = (params.get("symbol") ?? "").toUpperCase();
     const requestedDate = params.get("date");
@@ -235,6 +284,10 @@ export default function GameCanvas() {
     // P7.3: ?duel=CODE deep link — hold the loader until the duel resolves so
     // the terrain fetches exactly once (the duel's terrain, not the default).
     const duelParam = (params.get("duel") ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
+    // E5.5: ?ref= landing attribution — persisted device-wide; every later
+    // submission stamps it onto its board row (opaque, sanitized, server-clamped)
+    const refParam = params.get("ref");
+    if (refParam && /^[A-Za-z0-9_-]{1,24}$/.test(refParam)) localStorage.setItem(REF_KEY, refParam);
     if (DUEL_CODE_RE.test(duelParam)) {
       void loadDuel(duelParam).finally(() => setBooted(true));
     } else {
@@ -251,6 +304,7 @@ export default function GameCanvas() {
     // a timeframe switch invalidates any run state from the previous terrain
     setResult(null);
     setRank(null);
+    setLaneNote(null);
     setGraduated(false);
     setWorld2(false);
     const isArch = archive;
@@ -275,6 +329,17 @@ export default function GameCanvas() {
             .then((r) => r.json())
             .then((b) => { if (alive) setTopBoard(b.entries ?? []); })
             .catch(() => {});
+          // Option B: official lane loads only for wallet-linked devices
+          if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) {
+            fetch(`/api/leaderboard?date=${d.seed.date}&interval=${tf}&board=official`)
+              .then((r) => r.json())
+              .then((b) => {
+                if (!alive) return;
+                setOfficialBoard(b.entries ?? []);
+                if (b.season) setOfficialSeason(b.season);
+              })
+              .catch(() => {});
+          }
           // H4: yesterday's episode for the ready screen (cliffhanger loop)
           fetch("/api/report")
             .then((r) => r.json())
@@ -543,6 +608,7 @@ export default function GameCanvas() {
     setHud({ score: 0, combo: 0, candles: 0 });
     setResult(null);
     setRank(null);
+    setLaneNote(null);
     setGraduated(false);
     setWorld2(false);
     setPracticeNote(null);
@@ -569,6 +635,10 @@ export default function GameCanvas() {
   // sway/streaks, volume fog, tremor) and surfaced in the HUD when it matters.
   const weather = useMemo(
     () => (data ? deriveWeather(data.candles, data.seed.date + data.seed.symbol) : null),
+    [data],
+  );
+  const biomeId = useMemo<BiomeId | undefined>(
+    () => (data ? deriveBiome(data.candles, data.seed.date + data.seed.symbol).id : undefined),
     [data],
   );
 
@@ -602,7 +672,7 @@ export default function GameCanvas() {
       const s = Math.min(rect.width / VIEW_W, rect.height / VIEW_H);
       const ox = (rect.width - VIEW_W * s) / 2;
       const oy = (rect.height - VIEW_H * s) * weight;
-      fitRef.current = { dpr, w: rect.width, h: rect.height };
+      fitRef.current = { dpr, w: rect.width, h: rect.height, s, ox, oy };
       ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * ox, dpr * oy);
     };
     resize();
@@ -613,6 +683,7 @@ export default function GameCanvas() {
       if (!e) return;
       let dt = (now - lastRef.current) / 1000;
       lastRef.current = now;
+      const frameDt = Math.min(0.1, dt); // real frame delta — zoom easing only
       dt = Math.min(0.1, dt);
       accRef.current += dt;
       const FIXED = 1 / 60;
@@ -635,14 +706,44 @@ export default function GameCanvas() {
       ctx.setTransform(fit.dpr, 0, 0, fit.dpr, 0, 0);
       ctx.clearRect(0, 0, fit.w, fit.h);
       ctx.restore();
+
+      // CAMERA-FRAME zoom target: needed when the player rises higher than
+      // the band can show while the ground line stays pinned. z keeps the
+      // player top at ≥36px under the frame top; clamped to a readable 0.55.
+      const P = e.py - e.camY;          // player top, screen space
+      const G = e.lastGroundY - e.camY; // takeoff ground line, screen space
+      let zt = 1;
+      if (!e.dead && phase === "running" && P < 52 && G - P > 8) {
+        zt = Math.min(1, Math.max(0.55, (G - 36) / (G - P)));
+      }
+      const cz = camZoomRef.current;
+      cz.z += (zt - cz.z) * Math.min(1, frameDt * 7);
+      if (cz.z > 0.999 && zt >= 0.999) cz.z = 1; // snap fully back when idle
+      cz.px = e.playerScreenX + 17;
+      cz.py = G;
+
       const bot = vsBotRef.current ? botRef.current : null;
       // P7.2: ghost replay — position lookup by the human engine's own clock
       const gv: GhostView | null =
         ghostOnRef.current && ghostRef.current && (phase === "ready" || phase === "running" || phase === "dead" || phase === "graduated")
           ? ghostViewAt(ghostRef.current, e.time)
           : null;
-      if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv);
-      else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv);
+      // per-frame compose: fit → hard clip to the world band → zoom about the
+      // ground-line pivot (clip keeps letterbox clean while zoomed out)
+      ctx.save();
+      ctx.setTransform(fit.dpr * fit.s, 0, 0, fit.dpr * fit.s, fit.dpr * fit.ox, fit.dpr * fit.oy);
+      ctx.beginPath();
+      ctx.rect(0, 0, VIEW_W, VIEW_H);
+      ctx.clip();
+      if (cz.z < 0.999) {
+        ctx.translate(cz.px, cz.py);
+        ctx.scale(cz.z, cz.z);
+        ctx.translate(-cz.px, -cz.py);
+      }
+      const camZoom = cz.z < 0.999 ? { z: cz.z, px: cz.px, py: cz.py } : undefined;
+      if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv, camZoom, biomeId);
+      else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv, camZoom);
+      ctx.restore();
       rafRef.current = requestAnimationFrame(step);
     };
     rafRef.current = requestAnimationFrame(step);
@@ -650,7 +751,7 @@ export default function GameCanvas() {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
     };
-  }, [phase, v2, weather]);
+  }, [phase, v2, weather, biomeId]);
 
   // P3.2: mirror mutation state → ref consumed by the RAF render loop
   useEffect(() => {
@@ -670,6 +771,7 @@ export default function GameCanvas() {
         return;
       }
       if (ev.code === "Space" || ev.code === "ArrowUp" || ev.code === "KeyW") {
+        if (showTutorialRef.current) return; // tutorial handles Space
         ev.preventDefault();
         if (phase === "ready" || phase === "dead") startRun();
         else if (phase === "graduated") {
@@ -697,7 +799,7 @@ export default function GameCanvas() {
     // clicks meant for the name input or any other control inside them
     if ((ev.target as HTMLElement | null)?.closest("input,button,a,select,textarea,label")) return;
     ev.preventDefault();
-    if (phase === "ready") { startRun(); return; }
+    if (phase === "ready") { if (!showTutorialRef.current) startRun(); return; }
     engineRef.current?.press();
   };
   const onPointerUp = () => engineRef.current?.release();
@@ -709,6 +811,48 @@ export default function GameCanvas() {
     try {
       const finalName = (name.trim() || "ANON").slice(0, 14);
       localStorage.setItem(NAME_KEY, finalName);
+      // LAW 1.2 hardening — official lane needs an ownership proof: the wallet
+      // personal_signs the canonical run-binding message before the POST. The
+      // clamps here mirror board-validation exactly (the server verifies the
+      // signature against the CLAMPED entry values, byte-for-byte). No provider,
+      // user rejection, or a 30s popup timeout ⇒ post without proof: the run
+      // lands on the honestly-labeled GUEST board and play is never blocked.
+      const walletAddr = localStorage.getItem(WALLET_ADDRESS_KEY);
+      let signature: string | undefined;
+      let proofTs: number | undefined;
+      if (walletAddr && isValidAddress(walletAddr)) {
+        const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+        if (eth) {
+          proofTs = Date.now();
+          const msg = buildProofMessage(
+            {
+              score: Math.floor(result.score),
+              candlesPassed: Math.floor(result.candlesPassed),
+              bestStreak: Math.max(0, Math.min(999, Math.floor(result.bestStreak))),
+              date: data.seed.date,
+              interval: tf,
+              wallet: walletAddr.toLowerCase(),
+            },
+            proofTs,
+          );
+          const msgHex = "0x" + [...new TextEncoder().encode(msg)].map((b) => b.toString(16).padStart(2, "0")).join("");
+          // popup must not pin the panel forever: 30s → give up, post as guest
+          let timer: ReturnType<typeof setTimeout> | null = null;
+          try {
+            const s = (await Promise.race([
+              eth.request({ method: "personal_sign", params: [msgHex, walletAddr] }),
+              new Promise<never>((_, rej) => {
+                timer = setTimeout(() => rej(new Error("sign-timeout")), 30_000);
+              }),
+            ])) as unknown;
+            if (typeof s === "string" && /^0x[0-9a-fA-F]{130}$/.test(s)) signature = s;
+          } catch {
+            // rejected / timed out — guest lane, note below explains honestly
+          } finally {
+            if (timer) clearTimeout(timer);
+          }
+        }
+      }
       const res = await fetch("/api/leaderboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -719,15 +863,40 @@ export default function GameCanvas() {
           // E2.2: optional wallet link so the run also builds airdrop weights.
           // Display-only value from WalletChip — absent = ledger stays identity-only.
           // (JSON.stringify drops undefined — the field is simply absent when unlinked.)
-          address: localStorage.getItem(WALLET_ADDRESS_KEY) ?? undefined,
+          address: walletAddr ?? undefined,
+          // LAW 1.2 hardening: ownership proof (absent = guest lane, by design)
+          signature: signature,
+          ts: proofTs,
+          ref: localStorage.getItem(REF_KEY) ?? undefined, // E5.5: opaque referral stamp
           runToken: data.runToken,
         }),
       });
       const j = await res.json();
       if (typeof j.rank === "number") setRank(j.rank);
+      if (j.board === "official" || j.board === "guest") setSubmittedBoard(j.board);
+      // honest lane note: server-issued degrade reason, or a plain message when
+      // a linked wallet skipped signing (no provider / popup rejected / timeout)
+      setLaneNote(
+        typeof j.note === "string" && j.note
+          ? j.note
+          : j.board === "guest" && isValidAddress(walletAddr ?? "")
+            ? "no signature — run posted to the GUEST board"
+            : null,
+      );
       const b = await fetch(`/api/leaderboard?date=${data.seed.date}&interval=${tf}`).then((r) => r.json());
       setBoard(b.entries ?? []);
       setTopBoard(b.entries ?? []);
+      // Option B: refresh the official lane too (the run landed there when a
+      // wallet is linked — best run per wallet is kept server-side)
+      if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) {
+        await fetch(`/api/leaderboard?date=${data.seed.date}&interval=${tf}&board=official`)
+          .then((r) => r.json())
+          .then((ob) => {
+            setOfficialBoard(ob.entries ?? []);
+            if (ob.season) setOfficialSeason(ob.season);
+          })
+          .catch(() => {});
+      }
       // P7.2: submit the run's ghost with the SAME verified run-token
       // (best-effort — a ghost failure must never fail the score submission;
       // the ghost is cosmetic and the next load simply replays nothing).
@@ -782,7 +951,7 @@ export default function GameCanvas() {
         setDuelCode(j.code);
         const tag = normalizeRivalTag(rival);
         if (rival.trim()) localStorage.setItem(RIVAL_KEY, rival.trim());
-        const link = duelUrl(window.location.origin, j.code);
+        const link = `${duelUrl(window.location.origin, j.code)}${shareRef(finalName)}`; // E5.5: invite carries the ref
         const text = tag
           ? `${tag} you're up — beat ${result.score} on today's ${data.seed.symbol} chart: ${link}`
           : `beat my ${result.score} on today's ${data.seed.symbol} chart: ${link}`;
@@ -801,7 +970,9 @@ export default function GameCanvas() {
 
   const downloadCard = async () => {
     if (!result || !data) return;
-    const top = topBoard[0];
+    // Option B: the card's rival reads THIS device's lane (official with a
+    // linked wallet — empty official lane = no rival stamped, never guest rows)
+    const top = (hasWallet ? officialBoard : topBoard)[0];
     const rivalGap = top && top.score > result.score ? top.score - result.score : 0;
     // P3.1: honor the typed rival handle — invalid input simply omits the stamp
     const challenge = normalizeRivalTag(rival);
@@ -825,10 +996,11 @@ export default function GameCanvas() {
     a.download = `candle-climber-${result.score}.png`;
     a.click();
     URL.revokeObjectURL(url);
-    // P3.1: the mockery loop — share text tags the rival so their audience sees it
+    // P3.1: the mockery loop — share text tags the rival so their audience sees it.
+    // E5.5: the text also carries a measurable game link (sharer's name as ref).
     const shareText = challenge
-      ? `${challenge} you're up — beat ${result.score} on today's ${data.seed.symbol} chart`
-      : "Candle Climber";
+      ? `${challenge} you're up — beat ${result.score} on today's ${data.seed.symbol} chart — ${GAME_URL}${shareRef(name)}`
+      : `Candle Climber — ${GAME_URL}${shareRef(name)}`;
     if (navigator.share && navigator.canShare?.({ files: [new File([blob], "card.png", { type: "image/png" })] })) {
       try {
         await navigator.share({ files: [new File([blob], "card.png", { type: "image/png" })], title: shareText });
@@ -845,9 +1017,10 @@ export default function GameCanvas() {
   };
 
   // H4: the report is designed to travel — copy the episode verbatim
+  // E5.5: the copied text lands on a ?ref= link so episode-driven visits count
   const copyReport = () => {
     if (!report) return;
-    const text = `CANDLE CLIMBER — DAILY REPORT ${report.date}\n${report.narrative.join("\n")}\nhttps://candle-climber.vercel.app`;
+    const text = `CANDLE CLIMBER — DAILY REPORT ${report.date}\n${report.narrative.join("\n")}\n${GAME_URL}${shareRef(name)}`;
     navigator.clipboard?.writeText(text).then(() => {
       setReportCopied(true);
       setTimeout(() => setReportCopied(false), 1600);
@@ -865,7 +1038,11 @@ export default function GameCanvas() {
     : null;
   const canSubmit = Boolean(data?.runToken) && !archive; // archive = practice (H1)
   const unscoredMsg = archive ? ARCHIVE_MSG : UNSCORED_MSG;
-  const top = topBoard[0];
+  // Option B: rival/lead context follows THIS device's lane (official with a
+  // linked wallet, guest otherwise) — both boards stay labeled on the panel.
+  const myLane = hasWallet ? officialBoard : topBoard;
+  const miniOfficial = hasWallet && officialBoard.length > 0;
+  const top = myLane[0];
   const rivalGap = result && top && top.score > result.score ? top.score - result.score : 0;
 
   return (
@@ -923,8 +1100,13 @@ export default function GameCanvas() {
           )}
           {graduated && <div className="cc-chip cc-chip-grad">GRADUATED</div>}
           {world2 && <div className="cc-chip cc-chip-grad2">POST-GRAD ×2</div>}
-          {v2 && <div className="cc-chip cc-chip-mut" title="renderer v2 — grammar + parallax + juice">RENDER V2</div>}
+          {!v2 && <div className="cc-chip cc-chip-mut" title="legacy renderer opt-out — /?renderer=v1">RENDER V1 · LEGACY</div>}
           {weatherChip && <div className="cc-chip cc-chip-weather" title="H2 weather — ATR wind · volume fog">{weatherChip}</div>}
+          {biomeId && biomeId !== "temperate" && data && (
+            <div className="cc-chip cc-chip-biome" title={`environment biome — derived from today's market conditions`}>
+              {deriveBiome(data.candles, data.seed.date + data.seed.symbol).name}
+            </div>
+          )}
           {archive && <div className="cc-chip cc-chip-arch" title="archive terrain — practice only">ARCHIVE</div>}
           {/* P7.1: live rival race — local-only numbers, never submitted */}
           {vsBot && botRef.current && !botRef.current.stopped && (
@@ -981,6 +1163,7 @@ export default function GameCanvas() {
                 </div>
               )}
               <button className="cc-btn cc-btn-start cc-cta" onClick={startRun}>START CLIMB</button>
+              <button className="cc-btn cc-btn-ghost cc-tut-reopen" onClick={() => setShowTutorial(true)}>HOW TO PLAY</button>
               {best > 0 && <p className="cc-best">PERSONAL BEST <b>{best.toLocaleString()}</b></p>}
               <details className="cc-more">
                 <summary className="cc-more-summary">
@@ -1155,10 +1338,10 @@ export default function GameCanvas() {
                       SUPPLY BURNED · {burn} WICK
                     </p>
                   )}
-                  {topBoard.length > 0 && (
+                  {(miniOfficial || topBoard.length > 0) && (
                     <div className="cc-board cc-board-mini">
-                      <div className="cc-board-title">TOP 3 TODAY</div>
-                      {topBoard.slice(0, 3).map((e, i) => (
+                      <div className="cc-board-title">{miniOfficial ? "OFFICIAL · TOP 3 TODAY" : "GUEST · TOP 3 TODAY"}</div>
+                      {(miniOfficial ? officialBoard : topBoard).slice(0, 3).map((e, i) => (
                         <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
                           <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
                           <span className="cc-board-name">{e.name}</span>
@@ -1172,6 +1355,8 @@ export default function GameCanvas() {
             </div>
           </div>
         )}
+
+        {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
 
         {phase === "graduated" && result && (
           <div className="cc-overlay">
@@ -1206,7 +1391,8 @@ export default function GameCanvas() {
                 </button>
               )}
               {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
-              {rank !== null && <p className="cc-rank">GLOBAL RANK #{rank} TODAY</p>}
+              {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
+              {rank !== null && laneNote && <p className="cc-rank cc-rank-note" role="status">{laneNote}</p>}
             </div>
           </div>
         )}
@@ -1231,14 +1417,15 @@ export default function GameCanvas() {
                   TOP TODAY: <b>{top.name}</b> · {top.score.toLocaleString()} — you were <b>{rivalGap.toLocaleString()}</b> pts behind
                 </p>
               )}
-              {rivalGap === 0 && topBoard.length > 0 && <p className="cc-rival cc-rival-lead">YOU LEAD THE DAILY CHART. FLEX IT.</p>}
+              {rivalGap === 0 && myLane.length > 0 && <p className="cc-rival cc-rival-lead">YOU LEAD THE DAILY CHART. FLEX IT.</p>}
               {verdict && <p className="cc-vs-verdict" role="status">{verdict}</p>}
               {duelCode && (
                 <p className="cc-duel-live" role="status">
                   DUEL LIVE · <b>{duelCode}</b> · {duelCopied ? "INVITATION COPIED ✓" : "SHARE THE CODE"}
                 </p>
               )}
-              {rank !== null && <p className="cc-rank">GLOBAL RANK #{rank} TODAY</p>}
+              {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
+              {rank !== null && laneNote && <p className="cc-rank cc-rank-note" role="status">{laneNote}</p>}
               <div className="cc-death-actions">
                 <input
                   className="cc-input"
@@ -1284,9 +1471,28 @@ export default function GameCanvas() {
                 </button>
               )}
               {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
+              {officialBoard.length > 0 && (
+                <div className="cc-board cc-board-official">
+                  <div className="cc-board-title">OFFICIAL · {data?.seed.symbol}</div>
+                  <div className="cc-board-sub">
+                    wallet-bound · best run per wallet{officialSeason ? ` · season ${officialSeason}` : ""}
+                  </div>
+                  {officialBoard.slice(0, 10).map((e, i) => (
+                    <div key={`off-${e.ts ?? i}-${e.wallet ?? e.name}`} className="cc-board-row">
+                      <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
+                      <span className="cc-board-name">
+                        {e.name}
+                        {e.wallet ? <i className="cc-board-wallet">{e.wallet}</i> : null}
+                      </span>
+                      <span className="cc-board-score">{e.score.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               {board.length > 0 && (
                 <div className="cc-board">
-                  <div className="cc-board-title">TOP 10 · {data?.seed.symbol}</div>
+                  <div className="cc-board-title">GUEST · {data?.seed.symbol}</div>
+                  <div className="cc-board-sub">typed names · unofficial · play stays free & walletless</div>
                   {board.slice(0, 10).map((e, i) => (
                     <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
                       <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>

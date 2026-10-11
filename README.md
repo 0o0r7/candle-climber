@@ -93,9 +93,12 @@ src/game/cc/
   deathcard.ts  offscreen-canvas 1080×1350 share card
   sound.ts      WebAudio synth SFX
 src/app/api/candles/route.ts      GET seed + klines (Binance proxy + geo-fallback, cached)
-src/app/api/leaderboard/route.ts  GET top / POST entry (memory fallback → MongoDB Atlas when DATABASE_URL set)
-src/lib/leaderboard-store.ts      storage adapter: env-gated Atlas M0, memoized clients
-src/components/cc/GameCanvas.tsx  client shell: canvas + HUD + modals
+src/app/api/leaderboard/route.ts  GET top / POST entry (?board=guest|official|all; official POST requires a valid personal_sign ownership proof — anything less degrades to guest with a note; memory fallback → MongoDB Atlas when DATABASE_URL set)
+src/lib/leaderboard-store.ts      storage adapter: two lanes (guest walletless · official wallet-bound, best run per wallet), env-gated Atlas M0, memoized clients
+src/lib/proof-message.ts          isomorphic canonical proof message (client and server build the exact same bytes)
+src/lib/wallet-proof.ts           server-side EIP-191 personal_sign verification (ECDSA secp256k1 recovery, ±10-min freshness)
+src/lib/seasons.ts                append-only season registry (S1 opened 2026-10-10) — official records are season-stamped
+src/components/cc/GameCanvas.tsx  client shell: canvas + HUD + modals (+ wallet personal_sign before official submissions)
 ```
 
 ## Docs
@@ -109,6 +112,8 @@ src/components/cc/GameCanvas.tsx  client shell: canvas + HUD + modals
 - [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md) — design spec: rules, scoring, virality loop
 - [`docs/ECOSYSTEM_BAR.md`](docs/ECOSYSTEM_BAR.md) — honest scoreboard vs the vibe/vibe ecosystem bar (E1–E10)
 - [`docs/ECONOMY-LAWS.md`](docs/ECONOMY-LAWS.md) — fairness/weights laws (the language rule lives here)
+- [`docs/ECONOMY-CHECKLIST.md`](docs/ECONOMY-CHECKLIST.md) — economy-phase tracker (E0–E6; graduation runbook + watch plan live in `docs/council/`)
+- [`docs/PR-CHECKLIST.md`](docs/PR-CHECKLIST.md) — LAW 5.1 review gate, mechanical form (scoring/leaderboard/wallet/cosmetics PRs)
 - [`docs/INFRASTRUCTURE.md`](docs/INFRASTRUCTURE.md) — zero-cost infra map (Student Pack)
 
 ## Official ecosystem references
