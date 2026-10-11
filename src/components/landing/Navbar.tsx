@@ -6,7 +6,6 @@ export default function Navbar() {
   return (
     <nav className="lp-nav">
       <Link href="/" className="lp-nav-logo">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={LOGO_URL} alt="Candle Climber" />
         <span className="lp-nav-logo-text">CANDLE CLIMBER</span>
       </Link>

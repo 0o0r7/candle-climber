@@ -36,6 +36,10 @@ export default function StatsPage() {
   const [mine, setMine] = useState<OfficialRow[] | null>(null);
   const [armed, setArmed] = useState(false); // two-step local wipe
 
+  // Hydration-safe browser-only reads: these values do not exist at SSR time,
+  // so state is filled post-mount (a lazy useState initializer would render
+  // different HTML on the server and the client — hydration mismatch).
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
       setLedger(loadLedger(localStorage.getItem("cc_stats_v1")));
@@ -60,6 +64,7 @@ export default function StatsPage() {
       // private mode / storage blocked — the page still renders honest zeros
       setLedger((l) => l ?? loadLedger(null));
     }
+    // eslint-enable react-hooks/set-state-in-effect
   }, []);
 
   const clearLocal = () => {
