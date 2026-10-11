@@ -14,7 +14,7 @@ import { chromium } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const GAME_URL = process.env.GAME_URL || "https://candle-climber.vercel.app/?renderer=v2";
+const GAME_URL = process.env.GAME_URL || "https://candle-climber.vercel.app/play?renderer=v2";
 const RUN_SECONDS = Number(process.env.RUN_SECONDS || 24);
 // NO_RUSH=1 → clean baseline (owner-feedback F1/F2 metric): no risk bursts,
 // measures honest time-to-first-death on today's terrain.
@@ -66,6 +66,24 @@ async function main() {
   log(`canvas ok ${Math.round(box.width)}x${Math.round(box.height)}`);
 
   await page.screenshot({ path: join(ART, "01-boot.png"), fullPage: false });
+
+  // 1.5) First-visit onboarding tutorial: it AUTO-OPENS once the level loads
+  // (~0.7s after mount — do not race it) and advances ONLY via its own
+  // buttons (Space is ignored while it is open). Wait for it, then click the
+  // advancing button (actions row is [BACK|SKIP] ... [NEXT|GOT IT]; last()
+  // always advances) until the overlay is gone.
+  const tutBtn = page.locator("button.cc-tut-btn").last();
+  try {
+    await tutBtn.waitFor({ state: "visible", timeout: 20_000 });
+    for (let t = 0; t < 12; t++) {
+      if (!(await tutBtn.isVisible().catch(() => false))) break;
+      await tutBtn.click();
+      await page.waitForTimeout(150);
+    }
+    log("tutorial dismissed");
+  } catch {
+    log("no tutorial (already seen on this profile)");
+  }
 
   // 2) Start the run (Space starts from the ready panel; button is fallback)
   const startBtn = page.getByRole("button", { name: /start climb/i });

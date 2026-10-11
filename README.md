@@ -36,7 +36,7 @@ and you are — obviously — **liquidated**.
   [`docs/TRUTH-TABLE.md`](docs/TRUTH-TABLE.md); every feed is registered in
   [`docs/FEEDS.md`](docs/FEEDS.md).
 
-## Status — live at https://candle-climber.vercel.app
+## Status — live at https://candle-climber.vercel.app (landing) · game at /play
 
 Real daily candles, real deaths. Deployed 2026-09-29 · CI green on `main` ·
 QA: 450+ headless sim rounds + live desktop/mobile-emulated sessions, zero

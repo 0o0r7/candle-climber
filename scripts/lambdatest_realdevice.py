@@ -32,7 +32,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 import urllib.parse
 
-PROD = os.environ.get("GAME_URL", "https://candle-climber.vercel.app")
+PROD = os.environ.get("GAME_URL", "https://candle-climber.vercel.app/play")
 OUT = os.environ.get("QA_OUT", "/home/z/my-project/qa/realdevice")
 HUB = "https://hub.lambdatest.com/wd/hub"
 LT_API = "https://api.lambdatest.com/automation/api/v1"

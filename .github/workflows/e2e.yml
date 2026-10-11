@@ -33,7 +33,7 @@ jobs:
       - name: Play the game (prod smoke)
         run: bun scripts/e2e-gamer-bot.ts
         env:
-          GAME_URL: https://candle-climber.vercel.app/?renderer=v2
+          GAME_URL: https://candle-climber.vercel.app/play?renderer=v2
           RUN_SECONDS: "24"
 
       - name: Upload artifacts (screenshots + logs)
