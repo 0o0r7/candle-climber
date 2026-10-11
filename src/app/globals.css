@@ -1537,3 +1537,142 @@ button.cc-wallet-chip { cursor: pointer; }
   border-radius: 6px;
   text-decoration: none !important;
 }
+
+/* ================= P2 audit-polish: pause · sections · /stats ================= */
+
+/* grouped section titles inside HOW TO PLAY & OPTIONS (audit D-1) */
+.cc-sec-title {
+  font-family: var(--cc-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--cc-lime);
+  opacity: 0.85;
+  margin: 14px 0 6px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(204, 255, 0, 0.08);
+}
+.cc-sec-title:first-child { margin-top: 4px; border-top: 0; padding-top: 0; }
+
+/* always-visible core how-to (audit RB-1/M-1) — slightly brighter than folded copy */
+.cc-howto-core { margin-top: 12px; }
+.cc-howto-core p { color: #AEB6BC; }
+.cc-howto-core .cc-next-level { color: var(--cc-faint); }
+
+/* pause — HUD button + overlay panel */
+button.cc-chip-pausebtn {
+  cursor: pointer;
+  color: #AEB6BC;
+  pointer-events: auto;
+}
+button.cc-chip-pausebtn:hover { color: var(--cc-lime); border-color: rgba(204, 255, 0, 0.3); }
+.cc-panel-pause { text-align: center; }
+.cc-pause-head {
+  font-family: var(--cc-display);
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--cc-lime);
+  margin: 0 0 4px;
+}
+.cc-pause-sub {
+  font-family: var(--cc-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  color: var(--cc-faint);
+  margin: 0 0 16px;
+}
+.cc-pause-keys {
+  font-family: var(--cc-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--cc-faint);
+  margin: 14px 0 0;
+}
+.cc-pause-keys .lime { color: var(--cc-up); }
+
+/* /stats — per-device lifetime stats page (reuses the audit-fix page frame) */
+.cc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 18px 0 10px;
+}
+.cc-stats-tile {
+  border: 1px solid var(--cc-hairline);
+  border-radius: 10px;
+  background: rgba(204, 255, 0, 0.03);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cc-stats-tile.cc-stats-hi { border-color: rgba(204, 255, 0, 0.3); }
+.cc-stats-k {
+  font-family: var(--cc-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--cc-faint);
+}
+.cc-stats-v {
+  font-family: var(--cc-mono);
+  font-size: 15px;
+  color: #fff;
+}
+.cc-stats-hi .cc-stats-v { color: var(--cc-lime); }
+.cc-stats-note {
+  font-family: var(--cc-mono);
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--cc-faint);
+  margin: 6px 0 14px;
+}
+.cc-stats-note a { color: var(--cc-lime); text-decoration: none; }
+.cc-stats-note a:hover { text-decoration: underline; }
+.cc-stats-card {
+  border: 1px solid var(--cc-hairline);
+  border-radius: 12px;
+  background: rgba(204, 255, 0, 0.03);
+  padding: 12px 14px;
+  margin: 4px 0 16px;
+}
+.cc-stats-card-title {
+  font-family: var(--cc-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--cc-lime);
+  margin-bottom: 6px;
+}
+.cc-stats-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  line-height: 2;
+  color: #d7dbe2;
+}
+.cc-stats-row b { color: #fff; }
+.cc-stats-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+a.cc-btn { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+.cc-stats-wipe {
+  font-family: var(--cc-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--cc-faint);
+  background: transparent;
+  border: 1px solid var(--cc-hairline);
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.cc-stats-wipe:hover { color: var(--cc-down); border-color: rgba(224, 120, 86, 0.4); }
