@@ -160,11 +160,10 @@ function drawSkyV2(ctx: CanvasRenderingContext2D, e: Engine, t: TerrainV2, w: We
 
 const GHOST_F = 0.22, GHOST_C = 4.5, GHOST_K = 2.4, GHOST_AX = 60, GHOST_AY = 96;
 
-function drawGhostsV2(ctx: CanvasRenderingContext2D, e: Engine, t: TerrainV2, zm = 0) {
+function drawGhostsV2(ctx: CanvasRenderingContext2D, e: Engine, t: TerrainV2) {
   const camX = e.camX, camY = e.camY;
-  const m = 240 + zm;
-  const i0 = Math.max(0, Math.floor(((camX + (-m - GHOST_AX) / GHOST_F) / GHOST_C) / CANDLE_W));
-  const i1 = Math.min(e.plats.length - 1, Math.ceil(((camX + (VIEW_W + m - GHOST_AX) / GHOST_F) / GHOST_C) / CANDLE_W));
+  const i0 = Math.max(0, Math.floor(((camX + (-240 - GHOST_AX) / GHOST_F) / GHOST_C) / CANDLE_W));
+  const i1 = Math.min(e.plats.length - 1, Math.ceil(((camX + (VIEW_W + 240 - GHOST_AX) / GHOST_F) / GHOST_C) / CANDLE_W));
   ctx.save();
   for (let i = i0; i <= i1; i++) {
     const p = e.plats[i];
@@ -195,11 +194,10 @@ function drawGhostsV2(ctx: CanvasRenderingContext2D, e: Engine, t: TerrainV2, zm
 
 const RIDGE_F = 0.55, RIDGE_C = 1.8, RIDGE_K = 0.62, RIDGE_AX = 40, RIDGE_AY = 118;
 
-function drawRidgeV2(ctx: CanvasRenderingContext2D, e: Engine, zm = 0) {
+function drawRidgeV2(ctx: CanvasRenderingContext2D, e: Engine) {
   const camX = e.camX, camY = e.camY;
-  const m = 240 + zm;
-  const i0 = Math.max(0, Math.floor(((camX + (-m - RIDGE_AX) / RIDGE_F) / RIDGE_C) / CANDLE_W));
-  const i1 = Math.min(e.plats.length - 1, Math.ceil(((camX + (VIEW_W + m - RIDGE_AX) / RIDGE_F) / RIDGE_C) / CANDLE_W));
+  const i0 = Math.max(0, Math.floor(((camX + (-240 - RIDGE_AX) / RIDGE_F) / RIDGE_C) / CANDLE_W));
+  const i1 = Math.min(e.plats.length - 1, Math.ceil(((camX + (VIEW_W + 240 - RIDGE_AX) / RIDGE_F) / RIDGE_C) / CANDLE_W));
   if (i1 < i0) return;
   ctx.save();
   ctx.beginPath();
@@ -235,8 +233,7 @@ function drawRidgeV2(ctx: CanvasRenderingContext2D, e: Engine, zm = 0) {
 
 function drawChasmV2(ctx: CanvasRenderingContext2D, p: Platform, camX: number, camY: number, fog: number) {
   const x = p.x - camX;
-  // generous bounds: the camera zoom-out can reveal up to ~700px extra world
-  if (x > VIEW_W + 700 || x + CANDLE_W < -700) return;
+  if (x > VIEW_W + 40 || x + CANDLE_W < -40) return;
   const topY = Math.max(0, p.y - camY);
   const g = ctx.createLinearGradient(0, topY, 0, topY + 320);
   g.addColorStop(0, "rgba(12,14,16,0)");
@@ -269,8 +266,7 @@ function blitGlow(ctx: CanvasRenderingContext2D, st: V2State, key: string, color
 
 function drawSlabV2(ctx: CanvasRenderingContext2D, e: Engine, p: Platform, d: SlabDecor, camX: number, camY: number, st: V2State) {
   const x = p.x - camX;
-  // generous bounds: the camera zoom-out can reveal up to ~700px extra world
-  if (x > VIEW_W + 700 || x + p.w < -700) return;
+  if (x > VIEW_W + 40 || x + p.w < -40) return;
   if (d.gap || p.state === "gone" || p.w === 0) {
     drawChasmV2(ctx, p, camX, camY, st.terrain.fogAlpha);
     if (p.summit) drawSummit(ctx, x, p.y - camY, p.w);
@@ -828,22 +824,9 @@ function drawWrecks(ctx: CanvasRenderingContext2D, e: Engine, wrecks: Wreck[]) {
 
 /* --------------------------------- entry ----------------------------------- */
 
-export interface CamZoom {
-  /** zoom factor (<1 = zoomed out); ≥0.999 disables the transform */
-  z: number;
-  /** screen-space pivot x (player center) — stays put under zoom */
-  px: number;
-  /** screen-space pivot y (takeoff ground line) — STAYS PUT under zoom, so
-   *  the ground the player jumped from visually never moves */
-  py: number;
-}
-
-export function renderV2(ctx: CanvasRenderingContext2D, e: Engine, seedStr: string, weather: Weather = NEUTRAL_WEATHER, wrecks: Wreck[] = [], mutationId?: string, charId = "default", rival?: RivalBot | null, ghost?: GhostView | null, cam?: CamZoom) {
+export function renderV2(ctx: CanvasRenderingContext2D, e: Engine, seedStr: string, weather: Weather = NEUTRAL_WEATHER, wrecks: Wreck[] = [], mutationId?: string, charId = "default", rival?: RivalBot | null, ghost?: GhostView | null) {
   const st = getState(e, seedStr);
   const t = st.terrain;
-  // CAMERA-FRAME zoom: extra world visible horizontally when zoomed out
-  // (pivot at the player, so the lookahead side needs the larger margin)
-  const zm = cam && cam.z < 0.999 ? Math.ceil(VIEW_W * (1 / cam.z - 1)) + 8 : 0;
 
   // juice bookkeeping — engine time deltas (no wall clock)
   const dt = Math.min(0.1, Math.max(0, e.time - st.lastTime));
@@ -866,33 +849,23 @@ export function renderV2(ctx: CanvasRenderingContext2D, e: Engine, seedStr: stri
   ctx.translate(tx, ty);
 
   drawSkyV2(ctx, e, t, weather);
-  // ---- CAMERA-FRAME zoom: world layers zoom about the ground-line pivot;
-  // sky (above), foreground/vignette and the ticker (below) stay screen-space
-  ctx.save();
-  if (cam && cam.z < 0.999) {
-    ctx.translate(cam.px, cam.py);
-    ctx.scale(cam.z, cam.z);
-    ctx.translate(-cam.px, -cam.py);
-  }
   // H2 wind sway: background layers (ghosts + ridge) lean with the wind —
   // playfield caps NEVER move (market legibility is gameplay, ART-DIRECTION §1)
   ctx.save();
   if (weather.wind > 0.05) {
     ctx.translate(Math.sin(e.time * 0.9) * 7 * weather.wind * weather.windDir, Math.sin(e.time * 0.7) * 2 * weather.wind);
   }
-  drawGhostsV2(ctx, e, t, zm);
-  drawRidgeV2(ctx, e, zm);
+  drawGhostsV2(ctx, e, t);
+  drawRidgeV2(ctx, e);
   ctx.restore();
 
   // P3.2 candle-rain: decor layer between backdrop and playfield (never
   // occludes slabs/caps; engine-time driven — same seed+time ⇒ same frame)
   if (mutationId === "rain") drawCandleRain(ctx, e, seedStr, VIEW_W, VIEW_H);
 
-  // visible window (playfield space) — widened by the zoom margin so the
-  // zoomed-out view never shows missing terrain at the frame edges
-  const padC = 2 + Math.ceil(zm / CANDLE_W);
-  const i0 = Math.max(0, Math.floor(e.camX / CANDLE_W) - padC);
-  const i1 = Math.min(e.plats.length - 1, Math.ceil((e.camX + VIEW_W) / CANDLE_W) + padC);
+  // visible window (playfield space)
+  const i0 = Math.max(0, Math.floor(e.camX / CANDLE_W) - 2);
+  const i1 = Math.min(e.plats.length - 1, Math.ceil((e.camX + VIEW_W) / CANDLE_W) + 2);
   for (let i = i0; i <= i1; i++) {
     const p = e.plats[i];
     const d = t.slabs[i];
@@ -913,12 +886,10 @@ export function renderV2(ctx: CanvasRenderingContext2D, e: Engine, seedStr: stri
   if (ghost) drawGhost(ctx, e.camX, e.camY, ghost);
   if (rival) drawRival(ctx, e, rival);
   drawWrecks(ctx, e, wrecks);
-  // P3.13: per-character mood overlay — decor only, anchored to the player
-  // (must zoom WITH the player, so it stays inside the zoom transform)
-  drawCharFx(ctx, e, charId);
-  ctx.restore(); // ---- end camera zoom
-
   drawForegroundV2(ctx, e, st, weather);
+  // P3.13: per-character mood overlay — decor only, drawn LAST (over everything,
+  // still inside the shake transform), pure function of (charId, engine time)
+  drawCharFx(ctx, e, charId);
 
   // progress candle ticker (top center, in-canvas — same as v1)
   const passed = e.plats[Math.min(e.candlesPassed, e.plats.length - 1)];
