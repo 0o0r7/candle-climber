@@ -57,20 +57,48 @@ export const ROTATION_V2_FROM = "2026-10-12";
 // Fixed shuffle (deterministic across server + every client): Fisher-Yates
 // over ALL_SYMBOLS seeded by a constant — NOT the daily hash, so the order is
 // stable forever and the cycle never depends on when it is evaluated.
-export const ROTATION_ORDER: readonly string[] = (() => {
-  const rnd = mulberry32(hashString("cc-rotation-v2"));
-  const arr = [...ALL_SYMBOLS];
+function fixedShuffle(symbols: readonly string[], seedLabel: string): readonly string[] {
+  const rnd = mulberry32(hashString(seedLabel));
+  const arr = [...symbols];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(rnd() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
-})();
+}
+
+export const ROTATION_ORDER: readonly string[] = fixedShuffle(ALL_SYMBOLS, "cc-rotation-v2");
 
 /** v2 daily schedule: day-index round-robin over the fixed ROTATION_ORDER. */
 export function rotationSymbol(date: string): string {
   const days = Math.floor(Date.parse(date + "T00:00:00Z") / 86_400_000);
   return ROTATION_ORDER[((days % ROTATION_ORDER.length) + ROTATION_ORDER.length) % ROTATION_ORDER.length];
+}
+
+// ── Per-pool rotations (3-mode restructure, council 2026-10-12 ruling B) ────
+// CRYPTO mode and STOCKS mode each rotate their OWN pool: the all-symbol v2
+// order above stays for bare legacy requests (byte-compat), but a mode-scoped
+// level must never serve a symbol outside its pool (STOCKS mode serving BTC
+// would be a labeling lie; CRYPTO mode serving TSLA breaks the niche promise).
+// Same fixed-shuffle pattern, distinct seed labels — stable forever, and the
+// day-index round-robin guarantees no consecutive-day repeats within a pool.
+export const CRYPTO_ROTATION_ORDER: readonly string[] = fixedShuffle(WATCHLIST, "cc-rotation-v2-crypto");
+export const STOCK_ROTATION_ORDER: readonly string[] = fixedShuffle(STOCKS, "cc-rotation-v2-stocks");
+
+/** Day-index round-robin over any fixed order (shared schedule math). */
+export function poolRotationSymbol(order: readonly string[], date: string): string {
+  const days = Math.floor(Date.parse(date + "T00:00:00Z") / 86_400_000);
+  return order[((days % order.length) + order.length) % order.length];
+}
+
+/** CRYPTO mode's default symbol of the day (crypto-only pool). */
+export function cryptoRotation(date: string): string {
+  return poolRotationSymbol(CRYPTO_ROTATION_ORDER, date);
+}
+
+/** STOCKS mode's default symbol of the day (equities-only pool). */
+export function stocksRotation(date: string): string {
+  return poolRotationSymbol(STOCK_ROTATION_ORDER, date);
 }
 
 // Merge-back wave 1 (VARIANT-REVIEW-2026-10-05) — provenance badge. The ONE

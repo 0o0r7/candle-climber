@@ -2346,6 +2346,10 @@ html { scroll-behavior: smooth; }
   border-color: rgba(204, 255, 0, 0.4);
   box-shadow: 0 0 32px rgba(204, 255, 0, 0.12);
 }
+.lp-mode-stocks:hover {
+  border-color: rgba(96, 165, 250, 0.45);
+  box-shadow: 0 0 32px rgba(96, 165, 250, 0.12);
+}
 .lp-mode-icon {
   font-size: 32px;
   line-height: 1;
@@ -2361,6 +2365,7 @@ html { scroll-behavior: smooth; }
 }
 .lp-mode-market .lp-mode-tag { color: var(--lp-up); }
 .lp-mode-launchpad .lp-mode-tag { color: var(--lp-lime); }
+.lp-mode-stocks .lp-mode-tag { color: #60a5fa; }
 .lp-mode-title {
   font-family: var(--lp-display);
   font-weight: 700;

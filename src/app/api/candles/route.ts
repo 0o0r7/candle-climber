@@ -16,7 +16,7 @@
 // PRACTICE (no submission) — see src/game/cc/archive.ts.
 import { NextResponse } from "next/server";
 import { utcDateStr } from "@/game/cc/rng";
-import { pickSeed, syntheticCandles, anchoredCandles, INTERVAL, LIMIT, WATCHLIST, STOCKS, isInterval } from "@/game/cc/level-source";
+import { pickSeed, syntheticCandles, anchoredCandles, INTERVAL, LIMIT, WATCHLIST, STOCKS, isInterval, cryptoRotation, stocksRotation } from "@/game/cc/level-source";
 import { selectDailySymbol } from "@/lib/market-selector";
 import { readOfficialQuote } from "@/lib/robinhood-chain";
 import { isArchiveDate, endOfDayMs, clampCandlesTo, binanceKlinesUrl } from "@/game/cc/archive";
@@ -248,6 +248,11 @@ export async function GET(req: Request) {
   // date — for an archive date that is THAT day's rotation symbol, so the
   // archive browser can list past dailies without any server allow-list.
   const requested = (searchParams.get("symbol") ?? "").toUpperCase();
+  // ?pool=stocks|crypto — the 3-mode restructure (council 2026-10-12 ruling B):
+  // the mode the player is in decides WHICH pool the DEFAULT level comes from.
+  // A pinned ?symbol= deep link keeps working in every pool (whitelist-checked
+  // below) — the pool only decides the default when no symbol is pinned.
+  const pool = searchParams.get("pool");
   // Volatility-based daily selection: instead of random watchlist rotation,
   // fetch 24h ticker stats for all watchlist symbols and pick the one with
   // the most interesting volatility/volume profile. Falls back to the legacy
@@ -255,9 +260,18 @@ export async function GET(req: Request) {
   let symbol: string;
   if (WATCHLIST.includes(requested) || STOCKS.includes(requested)) {
     symbol = requested;
+  } else if (pool === "stocks") {
+    // STOCKS mode: deterministic equity-of-the-day. No volatility scoring
+    // here — there is no keyless 24h stock-ticker endpoint to score with;
+    // the honest default is the fixed rotation (level-source.ts), same
+    // no-consecutive-repeat guarantee as the crypto rotations.
+    symbol = stocksRotation(date);
   } else {
     const volSymbol = await selectDailySymbol(WATCHLIST, date);
-    symbol = volSymbol ?? pickSeed(date).symbol;
+    // pool=crypto keeps the fallback crypto-only (a stock leaking into CRYPTO
+    // mode's default would break the mode promise); bare legacy calls keep
+    // the all-symbol pickSeed fallback byte-for-byte.
+    symbol = volSymbol ?? (pool === "crypto" ? cryptoRotation(date) : pickSeed(date).symbol);
   }
   const isStock = STOCKS.includes(symbol);
 

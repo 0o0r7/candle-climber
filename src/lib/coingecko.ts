@@ -221,6 +221,53 @@ export function sparklineToCandles(
   return out.length >= 5 ? out : null;
 }
 
+// P4-2 (council 2026-10-12): DETERMINISM FIX for the CoinGecko path.
+// `market_chart?days=7` returns hourly [ts, price] samples whose LAST day is
+// the in-progress UTC day — the terrain built from it moved within the day
+// and changed again after every server restart (the in-memory route cache
+// only holds within one process). The fix follows the repo's universal
+// closed-candle law: only CLOSED UTC days shape terrain. Past days of a
+// sparkline are immutable history, so the same (coinId, date) now serves a
+// byte-identical terrain no matter when or how often it is fetched.
+const DAY_MS = 86_400_000;
+
+export function utcDayStart(ms: number): number {
+  return Math.floor(ms / DAY_MS) * DAY_MS;
+}
+
+/** Group hourly [ts, price] samples into CLOSED-UTC-day candles, dropping the
+ *  in-progress day (`now` bounds it). Returns null when fewer than 5 closed
+ *  days remain — the caller falls back like any other feed failure. */
+export function pricesToClosedDayCandles(
+  prices: [number, number][],
+  now: number,
+): Candle[] | null {
+  const todayStart = utcDayStart(now);
+  const byDay = new Map<number, number[]>();
+  for (const p of prices) {
+    if (!Array.isArray(p) || !Number.isFinite(p[0]) || !Number.isFinite(p[1]) || p[1] <= 0) continue;
+    const ts = p[0];
+    if (ts >= todayStart) continue; // in-progress day — never shapes terrain
+    const day = utcDayStart(ts);
+    const arr = byDay.get(day);
+    if (arr) arr.push(p[1]);
+    else byDay.set(day, [p[1]]);
+  }
+  if (byDay.size === 0) return null;
+  const days = [...byDay.keys()].sort((a, b) => a - b);
+  const out: Candle[] = days.map((day) => {
+    const arr = byDay.get(day) as number[];
+    return {
+      t: day,
+      o: arr[0],
+      c: arr[arr.length - 1],
+      h: Math.max(...arr),
+      l: Math.min(...arr),
+    };
+  });
+  return out.length >= 5 ? out : null;
+}
+
 const INTERVAL_MS_DAILY = 86_400_000;
 
 /**
@@ -247,8 +294,10 @@ export async function fetchCoinGeckoCandles(coinId: string): Promise<Candle[] | 
     }
     const body = (await res.json()) as { prices?: [number, number][] };
     if (!body.prices || !Array.isArray(body.prices)) return null;
-    const sparkline = body.prices.map((p) => p[1]).filter((v) => Number.isFinite(v) && v > 0);
-    return sparklineToCandles(sparkline);
+    // P4-2: build terrain from CLOSED UTC days only (timestamps are real, so
+    // the grouping is exact — no index-slicing guesswork). Deterministic per
+    // (coinId, date) across restarts and within the day.
+    return pricesToClosedDayCandles(body.prices, Date.now());
   } catch (err) {
     console.error("[coingecko]", "market_chart failed:", (err as Error).message);
     return null;

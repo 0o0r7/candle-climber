@@ -11,13 +11,25 @@
 //    deterministic (token, date) terrain with bounded length.
 import { describe, test, expect } from "bun:test";
 import { scoreSymbols, type TickerStat } from "@/lib/market-selector";
-import { scoreCoins, sparklineToCandles, type CoinMarket } from "@/lib/coingecko";
+import {
+  scoreCoins,
+  sparklineToCandles,
+  pricesToClosedDayCandles,
+  utcDayStart,
+  type CoinMarket,
+} from "@/lib/coingecko";
 import {
   aggregateActivity,
   launchpadCandles,
   MIN_TRADE_COUNT,
   type TradeEvent,
 } from "@/lib/launchpad-indexer";
+import {
+  WATCHLIST,
+  STOCKS,
+  cryptoRotation,
+  stocksRotation,
+} from "@/game/cc/level-source";
 
 const DATE = "2026-10-12";
 
@@ -175,5 +187,113 @@ describe("launchpad-indexer — eligibility, aggregation, deterministic terrain"
       expect(c.l).toBeLessThanOrEqual(Math.min(c.o, c.c));
       expect(c.c).toBeGreaterThan(0);
     }
+  });
+});
+
+/* ----------------- 3-mode pools (council 2026-10-12, ruling B) ----------------- */
+
+describe("per-pool rotations — CRYPTO and STOCKS never leak into each other", () => {
+  test("each pool rotates only its own symbols, deterministically", () => {
+    for (let d = 0; d < 30; d++) {
+      const date = new Date(Date.parse(DATE + "T00:00:00Z") + d * 86_400_000)
+        .toISOString()
+        .slice(0, 10);
+      expect(WATCHLIST).toContain(cryptoRotation(date));
+      expect(STOCKS).toContain(stocksRotation(date));
+      // determinism: same date, same pick — server, client and offline fallback agree
+      expect(cryptoRotation(date)).toBe(cryptoRotation(date));
+      expect(stocksRotation(date)).toBe(stocksRotation(date));
+    }
+  });
+
+  test("no consecutive-day repeats inside a pool (the anti-replay guarantee)", () => {
+    for (let d = 0; d < 29; d++) {
+      const a = new Date(Date.parse(DATE + "T00:00:00Z") + d * 86_400_000).toISOString().slice(0, 10);
+      const b = new Date(Date.parse(DATE + "T00:00:00Z") + (d + 1) * 86_400_000).toISOString().slice(0, 10);
+      expect(stocksRotation(b)).not.toBe(stocksRotation(a));
+      expect(cryptoRotation(b)).not.toBe(cryptoRotation(a));
+    }
+  });
+
+  test("every pool member serves within one cycle (equity rails all reachable)", () => {
+    const seenStocks = new Set<string>();
+    for (let d = 0; d < STOCKS.length; d++) {
+      const date = new Date(Date.parse(DATE + "T00:00:00Z") + d * 86_400_000).toISOString().slice(0, 10);
+      seenStocks.add(stocksRotation(date));
+    }
+    expect(seenStocks.size).toBe(STOCKS.length);
+  });
+});
+
+/* ------------------- P4-2: CoinGecko closed-day determinism ------------------- */
+
+describe("pricesToClosedDayCandles — terrain can no longer move within its day", () => {
+  // Build 6 CLOSED days + a partial 7th (today): hourly samples ending mid-day.
+  const NOW = Date.parse("2026-10-12T15:04:05Z");
+  const todayStart = utcDayStart(NOW);
+  function samplePrices(): [number, number][] {
+    const out: [number, number][] = [];
+    for (let day = 6; day >= 1; day--) {
+      const start = todayStart - day * 86_400_000;
+      for (let h = 0; h < 24; h++) {
+        out.push([start + h * 3_600_000, 100 + (6 - day) * 10 + h * 0.5]);
+      }
+    }
+    // today's partial data — MUST be dropped
+    for (let h = 0; h <= 15; h++) {
+      out.push([todayStart + h * 3_600_000, 999 + h]);
+    }
+    return out;
+  }
+
+  test("drops the in-progress day; every surviving candle is a CLOSED UTC day", () => {
+    const out = pricesToClosedDayCandles(samplePrices(), NOW);
+    expect(out).not.toBeNull();
+    expect(out!.length).toBe(6);
+    for (const c of out!) {
+      expect(c.t).toBeLessThan(todayStart);
+      expect(c.t % 86_400_000).toBe(0);
+      // today's 999+ prices never leak in
+      expect(Math.max(c.h, c.o, c.c, c.l)).toBeLessThan(999);
+    }
+    // OHLC sanity
+    for (const c of out!) {
+      expect(c.h).toBeGreaterThanOrEqual(c.o);
+      expect(c.h).toBeGreaterThanOrEqual(c.c);
+      expect(c.l).toBeLessThanOrEqual(c.o);
+      expect(c.l).toBeLessThanOrEqual(c.c);
+    }
+  });
+
+  test("byte-identical across restarts: any `now` within the same day → same terrain", () => {
+    const morning = pricesToClosedDayCandles(samplePrices(), Date.parse("2026-10-12T00:00:01Z"));
+    const evening = pricesToClosedDayCandles(samplePrices(), Date.parse("2026-10-12T23:59:59Z"));
+    expect(JSON.stringify(morning)).toBe(JSON.stringify(evening));
+  });
+
+  test("fewer than 5 closed days → null (feed failure path, like every other rail)", () => {
+    const NOW2 = Date.parse("2026-10-12T12:00:00Z");
+    const start = utcDayStart(NOW2);
+    const thin: [number, number][] = [];
+    for (let day = 3; day >= 1; day--) {
+      for (let h = 0; h < 24; h++) thin.push([start - day * 86_400_000 + h * 3_600_000, 50 + h]);
+    }
+    expect(pricesToClosedDayCandles(thin, NOW2)).toBeNull();
+  });
+
+  test("garbage samples are skipped, not fatal", () => {
+    const NOW2 = Date.parse("2026-10-12T12:00:00Z");
+    const start = utcDayStart(NOW2);
+    const noisy: [number, number][] = [
+      [NaN, 100],
+      [start - 86_400_000, -5], // non-positive price
+      [start - 3_600_000, 5], // today — dropped anyway
+    ];
+    for (let day = 6; day >= 1; day--) {
+      for (let h = 0; h < 24; h++) noisy.push([start - day * 86_400_000 + h * 3_600_000, 100 + h]);
+    }
+    const out = pricesToClosedDayCandles(noisy, NOW2);
+    expect(out).not.toBeNull();
+    expect(out!.length).toBe(6);
   });
 });

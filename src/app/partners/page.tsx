@@ -15,6 +15,7 @@
 // - Testnet status stated plainly; no returns promised to anyone; the
 //   threshold is quoted as a derived value with its source.
 import { useState } from "react";
+import PartnerPool from "./PartnerPool";
 
 interface ApplyState {
   status: "idle" | "sending" | "ok" | "error";
@@ -129,6 +130,8 @@ export default function PartnersPage() {
           <li>Nothing here is an investment offer; we promise no returns to anyone. Testnet today — no real funds.</li>
         </ul>
       </section>
+
+      <PartnerPool />
 
       <section className="mt-10 rounded-xl border border-white/10 bg-white/[0.03] p-6">
         <h2 className="text-lg font-semibold text-white">Apply for a partner chart</h2>

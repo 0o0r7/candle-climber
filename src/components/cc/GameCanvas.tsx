@@ -5,7 +5,7 @@ import { Engine, VIEW_W, VIEW_H } from "@/game/cc/engine";
 import { buildPlatforms } from "@/game/cc/level";
 import { dailyMutation, type Mutation } from "@/game/cc/mutations";
 import { marketStats, fmtPct } from "@/game/cc/market";
-import { pickSeed, syntheticCandles, LIMIT, ALL_SYMBOLS, INTERVALS, isInterval, provenanceLabel, type GameInterval } from "@/game/cc/level-source";
+import { pickSeed, syntheticCandles, LIMIT, ALL_SYMBOLS, INTERVALS, isInterval, stocksRotation, provenanceLabel, type GameInterval } from "@/game/cc/level-source";
 import { utcDateStr } from "@/game/cc/rng";
 import MiniChart from "@/components/cc/MiniChart";
 import ArchiveBrowser from "@/components/cc/ArchiveBrowser";
@@ -37,7 +37,7 @@ import {
 } from "@/game/cc/duel";
 import type { CandleData, RunResult } from "@/game/cc/types";
 import Tutorial from "@/components/cc/Tutorial";
-import ModeSelector, { type GameMode, loadMode, saveMode } from "@/components/cc/ModeSelector";
+import ModeSelector, { type GameMode, loadMode, normalizeModeParam, saveMode } from "@/components/cc/ModeSelector";
 // P2 self-ghost — this device's OWN best run per terrain (local, cosmetic,
 // same replay path as the server ghost; the fallback when nobody uploaded)
 import {
@@ -158,7 +158,7 @@ export default function GameCanvas() {
   const requestedDateRef = useRef<string | null>(null);
   const launchRef = useRef(false);
   const [tf, setTf] = useState<GameInterval>("1w"); // timeframe selector
-  const [mode, setMode] = useState<GameMode>("market"); // two-mode: market | launchpad
+  const [mode, setMode] = useState<GameMode>("crypto"); // 3-mode: crypto | stocks | launchpad
   const [booted, setBooted] = useState(false); // init ran → loader may fetch
   // P3.12: selected character — ref feeds the RAF renderer without re-subscribing
   const [charId, setCharId] = useState<string>(DEFAULT_CHAR_ID);
@@ -340,14 +340,16 @@ export default function GameCanvas() {
     const savedGhost = localStorage.getItem(GHOST_KEY) !== "0";
     setGhostOn(savedGhost);
     ghostOnRef.current = savedGhost;
-    // Two-mode: ?mode=<market|launchpad> is the canonical deep link from the
-    // landing page's mode selector. ?source=launch stays for backward compat
-    // (legacy links). Persisted pref is the fallback for bare /play visits.
+    // 3-mode: ?mode=<crypto|stocks|launchpad> is the canonical deep link from
+    // the landing page's mode selector (legacy "market" maps to "crypto").
+    // ?source=launch stays for backward compat (legacy links). Persisted pref
+    // (cc_mode_v2, auto-migrated from v1) is the fallback for bare /play visits.
     const urlMode = params.get("mode");
     const urlSource = params.get("source");
-    if (urlMode === "market" || urlMode === "launchpad") {
-      setMode(urlMode);
-      saveMode(urlMode);
+    const normalizedMode = normalizeModeParam(urlMode);
+    if (normalizedMode) {
+      setMode(normalizedMode);
+      saveMode(normalizedMode);
     } else if (urlSource === "launch") {
       setMode("launchpad");
       saveMode("launchpad");
@@ -384,15 +386,27 @@ export default function GameCanvas() {
     setWorld2(false);
     const isArch = archive;
     const isLaunchpad = mode === "launchpad" && !isArch && !duelLockRef.current;
+    // STOCKS mode clamps the effective timeframe to "1w": the equity rails
+    // (Yahoo/Stooq weekly) have no intraday feed — the server already pins
+    // "1w" for stocks, so the client pins its board/ghost queries to the SAME
+    // interval instead of asking for a 4h board on a 1w terrain. The saved tf
+    // pref is untouched and applies again when the player returns to CRYPTO.
+    const isStocks = mode === "stocks" && !isArch && !duelLockRef.current;
+    const effTf: GameInterval = isStocks ? "1w" : tf;
     ghostRef.current = null; // terrain switch invalidates the previous ghost
     const query = new URLSearchParams();
     if (requestedSymRef.current) query.set("symbol", requestedSymRef.current);
     if (isArch && requestedDateRef.current) query.set("date", requestedDateRef.current); // server re-validates (past dates only)
     if (launchRef.current || isLaunchpad) query.set("source", "launch");
-    if (!isArch) query.set("interval", tf);
+    if (!isArch) query.set("interval", effTf);
+    // 3-mode: the pool param scopes the DEFAULT daily symbol to the mode's
+    // own rotation (crypto / stocks) — pinned deep-link symbols still win.
+    if (!isArch && mode === "stocks") query.set("pool", "stocks");
+    else if (!isArch && mode === "crypto") query.set("pool", "crypto");
     const qs = query.toString();
     // Launchpad Mode: fetch from the dedicated /api/launchpad endpoint (on-chain
-    // indexer); Market Mode: the standard /api/candles feed chain.
+    // indexer); CRYPTO/STOCKS modes: the standard /api/candles feed chain with
+    // the mode's pool.
     const fetchUrl = isLaunchpad ? "/api/launchpad" : `/api/candles${qs ? `?${qs}` : ""}`;
     fetch(fetchUrl)
       .then((r) => r.json())
@@ -405,13 +419,13 @@ export default function GameCanvas() {
         refreshSelfGhost(d); // P2: mirror this terrain's own best ghost (if any)
         setPhase("ready");
         if (!isArch) {
-          fetch(`/api/leaderboard?date=${d.seed.date}&interval=${tf}`)
+          fetch(`/api/leaderboard?date=${d.seed.date}&interval=${effTf}`)
             .then((r) => r.json())
             .then((b) => { if (alive) setTopBoard(b.entries ?? []); })
             .catch(() => {});
           // Option B: official lane loads only for wallet-linked devices
           if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) {
-            fetch(`/api/leaderboard?date=${d.seed.date}&interval=${tf}&board=official`)
+            fetch(`/api/leaderboard?date=${d.seed.date}&interval=${effTf}&board=official`)
               .then((r) => r.json())
               .then((b) => {
                 if (!alive) return;
@@ -431,7 +445,7 @@ export default function GameCanvas() {
             .then((b: { ok?: boolean; burned?: string }) => { if (alive && b.ok) setBurn(b.burned ?? null); })
             .catch(() => {});
           // P7.2: best submitted ghost for THIS terrain (champion first)
-          fetch(`/api/ghosts?symbol=${d.seed.symbol}&date=${d.seed.date}&interval=${tf}`)
+          fetch(`/api/ghosts?symbol=${d.seed.symbol}&date=${d.seed.date}&interval=${effTf}`)
             .then((r) => r.json())
             .then((g: { ghosts?: GhostEntry[] }) => {
               if (!alive || duelLockRef.current) return; // P7.3: a loaded duel owns the ghost slot
@@ -449,8 +463,8 @@ export default function GameCanvas() {
         // crashes). Archive deep links keep their date; terrain is synthetic
         // (tokenless → unscored) until the API returns.
         const date = isArch ? (requestedDateRef.current as string) : utcDateStr();
-        const symbol = requestedSymRef.current || pickSeed(date).symbol;
-        const iv: GameInterval = isArch ? "1w" : tf;
+        const symbol = requestedSymRef.current || (isStocks ? stocksRotation(date) : pickSeed(date).symbol);
+        const iv: GameInterval = isArch || isStocks ? "1w" : tf; // offline fallback mirrors the server's stocks "1w" pin
         const d: CandleData = {
           seed: { date, symbol, interval: iv, source: "synthetic" },
           candles: syntheticCandles(date, LIMIT, iv),
@@ -473,8 +487,9 @@ export default function GameCanvas() {
     });
   }, []);
 
-  // Two-mode: switch between Market Mode and Launchpad Mode — persists and
-  // triggers the loader effect to re-fetch from the appropriate data source.
+  // Two-mode became three (council 2026-10-12 B): CRYPTO/STOCKS/LAUNCHPAD —
+  // switching persists (cc_mode_v2) and triggers the loader effect to re-fetch
+  // from the mode's own pool.
   const changeMode = useCallback((m: GameMode) => {
     setMode(m);
     saveMode(m);
@@ -1018,6 +1033,11 @@ export default function GameCanvas() {
   const submitScore = async () => {
     // tokenless terrain (synthetic fallback) is unscored — never POST it
     if (!result || !data || submitting || !data.runToken) return;
+    // The interval the terrain was actually served with — stocks pin "1w"
+    // server-side, crypto echoes the requested tf, launchpad is "derived"
+    // (falls back to tf, the legacy behavior). Proof messages and board/ghost
+    // refreshes must name the PLAYED interval, never the raw selector state.
+    const subIv: GameInterval = isInterval(data.seed.interval) ? data.seed.interval : tf;
     setSubmitting(true);
     try {
       const finalName = (name.trim() || "ANON").slice(0, 14);
@@ -1041,7 +1061,7 @@ export default function GameCanvas() {
               candlesPassed: Math.floor(result.candlesPassed),
               bestStreak: Math.max(0, Math.min(999, Math.floor(result.bestStreak))),
               date: data.seed.date,
-              interval: tf,
+              interval: subIv,
               wallet: walletAddr.toLowerCase(),
             },
             proofTs,
@@ -1094,13 +1114,13 @@ export default function GameCanvas() {
             ? "no signature — run posted to the GUEST board"
             : null,
       );
-      const b = await fetch(`/api/leaderboard?date=${data.seed.date}&interval=${tf}`).then((r) => r.json());
+      const b = await fetch(`/api/leaderboard?date=${data.seed.date}&interval=${subIv}`).then((r) => r.json());
       setBoard(b.entries ?? []);
       setTopBoard(b.entries ?? []);
       // Option B: refresh the official lane too (the run landed there when a
       // wallet is linked — best run per wallet is kept server-side)
       if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) {
-        await fetch(`/api/leaderboard?date=${data.seed.date}&interval=${tf}&board=official`)
+        await fetch(`/api/leaderboard?date=${data.seed.date}&interval=${subIv}&board=official`)
           .then((r) => r.json())
           .then((ob) => {
             setOfficialBoard(ob.entries ?? []);
@@ -1122,7 +1142,7 @@ export default function GameCanvas() {
           }),
         })
           .then((r) => { if (r.ok) return r.json(); throw new Error("ghost rejected"); })
-          .then(() => fetch(`/api/ghosts?symbol=${data.seed.symbol}&date=${data.seed.date}&interval=${tf}`))
+          .then(() => fetch(`/api/ghosts?symbol=${data.seed.symbol}&date=${data.seed.date}&interval=${subIv}`))
           .then((r) => r.json())
           .then((g: { ghosts?: GhostEntry[] }) => {
             const best = bestGhost(g.ghosts ?? []);
@@ -1158,13 +1178,14 @@ export default function GameCanvas() {
       const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
       if (!eth) throw new Error("no wallet provider in this browser");
       const ts = Date.now();
+      const subIv: GameInterval = isInterval(data.seed.interval) ? data.seed.interval : tf;
       const msg = buildMintProofMessage(
         {
           score: Math.floor(result.score),
           candlesPassed: Math.floor(result.candlesPassed),
           bestStreak: Math.max(0, Math.min(999, Math.floor(result.bestStreak))),
           date: data.seed.date,
-          interval: tf,
+          interval: subIv,
           wallet: walletAddr.toLowerCase(),
         },
         ts,
@@ -1520,7 +1541,7 @@ export default function GameCanvas() {
               <p className="cc-tag">the chart is the level</p>
               <ModeSelector mode={mode} onChange={changeMode} />
               <div className="cc-daily">
-                <span className="cc-daily-label" title={archive ? "Real history — practice terrain" : "Levels reset at 00:00 UTC"}>{archive ? "ARCHIVE CHART · PRACTICE" : mode === "launchpad" ? "LAUNCHPAD · ON-CHAIN" : "TODAY'S CHART · UTC"}</span>
+                <span className="cc-daily-label" title={archive ? "Real history — practice terrain" : "Levels reset at 00:00 UTC"}>{archive ? "ARCHIVE CHART · PRACTICE" : mode === "launchpad" ? "LAUNCHPAD · ON-CHAIN" : mode === "stocks" ? "TODAY'S STOCK · UTC" : "TODAY'S CHART · UTC"}</span>
                 <span className="cc-daily-symbol">{data.seed.symbol}</span>
                 <span className="cc-daily-src">{data.seed.source === "binance" || data.seed.source === "stooq" || data.seed.source === "yahoo" || data.seed.source === "coingecko" ? "live data" : data.seed.source === "vibe-launch" ? "vibe launch" : data.seed.source === "robinhood" ? "official on-chain price" : "synthetic"}</span>
               </div>

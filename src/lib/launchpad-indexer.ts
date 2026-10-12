@@ -316,6 +316,47 @@ export async function getLaunchpadLevel(date: string = utcDateStr()): Promise<{
   return { launch, activity, candles, source, symbol };
 }
 
+/**
+ * Partner lane (council 2026-10-12): per-token terrain for a PARTNER chart.
+ *
+ * Unlike getLaunchpadLevel (launch-of-the-day), this pins ONE token — the
+ * registry entry's tokenAddress — and derives terrain from ITS real curve
+ * trades. There is NO api-derived fallback here: a partner token whose feed
+ * cannot prove MIN_TRADE_COUNT real trades in the window is simply not
+ * available (the feed-availability gate, fail-closed). null = not available.
+ */
+export async function getPartnerLevel(
+  tokenAddress: string,
+  symbol: string,
+  date: string = utcDateStr(),
+): Promise<{
+  activity: LaunchpadTokenActivity;
+  candles: Candle[];
+  source: "on-chain";
+} | null> {
+  if (!/^0x[a-fA-F0-9]{40}$/.test(tokenAddress)) return null;
+  const events = await fetchTradeEvents(tokenAddress);
+  if (!events || events.length === 0) return null;
+  const activity = aggregateActivity(events, symbol);
+  // aggregateActivity picks the most active token among the events; the
+  // topic-3 filter (P3-1 assumption) means they all belong to the partner
+  // token — but if the address somehow differs, refuse rather than serve
+  // another token's terrain under this partner's name.
+  if (!activity || !activity.eligible) return null;
+  if (activity.token.toLowerCase() !== tokenAddress.toLowerCase()) return null;
+  return { activity, candles: launchpadCandles(activity, date), source: "on-chain" };
+}
+
+/** Cheap feed-availability probe for the pool API: can this token prove the
+ *  minimum real trade activity right now? (Same gate getPartnerLevel applies.) */
+export async function partnerFeedReady(tokenAddress: string): Promise<boolean> {
+  if (!/^0x[a-fA-F0-9]{40}$/.test(tokenAddress)) return false;
+  const events = await fetchTradeEvents(tokenAddress);
+  if (!events || events.length < MIN_TRADE_COUNT) return false;
+  const activity = aggregateActivity(events);
+  return !!activity && activity.eligible && activity.token.toLowerCase() === tokenAddress.toLowerCase();
+}
+
 // --- minimal JSON-RPC helper (same pattern as robinhood-chain.ts) ---
 
 async function rpcCall(
