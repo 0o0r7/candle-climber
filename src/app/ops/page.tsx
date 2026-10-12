@@ -7,6 +7,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getBoard } from "@/lib/leaderboard-store";
 import { getWeights } from "@/lib/weights-store";
+import { getScoreReports } from "@/lib/score-report-store"; // LU-15 review queue
+import { detectAnomalies } from "@/lib/anomaly-detection"; // LU-7 live flags
 import { fetchBurnedWick } from "@/lib/burn";
 import { fetchMeter, ethHuman } from "@/lib/meter";
 import { graduationState, weightsFrozen, POST_GRAD_LANES } from "@/lib/graduation";
@@ -48,6 +50,25 @@ export default async function OpsPage() {
     getWeights().stats(now),
     graduationState(now),
   ]);
+
+  // LU-15/LU-7 moderation surfaces — fail-open: any failure renders "n/a",
+  // never a wrong number (ECONOMY-SPEC §8 applies to ops surfaces too).
+  let reports: Awaited<ReturnType<ReturnType<typeof getScoreReports>["recent"]>> = [];
+  let reportStore = NA;
+  let flaggedGuest = NA;
+  let flaggedOfficial = NA;
+  try {
+    const rs = getScoreReports();
+    reports = await rs.recent(10);
+    reportStore = rs.kind;
+  } catch { /* fail-open */ }
+  try {
+    const board = getBoard();
+    const g = await board.top(null, 100, "1w", "guest");
+    const o = await board.top(null, 100, "1w", "official");
+    flaggedGuest = String(detectAnomalies(g).size);
+    flaggedOfficial = String(detectAnomalies(o).size);
+  } catch { /* fail-open */ }
 
   return (
     <main style={{ maxWidth: 720, margin: "0 auto", padding: "32px 20px", fontFamily: "ui-monospace, monospace", color: "#ddd" }}>
@@ -92,6 +113,40 @@ export default async function OpsPage() {
         <Row k="linked wallets" v={String(wStats.linkedWallets)} />
         <Row k="total points" v={String(wStats.totalPoints)} />
         <Row k="connect-rate" v={NA} note="needs analytics (SimpleAnalytics) — E4.2 defines the KPI" />
+      </Block>
+
+      <Block title="MODERATION (LU-7 anomalies + LU-15 reports)">
+        <Row k="anomaly flags · guest" v={flaggedGuest} note="top-100 all-time, >2× median" />
+        <Row k="anomaly flags · official" v={flaggedOfficial} note="wallet-proven lane" />
+        <Row k="community reports" v={String(reports.length)} note={`store: ${reportStore} · latest below`} />
+        {reports.length > 0 && (
+          <tr>
+            <td colSpan={3} style={{ padding: "6px 0" }}>
+              <table style={{ borderCollapse: "collapse", fontSize: 12, width: "100%" }}>
+                <thead>
+                  <tr style={{ color: "#888", textAlign: "left" }}>
+                    <th style={{ padding: "2px 10px 2px 0" }}>when</th>
+                    <th style={{ padding: "2px 10px 2px 0" }}>name</th>
+                    <th style={{ padding: "2px 10px 2px 0" }}>score</th>
+                    <th style={{ padding: "2px 10px 2px 0" }}>lane</th>
+                    <th style={{ padding: "2px 0" }}>reason / reporter</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reports.map((r, i) => (
+                    <tr key={`${r.ts}-${i}`}>
+                      <td style={{ padding: "2px 10px 2px 0", whiteSpace: "nowrap", color: "#888" }}>{new Date(r.ts).toISOString().slice(0, 16).replace("T", " ")}</td>
+                      <td style={{ padding: "2px 10px 2px 0" }}>{r.name}</td>
+                      <td style={{ padding: "2px 10px 2px 0" }}>{r.score.toLocaleString()}</td>
+                      <td style={{ padding: "2px 10px 2px 0", color: "#888" }}>{r.board}{r.date ? ` · ${r.date}` : ""}</td>
+                      <td style={{ padding: "2px 0", color: "#bbb" }}>{r.reason || "(no reason)"}{r.reporter ? ` — via ${r.reporter}` : ""}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        )}
       </Block>
 
       <p style={{ color: "#777", fontSize: 12, marginTop: 32 }}>

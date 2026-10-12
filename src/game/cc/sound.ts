@@ -1,11 +1,19 @@
 // WebAudio synth — zero-asset sound design
 let ctx: AudioContext | null = null;
+let masterGain: GainNode | null = null;
+let masterVolume = 1; // 0..1, set by SettingsPanel
 
 function ac(): AudioContext | null {
   if (typeof window === "undefined") return null;
   if (!ctx) {
     const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (AC) ctx = new AC();
+    if (AC) {
+      ctx = new AC();
+      // Master gain node — every oscillator/noise passes through it
+      masterGain = ctx.createGain();
+      masterGain.gain.value = masterVolume;
+      masterGain.connect(ctx.destination);
+    }
   }
   // resume() rejects (NotAllowedError) when called outside a user-gesture
   // window — e.g. setTimeout-deferred sfx (milestone/victory). A bare `void`
@@ -22,6 +30,14 @@ export function setMuted(m: boolean) {
   if (!m) ctx?.resume().catch(() => {});
 }
 
+/** Set master volume (0..1). Called by SettingsPanel when the slider changes. */
+export function setVolume(level: number) {
+  masterVolume = Math.max(0, Math.min(1, level));
+  if (masterGain && ctx) {
+    masterGain.gain.setValueAtTime(masterVolume, ctx.currentTime);
+  }
+}
+
 function blip(freq0: number, freq1: number, dur: number, type: OscillatorType, vol = 0.12) {
   const a = ac();
   if (!a) return;
@@ -32,7 +48,10 @@ function blip(freq0: number, freq1: number, dur: number, type: OscillatorType, v
   o.frequency.exponentialRampToValueAtTime(Math.max(1, freq1), a.currentTime + dur);
   g.gain.setValueAtTime(vol, a.currentTime);
   g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + dur);
-  o.connect(g).connect(a.destination);
+  // Route through master gain (if available) for volume control,
+  // otherwise fall back to the destination directly.
+  const dest = masterGain ?? a.destination;
+  o.connect(g).connect(dest);
   o.start();
   o.stop(a.currentTime + dur + 0.02);
 }
@@ -48,7 +67,8 @@ function noise(dur: number, vol = 0.14) {
   src.buffer = buf;
   const g = a.createGain();
   g.gain.value = vol;
-  src.connect(g).connect(a.destination);
+  const dest = masterGain ?? a.destination;
+  src.connect(g).connect(dest);
   src.start();
 }
 

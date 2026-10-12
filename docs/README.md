@@ -18,6 +18,8 @@
 | The PARTNER lane: build status ledger (done / not-started, each with why + trigger) | [`PARTNER-LAUNCH-ROADMAP.md`](PARTNER-LAUNCH-ROADMAP.md) |
 | Overall phase checklist (P0–P7 + G items) and where the project stands | [`MASTER-CHECKLIST.md`](MASTER-CHECKLIST.md) |
 | Delivery audit 2026-10-13: scope, findings, fixes, deferred items | [`DELIVERY-READINESS-REPORT.md`](DELIVERY-READINESS-REPORT.md) |
+| Base44 research wave: product audit + level-up plan + leaderboard/anti-cheat deep-dive (Persian, EN abstracts) | [`RESEARCH-DEEP-DIVE-FA.md`](RESEARCH-DEEP-DIVE-FA.md) · [`LEVEL-UP-PACKAGE-FA.md`](LEVEL-UP-PACKAGE-FA.md) · [`DEEP-DIVE-LEADERBOARD-COMPETITION-FA.md`](DEEP-DIVE-LEADERBOARD-COMPETITION-FA.md) |
+| Security hardening audit of the LU wave (agent self-review) + integration fixes record | [`SECURITY-HARDENING-AUDIT.md`](SECURITY-HARDENING-AUDIT.md) |
 | How we compare against the ecosystem bar | [`ECOSYSTEM_BAR.md`](ECOSYSTEM_BAR.md) |
 | Game design + technical plan | [`GAME_DESIGN.md`](GAME_DESIGN.md) · [`CC-PLAN.md`](CC-PLAN.md) |
 | Zero-cost infrastructure map | [`INFRASTRUCTURE.md`](INFRASTRUCTURE.md) |
@@ -30,7 +32,10 @@ Working language of this repo is **English, technical, professional**. Three
 deliberate exceptions are dated records, not working docs:
 [`STATUS-FA.md`](../STATUS-FA.md) and [`GLOSSARY-FA.md`](GLOSSARY-FA.md)
 (owner-facing status + chat glossary) and the `docs/council/*-FA.md` Persian
-session transcripts (each carries a one-paragraph English abstract; the
+session transcripts and the three Base44 research companions
+(`RESEARCH-DEEP-DIVE-FA.md`, `LEVEL-UP-PACKAGE-FA.md`,
+`DEEP-DIVE-LEADERBOARD-COMPETITION-FA.md`) — each carries a one-paragraph
+English abstract; the
 English council verdicts are the authoritative record). Verbatim owner quotes
 inside English docs are preserved as evidence; where load-bearing, an English
 gloss accompanies them. `docs/WICK-LAUNCH-FORM-PACK.md` is the historical

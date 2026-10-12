@@ -23,6 +23,11 @@ export interface StatsLedger {
   bestStreak: number;
   bestCandles: number;
   updated: number;
+  /** daily-streak: consecutive UTC days with at least one finished run */
+  currentStreak: number;
+  bestDailyStreak: number;
+  /** last UTC date string (YYYY-MM-DD) a run was recorded */
+  lastPlayedDate: string | null;
 }
 
 export interface RunRecordInput {
@@ -44,6 +49,9 @@ export function emptyLedger(): StatsLedger {
     bestStreak: 0,
     bestCandles: 0,
     updated: 0,
+    currentStreak: 0,
+    bestDailyStreak: 0,
+    lastPlayedDate: null,
   };
 }
 
@@ -67,17 +75,47 @@ export function loadLedger(raw: string | null): StatsLedger {
       bestStreak: num(j.bestStreak, 1e4),
       bestCandles: num(j.bestCandles, 1e6),
       updated: num(j.updated, 8.64e15),
+      currentStreak: num(j.currentStreak, 1e4),
+      bestDailyStreak: num(j.bestDailyStreak, 1e4),
+      lastPlayedDate: typeof j.lastPlayedDate === "string" ? j.lastPlayedDate : null,
     };
   } catch {
     return emptyLedger();
   }
 }
 
-/** Fold one finished run into the ledger. Pure — returns the NEXT ledger. */
+/** Fold one finished run into the ledger. Pure — returns the NEXT ledger.
+ *  Also updates the daily streak: +1 if yesterday was the last play day,
+ *  1 if it's a new streak (gap > 1 day), unchanged if already played today. */
 export function recordRun(l: StatsLedger, r: RunRecordInput, now: number): StatsLedger {
   const score = Math.max(0, Math.floor(r.score) || 0);
   const candles = Math.max(0, Math.floor(r.candlesPassed) || 0);
   const streak = Math.max(0, Math.floor(r.bestStreak) || 0);
+
+  // ── daily streak logic ──
+  const todayStr = new Date(now).toISOString().slice(0, 10); // YYYY-MM-DD UTC
+  let currentStreak = l.currentStreak;
+  let bestDailyStreak = l.bestDailyStreak;
+  if (l.lastPlayedDate !== todayStr) {
+    // not yet played today — check if yesterday was the last play
+    if (l.lastPlayedDate) {
+      const last = new Date(l.lastPlayedDate + "T00:00:00Z").getTime();
+      const today = new Date(todayStr + "T00:00:00Z").getTime();
+      const dayMs = 86_400_000;
+      if (today - last === dayMs) {
+        // consecutive day
+        currentStreak = l.currentStreak + 1;
+      } else {
+        // gap — reset
+        currentStreak = 1;
+      }
+    } else {
+      // first ever play
+      currentStreak = 1;
+    }
+    bestDailyStreak = Math.max(bestDailyStreak, currentStreak);
+  }
+
   return {
     v: 1,
     runs: l.runs + 1,
@@ -88,6 +126,9 @@ export function recordRun(l: StatsLedger, r: RunRecordInput, now: number): Stats
     bestStreak: Math.max(l.bestStreak, streak),
     bestCandles: Math.max(l.bestCandles, candles),
     updated: now,
+    currentStreak,
+    bestDailyStreak,
+    lastPlayedDate: todayStr,
   };
 }
 

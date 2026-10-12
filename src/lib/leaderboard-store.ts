@@ -54,6 +54,8 @@ export interface BoardStore {
   readonly kind: "memory" | "mongo";
   add(entry: BoardEntry): Promise<number>; // returns rank (1-based) within the entry's own lane + interval
   top(date: string | null, n: number, interval?: string, board?: BoardFilter): Promise<BoardEntry[]>;
+  /** LU-17: entries around a given rank (±window/2), scoped to lane + interval + date. */
+  around(date: string | null, rank: number, window: number, interval?: string, board?: BoardFilter): Promise<BoardEntry[]>;
   /** E4.1: privacy-safe lane aggregates for the /ops page (counts only). */
   laneStats(now: number): Promise<LaneStats>;
   /** last connection error when a backing store is down (diagnostics) */
@@ -133,6 +135,24 @@ export class MemoryStore implements BoardStore {
       })
       .sort((a, b) => b.score - a.score)
       .slice(0, n);
+  }
+
+  async around(
+    date: string | null,
+    rank: number,
+    window: number,
+    interval: string = "1w",
+    board: BoardFilter = "guest",
+  ): Promise<BoardEntry[]> {
+    const all = this.rows
+      .filter((r) => {
+        if (board === "official" && r.board !== "official") return false;
+        if (board === "guest" && r.board === "official") return false;
+        return (!date || r.date === date) && IV(r) === interval;
+      })
+      .sort((a, b) => b.score - a.score);
+    const start = Math.max(0, rank - 1 - Math.floor(window / 2));
+    return all.slice(start, start + window);
   }
 
   async laneStats(now: number): Promise<LaneStats> {
@@ -277,6 +297,25 @@ class MongoStore implements BoardStore {
     const lane = board === "official" ? OFFICIAL_Q : board === "all" ? {} : GUEST_Q;
     const q = { ...lane, ...(date ? { date } : {}), ...ivq };
     return coll.find(q).sort({ score: -1 }).limit(n).toArray();
+  }
+
+  async around(
+    date: string | null,
+    rank: number,
+    window: number,
+    interval: string = "1w",
+    board: BoardFilter = "guest",
+  ): Promise<BoardEntry[]> {
+    const coll = await this.connect();
+    if (!coll) return [];
+    const ivq =
+      interval === "1w"
+        ? { $or: [{ interval: "1w" }, { interval: { $exists: false } }] }
+        : { interval };
+    const lane = board === "official" ? OFFICIAL_Q : board === "all" ? {} : GUEST_Q;
+    const q = { ...lane, ...(date ? { date } : {}), ...ivq };
+    const start = Math.max(0, rank - 1 - Math.floor(window / 2));
+    return coll.find(q).sort({ score: -1 }).skip(start).limit(window).toArray();
   }
 
   async laneStats(now: number): Promise<LaneStats> {

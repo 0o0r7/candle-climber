@@ -16,7 +16,7 @@
 // server runtime alike.
 import { recoverPublicKey } from "@noble/secp256k1";
 import { keccak_256 } from "@noble/hashes/sha3.js";
-import { buildProofMessage, buildMintProofMessage, type ProofFields } from "@/lib/proof-message";
+import { buildProofMessage, buildMintProofMessage, buildWalletLinkProofMessage, type ProofFields, type WalletLinkFields } from "@/lib/proof-message";
 import { isValidAddress } from "@/lib/wallet";
 
 /** Clock-skew + replay window for the client timestamp inside the message. */
@@ -122,6 +122,27 @@ export function verifyOfficialProof(
   now: number = Date.now(),
 ): ProofVerdict {
   return verifyPersonalSignProof(wallet, signature, buildProofMessage(fields, Number(clientTs)), clientTs, now);
+}
+
+/**
+ * Verify a wallet-link ownership proof (LU-2). Purpose-separated from the board
+ * proof: a different canonical message means neither signature can be replayed
+ * into the other's route. Used by practice/prediction/vault routes to ensure
+ * a claimed wallet is actually owned by the caller before linking it to a
+ * weights or vault action.
+ *   signature — 0x-prefixed 65-byte hex (r‖s‖v), v = 27/28
+ *   fields    — { wallet, purpose, date } (purpose is route-specific)
+ *   clientTs  — the "Run time" value inside the signed message (ms epoch)
+ *   now       — server clock, injectable for tests
+ */
+export function verifyWalletLinkProof(
+  wallet: string,
+  signature: unknown,
+  fields: WalletLinkFields,
+  clientTs: unknown,
+  now: number = Date.now(),
+): ProofVerdict {
+  return verifyPersonalSignProof(wallet, signature, buildWalletLinkProofMessage(fields, Number(clientTs)), clientTs, now);
 }
 
 /**

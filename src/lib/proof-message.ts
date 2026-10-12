@@ -43,6 +43,36 @@ export function buildProofMessage(f: ProofFields, clientTs: number): string {
   ].join("\n");
 }
 
+// ---- Wallet-link proof (practice / prediction / vault) ---------------------
+// LU-2: purpose-separated from the board proof — a different canonical message
+// means a board signature can never be replayed as a wallet-link proof and vice
+// versa. Binds the wallet to a purpose + date + timestamp so the same proof
+// cannot be replayed across routes or days.
+
+export interface WalletLinkFields {
+  wallet: string;
+  purpose: "practice" | "prediction" | "vault";
+  date: string; // UTC date the proof is for
+}
+
+/**
+ * The exact string the wallet signs via personal_sign to prove ownership when
+ * linking a wallet to a weights/vault action (NOT a board submission). Both
+ * sides must produce byte-identical output.
+ */
+export function buildWalletLinkProofMessage(f: WalletLinkFields, clientTs: number): string {
+  const wallet = String(f.wallet).toLowerCase();
+  return [
+    "Candle Climber — wallet link proof",
+    "Sign once to verify wallet ownership for this action.",
+    "",
+    `Purpose: ${f.purpose}`,
+    `Date: ${f.date}`,
+    `Run time: ${clientTs}`,
+    `Wallet: ${wallet}`,
+  ].join("\n");
+}
+
 // ---- Death Card mint proof (TESTNET) ---------------------------------------
 // Purpose-separated from the board proof: a different canonical message means a
 // board signature can never be replayed as a mint request and vice versa. The

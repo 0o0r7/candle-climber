@@ -331,6 +331,24 @@ function drawSlabV2(ctx: CanvasRenderingContext2D, e: Engine, p: Platform, d: Sl
   ctx.fill();
   ctx.stroke();
 
+  // Colorblind mode: shape coding beyond hue — down candles get a diagonal
+  // hatch overlay (up candles already carry the living-stone vein pattern),
+  // so green/red never carry the meaning alone.
+  if (colorblindMode && !p.up) {
+    ctx.save();
+    roundRect(ctx, cx, bTop, p.w, bodyH, 6);
+    ctx.clip();
+    ctx.strokeStyle = "rgba(240, 244, 248, 0.5)";
+    ctx.lineWidth = 2;
+    for (let hy = bTop - p.w; hy < bBot + 8; hy += 9) {
+      ctx.beginPath();
+      ctx.moveTo(cx - 2, hy);
+      ctx.lineTo(cx + p.w + 2, hy + p.w + 4);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   if (p.up) {
     // living stone: upward lime veins
     ctx.strokeStyle = COLORS.lime;
@@ -891,6 +909,7 @@ function drawCelebrationV2(
   st: V2State,
   seedStr: string,
   celebrateT: number,
+  reducedMotion = false,
 ) {
   if (!(celebrateT > 0)) return;
   // the summit is the LAST platform of the daily level (level.ts W4 arc)
@@ -911,8 +930,8 @@ function drawCelebrationV2(
   const bw = 96 + Math.sin(t * 1.4) * 6;
   ctx.fillRect(sx - bw / 2, sy - 230, bw, 230);
 
-  // embers — 9 motes rising on a loop, subtle
-  for (let k = 0; k < 9; k++) {
+  // embers — 9 motes rising on a loop, subtle (skipped in reduced motion)
+  if (!reducedMotion) for (let k = 0; k < 9; k++) {
     const ph = (t * 0.35 + k / 9) % 1;
     const ey = sy - 14 - ph * 150;
     const ex = sx + Math.sin(t * 1.1 + k * 2.4) * 16;
@@ -927,6 +946,8 @@ function drawCelebrationV2(
   ctx.globalAlpha = 1;
 
   // confetti volley — deterministic per seed, cached on the renderer state
+  // (skipped entirely in reduced motion — the beam alone marks the summit)
+  if (reducedMotion) return;
   if (st.gradKey !== seedStr) {
     st.gradKey = seedStr;
     st.gradShards = gradConfetti(seedStr);
@@ -1009,6 +1030,10 @@ function drawWrecks(ctx: CanvasRenderingContext2D, e: Engine, wrecks: Wreck[]) {
 
 /* --------------------------------- entry ----------------------------------- */
 
+// Accessibility render flags — module-level because the platform draw helpers
+// are called deep inside the compose path; renderV2 stamps them every frame.
+let colorblindMode = false;
+
 export function renderV2(
   ctx: CanvasRenderingContext2D,
   e: Engine,
@@ -1025,7 +1050,13 @@ export function renderV2(
   // panel opened (RAF-fed by GameCanvas — see drawCelebrationV2).
   peakIdx = -1,
   celebrateT = 0,
+  // Accessibility flags — wired from GameCanvas via the settings store
+  // (settingsRef at the call site). colorblind adds shape coding to candles;
+  // reducedMotion zeroes shake/tremor and skips the confetti volley.
+  colorblind = false,
+  reducedMotion = false,
 ) {
+  colorblindMode = colorblind;
   const st = getState(e, seedStr);
   const t = st.terrain;
 
@@ -1040,11 +1071,12 @@ export function renderV2(
   st.prevVy = e.vy;
 
   ctx.save();
-  const sx = e.shake > 0 ? (Math.random() - 0.5) * e.shake : 0;
-  const sy = e.shake > 0 ? (Math.random() - 0.5) * e.shake : 0;
+  // Reduced-motion: zero out shake and tremor entirely
+  const sx = (!reducedMotion && e.shake > 0) ? (Math.random() - 0.5) * e.shake : 0;
+  const sy = (!reducedMotion && e.shake > 0) ? (Math.random() - 0.5) * e.shake : 0;
   // H2 tremor: deterministic cosmetic camera noise — red-dense tails + high
   // wind make the screen breathe; never more than ~2.2px, engine untouched
-  const tremAmp = weather.tremor * 1.2 + weather.wind * 0.8;
+  const tremAmp = reducedMotion ? 0 : weather.tremor * 1.2 + weather.wind * 0.8;
   const tx = sx + (tremAmp > 0.05 ? Math.sin(e.time * 37) * tremAmp : 0);
   const ty = sy + (tremAmp > 0.05 ? Math.cos(e.time * 29) * tremAmp * 0.6 : 0);
   ctx.translate(tx, ty);
@@ -1094,7 +1126,8 @@ export function renderV2(
   if (ghost) drawGhost(ctx, e.camX, e.camY, ghost);
   if (rival) drawRival(ctx, e, rival);
   drawWrecks(ctx, e, wrecks);
-  drawCelebrationV2(ctx, e, st, seedStr, celebrateT);
+  // Reduced-motion: keep the light column beacon, skip embers + confetti
+  drawCelebrationV2(ctx, e, st, seedStr, celebrateT, reducedMotion);
   drawForegroundV2(ctx, e, st, weather);
   if (bio) {
     drawBiomeParticles(ctx, e, bio, seedStr);

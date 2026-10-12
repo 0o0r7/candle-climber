@@ -728,6 +728,21 @@ button.cc-wallet-chip { cursor: pointer; }
 .cc-board-rank.top { color: var(--cc-lime); }
 .cc-board-name { color: #DDE2E5; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cc-board-score { color: var(--cc-up); font-weight: 700; }
+.cc-report-btn {
+  background: none; border: none; cursor: pointer; padding: 0 2px;
+  font-size: 12px; opacity: 0.3; transition: opacity 0.15s;
+  line-height: 1; flex-shrink: 0;
+}
+.cc-report-btn:hover { opacity: 1; }
+/* LU level-up additions — mobile RUSH button, ready-screen action row, daily streak */
+.cc-rush-btn {
+  background: rgba(204, 255, 0, 0.12); border: 1px solid rgba(204, 255, 0, 0.45);
+  color: var(--cc-lime); font-weight: 800; letter-spacing: 0.08em;
+  border-radius: 999px; padding: 10px 22px; touch-action: none; user-select: none;
+}
+.cc-rush-btn:active { background: rgba(204, 255, 0, 0.25); }
+.cc-ready-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.cc-streak { color: #E0B04E; font-size: 12px; letter-spacing: 0.06em; margin: 4px 0 0; }
 /* Option B identity layer — honest lane labels (LAW 4): the official board is
    wallet-bound, the guest board says exactly what it is. */
 .cc-board-sub {
