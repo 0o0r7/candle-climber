@@ -297,3 +297,118 @@ describe("pricesToClosedDayCandles — terrain can no longer move within its day
     expect(out!.length).toBe(6);
   });
 });
+
+/* --------------- P3-1 RESOLVED: real curve event parsing ----------------
+ * The live-log test (2026-10-12) disproved the old topic-3 ABI assumption
+ * and captured REAL events from launch "Trust Me Bro" (curve
+ * 0x7ddb4a8b…, chain 46630). These fixtures are byte-for-byte the live
+ * logs — they pin the parser to the WIRE, not to a guessed ABI. */
+import { parseTradeEvent } from "@/lib/launchpad-indexer";
+
+const TOKEN = "0x2a4476685c4a01716c3a68acd9f94fdb45162733";
+
+describe("parseTradeEvent — verified against live captured logs", () => {
+  // Captured live 2026-10-12, block 133461814: a quoted-pair CurveBuy.
+  const LIVE_CURVE_BUY = {
+    topics: [
+      "0x55867fe9a84ea30ad247ef1bb703eba47fd9af476149002512a2814b1e3d8fb5",
+      "0x0000000000000000000000002784448c519d01d3ae257c0aac0b7cdad8acceb1",
+      "0x000000000000000000000000e60b8924984feaf245aa4d80839c5b2c771eeac2",
+    ],
+    data:
+      "0x" +
+      (235548239728706535784115795n).toString(16).padStart(64, "0") +
+      (232533222260179092126079113n).toString(16).padStart(64, "0") +
+      (3015017468527443658036682n).toString(16).padStart(64, "0") +
+      (2446230996686973695897n).toString(16).padStart(64, "0") +
+      (17612863176146210610n).toString(16).padStart(64, "0") +
+      (200n).toString(16).padStart(64, "0"),
+    blockNumber: "0x7f4a86",
+    transactionHash: "0xdead",
+  };
+
+  test("live CurveBuy decodes to (amount=grossTokens, cost=pairCost)", () => {
+    const ev = parseTradeEvent(LIVE_CURVE_BUY, TOKEN);
+    expect(ev).not.toBeNull();
+    expect(ev!.type).toBe("buy");
+    expect(ev!.amount).toBe(235548239728706535784115795n);
+    expect(ev!.cost).toBe(2446230996686973695897n);
+    expect(ev!.token).toBe(TOKEN);
+  });
+
+  test("unknown topic0 → null (never a fabricated trade)", () => {
+    const ev = parseTradeEvent({ ...LIVE_CURVE_BUY, topics: ["0x" + "ab".repeat(32), ...LIVE_CURVE_BUY.topics.slice(1)] }, TOKEN);
+    expect(ev).toBeNull();
+  });
+
+  test("truncated data → null (word() refuses a partial word)", () => {
+    const ev = parseTradeEvent({ ...LIVE_CURVE_BUY, data: "0x" + "11".repeat(40) }, TOKEN);
+    expect(ev).toBeNull();
+  });
+
+  test("quoted CurveSell shape decodes (amount, pairProceeds)", () => {
+    const sell = {
+      topics: [
+        "0x3899b2b9ba4dfe77b54ff5e6f921672b2a7563ade468f2a106b25a4b808d60de",
+        "0x0000000000000000000000002784448c519d01d3ae257c0aac0b7cdad8acceb1",
+        "0x0000000000000000000000002784448c519d01d3ae257c0aac0b7cdad8acceb1",
+      ],
+      data:
+        "0x" +
+        (1000n).toString(16).padStart(64, "0") +
+        (900n).toString(16).padStart(64, "0") +
+        (100n).toString(16).padStart(64, "0") +
+        (5n).toString(16).padStart(64, "0") +
+        (1n).toString(16).padStart(64, "0"),
+      blockNumber: "0x1",
+      transactionHash: "0xdead",
+    };
+    const ev = parseTradeEvent(sell, TOKEN);
+    expect(ev!.type).toBe("sell");
+    expect(ev!.amount).toBe(1000n);
+    expect(ev!.cost).toBe(5n);
+  });
+
+  test("ETH-pair Bought/Sold families decode (tokenAmount ↔ ethUsed/ethReceived)", () => {
+    const bought = {
+      topics: [
+        "0x8a5254432535d4192429d2cc163283a57784eac274295fcda17cc659c1ee414c",
+        "0x0000000000000000000000002784448c519d01d3ae257c0aac0b7cdad8acceb1",
+        "0x0000000000000000000000002784448c519d01d3ae257c0aac0b7cdad8acceb1",
+      ],
+      data:
+        "0x" +
+        (10n ** 18n).toString(16).padStart(64, "0") + // grossEthUsed
+        (0n).toString(16).padStart(64, "0") + // curveQuote
+        (500n).toString(16).padStart(64, "0") + // tokenAmount
+        (0n).toString(16).padStart(64, "0") +
+        (0n).toString(16).padStart(64, "0"),
+      blockNumber: "0x1",
+      transactionHash: "0xdead",
+    };
+    const ev = parseTradeEvent(bought, TOKEN);
+    expect(ev!.type).toBe("buy");
+    expect(ev!.amount).toBe(500n);
+    expect(ev!.cost).toBe(10n ** 18n);
+
+    const sold = {
+      topics: [
+        "0x917d0fe1b6c3328f12a0177d25bf1b7d9e963116addad0bfc06b0cdcb6427603",
+        "0x0000000000000000000000002784448c519d01d3ae257c0aac0b7cdad8acceb1",
+      ],
+      data:
+        "0x" +
+        (300n).toString(16).padStart(64, "0") + // tokenAmount
+        (0n).toString(16).padStart(64, "0") +
+        (4n).toString(16).padStart(64, "0") + // ethReceived
+        (0n).toString(16).padStart(64, "0") +
+        (0n).toString(16).padStart(64, "0"),
+      blockNumber: "0x1",
+      transactionHash: "0xdead",
+    };
+    const ev2 = parseTradeEvent(sold, TOKEN);
+    expect(ev2!.type).toBe("sell");
+    expect(ev2!.amount).toBe(300n);
+    expect(ev2!.cost).toBe(4n);
+  });
+});

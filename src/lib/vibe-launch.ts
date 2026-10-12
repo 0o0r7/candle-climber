@@ -20,7 +20,11 @@ const RAW_TTL_MS = 60 * 60 * 1000; // raw response cache: 1h, keyed by hour buck
 const MIN_CANDLES = 60;
 const MAX_CANDLES = 219;
 
-/** The exact fields this module uses — all verified present in the real payload. */
+/** The exact fields this module uses — all verified present in the real payload.
+ *  tokenAddress/curveAddress are OPTIONAL extras (verified present in the
+ *  v6 payload 2026-10-12): the on-chain indexer needs the curve contract to
+ *  read real trades for THIS launch; an older payload shape simply skips the
+ *  on-chain path and uses the api-derived fallback (honest degradation). */
 export interface VibeLaunch {
   launchId: string;
   symbol: string;
@@ -30,6 +34,8 @@ export interface VibeLaunch {
   volume24hPairUnits: string; // market.volume24hPairUnits (18-decimal units)
   buyCount24h: number; // market.buyCount24h
   sellCount24h: number; // market.sellCount24h
+  tokenAddress?: string; // token contract (0x…)
+  curveAddress?: string; // bonding-curve contract (0x…) — the trade-event source
 }
 
 /* ---- raw response cache: 1h, keyed by UTC hour bucket (spec §2a) ---- */
@@ -43,6 +49,7 @@ function extractItems(payload: unknown): VibeLaunch[] {
   const items = (payload as { data?: { items?: unknown[] } })?.data?.items;
   if (!Array.isArray(items)) return [];
   const out: VibeLaunch[] = [];
+  const ADDR = /^0x[a-fA-F0-9]{40}$/;
   for (const it of items) {
     const o = it as Record<string, unknown>;
     const market = o.market as Record<string, unknown> | undefined;
@@ -58,6 +65,8 @@ function extractItems(payload: unknown): VibeLaunch[] {
       typeof market.buyCount24h === "number" &&
       typeof market.sellCount24h === "number"
     ) {
+      const tokenAddress = typeof o.tokenAddress === "string" && ADDR.test(o.tokenAddress) ? o.tokenAddress : undefined;
+      const curveAddress = typeof o.curveAddress === "string" && ADDR.test(o.curveAddress) ? o.curveAddress : undefined;
       out.push({
         launchId: o.launchId,
         symbol: o.symbol,
@@ -67,6 +76,8 @@ function extractItems(payload: unknown): VibeLaunch[] {
         volume24hPairUnits: market.volume24hPairUnits,
         buyCount24h: market.buyCount24h,
         sellCount24h: market.sellCount24h,
+        ...(tokenAddress ? { tokenAddress } : {}),
+        ...(curveAddress ? { curveAddress } : {}),
       });
     }
   }

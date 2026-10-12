@@ -34,7 +34,11 @@ export async function GET() {
     entries.map(async (entry) => {
       const [v, feedReady] = await Promise.all([
         verifyPartner(entry),
-        partnerFeedReady(entry.tokenAddress),
+        // P3-1: the curve address IS the trade source — without it the feed
+        // gate stays closed (honest "not ready" rather than a guess).
+        entry.curveAddress
+          ? partnerFeedReady(entry.tokenAddress, entry.curveAddress)
+          : Promise.resolve(false),
       ]);
       return {
         id: entry.id,

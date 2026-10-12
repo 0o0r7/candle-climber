@@ -11,41 +11,50 @@
 // - Terrain candles are DERIVED from trade-flow metrics — never labeled "live".
 // - Failure degrades to the existing vibe-launch.ts API path.
 //
-// VibeVibe emits CurveBuy/CurveSell events from its bonding curve contracts.
-// The event signatures (verified from contract ABIs):
-//   CurveBuyindexed address buyer, uint256 amount, uint256 cost, address token)
-//   CurveSellindexed address seller, uint256 amount, uint256 refund, address token)
+// VibeVibe curve trade events — VERIFIED 2026-10-12 (P3-1 RESOLVED).
+// The ORIGINAL assumption (CurveBuy(address,uint256,uint256,address) with the
+// token as topic3) was WRONG: the live-log test found ZERO matching events,
+// and the platform's own frontend bundle (testnet.vibevibe.fun
+// /static-v2/V6TradingProvider-V437DJPA.js) defines the REAL events:
 //
-// We use keccak-256 topic hashing (via @noble/hashes, already in the project)
-// to match event topics in eth_getLogs results.
-import { keccak_256 } from "@noble/hashes/sha3.js";
+// QUOTED-pair curves (pairCurrencyAddress = an ERC-20, e.g. VIBEVIBE):
+//   CurveBuy(buyer✓, recipient✓, grossTokens, netTokens, tokenFee, pairCost,
+//            pairFee, rateBps)
+//   CurveSell(seller✓, recipient✓, grossTokens, netTokens, tokenFee,
+//             pairProceeds, pairFee)
+// ETH-pair curves (the abis bundle's Bought/Sold):
+//   Bought(buyer✓, recipient✓, grossEthUsed, curveQuote, tokenAmount,
+//          creatorFee, protocolFee)
+//   Sold(seller✓, tokenAmount, grossCurveQuote, ethReceived, creatorFee,
+//        protocolFee)
+//
+// In EVERY family the token appears in NO topic — one curve contract serves
+// exactly one token, so the trade's token is identified by the log's ADDRESS
+// (the curve), never by a topic. Double confirmation for the quoted family:
+// the keccak-256 hashes below match the frontend bundle's own constants
+// (Zn/Xn), and a live captured CurveBuy (launch "Trust Me Bro" 2026-10-12)
+// decoded field-per-field against this ABI.
+const CURVE_BUY_QUOTED_TOPIC = "0x55867fe9a84ea30ad247ef1bb703eba47fd9af476149002512a2814b1e3d8fb5"; // CurveBuy(address,address,uint256,uint256,uint256,uint256,uint256,uint256)
+const CURVE_SELL_QUOTED_TOPIC = "0x3899b2b9ba4dfe77b54ff5e6f921672b2a7563ade468f2a106b25a4b808d60de"; // CurveSell(address,address,uint256,uint256,uint256,uint256,uint256)
+const ETH_BOUGHT_TOPIC = "0x8a5254432535d4192429d2cc163283a57784eac274295fcda17cc659c1ee414c"; // Bought(address,address,uint256,uint256,uint256,uint256,uint256)
+const ETH_SOLD_TOPIC = "0x917d0fe1b6c3328f12a0177d25bf1b7d9e963116addad0bfc06b0cdcb6427603"; // Sold(address,uint256,uint256,uint256,uint256,uint256)
+
 import { hashString, mulberry32, utcDateStr } from "@/game/cc/rng";
 import type { Candle } from "@/game/cc/types";
 import { getLaunchOfDay, launchSymbol, vibeLaunchCandles, type VibeLaunch } from "@/lib/vibe-launch";
 
 // VibeVibe testnet chain config (same as vibe-launch.ts)
-const CHAIN_ID = 46630;
 const RPC_URL = process.env.ROBINHOOD_TESTNET_RPC || "https://rpc.testnet.chain.robinhood.com";
-
-// Event topic hashes (keccak-256 of the signature, first 32 bytes)
-// CurveBuy(address,uint256,uint256,address) → topic0
-// CurveSell(address,uint256,uint256,address) → topic0
-const CURVE_BUY_TOPIC = "0x" + bytesToHex(keccak_256(
-  new TextEncoder().encode("CurveBuy(address,uint256,uint256,address)"),
-));
-const CURVE_SELL_TOPIC = "0x" + bytesToHex(keccak_256(
-  new TextEncoder().encode("CurveSell(address,uint256,uint256,address)"),
-));
-
-function bytesToHex(b: Uint8Array): string {
-  return [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
-}
 
 // Minimum activity threshold for Launchpad Mode eligibility.
 // A token needs at least this many buy+sell events in the lookback window
-// to produce interesting, non-trivial terrain.
+// to produce interesting, non-trivial terrain. NOTE on units: the volume
+// floor is expressed in 18-decimal PAIR units — ETH for ETH-pair curves,
+// the quote token (e.g. VIBEVIBE) for quoted-pair curves. Both are 18-dec,
+// and the floor is deliberately trivial: the trade COUNT is the primary
+// activity gate; the volume floor only filters dust-only curves.
 export const MIN_TRADE_COUNT = 10;
-export const MIN_VOLUME_UNITS = 1_000_000_000_000_000n; // 0.001 ETH in 18-dec units
+export const MIN_VOLUME_UNITS = 1_000_000_000_000_000n; // 0.001 pair units (18-dec)
 
 export interface TradeEvent {
   type: "buy" | "sell";
@@ -80,17 +89,28 @@ const LOG_CACHE_TTL = 15 * 60 * 1000;
 let logCache: { key: string; at: number; events: TradeEvent[] } | null = null;
 
 /**
- * Fetch CurveBuy/CurveSell events from the VibeVibe bonding curve contracts
- * via eth_getLogs. Scans the most recent ~1000 blocks (testnet blocks are
-// fast, so this covers recent trading activity).
+ * Fetch REAL curve trade events for ONE curve contract via eth_getLogs.
  *
- * Returns all trade events found, or null on RPC failure.
+ * P3-1 lesson (2026-10-12): the token is NOT in any event topic — one curve
+ * serves one token — so the query filters by the curve's ADDRESS and the
+ * caller tells us which token these trades belong to. The default window is
+ * 25 000 blocks (~21h of testnet at ~3s blocks), within the RPC's 30 000-block
+ * eth_getLogs cap; an address-filtered query of this span was live-verified.
+ *
+ * Returns the parsed trades (empty array when the curve simply had no
+ * activity), or null ONLY on RPC failure (caller keeps its fallback path).
  */
 export async function fetchTradeEvents(
-  tokenAddress?: string,
-  blockRange = 1000,
+  curveAddress: string,
+  tokenAddress: string,
+  blockRange = 25_000,
 ): Promise<TradeEvent[] | null> {
-  const cacheKey = tokenAddress || "all";
+  if (!/^0x[a-fA-F0-9]{40}$/.test(curveAddress) || !/^0x[a-fA-F0-9]{40}$/.test(tokenAddress)) {
+    return null;
+  }
+  const curve = curveAddress.toLowerCase();
+  const token = tokenAddress.toLowerCase();
+  const cacheKey = `${curve}:${token}:${blockRange}`;
   if (logCache && logCache.key === cacheKey && Date.now() - logCache.at < LOG_CACHE_TTL) {
     return logCache.events;
   }
@@ -104,27 +124,17 @@ export async function fetchTradeEvents(
 
     const fromBlock = Math.max(0, latestBlock - blockRange);
 
-    // Query for both CurveBuy and CurveSell events
-    // If a token address is given, filter on the `token` indexed param (topic 3)
-    const topics: (string | string[] | null)[] = [
-      [CURVE_BUY_TOPIC, CURVE_SELL_TOPIC],
-    ];
-    if (tokenAddress) {
-      // The `token` field is the 4th indexed param (index 3) — pad to 32 bytes
-      const paddedToken = "0x000000000000000000000000" + tokenAddress.toLowerCase().replace(/^0x/, "");
-      topics.push(null, null, paddedToken);
-    }
-
     const logsRes = await rpcCall(RPC_URL, "eth_getLogs", [{
       fromBlock: "0x" + fromBlock.toString(16),
       toBlock: "0x" + latestBlock.toString(16),
-      topics,
+      address: curve, // the curve IS the token's identity on-chain
+      topics: [[CURVE_BUY_QUOTED_TOPIC, CURVE_SELL_QUOTED_TOPIC, ETH_BOUGHT_TOPIC, ETH_SOLD_TOPIC]],
     }]);
     if (!logsRes?.result || !Array.isArray(logsRes.result)) return null;
 
     const events: TradeEvent[] = [];
     for (const log of logsRes.result) {
-      const parsed = parseTradeEvent(log);
+      const parsed = parseTradeEvent(log, token);
       if (parsed) events.push(parsed);
     }
 
@@ -141,30 +151,51 @@ interface RawLog {
   data: string;
   blockNumber: string;
   transactionHash: string;
+  address?: string;
 }
 
-function parseTradeEvent(log: RawLog): TradeEvent | null {
-  if (!log.topics || log.topics.length < 1) return null;
-  const topic0 = log.topics[0];
-  const isBuy = topic0 === CURVE_BUY_TOPIC;
-  const isSell = topic0 === CURVE_SELL_TOPIC;
-  if (!isBuy && !isSell) return null;
+function word(hex: string, i: number): bigint | null {
+  const body = hex.replace(/^0x/, "");
+  const w = body.slice(i * 64, (i + 1) * 64);
+  if (w.length !== 64) return null;
+  return BigInt("0x" + w);
+}
 
-  // Non-indexed data: amount (uint256), cost (uint256) — packed as 2 words
-  // The `token` is indexed (topic[3])
+/** Parse one log into a TradeEvent using the VERIFIED ABI families.
+ *  `token` is the caller's attribution (the curve's token) — attached as-is.
+ *  Unknown topic0 / malformed data → null (never a fabricated trade). */
+export function parseTradeEvent(log: RawLog, token: string): TradeEvent | null {
+  if (!log.topics || log.topics.length < 2) return null;
+  const topic0 = log.topics[0];
   const data = log.data?.replace(/^0x/, "") ?? "";
-  if (data.length < 128) return null;
-  const amount = BigInt("0x" + data.slice(0, 64));
-  const cost = BigInt("0x" + data.slice(64, 128));
-  const token = log.topics.length >= 4
-    ? "0x" + log.topics[3].slice(26)  // last 20 bytes of the 32-byte word
-    : "";
+  const type =
+    topic0 === CURVE_BUY_QUOTED_TOPIC || topic0 === ETH_BOUGHT_TOPIC ? "buy"
+    : topic0 === CURVE_SELL_QUOTED_TOPIC || topic0 === ETH_SOLD_TOPIC ? "sell"
+    : null;
+  if (!type) return null;
+
+  let amount: bigint | null;
+  let cost: bigint | null;
+  if (topic0 === CURVE_BUY_QUOTED_TOPIC) {
+    // [grossTokens, netTokens, tokenFee, pairCost, pairFee, rateBps]
+    amount = word(data, 0); cost = word(data, 3);
+  } else if (topic0 === CURVE_SELL_QUOTED_TOPIC) {
+    // [grossTokens, netTokens, tokenFee, pairProceeds, pairFee]
+    amount = word(data, 0); cost = word(data, 3);
+  } else if (topic0 === ETH_BOUGHT_TOPIC) {
+    // [grossEthUsed, curveQuote, tokenAmount, creatorFee, protocolFee]
+    amount = word(data, 2); cost = word(data, 0);
+  } else {
+    // ETH_SOLD_TOPIC: [tokenAmount, grossCurveQuote, ethReceived, creatorFee, protocolFee]
+    amount = word(data, 0); cost = word(data, 2);
+  }
+  if (amount === null || cost === null) return null;
 
   return {
-    type: isBuy ? "buy" : "sell",
+    type,
     amount,
     cost,
-    token,
+    token: token.toLowerCase(),
     blockNumber: parseInt(log.blockNumber, 16),
     txHash: log.transactionHash ?? "",
   };
@@ -291,8 +322,12 @@ export async function getLaunchpadLevel(date: string = utcDateStr()): Promise<{
 
   const symbol = launchSymbol(launch.symbol);
 
-  // Attempt on-chain event reading
-  const events = await fetchTradeEvents();
+  // Attempt on-chain event reading — P3-1 fixed: filter by THIS launch's curve
+  // ADDRESS (the token is not in any topic); a payload without curveAddress
+  // (older shape) honestly skips the on-chain path.
+  const events = launch.curveAddress && launch.tokenAddress
+    ? await fetchTradeEvents(launch.curveAddress, launch.tokenAddress)
+    : null;
   let activity: LaunchpadTokenActivity | null = null;
   let candles: Candle[];
   let source: "on-chain" | "api-derived";
@@ -319,14 +354,17 @@ export async function getLaunchpadLevel(date: string = utcDateStr()): Promise<{
 /**
  * Partner lane (council 2026-10-12): per-token terrain for a PARTNER chart.
  *
- * Unlike getLaunchpadLevel (launch-of-the-day), this pins ONE token — the
- * registry entry's tokenAddress — and derives terrain from ITS real curve
- * trades. There is NO api-derived fallback here: a partner token whose feed
- * cannot prove MIN_TRADE_COUNT real trades in the window is simply not
- * available (the feed-availability gate, fail-closed). null = not available.
+ * Unlike getLaunchpadLevel (launch-of-the-day), this pins ONE partner token
+ * and derives terrain from ITS real curve trades. The partner's registry
+ * entry supplies tokenAddress AND curveAddress (P3-1: the curve is the
+ * on-chain identity — trades carry no token topic). There is NO api-derived
+ * fallback here: a partner token whose feed cannot prove MIN_TRADE_COUNT
+ * real trades in the window is simply not available (the feed-availability
+ * gate, fail-closed). null = not available.
  */
 export async function getPartnerLevel(
   tokenAddress: string,
+  curveAddress: string,
   symbol: string,
   date: string = utcDateStr(),
 ): Promise<{
@@ -334,24 +372,23 @@ export async function getPartnerLevel(
   candles: Candle[];
   source: "on-chain";
 } | null> {
-  if (!/^0x[a-fA-F0-9]{40}$/.test(tokenAddress)) return null;
-  const events = await fetchTradeEvents(tokenAddress);
+  if (!/^0x[a-fA-F0-9]{40}$/.test(tokenAddress) || !/^0x[a-fA-F0-9]{40}$/.test(curveAddress)) return null;
+  const events = await fetchTradeEvents(curveAddress, tokenAddress);
   if (!events || events.length === 0) return null;
   const activity = aggregateActivity(events, symbol);
-  // aggregateActivity picks the most active token among the events; the
-  // topic-3 filter (P3-1 assumption) means they all belong to the partner
-  // token — but if the address somehow differs, refuse rather than serve
-  // another token's terrain under this partner's name.
+  // All events came from ONE address-filtered curve query — attribution is
+  // by construction — but refuse rather than serve if anything disagrees.
   if (!activity || !activity.eligible) return null;
   if (activity.token.toLowerCase() !== tokenAddress.toLowerCase()) return null;
   return { activity, candles: launchpadCandles(activity, date), source: "on-chain" };
 }
 
-/** Cheap feed-availability probe for the pool API: can this token prove the
- *  minimum real trade activity right now? (Same gate getPartnerLevel applies.) */
-export async function partnerFeedReady(tokenAddress: string): Promise<boolean> {
-  if (!/^0x[a-fA-F0-9]{40}$/.test(tokenAddress)) return false;
-  const events = await fetchTradeEvents(tokenAddress);
+/** Cheap feed-availability probe for the pool API: can this partner token's
+ *  curve prove the minimum real trade activity right now? (Same gate
+ *  getPartnerLevel applies.) curveAddress comes from the registry entry. */
+export async function partnerFeedReady(tokenAddress: string, curveAddress: string): Promise<boolean> {
+  if (!/^0x[a-fA-F0-9]{40}$/.test(tokenAddress) || !/^0x[a-fA-F0-9]{40}$/.test(curveAddress)) return false;
+  const events = await fetchTradeEvents(curveAddress, tokenAddress);
   if (!events || events.length < MIN_TRADE_COUNT) return false;
   const activity = aggregateActivity(events);
   return !!activity && activity.eligible && activity.token.toLowerCase() === tokenAddress.toLowerCase();

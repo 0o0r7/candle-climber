@@ -38,6 +38,11 @@ export interface PartnerEntry {
   symbol: string;
   /** Partner token contract (0x…, 40 hex) — the feed target for terrain. */
   tokenAddress: string;
+  /** The bonding-curve contract for the token (0x…, 40 hex). P3-1 lesson:
+   *  curve trades carry NO token topic — the curve address IS the token's
+   *  on-chain identity, so the feed gate needs it explicitly. Optional in
+   *  the entry, but the feed-availability gate stays closed without it. */
+  curveAddress?: string;
   /** The wallet that must hold $WICK (0x…, 40 hex) — verification target. */
   walletAddress: string;
   /** ISO date the curator added the entry. */
@@ -69,6 +74,7 @@ export function validatePartnerEntry(raw: unknown): { entry?: PartnerEntry; erro
   const symbol = typeof r.symbol === "string" ? r.symbol.trim().toUpperCase() : "";
   const tokenAddress = normalizeAddress(r.tokenAddress);
   const walletAddress = normalizeAddress(r.walletAddress);
+  const curveAddress = normalizeAddress(r.curveAddress);
   const addedAt = typeof r.addedAt === "string" ? r.addedAt.trim() : "";
   const note = typeof r.note === "string" ? r.note.trim() : "";
 
@@ -86,6 +92,7 @@ export function validatePartnerEntry(raw: unknown): { entry?: PartnerEntry; erro
     tokenAddress,
     walletAddress,
     addedAt,
+    ...(curveAddress ? { curveAddress } : {}),
     ...(note ? { note } : {}),
   };
   return { entry };

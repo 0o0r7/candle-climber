@@ -62,14 +62,14 @@ export async function GET(req: Request) {
         { status: 503, headers: { "Cache-Control": "no-store" } },
       );
     }
-    const feedReady = await partnerFeedReady(partnerToken);
+    const feedReady = await partnerFeedReady(partnerToken, entry.curveAddress ?? "");
     if (!feedReady) {
       return NextResponse.json(
         { error: "partner feed not available", reason: "feed-gate", date },
         { status: 503, headers: { "Cache-Control": "no-store" } },
       );
     }
-    const level = await getPartnerLevel(partnerToken, entry.symbol, date);
+    const level = await getPartnerLevel(partnerToken, entry.curveAddress ?? "", entry.symbol, date);
     if (!level) {
       return NextResponse.json(
         { error: "partner feed not available", reason: "feed-gate", date },
