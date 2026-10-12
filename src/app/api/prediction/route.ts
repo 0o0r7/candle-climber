@@ -26,6 +26,8 @@ import { fetchDailyCandle } from "@/lib/ohlc";
 import { getPredictions, type PredictionRow } from "@/lib/prediction-store";
 import { recordPredictionPoints } from "@/lib/weights-store";
 import { weightsFrozen, WEIGHTS_FROZEN_RESPONSE } from "@/lib/graduation"; // E6.1
+// LU-2: wallet ownership proof — optional, fail-open (wallet ignored without proof)
+import { verifyWalletLinkProof } from "@/lib/wallet-proof";
 
 export const dynamic = "force-dynamic";
 
@@ -141,6 +143,8 @@ export async function POST(req: Request) {
       name?: unknown;
       call?: unknown;
       address?: unknown;
+      signature?: unknown; // LU-2: wallet ownership proof (optional)
+      ts?: unknown; // LU-2: client timestamp inside the signed message
     };
     const today = utcDate();
     const targetDate = nextUtcDate(today); // server-computed — never client-sent
@@ -150,7 +154,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "invalid call" }, { status: 400 });
     }
     const name = sanitizeName(body.name);
-    const wallet = normalizeWallet(body.address);
+    // LU-2: a wallet address is only linked to the prediction when the caller
+    // proves ownership via a personal_sign proof. Without proof, the call is
+    // stored under the name-only identity — play is never blocked (fail-open).
+    const claimedWallet = normalizeWallet(body.address);
+    let wallet: string | null = null;
+    if (claimedWallet) {
+      const proof = verifyWalletLinkProof(
+        claimedWallet,
+        body.signature,
+        { wallet: claimedWallet, purpose: "prediction", date: targetDate },
+        body.ts,
+        Date.now(),
+      );
+      if (proof.ok) wallet = claimedWallet;
+    }
     // E6.1 snapshot freeze: the call itself is not taken (409-free honest pause);
     // the player can lock the same call after the snapshot window closes.
     if (weightsFrozen()) {

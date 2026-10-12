@@ -10,7 +10,8 @@ import { useCallback, useEffect, useState } from "react";
 import { pickSeed } from "@/game/cc/level-source";
 import { utcDateStr } from "@/game/cc/rng";
 import { nextUtcDate } from "@/lib/prediction";
-import { WALLET_ADDRESS_KEY } from "@/lib/wallet";
+import { WALLET_ADDRESS_KEY, isValidAddress } from "@/lib/wallet";
+import { buildWalletLinkProofMessage } from "@/lib/proof-message";
 
 type Dir = "up" | "down";
 type Vol = "low" | "mid" | "high";
@@ -77,13 +78,39 @@ export default function PredictionPanel({ name }: { name: string }) {
     setBusy(true);
     setMsg(null);
     try {
+      // LU-2: sign a wallet-link proof so the prediction links to a verified
+      // wallet. Without proof, the call is stored under name-only identity
+      // (fail-open — the prediction is never blocked by wallet state).
+      const walletAddr = localStorage.getItem(WALLET_ADDRESS_KEY);
+      let signature: string | undefined;
+      let proofTs: number | undefined;
+      if (walletAddr && isValidAddress(walletAddr)) {
+        const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+        if (eth && tomorrow) {
+          proofTs = Date.now();
+          const msg = buildWalletLinkProofMessage(
+            { wallet: walletAddr.toLowerCase(), purpose: "prediction", date: tomorrow.date },
+            proofTs,
+          );
+          const msgHex = "0x" + [...new TextEncoder().encode(msg)].map((b) => b.toString(16).padStart(2, "0")).join("");
+          try {
+            const s = await Promise.race([
+              eth.request({ method: "personal_sign", params: [msgHex, walletAddr] }),
+              new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sign-timeout")), 30_000)),
+            ]);
+            if (typeof s === "string" && /^0x[0-9a-fA-F]{130}$/.test(s)) signature = s;
+          } catch { /* rejected — name-only identity */ }
+        }
+      }
       const res = await fetch("/api/prediction", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           name: identity,
           call: { dir, vol, tail },
-          address: localStorage.getItem(WALLET_ADDRESS_KEY) ?? undefined,
+          address: walletAddr ?? undefined,
+          signature,
+          ts: proofTs,
         }),
       });
       const r = (await res.json()) as PredResp;

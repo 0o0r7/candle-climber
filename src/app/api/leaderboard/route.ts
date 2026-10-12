@@ -39,6 +39,17 @@ import { normalizeWallet } from "@/lib/weights";
 import { shortAddress } from "@/lib/wallet";
 import { currentSeason } from "@/lib/seasons";
 import { weightsFrozen } from "@/lib/graduation"; // E6.1: snapshot freeze etiquette
+// LU-9: warn loudly when production runs without a database
+import { checkProductionDatabase } from "@/lib/production-check";
+// LU-8: per-submission unique nonce — prevents run-token replay
+import { claimNonce, releaseNonce, consumeNonce } from "@/lib/nonce-store";
+// LU-7: statistical anomaly detection — flag top-1% outliers for review
+import { wouldBeAnomaly } from "@/lib/anomaly-detection";
+// LU-1: Cloudflare Turnstile — optional bot prevention for guest lane
+import { verifyTurnstileToken, isTurnstileEnabled } from "@/lib/turnstile";
+
+// LU-9: fire once at module load (serverless warm start)
+checkProductionDatabase();
 
 const BOARDS: BoardFilter[] = ["guest", "official", "all"];
 
@@ -93,12 +104,43 @@ export async function GET(req: Request) {
   // Option B: lane selector — default keeps the classic (guest) board contract
   const board = boardParam(searchParams.get("board"));
   const store = getBoard();
+
+  // LU-17: rank-around-me — ?around=<rank>&window=<n> returns entries
+  // centered on the given rank (5 above, 5 below by default), scoped to the
+  // same lane + interval + date. Enables the "who's near me" social hook.
+  const aroundRaw = searchParams.get("around");
+  if (aroundRaw !== null) {
+    const rank = Math.max(1, Math.min(9999, parseInt(aroundRaw, 10) || 1));
+    const window = Math.max(3, Math.min(50, parseInt(searchParams.get("window") ?? "11", 10) || 11));
+    const entries = maskWallets(await store.around(date, rank, window, interval, board));
+    return NextResponse.json({
+      entries,
+      interval,
+      board,
+      around: rank,
+      window,
+      ...(board === "official" ? { season: currentSeason() } : {}),
+      store: store.kind,
+    });
+  }
+
   const entries = maskWallets(await store.top(date, 50, interval, board));
+
+  // LU-14: verified-first — when requesting the default (guest) board, also
+  // return the official top entries so the UI can show verified scores first.
+  // Guest scores appear below, clearly labeled as unofficial. This protects
+  // competitive integrity: the top of the board is always wallet-proven.
+  let official: BoardEntry[] | undefined;
+  if (board === "guest") {
+    official = maskWallets(await store.top(date, 10, interval, "official"));
+  }
+
   return NextResponse.json({
     entries,
+    official,
     interval,
     board,
-    ...(board === "official" ? { season: currentSeason() } : {}),
+    ...((board === "official" || (official && official.length > 0)) ? { season: currentSeason() } : {}),
     store: store.kind,
     ...(store.lastError ? { dbError: store.lastError } : {}),
   });
@@ -118,6 +160,8 @@ export async function POST(req: Request) {
       address?: unknown; // E2.2/Option B: wallet link (official lane + weights ledger)
       signature?: unknown; // LAW 1.2 hardening: personal_sign ownership proof
       ts?: unknown; // client ms timestamp inside the signed message
+      nonce?: unknown; // LU-8: per-submission unique nonce (replay prevention)
+      turnstileToken?: unknown; // LU-1: Cloudflare Turnstile token (guest lane)
     };
 
     // run token: mandatory, signature-verified (timingSafeEqual), shape-checked
@@ -127,6 +171,26 @@ export async function POST(req: Request) {
     }
     if (isTokenStale(tok.date)) {
       return NextResponse.json({ error: "run token expired" }, { status: 403 });
+    }
+
+    // LU-8: per-submission unique nonce — the run token is shared (by design,
+    // W1) so a token alone cannot identify a submitter. A client-supplied nonce
+    // (random string) is consumed on first use and rejected on replay. This
+    // closes the residual vector of replaying one token under unlimited names.
+    // Backward-compatible: if no nonce is sent, the request still processes
+    // (existing clients and tests are not broken), but the replay protection
+    // only applies when both client and server participate.
+    const nonce = typeof body.nonce === "string" ? body.nonce : null;
+    if (nonce && (nonce.length < 8 || nonce.length > 64)) {
+      return NextResponse.json({ error: "invalid nonce" }, { status: 400 });
+    }
+    // LU-8 (hardened): claim the nonce ATOMICALLY (set-if-absent). A plain
+    // isConsumed()-check followed by a later consume() leaves a window where
+    // two concurrent submissions with the same nonce both pass; claiming
+    // closes it. A claim that ends in a rejected request is released below,
+    // so failures never burn a legitimate nonce.
+    if (nonce && !claimNonce(nonce)) {
+      return NextResponse.json({ error: "nonce already used" }, { status: 409 });
     }
 
     // Option B lane decision: ONLY a wallet with a VALID ownership proof lands on
@@ -143,6 +207,7 @@ export async function POST(req: Request) {
       if (!draft.ok) {
         // shape/anti-cheat failures are lane-independent — identical verdict
         // whether the run claims official or guest
+        if (nonce) releaseNonce(nonce);
         return NextResponse.json({ error: draft.error }, { status: draft.status });
       }
       const proof = verifyOfficialProof(
@@ -169,19 +234,47 @@ export async function POST(req: Request) {
     // pure validation core (W5): shape checks + terrain-physical anti-cheat caps
     const verdict = validateSubmission(body, tok, Date.now(), wallet);
     if (!verdict.ok) {
+      if (nonce) releaseNonce(nonce);
       return NextResponse.json({ error: verdict.error }, { status: verdict.status });
+    }
+
+    // LU-1: Cloudflare Turnstile — when configured, guest-lane submissions
+    // (no valid wallet proof) must carry a valid Turnstile token. This blocks
+    // automated guest-board flooding without any CAPTCHA UX (Turnstile is
+    // invisible). When not configured, verification is skipped entirely.
+    // Official-lane submissions are already wallet-proven and skip this check.
+    if (!wallet && isTurnstileEnabled()) {
+      const turnstileToken = typeof body.turnstileToken === "string" ? body.turnstileToken : null;
+      const turnstileOk = await verifyTurnstileToken(turnstileToken, ip);
+      if (!turnstileOk) {
+        if (nonce) releaseNonce(nonce);
+        return NextResponse.json({ error: "bot check failed" }, { status: 403 });
+      }
     }
 
     // Audit fix: one client must not flood the guest board with endless
     // distinct names (the run token is shared per terrain by design).
     if (!wallet && guestNameCapExceeded(ip, verdict.entry.name)) {
+      if (nonce) releaseNonce(nonce);
       return NextResponse.json(
         { error: "too many distinct guest names from this client today" },
         { status: 429 },
       );
     }
 
+    // LU-8: the nonce was claimed atomically above; on success, refresh its
+    // TTL so the single-use window runs from the accepted submission.
+    if (nonce) consumeNonce(nonce);
+
     const store = getBoard();
+
+    // LU-7: statistical anomaly detection — if the new entry would be a top-1%
+    // outlier (>2× median) among existing entries in its lane, flag it. The
+    // entry is still accepted (false positives must never block legit runs);
+    // the flag is surfaced in the response and visible in /ops for review.
+    const existing = await store.top(verdict.entry.date, 100, verdict.entry.interval ?? "1w", verdict.entry.board ?? "guest");
+    const anomaly = wouldBeAnomaly(verdict.entry, existing);
+
     const rank = await store.add(verdict.entry);
     // E2.2: ledger fire-and-forget — a weights failure must never fail the score
     // submission or even be observable in this response (ECONOMY-LAWS LAW 1).
@@ -197,6 +290,7 @@ export async function POST(req: Request) {
       season: verdict.entry.season,
       store: store.kind,
       ...(frozen ? { weightsFrozen: true } : {}),
+      ...(anomaly ? { flagged: true } : {}),
       // honest degrade note — only when an official run was claimed but the
       // ownership proof did not verify (reason is safe to surface: the client
       // knows what it signed; nothing about OTHERS' submissions leaks)

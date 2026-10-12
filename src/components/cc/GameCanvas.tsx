@@ -14,7 +14,7 @@ import PredictionPanel from "@/components/cc/PredictionPanel";
 import { WALLET_ADDRESS_KEY, isValidAddress } from "@/lib/wallet";
 // LAW 1.2 hardening: official-lane ownership proof — the browser builds the
 // EXACT message the server verifies (isomorphic template, no crypto import)
-import { buildProofMessage, buildMintProofMessage } from "@/lib/proof-message";
+import { buildProofMessage, buildMintProofMessage, buildWalletLinkProofMessage } from "@/lib/proof-message";
 import { isArchiveDate } from "@/game/cc/archive";
 import { render } from "@/game/cc/render";
 import { renderV2 } from "@/game/cc/render-v2";
@@ -23,7 +23,13 @@ import { deriveBiome, type BiomeId } from "@/game/cc/biome";
 import { recordWreck, wrecksFor, loadWreckDB, saveWreckDB, type WreckDB, type Wreck } from "@/game/cc/wreckage";
 import { makeDeathCard, normalizeRivalTag } from "@/game/cc/deathcard";
 import { rosterList, isValidCharId, DEFAULT_CHAR_ID, CHAR_KEY, getChar } from "@/game/cc/characters";
-import { sfx, setMuted, unlockAudio } from "@/game/cc/sound";
+import { sfx, setMuted, setVolume, unlockAudio } from "@/game/cc/sound";
+import { vibrate, isCoarsePointer as detectCoarsePointer } from "@/game/cc/haptics";
+import SettingsPanel from "@/components/cc/SettingsPanel";
+import AchievementsPanel from "@/components/cc/AchievementsPanel";
+import { useSettings } from "@/lib/settings-context";
+import { ACHIEVEMENTS_KEY, ACHIEVEMENT_DEFS, checkAchievements, loadUnlocked, mergeUnlocked, saveUnlocked, defsFor } from "@/lib/achievements";
+import { toast } from "sonner";
 import { RivalBot, pickRivalCharId, rivalVerdict } from "@/game/cc/rival/bot";
 import { personalityForCharId } from "@/game/cc/rival/personality";
 // P7.2 ghost runs — position-stream recorder + replay (cosmetic, never scored)
@@ -76,11 +82,10 @@ interface ReportResp {
 const BEST_KEY = "cc_best_v1";
 const NAME_KEY = "cc_name_v1";
 const RIVAL_KEY = "cc_rival_v1"; // P3.1: remembered rivalry tag
-const MUTE_KEY = "cc_mute_v1";
+// (legacy per-key prefs cc_mute_v1 / cc_vsbot_v1 / cc_ghost_v1 are migrated
+// into cc_settings_v1 by settings-context — no direct reads remain here)
 const RUNS_KEY = "cc_runs_v1";
 const TF_KEY = "cc_tf_v1"; // P3.5: remembered timeframe ("1w" classic default)
-const VS_KEY = "cc_vsbot_v1"; // P7.1: remembered SOLO / VS BOT choice (default SOLO)
-const GHOST_KEY = "cc_ghost_v1"; // P7.2: remembered ghost replay toggle (default ON)
 const DUEL_TALLY_KEY = "cc_duel_v1"; // P7.3: local duel W-L-D tally (no server identity exists)
 const CC_CHAR_KEY = CHAR_KEY; // P3.12: remembered character id ("default" = procedural)
 const REF_KEY = "cc_ref_v1"; // E5.5: referral attribution — last ?ref= landing param on this device
@@ -135,6 +140,16 @@ export default function GameCanvas() {
   const [mintMsg, setMintMsg] = useState<string | null>(null);
   const [mintUrl, setMintUrl] = useState<string | null>(null);
   const [muted, setMutedState] = useState(false);
+  // Settings context — centralized settings (volume, colorblind, haptics, etc.)
+  const { settings, update: updateSettings } = useSettings();
+  // Live mirror of the settings store for run-scoped closures — the engine
+  // factory (buildEngine) and the RAF render loop are created once per run,
+  // so reading `settings` directly would freeze at mount. The ref always sees
+  // the latest value without recreating the engine mid-run.
+  const settingsRef = useRef(settings);
+  useEffect(() => { settingsRef.current = settings; }, [settings]);
+  // Achievement toast queue — newly unlocked ids this session
+  const [newAchievements, setNewAchievements] = useState<string[]>([]);
   // P2.4: yesterday's episode — honest aggregates over the day's submissions
   const [report, setReport] = useState<ReportResp | null>(null);
   const [reportCopied, setReportCopied] = useState(false);
@@ -209,6 +224,8 @@ export default function GameCanvas() {
 
   // P2 lifetime ledger — recorded EXACTLY ONCE per finished run
   const ledgerRef = useRef<StatsLedger>(emptyLedger());
+  const usedRushRef = useRef(false); // per-run RUSH usage — feeds DIAMOND HANDS honestly
+  const [currentStreak, setCurrentStreak] = useState(0); // streak chip renders from state (refs don't re-render)
   const runRecordedRef = useRef(false);
   const tfRef = useRef<GameInterval>("1w"); // self-ghost key needs the interval
 
@@ -303,9 +320,10 @@ export default function GameCanvas() {
     setBest(Number(localStorage.getItem(BEST_KEY) ?? 0));
     setName(localStorage.getItem(NAME_KEY) ?? "");
     setRival(localStorage.getItem(RIVAL_KEY) ?? ""); // P3.1
-    const savedMute = localStorage.getItem(MUTE_KEY) === "1";
-    setMutedState(savedMute);
-    if (savedMute) setMuted(true); // applies on next unlock
+    // Settings-driven audio: sync mute/volume from the centralized settings store
+    setMutedState(settings.muted);
+    if (settings.muted) setMuted(true);
+    setVolume(settings.volume);
     // optional deep links (whitelist-checked; the server still pins the terrain
     // and issues the run token): /?symbol=ETHUSDT opens that chart,
     // /?source=launch plays the vibe/vibe launch-of-the-day level,
@@ -316,6 +334,7 @@ export default function GameCanvas() {
     wreckDBRef.current = loadWreckDB(); // H3: this device's death map
     selfDBRef.current = loadSelfGhostDB(localStorage.getItem(SELF_GHOST_KEY)); // P2 self-ghost
     ledgerRef.current = loadLedger(localStorage.getItem(STATS_KEY)); // P2 stats ledger
+    setCurrentStreak(ledgerRef.current.currentStreak);
     const requested = (params.get("symbol") ?? "").toUpperCase();
     const requestedDate = params.get("date");
     const isArch = isArchiveDate(requestedDate, utcDateStr());
@@ -332,14 +351,9 @@ export default function GameCanvas() {
     const picked = isValidCharId(urlChar) ? (urlChar as string) : isValidCharId(savedChar) ? savedChar : DEFAULT_CHAR_ID;
     setCharId(picked);
     charIdRef.current = picked;
-    // P7.1: default SOLO — every existing flow is untouched unless opted in
-    const savedVs = localStorage.getItem(VS_KEY) === "1";
-    setVsBot(savedVs);
-    vsBotRef.current = savedVs;
-    // P7.2: ghost replay defaults ON (cosmetic); the opt-out persists
-    const savedGhost = localStorage.getItem(GHOST_KEY) !== "0";
-    setGhostOn(savedGhost);
-    ghostOnRef.current = savedGhost;
+    // P7.1/P7.2: SOLO-vs-bot and ghost toggles live in the settings store now
+    // (cc_settings_v1 — settings-context migrates the legacy cc_vsbot_v1 /
+    // cc_ghost_v1 keys). The mirror effect below keeps RAF refs + UI in sync.
     // 3-mode: ?mode=<crypto|stocks|launchpad> is the canonical deep link from
     // the landing page's mode selector (legacy "market" maps to "crypto").
     // ?source=launch stays for backward compat (legacy links). Persisted pref
@@ -421,7 +435,18 @@ export default function GameCanvas() {
         if (!isArch) {
           fetch(`/api/leaderboard?date=${d.seed.date}&interval=${effTf}`)
             .then((r) => r.json())
-            .then((b) => { if (alive) setTopBoard(b.entries ?? []); })
+            .then((b) => {
+              if (!alive) return;
+              setTopBoard(b.entries ?? []);
+              setBoard(b.entries ?? []);
+              // LU-14: the guest-board response now includes `official` (top 10
+              // verified entries) so the UI can show wallet-proven scores first —
+              // even for walletless players who never fetched the official lane.
+              if (b.official && b.official.length > 0) {
+                setOfficialBoard(b.official);
+                if (b.season) setOfficialSeason(b.season);
+              }
+            })
             .catch(() => {});
           // Option B: official lane loads only for wallet-linked devices
           if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) {
@@ -505,22 +530,22 @@ export default function GameCanvas() {
     sfx.land();
   }, []);
 
-  // P7.2: ghost replay toggle — persists (GHOST_KEY); default ON. Replay is
-  // render-only: no engine reads beyond the ghost's own recorded stream.
+  // P7.2: ghost replay toggle — single source of truth is the settings store
+  // (persistence handled there); the ref mirrors it for the RAF loop.
   const changeGhost = useCallback((on: boolean) => {
     setGhostOn(on);
-    ghostOnRef.current = on;
-    try { localStorage.setItem(GHOST_KEY, on ? "1" : "0"); } catch { /* private mode — cosmetic only */ }
-  }, []);
+    ghostOnRef.current = on; // immediate — the RAF loop reads the ref
+    updateSettings({ ghostOn: on });
+  }, [updateSettings]);
 
-  // P7.1: SOLO / VS BOT toggle — persists (VS_KEY); default SOLO keeps every
-  // existing QA/leaderboard/anti-cheat flow byte-identical.
+  // P7.1: SOLO / VS BOT toggle — single source of truth is the settings store
+  // (default SOLO keeps every existing QA/leaderboard/anti-cheat flow intact).
   const changeVsBot = useCallback((on: boolean) => {
     setVsBot(on);
     vsBotRef.current = on;
-    try { localStorage.setItem(VS_KEY, on ? "1" : "0"); } catch { /* private mode — cosmetic only */ }
+    updateSettings({ botOn: on });
     sfx.land();
-  }, []);
+  }, [updateSettings]);
 
   // ---- P2 pause ------------------------------------------------------------
   useEffect(() => {
@@ -617,6 +642,32 @@ export default function GameCanvas() {
       died,
     }, Date.now());
     try { localStorage.setItem(STATS_KEY, saveLedger(ledgerRef.current)); } catch { /* private mode */ }
+    setCurrentStreak(ledgerRef.current.currentStreak); // streak chip renders from state
+
+    // Achievement check — compare run stats against definitions
+    try {
+      const existing = loadUnlocked(localStorage.getItem(ACHIEVEMENTS_KEY));
+      const satisfied = checkAchievements({
+        score: r.score,
+        candlesPassed: r.candlesPassed,
+        bestStreak: r.bestStreak,
+        graduated: r.graduated === true,
+        died,
+        usedRush: usedRushRef.current, // per-run RUSH usage — DIAMOND HANDS is earned, not given
+        enteredWorld2: r.world2 === true,
+        currentStreak: ledgerRef.current.currentStreak,
+        duelWins: parseTally(localStorage.getItem(DUEL_TALLY_KEY) ?? "").w,
+      });
+      const { newlyUnlocked, all } = mergeUnlocked(existing, satisfied);
+      if (newlyUnlocked.length > 0) {
+        localStorage.setItem(ACHIEVEMENTS_KEY, saveUnlocked(all));
+        setNewAchievements((prev) => [...prev, ...newlyUnlocked]);
+        for (const id of newlyUnlocked) {
+          const def = ACHIEVEMENT_DEFS.find((d) => d.id === id);
+          if (def) toast(`🏆 ${def.name}`, { description: def.desc });
+        }
+      }
+    } catch { /* private mode */ }
   }, []);
 
   // P7.1: the rival's skin/personality is deterministic per level seed — the
@@ -650,13 +701,38 @@ export default function GameCanvas() {
     if (!data?.runToken || vaultBusy) return;
     setVaultBusy(true);
     try {
+      // LU-2: the vault requires wallet ownership proof — sign a purpose-
+      // separated message (different from the board proof) to verify ownership.
+      const walletAddr = localStorage.getItem(WALLET_ADDRESS_KEY);
+      let signature: string | undefined;
+      let proofTs: number | undefined;
+      if (walletAddr && isValidAddress(walletAddr)) {
+        const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+        if (eth) {
+          proofTs = Date.now();
+          const msg = buildWalletLinkProofMessage(
+            { wallet: walletAddr.toLowerCase(), purpose: "vault", date: data.seed.date },
+            proofTs,
+          );
+          const msgHex = "0x" + [...new TextEncoder().encode(msg)].map((b) => b.toString(16).padStart(2, "0")).join("");
+          try {
+            const s = await Promise.race([
+              eth.request({ method: "personal_sign", params: [msgHex, walletAddr] }),
+              new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sign-timeout")), 30_000)),
+            ]);
+            if (typeof s === "string" && /^0x[0-9a-fA-F]{130}$/.test(s)) signature = s;
+          } catch { /* rejected — vault stays locked */ }
+        }
+      }
       const res = await fetch("/api/vault", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           runToken: data.runToken,
           name,
-          address: localStorage.getItem(WALLET_ADDRESS_KEY) ?? undefined,
+          address: walletAddr ?? undefined,
+          signature,
+          ts: proofTs,
         }),
       });
       const r = (await res.json()) as { ok?: boolean; error?: string; grant?: { cosmetic?: string } };
@@ -673,12 +749,22 @@ export default function GameCanvas() {
   }, [data, name, vaultBusy]);
 
   const buildEngine = useCallback((d: CandleData, mut: Mutation) => {
+    usedRushRef.current = false; // per-run reset — RUSH usage is measured per run
     const plats = buildPlatforms(d.candles, d.seed.date + d.seed.symbol);
     return new Engine(
       plats,
       {
         onScore: (score, combo) => setHud({ score, combo, candles: engineRef.current?.candlesPassed ?? 0 }),
-        onSfx: (s) => sfx[s](),
+        onSfx: (s) => {
+          sfx[s]();
+          // Haptics — gated by settings, only on coarse-pointer (mobile) devices
+          if (settingsRef.current.haptics && detectCoarsePointer()) {
+            if (s === "jump") vibrate(10);
+            else if (s === "land") vibrate(15);
+            else if (s === "milestone") vibrate([10, 30, 10]);
+            else if (s === "victory") vibrate([20, 40, 20, 40, 60]);
+          }
+        },
         onGraduate: () => {
           // W4: summit reached — pause for the celebration panel; the run is
           // still live (score snapshot now, real RunResult only at death).
@@ -714,22 +800,47 @@ export default function GameCanvas() {
           // verifies the signed archive token; 2/day cap). Fire-and-forget,
           // display-only — never blocks or alters the run's end state (LAW 1).
           if (d.seed.date < utcDateStr() && d.runToken) {
-            void fetch("/api/practice", {
-              method: "POST",
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify({
-                runToken: d.runToken,
-                name: nameRef.current,
-                address: localStorage.getItem(WALLET_ADDRESS_KEY) ?? undefined,
-              }),
-            })
-              .then((res) => res.json())
-              .then((p: { ok?: boolean; banked?: number }) => {
-                if (p?.ok && typeof p.banked === "number") {
-                  setPracticeNote(`PRACTICE · +${p.banked} WEIGHT BANKED TODAY`);
+            // LU-2: sign a wallet-link proof so the weights ledger links to a
+            // verified wallet. Fire-and-forget — the proof failure degrades to
+            // name-only identity (never blocks play, LAW 1.2 fail-open).
+            void (async () => {
+              const walletAddr = localStorage.getItem(WALLET_ADDRESS_KEY);
+              let signature: string | undefined;
+              let proofTs: number | undefined;
+              if (walletAddr && isValidAddress(walletAddr)) {
+                const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+                if (eth) {
+                  proofTs = Date.now();
+                  const msg = buildWalletLinkProofMessage(
+                    { wallet: walletAddr.toLowerCase(), purpose: "practice", date: d.seed.date },
+                    proofTs,
+                  );
+                  const msgHex = "0x" + [...new TextEncoder().encode(msg)].map((b) => b.toString(16).padStart(2, "0")).join("");
+                  try {
+                    const s = await Promise.race([
+                      eth.request({ method: "personal_sign", params: [msgHex, walletAddr] }),
+                      new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sign-timeout")), 30_000)),
+                    ]);
+                    if (typeof s === "string" && /^0x[0-9a-fA-F]{130}$/.test(s)) signature = s;
+                  } catch { /* rejected — name-only identity */ }
                 }
-              })
-              .catch(() => {});
+              }
+              const res = await fetch("/api/practice", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({
+                  runToken: d.runToken,
+                  name: nameRef.current,
+                  address: walletAddr ?? undefined,
+                  signature,
+                  ts: proofTs,
+                }),
+              });
+              const p = (await res.json()) as { ok?: boolean; banked?: number };
+              if (p?.ok && typeof p.banked === "number") {
+                setPracticeNote(`PRACTICE · +${p.banked} WEIGHT BANKED TODAY`);
+              }
+            })().catch(() => {});
           }
           // H3 WRECKAGE: freeze this death into the device's local map —
           // the exact fall point, visible to future climbers of this level
@@ -960,7 +1071,7 @@ export default function GameCanvas() {
       // unclipped, un-zoomed compose (owner: zoom/crop made the frame lag and
       // feel unnatural). Renderers draw under the resize-time fit transform and
       // save/restore internally. (Biome layers ride the v2 renderer — render-only.)
-      if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv, biomeId, peakIdxRef.current, celebrateRef.current);
+      if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv, biomeId, peakIdxRef.current, celebrateRef.current, settingsRef.current.colorblind, settingsRef.current.reducedMotion);
       else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv);
       rafRef.current = requestAnimationFrame(step);
     };
@@ -992,6 +1103,7 @@ export default function GameCanvas() {
       if (pausedRef.current && phase === "running") return;
       // P3.6 RUSH (desktop): hold Shift = faster climb + 25% gains (opt-in risk)
       if (ev.key === "Shift") {
+        usedRushRef.current = true; // honest DIAMOND HANDS tracking
         engineRef.current?.pressRush();
         return;
       }
@@ -1100,6 +1212,8 @@ export default function GameCanvas() {
           ts: proofTs,
           ref: localStorage.getItem(REF_KEY) ?? undefined, // E5.5: opaque referral stamp
           runToken: data.runToken,
+          // LU-8: per-submission unique nonce — prevents run-token replay
+          nonce: crypto.randomUUID().replace(/-/g, "") + Date.now().toString(36),
         }),
       });
       const j = await res.json();
@@ -1114,9 +1228,19 @@ export default function GameCanvas() {
             ? "no signature — run posted to the GUEST board"
             : null,
       );
+      // LU-7: if the server flagged this submission as a statistical anomaly,
+      // surface a non-blocking toast (the score was still accepted)
+      if (j.flagged) {
+        toast.info("High score flagged for review — our team verifies top scores.");
+      }
       const b = await fetch(`/api/leaderboard?date=${data.seed.date}&interval=${subIv}`).then((r) => r.json());
       setBoard(b.entries ?? []);
       setTopBoard(b.entries ?? []);
+      // LU-14: refresh official entries from the combined response too
+      if (b.official && b.official.length > 0) {
+        setOfficialBoard(b.official);
+        if (b.season) setOfficialSeason(b.season);
+      }
       // Option B: refresh the official lane too (the run landed there when a
       // wallet is linked — best run per wallet is kept server-side)
       if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) {
@@ -1336,10 +1460,30 @@ export default function GameCanvas() {
   const toggleMute = () => {
     const m = !muted;
     setMutedState(m);
-    localStorage.setItem(MUTE_KEY, m ? "1" : "0");
+    // Sync to centralized settings store
+    updateSettings({ muted: m });
     unlockAudio(); // create context first so suspend/resume has a target
     setMuted(m);
+    if (!m) setVolume(settings.volume);
   };
+
+  // Sync audio state when settings change externally (e.g. from SettingsPanel)
+  useEffect(() => {
+    if (settings.muted !== muted) {
+      setMutedState(settings.muted);
+      setMuted(settings.muted);
+    }
+    setVolume(settings.volume);
+  }, [settings.muted, settings.volume]);
+
+  // Mirror the ghost / rival-bot toggles from the settings store into the
+  // RAF refs + UI state — SettingsPanel writes the store, the loop reads refs.
+  useEffect(() => {
+    setGhostOn(settings.ghostOn);
+    ghostOnRef.current = settings.ghostOn;
+    setVsBot(settings.botOn);
+    vsBotRef.current = settings.botOn;
+  }, [settings.ghostOn, settings.botOn]);
 
   // H4: the report is designed to travel — copy the episode verbatim
   // E5.5: the copied text lands on a ?ref= link so episode-driven visits count
@@ -1351,6 +1495,31 @@ export default function GameCanvas() {
       setTimeout(() => setReportCopied(false), 1600);
     }).catch(() => {});
   };
+
+  // LU-15: community score moderation — report a suspicious leaderboard entry.
+  // Fire-and-forget with a toast confirmation; the report feeds the /ops queue.
+  const reportScore = useCallback(async (e: BoardEntry) => {
+    const reason = window.prompt(`Report ${e.name}'s score (${e.score.toLocaleString()})?\nReason (optional):`);
+    if (reason === null) return; // user clicked Cancel
+    try {
+      const res = await fetch("/api/score-report", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          name: e.name,
+          score: e.score,
+          date: e.date,
+          board: e.board ?? "guest",
+          reason: reason.trim(),
+          reporter: name.trim() || undefined,
+        }),
+      });
+      if (res.ok) toast.success("Score reported for review — thank you.");
+      else toast.error("Report failed — try again later.");
+    } catch {
+      toast.error("Report failed — try again later.");
+    }
+  }, [name]);
 
   const seedLabel = data ? `${data.seed.symbol} · ${data.seed.date}` : "";
   // Merge-back wave 1: provenance badge state — flips whenever the seed the
@@ -1486,6 +1655,18 @@ export default function GameCanvas() {
               PAUSE
             </button>
           )}
+          {/* R8: RUSH button for mobile — hold to boost (desktop uses Shift) */}
+          {phase === "running" && coarsePointer && (
+            <button
+              className="cc-chip cc-rush-btn"
+              onPointerDown={(e) => { e.preventDefault(); usedRushRef.current = true; engineRef.current?.pressRush(); }}
+              onPointerUp={(e) => { e.preventDefault(); engineRef.current?.releaseRush(); }}
+              onPointerLeave={() => engineRef.current?.releaseRush()}
+              aria-label="RUSH — hold to climb faster"
+            >
+              RUSH
+            </button>
+          )}
           <div className="cc-chip cc-chip-score">{hud.score.toLocaleString()}</div>
           {hud.combo > 1 && <div className="cc-chip cc-chip-combo">x{(1 + Math.min(hud.combo, 12) * 0.5).toFixed(1)}</div>}
         </div>
@@ -1554,8 +1735,14 @@ export default function GameCanvas() {
                 </div>
               )}
               <button className="cc-btn cc-btn-start cc-cta" onClick={startRun}>START CLIMB</button>
-              <button className="cc-btn cc-btn-ghost cc-tut-reopen" onClick={() => setShowTutorial(true)}>HOW TO PLAY</button>
+              <div className="cc-ready-actions">
+                <button className="cc-btn cc-btn-ghost cc-tut-reopen" onClick={() => setShowTutorial(true)}>HOW TO PLAY</button>
+                <AchievementsPanel triggerVariant="ghost" triggerSize="sm" triggerClassName="cc-btn cc-btn-ghost" newCount={newAchievements.length} />
+              </div>
               {best > 0 && <p className="cc-best">PERSONAL BEST <b>{best.toLocaleString()}</b></p>}
+              {currentStreak > 0 && (
+                <p className="cc-streak">🔥 {currentStreak} DAY STREAK</p>
+              )}
               {/* Audit RB-1/M-1: the objective, controls, scoring and failure
                   condition live ABOVE the fold — no expansion required. */}
               <div className="cc-howto cc-howto-core">
@@ -1910,9 +2097,9 @@ export default function GameCanvas() {
               {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
               {officialBoard.length > 0 && (
                 <div className="cc-board cc-board-official">
-                  <div className="cc-board-title">OFFICIAL · {data?.seed.symbol}</div>
+                  <div className="cc-board-title">🏆 OFFICIAL · {data?.seed.symbol}</div>
                   <div className="cc-board-sub">
-                    wallet-bound · best run per wallet{officialSeason ? ` · season ${officialSeason}` : ""}
+                    wallet-verified · best run per wallet{officialSeason ? ` · season ${officialSeason}` : ""}
                   </div>
                   {officialBoard.slice(0, 10).map((e, i) => (
                     <div key={`off-${e.ts ?? i}-${e.wallet ?? e.name}`} className="cc-board-row">
@@ -1922,19 +2109,21 @@ export default function GameCanvas() {
                         {e.wallet ? <i className="cc-board-wallet">{e.wallet}</i> : null}
                       </span>
                       <span className="cc-board-score">{e.score.toLocaleString()}</span>
+                      <button className="cc-report-btn" onClick={() => reportScore(e)} title="Report suspicious score" aria-label={`Report ${e.name}'s score`}>🚩</button>
                     </div>
                   ))}
                 </div>
               )}
               {board.length > 0 && (
                 <div className="cc-board">
-                  <div className="cc-board-title">GUEST · {data?.seed.symbol}</div>
-                  <div className="cc-board-sub">typed names · unofficial · play stays free & walletless</div>
+                  <div className="cc-board-title">{officialBoard.length > 0 ? "CASUAL" : "GUEST"} · {data?.seed.symbol}</div>
+                  <div className="cc-board-sub">typed names · unofficial · play stays free &amp; walletless</div>
                   {board.slice(0, 10).map((e, i) => (
                     <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
                       <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
                       <span className="cc-board-name">{e.name}</span>
                       <span className="cc-board-score">{e.score.toLocaleString()}</span>
+                      <button className="cc-report-btn" onClick={() => reportScore(e)} title="Report suspicious score" aria-label={`Report ${e.name}'s score`}>🚩</button>
                     </div>
                   ))}
                 </div>
@@ -1978,6 +2167,11 @@ export default function GameCanvas() {
       >
         {muted ? "MUTED" : "SOUND ON"}
       </button>
+
+      <div className="cc-chip cc-settings-trigger">
+        <SettingsPanel triggerVariant="ghost" triggerSize="sm" />
+        <AchievementsPanel triggerVariant="ghost" triggerSize="sm" newCount={newAchievements.length} />
+      </div>
     </div>
   );
 }

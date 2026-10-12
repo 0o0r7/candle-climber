@@ -1,4 +1,5 @@
 import GameCanvas from "@/components/cc/GameCanvas";
+import { SettingsProvider } from "@/lib/settings-context";
 
 export const metadata = {
   title: "CANDLE CLIMBER — Play",
@@ -6,5 +7,9 @@ export const metadata = {
 };
 
 export default function PlayPage() {
-  return <GameCanvas />;
+  return (
+    <SettingsProvider>
+      <GameCanvas />
+    </SettingsProvider>
+  );
 }

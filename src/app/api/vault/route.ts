@@ -9,12 +9,14 @@
 // Fail language stays honest: holders open it, everyone else sees the rule.
 import { NextResponse } from "next/server";
 import { verifyRunToken } from "@/lib/run-token";
-import { rateLimited, clientIp } from "@/lib/http-limiter"; // delivery hardening 2026-10-13
 import { utcDate, normalizeWallet, VAULT_POINTS } from "@/lib/weights";
 import { sanitizeName } from "@/lib/board-validation";
 import { recordVaultGrant } from "@/lib/weights-store";
 import { readWickTier } from "@/lib/wick-balance";
 import { weightsFrozen, WEIGHTS_FROZEN_RESPONSE } from "@/lib/graduation"; // E6.1
+import { rateLimited, clientIp } from "@/lib/http-limiter"; // delivery hardening 2026-10-13
+// LU-2: wallet ownership proof — the vault requires a wallet, so proof is mandatory
+import { verifyWalletLinkProof } from "@/lib/wallet-proof";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +34,8 @@ export async function POST(req: Request) {
       runToken?: unknown;
       name?: unknown;
       address?: unknown;
+      signature?: unknown; // LU-2: wallet ownership proof
+      ts?: unknown; // LU-2: client timestamp inside the signed message
     };
     const tok = verifyRunToken(body.runToken);
     if (!tok) {
@@ -49,6 +53,23 @@ export async function POST(req: Request) {
     const wallet = normalizeWallet(body.address);
     if (!wallet) {
       return NextResponse.json({ error: "connect a wallet to open the vault" }, { status: 400 });
+    }
+    // LU-2: the vault requires wallet ownership proof — a claimed address alone
+    // is not enough (someone could pass any wallet with $WICK balance). The
+    // proof is purpose-separated from the board proof (different canonical
+    // message), so neither signature can be replayed into the other's route.
+    const proofOk = verifyWalletLinkProof(
+      wallet,
+      body.signature,
+      { wallet, purpose: "vault", date: tok.date },
+      body.ts,
+      Date.now(),
+    );
+    if (!proofOk.ok) {
+      return NextResponse.json(
+        { error: "wallet ownership proof required — sign to open the vault" },
+        { status: 403 },
+      );
     }
     const name = sanitizeName(body.name);
 

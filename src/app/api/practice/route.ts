@@ -7,11 +7,13 @@
 // proof a real historical level was played.
 import { NextResponse } from "next/server";
 import { verifyRunToken } from "@/lib/run-token";
-import { rateLimited, clientIp } from "@/lib/http-limiter"; // delivery hardening 2026-10-13
 import { utcDate, normalizeWallet, PRACTICE_POINTS, PRACTICE_DAILY_CAP } from "@/lib/weights";
 import { sanitizeName } from "@/lib/board-validation";
 import { recordPracticeRun } from "@/lib/weights-store";
 import { weightsFrozen, WEIGHTS_FROZEN_RESPONSE } from "@/lib/graduation"; // E6.1
+import { rateLimited, clientIp } from "@/lib/http-limiter"; // delivery hardening 2026-10-13
+// LU-2: wallet ownership proof — optional, fail-open (wallet ignored without proof)
+import { verifyWalletLinkProof } from "@/lib/wallet-proof";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +31,8 @@ export async function POST(req: Request) {
       runToken?: unknown;
       name?: unknown;
       address?: unknown;
+      signature?: unknown; // LU-2: wallet ownership proof (optional)
+      ts?: unknown; // LU-2: client timestamp inside the signed message
     };
     const tok = verifyRunToken(body.runToken);
     if (!tok) {
@@ -44,7 +48,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "practice is for archive terrain only" }, { status: 400 });
     }
     const name = sanitizeName(body.name);
-    const wallet = normalizeWallet(body.address);
+    // LU-2: a wallet address is only linked to the weights ledger when the
+    // caller proves ownership via a personal_sign proof (purpose-separated
+    // from the board proof). Without proof, the run still banks weights under
+    // the name-only identity — play is never blocked (fail-open, LAW 1.2).
+    const claimedWallet = normalizeWallet(body.address);
+    let wallet: string | null = null;
+    if (claimedWallet) {
+      const proof = verifyWalletLinkProof(
+        claimedWallet,
+        body.signature,
+        { wallet: claimedWallet, purpose: "practice", date: tok.date },
+        body.ts,
+        Date.now(),
+      );
+      if (proof.ok) wallet = claimedWallet;
+    }
     const row = await recordPracticeRun(name, wallet);
     return NextResponse.json({
       ok: true,
