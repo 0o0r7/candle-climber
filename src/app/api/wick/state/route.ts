@@ -36,6 +36,7 @@ export async function GET() {
           ? String(BigInt(Math.round(read.realizablePriceEth * 1e18)))
           : null,
       source: read.source,
+      poolId: read.poolId ?? null,
       reserveWei: read.reserveWei,
       targetWei: read.targetWei,
       soldUnits: read.soldUnits,

@@ -11,10 +11,12 @@ import { useEffect, useState } from "react";
 interface WickStateShape {
   ok: boolean;
   lifecycle: string | null;
+  graduated: boolean | null;
   meterPct: number;
   priceEthWad: string | null;
   realizablePriceEthWad: string | null;
   source: string | null;
+  poolId: string | null;
   curvePhaseMinUnits: string;
   tradeUrl: string;
   error: string | null;
@@ -76,11 +78,22 @@ export default function WickState() {
         <div className="rounded-md border border-white/10 bg-white/[0.03] p-3">
           <dt className="text-xs uppercase tracking-wide text-white/40">Graduation meter</dt>
           <dd className="mt-1 text-white">
-            {state ? (state.ok ? `${state.meterPct.toFixed(2)}% of the 4 ETH cap` : "n/a (feed down — honest gap)") : "…"}
+            {state ? (
+              state.ok ? (
+                state.graduated
+                  ? "100% — GRADUATED · DEX pool trading"
+                  : `${state.meterPct.toFixed(2)}% of the 4 ETH cap`
+              )
+              : "n/a (feed down — honest gap)"
+            ) : (
+              "…"
+            )}
           </dd>
         </div>
         <div className="rounded-md border border-white/10 bg-white/[0.03] p-3">
-          <dt className="text-xs uppercase tracking-wide text-white/40">Curve price (display)</dt>
+          <dt className="text-xs uppercase tracking-wide text-white/40">
+            {state?.graduated ? "DEX pool price (display)" : "Curve price (display)"}
+          </dt>
           <dd className="mt-1 text-white">
             {displayGwei ? `${displayGwei} gwei / $WICK` : "n/a"}
             {realizableGwei && (
@@ -89,13 +102,22 @@ export default function WickState() {
           </dd>
         </div>
         <div className="rounded-md border border-white/10 bg-white/[0.03] p-3">
-          <dt className="text-xs uppercase tracking-wide text-white/40">Curve-phase gate</dt>
-          <dd className="mt-1 text-white">{fmtTokens(state?.curvePhaseMinUnits ?? "19600000000000000000000000")} $WICK held</dd>
+          <dt className="text-xs uppercase tracking-wide text-white/40">
+            {state?.graduated ? "Post-graduation gate" : "Curve-phase gate"}
+          </dt>
+          <dd className="mt-1 text-white">
+            {state?.graduated
+              ? "1.25 ETH of $WICK value at the realizable price"
+              : `${fmtTokens(state?.curvePhaseMinUnits ?? "19600000000000000000000000")} $WICK held`}
+          </dd>
         </div>
       </dl>
       <p className="mt-3 text-xs text-white/40">
-        Source: the launch platform's own public feed and its own curve formula,
-        cross-checked against the on-chain reserve on every read. {state?.source === "env-override" ? "Owner-verified price override active." : ""}
+        {state?.source === "dex-pool"
+          ? "Source: the launch's own V4 pool, read live on-chain (PoolManager slot0); sell-fee haircut measured from the platform's own fee events. "
+          : "Source: the launch platform's own public feed and its own curve formula, cross-checked against the on-chain reserve on every read. "}
+        {state?.source === "env-override" ? "Owner-verified price override active. " : ""}
+        {state?.poolId ? `Pool ${state.poolId.slice(0, 10)}…${state.poolId.slice(-6)}. ` : ""}
         Testnet — no real funds.
       </p>
     </section>

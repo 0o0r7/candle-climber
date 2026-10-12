@@ -1,0 +1,80 @@
+{
+  "capturedAt": "2026-10-12",
+  "chain": {
+    "id": 46630,
+    "name": "Robinhood Chain Testnet"
+  },
+  "what": "Real GRADUATED launch (BEEF, graduated 2026-10-12T09:45:16Z) \u2014 evidence for the post-graduation DEX price reader. Three independent sources of the live pool price agree byte-exact: the platform's own list-feed market.poolSqrtPriceX96, the V4 Swap event log (explorer tx 0x59b5b6b2...), and the on-chain PoolManager extsload slot0 word read at storage key keccak(poolId ++ uint256(6)). Fee structure from two real POOL_SWAP feeEvents + their explorer tx logs.",
+  "launch": {
+    "tokenAddress": "0x109c36232e6103a9284a4585a784383bd912bb5b",
+    "curveAddress": "0x1cfe78453811e017203007e53409b94083af5c36",
+    "lifecycle": "GRADUATED",
+    "graduated": true,
+    "targetPairUnits": "4000000000000000000",
+    "taxBps": 200,
+    "graduation": {
+      "blockNumber": "133548108",
+      "transactionHash": "0xa8aed28c9cb2e20b5424caf0b87628d2b549b070fb8f37ffa169ed77f4d9866d",
+      "at": "2026-10-12T09:45:16.000Z",
+      "poolId": "0xee45030beb16063a1ab2c0a18fb39344b942a2bd9c6a20bb103cf9cf1ce267df",
+      "pairUnits": "4000000000000000000",
+      "tokenUnits": "200000000000000000000000000",
+      "leftoverBurnedUnits": "0",
+      "poolLiquidity": "28284271247461900976033",
+      "poolInitialSqrtPriceX96": "560227709747861399187319382274581"
+    },
+    "curve": {
+      "tokensSoldGrossUnits": "800000000000000000000000000",
+      "pairReserveUnits": "0",
+      "transfersUnlocked": true
+    }
+  },
+  "listFeedMarket": {
+    "complete": true,
+    "volume24hPairUnits": "10746851953736428543",
+    "holderCount": 3882,
+    "buyCount24h": 6,
+    "sellCount24h": 5,
+    "poolSqrtPriceX96": "2432839496801677223132263614470068",
+    "priceChange5mBps": 0,
+    "priceChange1hBps": null,
+    "priceChange6hBps": null,
+    "priceChange24hBps": null
+  },
+  "onchain": {
+    "poolManager": "0x8366a39cc670b4001a1121b8f6a443a643e40951",
+    "poolsStorageSlot": 6,
+    "extsloadSelector": "0x1e2eaeaf",
+    "storageKeyHex": "0xde07ce3b984fa22bbf085d62f6a2b7cdf584c1dcd181e6aa8dbefb6636c907d1",
+    "slot0Word": "0x00000000000000000003273f00000000000077f2c0613525fe3a203814bf57b4",
+    "decoded": {
+      "sqrtPriceX96": "2432839496801677223132263614470068",
+      "tick": 206655,
+      "protocolFee": 0,
+      "lpFee": 0
+    }
+  },
+  "swapEvent": {
+    "txHash": "0x59b5b6b218f092e1b73ba868c70a8004341c03c03b52d81d3de8024c7ce26f46",
+    "sqrtPriceX96": "2432839496801677223132263614470068",
+    "tick": 206655,
+    "fee": 0
+  },
+  "feeEvidence": {
+    "sells": [
+      {
+        "txHash": "0x8a417aad03586346ffccbae2f565f7bdd97a279c09ddb168e76d4a523b563bbc",
+        "tokenLegBps": 128.0,
+        "pairLegBps": 71.5
+      },
+      {
+        "txHash": "0x59b5b6b218f092e1b73ba868c70a8004341c03c03b52d81d3de8024c7ce26f46",
+        "tokenLegBps": 128.0,
+        "pairLegBps": 71.5
+      }
+    ],
+    "combinedMeasuredBps": 199.5,
+    "pinnedConservativeBps": 200,
+    "note": "hook-charged fees via POOL_SWAP feeEvents (pairFeeUnits + tokenFeeUnits; rateBps null; swap-event fee field = 0 = lpFee, the hook fee is separate). Measured on the platform's shared feeHook 2026-10-12; re-verify at WICK's own graduation. 200 bps = measured 199.5 rounded UP (fail-closed direction)."
+  }
+}
