@@ -37,6 +37,7 @@ import {
 } from "@/game/cc/duel";
 import type { CandleData, RunResult } from "@/game/cc/types";
 import Tutorial from "@/components/cc/Tutorial";
+import ModeSelector, { type GameMode, loadMode, saveMode } from "@/components/cc/ModeSelector";
 // P2 self-ghost — this device's OWN best run per terrain (local, cosmetic,
 // same replay path as the server ghost; the fallback when nobody uploaded)
 import {
@@ -157,6 +158,7 @@ export default function GameCanvas() {
   const requestedDateRef = useRef<string | null>(null);
   const launchRef = useRef(false);
   const [tf, setTf] = useState<GameInterval>("1w"); // timeframe selector
+  const [mode, setMode] = useState<GameMode>("market"); // two-mode: market | launchpad
   const [booted, setBooted] = useState(false); // init ran → loader may fetch
   // P3.12: selected character — ref feeds the RAF renderer without re-subscribing
   const [charId, setCharId] = useState<string>(DEFAULT_CHAR_ID);
@@ -338,6 +340,20 @@ export default function GameCanvas() {
     const savedGhost = localStorage.getItem(GHOST_KEY) !== "0";
     setGhostOn(savedGhost);
     ghostOnRef.current = savedGhost;
+    // Two-mode: ?mode=<market|launchpad> is the canonical deep link from the
+    // landing page's mode selector. ?source=launch stays for backward compat
+    // (legacy links). Persisted pref is the fallback for bare /play visits.
+    const urlMode = params.get("mode");
+    const urlSource = params.get("source");
+    if (urlMode === "market" || urlMode === "launchpad") {
+      setMode(urlMode);
+      saveMode(urlMode);
+    } else if (urlSource === "launch") {
+      setMode("launchpad");
+      saveMode("launchpad");
+    } else {
+      setMode(loadMode());
+    }
     // P7.3: local duel tally (no server identity — the record lives here)
     setDuelTally(parseTally(localStorage.getItem(DUEL_TALLY_KEY)));
     // P7.3: ?duel=CODE deep link — hold the loader until the duel resolves so
@@ -367,14 +383,18 @@ export default function GameCanvas() {
     setGraduated(false);
     setWorld2(false);
     const isArch = archive;
+    const isLaunchpad = mode === "launchpad" && !isArch && !duelLockRef.current;
     ghostRef.current = null; // terrain switch invalidates the previous ghost
     const query = new URLSearchParams();
     if (requestedSymRef.current) query.set("symbol", requestedSymRef.current);
     if (isArch && requestedDateRef.current) query.set("date", requestedDateRef.current); // server re-validates (past dates only)
-    if (launchRef.current) query.set("source", "launch");
+    if (launchRef.current || isLaunchpad) query.set("source", "launch");
     if (!isArch) query.set("interval", tf);
     const qs = query.toString();
-    fetch(`/api/candles${qs ? `?${qs}` : ""}`)
+    // Launchpad Mode: fetch from the dedicated /api/launchpad endpoint (on-chain
+    // indexer); Market Mode: the standard /api/candles feed chain.
+    const fetchUrl = isLaunchpad ? "/api/launchpad" : `/api/candles${qs ? `?${qs}` : ""}`;
+    fetch(fetchUrl)
       .then((r) => r.json())
       .then((d: CandleData) => {
         if (!alive) return;
@@ -443,7 +463,7 @@ export default function GameCanvas() {
         setPhase("ready");
       });
     return () => { alive = false; };
-  }, [tf, archive, booted]);
+  }, [tf, archive, booted, mode]);
 
   // P3.5: timeframe switch — persist and let the loader effect re-fetch
   const changeTf = useCallback((iv: GameInterval) => {
@@ -451,6 +471,14 @@ export default function GameCanvas() {
       if (iv !== cur) localStorage.setItem(TF_KEY, iv);
       return iv;
     });
+  }, []);
+
+  // Two-mode: switch between Market Mode and Launchpad Mode — persists and
+  // triggers the loader effect to re-fetch from the appropriate data source.
+  const changeMode = useCallback((m: GameMode) => {
+    setMode(m);
+    saveMode(m);
+    sfx.land();
   }, []);
 
   // P3.12: character pick — persists + updates the renderer ref immediately
@@ -1490,10 +1518,11 @@ export default function GameCanvas() {
             <div className="cc-panel cc-panel-entry">
               <h1 className="cc-title cc-title-entry">CANDLE <span>CLIMBER</span></h1>
               <p className="cc-tag">the chart is the level</p>
+              <ModeSelector mode={mode} onChange={changeMode} />
               <div className="cc-daily">
-                <span className="cc-daily-label" title={archive ? "Real history — practice terrain" : "Levels reset at 00:00 UTC"}>{archive ? "ARCHIVE CHART · PRACTICE" : "TODAY'S CHART · UTC"}</span>
+                <span className="cc-daily-label" title={archive ? "Real history — practice terrain" : "Levels reset at 00:00 UTC"}>{archive ? "ARCHIVE CHART · PRACTICE" : mode === "launchpad" ? "LAUNCHPAD · ON-CHAIN" : "TODAY'S CHART · UTC"}</span>
                 <span className="cc-daily-symbol">{data.seed.symbol}</span>
-                <span className="cc-daily-src">{data.seed.source === "binance" || data.seed.source === "stooq" || data.seed.source === "yahoo" ? "live data" : data.seed.source === "vibe-launch" ? "vibe launch" : data.seed.source === "robinhood" ? "official on-chain price" : "synthetic"}</span>
+                <span className="cc-daily-src">{data.seed.source === "binance" || data.seed.source === "stooq" || data.seed.source === "yahoo" || data.seed.source === "coingecko" ? "live data" : data.seed.source === "vibe-launch" ? "vibe launch" : data.seed.source === "robinhood" ? "official on-chain price" : "synthetic"}</span>
               </div>
               {/* P7.3: a duel deep link IS the landing context — stays above the fold */}
               {duel && (

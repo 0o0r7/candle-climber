@@ -34,7 +34,7 @@ export interface SeedInfo {
   date: string; // UTC YYYY-MM-DD
   symbol: string; // e.g. BTCUSDT / TSLA / launch ticker
   interval: string; // e.g. 1w; "derived" for vibe-launch terrain
-  source: 'binance' | 'stooq' | 'yahoo' | 'vibe-launch' | 'robinhood' | 'synthetic';
+  source: 'binance' | 'stooq' | 'yahoo' | 'vibe-launch' | 'robinhood' | 'coingecko' | 'synthetic';
   /** Present for stock levels when the official mainnet Chainlink feed was
    *  read; absent when the ticker has no official feed or the read failed. */
   onchain?: OnchainVerification;

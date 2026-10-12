@@ -24,6 +24,7 @@ import { signRunToken } from "@/lib/run-token";
 import { parseStooqCsv } from "@/lib/stooq";
 import { parseYahooChart, yahooChartUrl } from "@/lib/yahoo";
 import { getLaunchOfDay, launchSymbol, vibeLaunchCandles } from "@/lib/vibe-launch";
+import { selectDailyCoin, fetchCoinGeckoCandles } from "@/lib/coingecko";
 import type { Candle, CandleData, SeedInfo } from "@/game/cc/types";
 
 type Source = SeedInfo["source"]; // "binance" | "stooq" | "yahoo" | "vibe-launch" | "robinhood" | "synthetic"
@@ -204,6 +205,42 @@ export async function GET(req: Request) {
     }
     // Launch-feed failure -> the daily synthetic tokenless path (same rule as
     // every other feed failure): unscored by construction.
+  }
+
+  // ?source=coingecko — Market Mode's broader asset pool: selects today's top
+  // coin from CoinGecko's top-30-by-market-cap list (volatility-scored, same
+  // rotation-pool philosophy as the Binance watchlist path) and serves its
+  // 7d sparkline as playable terrain. Failure degrades to the standard feed
+  // chain below (the symbol selection + Binance/Yahoo/Stooq path).
+  if (!isArchive && searchParams.get("source") === "coingecko") {
+    try {
+      const coin = await selectDailyCoin(date);
+      if (coin) {
+        const key = `cg:${coin.coinId}|${date}`;
+        let candles: Candle[] | null = null;
+        const hit = cache.get(key);
+        if (hit && Date.now() - hit.ts < TTL) {
+          candles = hit.candles;
+        } else {
+          const fetched = await fetchCoinGeckoCandles(coin.coinId);
+          if (fetched && fetched.length >= 5) {
+            candles = fetched;
+            cache.set(key, { ts: Date.now(), candles, source: "coingecko" });
+          }
+        }
+        if (candles && candles.length >= 5) {
+          const data: CandleData = {
+            seed: { date, symbol: coin.symbol, interval: "1d", source: "coingecko" as const },
+            candles,
+          };
+          data.runToken = signRunToken(coin.symbol, date, candles.length, JSON.stringify(candles));
+          return NextResponse.json(data, { headers: { "Cache-Control": "public, max-age=300" } });
+        }
+      }
+    } catch (err) {
+      console.error("[candles/coingecko]", (err as Error).message);
+    }
+    // CoinGecko failure → fall through to the standard feed chain
   }
 
   // Honor ?symbol= when it is one of the whitelisted pairs (crypto rotation or
