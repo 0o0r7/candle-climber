@@ -26,11 +26,15 @@ export interface ScoredSymbol {
   changePct: number;
 }
 
-// Score weights — higher volatility = more interesting terrain,
-// higher volume = more liquid (preferred), extreme moves get a bonus.
-const VOL_WEIGHT = 0.5;
-const VOL_WEIGHT_SCALED = 0.3;
-const CHANGE_BONUS = 0.2;
+// Score weights — volatility is the PRIMARY factor (it shapes interesting
+// terrain); volume is a minor liquidity preference (log-scaled so BTC's raw
+// volume advantage doesn't make it win every single day); extreme moves get
+// a bonus. The top ROTATION_POOL candidates are then picked from
+// deterministically per-date, so the chart actually changes day to day.
+const VOL_WEIGHT = 0.6;
+const VOLUME_WEIGHT = 0.1;
+const CHANGE_BONUS = 0.3;
+const ROTATION_POOL = 3;
 
 /**
  * Fetch 24h ticker stats for all watchlist symbols from Binance.
@@ -89,13 +93,14 @@ export function scoreSymbols(stats: TickerStat[], dateStr: string): ScoredSymbol
     const rangeRatio = s.lastPrice > 0 ? (s.highPrice - s.lowPrice) / s.lastPrice : 0;
     // Combined volatility score (normalized 0..1, clamped)
     const volatility = Math.min(1, (changePct / 15 + rangeRatio / 0.1) / 2);
-    // Volume score (normalized 0..1)
-    const volume = s.quoteVolume / maxVol;
+    // Volume score: LOG-scaled so BTC's ~10x raw volume advantage becomes a
+    // minor nudge instead of a permanent +0.3 that wins every day.
+    const volume = Math.log(1 + s.quoteVolume) / Math.log(1 + maxVol);
     // Directional bonus: extreme moves (>5% up or down) get a boost
     const directionalBonus = changePct > 5 ? CHANGE_BONUS : 0;
 
     // Final score: weighted combination
-    const score = volatility * VOL_WEIGHT + volume * VOL_WEIGHT_SCALED + directionalBonus;
+    const score = volatility * VOL_WEIGHT + volume * VOLUME_WEIGHT + directionalBonus;
 
     return {
       symbol: s.symbol,
@@ -122,6 +127,12 @@ export function scoreSymbols(stats: TickerStat[], dateStr: string): ScoredSymbol
  * Select today's symbol based on market volatility/volume.
  * Returns the winning symbol, or null if stats couldn't be fetched
  * (caller falls back to the legacy random rotation).
+ *
+ * Instead of always picking the single highest scorer (which lets one
+ * high-volume symbol like BTC win every day), the top ROTATION_POOL
+ * candidates compete and the date hash deterministically picks one — so
+ * the chart actually changes day to day while still favoring interesting
+ * market conditions.
  */
 export async function selectDailySymbol(
   watchlist: string[],
@@ -130,5 +141,10 @@ export async function selectDailySymbol(
   const stats = await fetchTickerStats(watchlist);
   if (!stats || stats.length === 0) return null;
   const scored = scoreSymbols(stats, dateStr);
-  return scored[0]?.symbol ?? null;
+  if (scored.length === 0) return null;
+  // Pick deterministically from the top candidates — variety without
+  // sacrificing quality (all pool members passed the volatility/volume bar).
+  const pool = scored.slice(0, Math.min(ROTATION_POOL, scored.length));
+  const idx = hashString(`cc-select-pick:${dateStr}`) % pool.length;
+  return pool[idx].symbol;
 }

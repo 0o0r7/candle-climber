@@ -2284,6 +2284,107 @@ html { scroll-behavior: smooth; }
   white-space: nowrap;
 }
 
+/* Two-mode selector — Market Mode vs Launchpad Mode toggle */
+.cc-mode-selector {
+  display: inline-flex;
+  gap: 4px;
+  margin: 12px auto 0;
+  padding: 3px;
+  background: #101214;
+  border: 1px solid var(--cc-hairline);
+  border-radius: 10px;
+}
+.cc-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--cc-faint);
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.cc-mode-btn:hover { color: #fff; }
+.cc-mode-btn.cc-mode-active {
+  color: var(--cc-ink);
+  background: var(--cc-lime);
+}
+.cc-mode-icon { font-size: 14px; line-height: 1; }
+
+/* Mode selection (landing) */
+.lp-modes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 44px;
+}
+.lp-mode-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: var(--lp-card);
+  border: 1px solid var(--lp-hairline);
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+}
+.lp-mode-card:hover {
+  transform: translateY(-3px);
+}
+.lp-mode-market:hover {
+  border-color: rgba(91, 208, 138, 0.4);
+  box-shadow: 0 0 32px rgba(91, 208, 138, 0.1);
+}
+.lp-mode-launchpad:hover {
+  border-color: rgba(204, 255, 0, 0.4);
+  box-shadow: 0 0 32px rgba(204, 255, 0, 0.12);
+}
+.lp-mode-icon {
+  font-size: 32px;
+  line-height: 1;
+  margin-bottom: 14px;
+}
+.lp-mode-tag {
+  font-family: var(--lp-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--lp-faint);
+  margin-bottom: 8px;
+}
+.lp-mode-market .lp-mode-tag { color: var(--lp-up); }
+.lp-mode-launchpad .lp-mode-tag { color: var(--lp-lime); }
+.lp-mode-title {
+  font-family: var(--lp-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.lp-mode-desc {
+  font-family: var(--lp-ui);
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--lp-faint);
+  flex: 1;
+}
+.lp-mode-cta {
+  margin-top: 18px;
+  font-family: var(--lp-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.lp-mode-market .lp-mode-cta { color: var(--lp-up); }
+.lp-mode-launchpad .lp-mode-cta { color: var(--lp-lime); }
+
 /* Mobile */
 @media (max-width: 768px) {
   .lp-nav-links { display: none; }
