@@ -1936,6 +1936,8 @@ export default function GameCanvas() {
         <span aria-hidden>·</span>
         <a href="/airdrop">airdrop board</a>
         <span aria-hidden>·</span>
+        <a href="/partners">partners</a>
+        <span aria-hidden>·</span>
         <a href="/stats">stats</a>
         <span aria-hidden>·</span>
         <a href="/privacy">privacy</a>
