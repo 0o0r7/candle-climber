@@ -19,15 +19,22 @@
 // an unknown price or a failed balance read never auto-passes. A partner
 // whose state cannot be proven is simply not listed while the failure lasts.
 //
-// PRICE SOURCE (honest, LAW 4):
-// v0 reads WICK_ETH_PRICE from the environment — a VERIFIED figure the owner
-// sets from the VibeVibe launchpad UI once $WICK is live (the launchpad shows
-// the curve price; post-graduation the DEX price takes over). There is no
-// automated curve-price reader yet, and inventing one that guesses would
-// violate the honesty rules. When the price is unset, NO partner can be
-// listed — the feature is honest-by-default: it lights up when the token
-// exists, not before. Parameterized so a future on-chain price reader can
-// replace the env var without touching the state machine.
+// PRICE SOURCE + RULE (honest, LAW 4 — live since 2026-10-12):
+// $WICK IS LIVE (launchId 5963, 2026-10-05, docs/evidence/
+// wick-launch-record.json). The v0 "wait for the owner to set WICK_ETH_PRICE"
+// stance is retired: wick-price.ts derives the price from the platform's OWN
+// feed using the platform's OWN curve formula (validated to ≤6e-5 against two
+// pinned chain states — docs/PARTNER-LANE-DESIGN.md §2). The env var remains
+// as an optional owner override only.
+// THE RULE IS PHASE-AWARE (partner-threshold.ts):
+//   · CURVE TRADING → the curve-phase rule: hold the platform's own maximum
+//     per-wallet commitment (19.6M WICK = 20M cap × 0.98 net-of-tax). No price
+//     needed — the requirement is in units, reachable by construction.
+//   · GRADUATED → the value rule: ≥ 1.25 ETH at the realizable price
+//     (transfers unlock; DEX pricing begins; curve-phase haircuts apply to
+//     curve-sourced prices only).
+//   · unreadable state / no usable price → fail-closed (never auto-pass),
+//     and the grace clock never advances on infra failures.
 //
 // GRACE CLOCK PERSISTENCE (v0 note): belowSince lives in process memory.
 // With zero partners this is fine; the day the first real partner is
@@ -42,8 +49,21 @@ import {
   encodeBalanceOf,
   decodeHexQuantity,
 } from "@/lib/wallet";
-import { GRACE_DAYS, meetsThreshold } from "@/lib/partner-threshold";
+import {
+  GRACE_DAYS,
+  meetsThreshold,
+  meetsThresholdCurvePhase,
+} from "@/lib/partner-threshold";
+import {
+  fetchWickPrice,
+  readWickPriceEth,
+  type WickPriceRead,
+} from "@/lib/wick-price";
 import type { PartnerEntry } from "@/lib/partner-registry";
+
+// Re-exported for compatibility (the env-parse lives in wick-price.ts now —
+// one definition, no circular import).
+export { readWickPriceEth };
 
 export type PartnerStatus = "verified" | "grace" | "delisted" | "unverified";
 
@@ -65,15 +85,6 @@ export interface PartnerVerification {
 
 const DAY_MS = 86_400_000;
 export const GRACE_MS = GRACE_DAYS * DAY_MS;
-
-/** The verified $WICK price in ETH (owner-set env figure), or null when unset.
- *  A present-but-invalid value is treated as unset (fail-closed). */
-export function readWickPriceEth(env: Record<string, string | undefined> = process.env): number | null {
-  const raw = env.WICK_ETH_PRICE;
-  if (!raw) return null;
-  const p = Number(raw);
-  return Number.isFinite(p) && p > 0 ? p : null;
-}
 
 /** Pure status machine — no I/O, fully testable.
  *  `meets === null` never advances or clears the grace clock. */
@@ -113,8 +124,15 @@ const balanceCache = new Map<string, { at: number; units: bigint | null }>();
 
 export interface VerifyOpts {
   now?: number;
-  /** injectable price (tests); default reads WICK_ETH_PRICE */
+  /** injectable price for the VALUE rule (tests / forced env figure).
+   *  Present (even when null) selects the value rule without any live read —
+   *  keeps legacy call sites and tests offline-deterministic. */
   priceEth?: number | null;
+  /** injectable phase flag: true = CURVE_TRADING (units rule), false =
+   *  graduated/other (value rule). Undefined = resolve via the price reader. */
+  curvePhase?: boolean;
+  /** injectable full price-read (tests); default fetchWickPrice() (1h cache) */
+  wickPrice?: WickPriceRead;
   /** injectable RPC url (tests) */
   rpcUrl?: string;
   /** injectable transport (tests) — returns the raw eth_call result hex */
@@ -189,15 +207,51 @@ async function readBalanceUnits(
  *  grace clock for the entry (only on DEFINITIVE checks). */
 export async function verifyPartner(entry: PartnerEntry, opts: VerifyOpts = {}): Promise<PartnerVerification> {
   const now = opts.now ?? Date.now();
-  const price = opts.priceEth !== undefined ? opts.priceEth : readWickPriceEth();
   const { units, reason } = await readBalanceUnits(entry.walletAddress, opts);
+
+  // Rule resolution (phase-aware, offline-safe for injected opts):
+  //   1. curvePhase === true                       → units rule (no price)
+  //   2. curvePhase === false OR priceEth injected → value rule (price ?? env)
+  //   3. otherwise                                 → live read (fetchWickPrice)
+  let rule: "units" | "value";
+  let price: number | null;
+  let readerError: string | undefined;
+  if (opts.curvePhase === true) {
+    rule = "units";
+    price = opts.priceEth !== undefined ? opts.priceEth : null;
+  } else if (opts.curvePhase === false || opts.priceEth !== undefined) {
+    rule = "value";
+    price = opts.priceEth !== undefined ? opts.priceEth : readWickPriceEth();
+  } else {
+    const read = opts.wickPrice !== undefined ? opts.wickPrice : await fetchWickPrice();
+    if (read.ok && read.curvePhase) {
+      rule = "units";
+      price = null;
+    } else if (read.ok) {
+      rule = "value";
+      price = read.realizablePriceEth;
+    } else {
+      // Reader failed — fall back to the owner-verified env figure if present,
+      // else fail closed. The reader's reason is surfaced for honest display.
+      rule = "value";
+      price = readWickPriceEth();
+      readerError = read.error;
+    }
+  }
 
   let meets: boolean | null = null;
   let balanceUnits: string | null = null;
   let failReason: string | undefined = reason;
 
-  if (price === null) {
-    failReason = "no-verified-price"; // the token is not live yet — honest default
+  if (rule === "units") {
+    if (units === null) {
+      failReason = failReason ?? "rpc-unavailable";
+    } else {
+      balanceUnits = units.toString();
+      meets = meetsThresholdCurvePhase(units);
+    }
+  } else if (price === null) {
+    failReason = readerError ? `price-reader: ${readerError}` : "no-verified-price";
   } else if (units === null) {
     failReason = failReason ?? "rpc-unavailable";
   } else {

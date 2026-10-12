@@ -16,6 +16,7 @@
 //   threshold is quoted as a derived value with its source.
 import { useState } from "react";
 import PartnerPool from "./PartnerPool";
+import WickState from "./WickState";
 
 interface ApplyState {
   status: "idle" | "sending" | "ok" | "error";
@@ -106,15 +107,24 @@ export default function PartnersPage() {
           <li>Honest placement: labeled as a partner chart — never mixed into the daily spotlight, never touching scores.</li>
         </ul>
 
+        <WickState />
+
         <h2 className="text-lg font-semibold text-white">What we ask (and why)</h2>
         <p>
-          A registered wallet holds <strong className="text-white">≈ 1.25 ETH worth of $WICK</strong>{" "}
-          while the chart is listed. Why this number: the platform's own curve config sets the
-          graduation raise target at <strong className="text-white">5 ETH</strong> (verified from
-          the launch platform's public configuration), and the partner cohort is sized so that
-          about four partners' entries cover that entire raise — partner demand is literally the
-          fuel that graduates the token. The check is on-chain and continuous (no keys, public
-          RPC), with a 7-day grace period before a chart would stop appearing for future days.
+          A registered wallet holds <strong className="text-white">19,600,000 $WICK</strong> — the
+          net tokens from buying the platform's FULL per-wallet curve allowance (20,000,000 gross,
+          before the launch's 2% buy tax) — while the chart is listed. Why this number: the
+          platform itself caps every wallet at 2% of supply (curveWalletCapBps = 200) and locks
+          transfers until graduation, so the maximum commitment one wallet can physically make is
+          exactly this position. Asking for the maximum is the only bar that is both reachable and
+          whale-proof by construction. And every partner's buy-in is real demand: purchases count
+          directly toward the launch's own graduation cap of <strong className="text-white">4 ETH</strong>
+          {" "}(targetPairUnits in the launch record) — roughly 40 maxed wallets complete the curve,
+          and partner communities buying alongside push it faster. The check is on-chain and
+          continuous (no keys, public RPC), with a 7-day grace period before a chart would stop
+          appearing for future days. After graduation the lane switches to a value threshold
+          (1.25 ETH at realizable DEX prices) — sized so a 4-partner cohort covers the entire cap
+          with margin.
         </p>
         <p className="text-white/60">
           Meeting the threshold starts the conversation; it does not guarantee listing. Every
