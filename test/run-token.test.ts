@@ -122,16 +122,16 @@ describe("W5 run-token contract", () => {
     expect(verifyRunToken(`${tok.split(".")[0]}.!!!not-base64url!!!`)).toBeNull();
     // payload that does not decode to JSON (signed correctly, still null)
     const junkPayload = Buffer.from("not json at all").toString("base64url");
-    const junkSig = createHmac("sha256", getRunTokenSecret()).update(junkPayload).digest("base64url");
+    const junkSig = createHmac("sha256", getRunTokenSecret() as string).update(junkPayload).digest("base64url");
     expect(verifyRunToken(`${junkPayload}.${junkSig}`)).toBeNull();
     // JSON that is not an object
     const numPayload = Buffer.from("42").toString("base64url");
-    const numSig = createHmac("sha256", getRunTokenSecret()).update(numPayload).digest("base64url");
+    const numSig = createHmac("sha256", getRunTokenSecret() as string).update(numPayload).digest("base64url");
     expect(verifyRunToken(`${numPayload}.${numSig}`)).toBeNull();
   });
 
   test("payload shape violations -> null (date/count/h/symbol), even when signed", () => {
-    const s = getRunTokenSecret();
+    const s = getRunTokenSecret() as string;
     const base = { symbol: SYMBOL, date: DATE, count: COUNT, h: "0123456789abcdef" };
     const expectNull = (p: Record<string, unknown>) => expect(verifyRunToken(craftToken(p, s))).toBeNull();
 
@@ -151,5 +151,79 @@ describe("W5 run-token contract", () => {
     // sanity: the exact boundary is accepted (12-char symbol, count 10000)
     const ok = verifyRunToken(craftToken({ ...base, symbol: "TWELVECHARSX", count: 10000 }, s));
     expect(ok).not.toBeNull();
+  });
+});
+
+// Delivery hardening (2026-10-13): a production deploy WITHOUT any configured
+// secret must fail CLOSED — no committed default, no signing, no verify pass.
+// Dev/preview keeps the local-dev default so local work needs zero setup.
+describe("run-token fail-closed hardening", () => {
+  const savedNodeEnv = process.env.NODE_ENV;
+  const savedVercelEnv = process.env.VERCEL_ENV;
+  const savedMongo = process.env.MONGODB_URI;
+  const savedDbUrl = process.env.DATABASE_URL;
+
+  const env = process.env as Record<string, string | undefined>; // NODE_ENV is typed read-only
+  function prodWithoutSecret(): void {
+    env.NODE_ENV = "production";
+    env.VERCEL_ENV = "production";
+    delete env[ENV_KEY];
+    delete env.MONGODB_URI;
+    delete env.DATABASE_URL;
+  }
+  function restore(): void {
+    if (savedNodeEnv === undefined) delete env.NODE_ENV;
+    else env.NODE_ENV = savedNodeEnv;
+    if (savedVercelEnv === undefined) delete process.env.VERCEL_ENV;
+    else process.env.VERCEL_ENV = savedVercelEnv;
+    if (savedMongo === undefined) delete process.env.MONGODB_URI;
+    else process.env.MONGODB_URI = savedMongo;
+    if (savedDbUrl === undefined) delete process.env.DATABASE_URL;
+    else process.env.DATABASE_URL = savedDbUrl;
+    process.env[ENV_KEY] = SECRET_A; // suite default restored
+  }
+
+  test("production without any secret: getRunTokenSecret() -> null", () => {
+    prodWithoutSecret();
+    try {
+      expect(getRunTokenSecret()).toBeNull();
+    } finally {
+      restore();
+    }
+  });
+
+  test("production without any secret: signRunToken returns empty (no token issued)", () => {
+    prodWithoutSecret();
+    try {
+      expect(signRunToken(SYMBOL, DATE, COUNT, CANDLE_JSON)).toBe("");
+    } finally {
+      restore();
+    }
+  });
+
+  test("production without any secret: verifyRunToken rejects even a well-signed token", () => {
+    const tok = signRunToken(SYMBOL, DATE, COUNT, CANDLE_JSON); // signed under SECRET_A
+    prodWithoutSecret();
+    try {
+      expect(verifyRunToken(tok)).toBeNull();
+      expect(verifyRunToken("anything.atall")).toBeNull();
+    } finally {
+      restore();
+    }
+  });
+
+  test("dev without any secret: local-dev default keeps working (zero-setup dev)", () => {
+    env.NODE_ENV = "test"; // not "production"
+    delete env.VERCEL_ENV;
+    delete env[ENV_KEY];
+    delete env.MONGODB_URI;
+    delete env.DATABASE_URL;
+    try {
+      expect(getRunTokenSecret()).not.toBeNull();
+      const tok = signRunToken(SYMBOL, DATE, COUNT, CANDLE_JSON);
+      expect(verifyRunToken(tok)).not.toBeNull();
+    } finally {
+      restore();
+    }
   });
 });

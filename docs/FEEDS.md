@@ -109,7 +109,9 @@
 - **URL**: `https://testnet.vibevibe.fun/api/v1/chains/46630/v6/launches?limit=5`
   (cursor API, max limit=5 — sufficient for launch-of-the-day). Real payload
   shape captured in `research-cache/launches_ALL.json` (top level
-  `apiVersion/requestId/data{items,page}/meta`; items carry `launchId`, `name`,
+  `apiVersion/requestId/data{items,page}/meta` — workspace-internal capture,
+  gitignored, not part of the repo; the same shape is pinned by
+  `test/fixtures/` files — items carry `launchId`, `name`,
   `symbol`, `createdAt`, `graduated`, `curve{...}`, `market{holderCount,
   volume24hPairUnits, buyCount24h, sellCount24h, priceChange*Bps, ...}`).
 - **Wiring**: `GET /api/candles?source=launch` (the only whitelisted source
@@ -149,6 +151,20 @@
   live prices of the token.
 - **Failure mode**: fetch error, non-OK status, or no valid items → the daily
   **synthetic tokenless path** (same rule as every feed failure).
+
+## 4b. CoinGecko daily OHLC — Market Mode pool (2026-10-12)
+
+- **URL**: `https://api.coingecko.com/api/v3/coins/{id}/ohlc?vs_currency=usd&days=30` —
+  public, keyless free tier; no auth, no key (a keyed Pro URL would be a secret).
+- **Wiring**: `GET /api/candles?source=coingecko` (Market Mode's broader asset
+  pool); `src/lib/coingecko.ts` (selector + parser, pure and test-pinned,
+  `types.ts` registers the source label `coingecko`).
+- **Honesty label**: `coingecko` → "live data" (real OHLC).
+- **Failure mode**: rate-limit/429 or parse failure falls through to the
+  standard feed chain and finally the synthetic tokenless path (unscored) —
+  same rule as every other feed failure.
+- **Cadence**: closed daily candles only; the in-progress candle is dropped
+  (the W1 no-future-terrain guarantee applies unchanged).
 
 ## 5. Robinhood Chain on-chain price — official stock anchor (W6)
 

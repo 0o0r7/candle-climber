@@ -21,6 +21,7 @@ import { selectDailySymbol } from "@/lib/market-selector";
 import { readOfficialQuote } from "@/lib/robinhood-chain";
 import { isArchiveDate, endOfDayMs, clampCandlesTo, binanceKlinesUrl } from "@/game/cc/archive";
 import { signRunToken } from "@/lib/run-token";
+import { rateLimited, clientIp } from "@/lib/http-limiter";
 import { parseStooqCsv } from "@/lib/stooq";
 import { parseYahooChart, yahooChartUrl } from "@/lib/yahoo";
 import { getLaunchOfDay, launchSymbol, vibeLaunchCandles } from "@/lib/vibe-launch";
@@ -164,6 +165,17 @@ async function fetchStooq(symbol: string, clamp?: (rows: Candle[]) => Candle[]):
 }
 
 export async function GET(req: Request) {
+  // Delivery hardening (2026-10-13): this route issues the HMAC run tokens the
+  // whole integrity chain trusts and fans out to paid/public upstreams — put a
+  // generous per-IP ceiling on it (60/min ≈ 60 terrain loads/min from one IP;
+  // the game client needs 1). Per-instance, same tradeoff as the write lanes.
+  if (rateLimited(clientIp(req), 60)) {
+    return NextResponse.json(
+      { error: "rate limited — slow down" },
+      { status: 429, headers: { "Retry-After": "60" } },
+    );
+  }
+
   const { searchParams } = new URL(req.url);
   // Date-clamp (P0 follow-up, extended by P2.2): the server pins today unless
   // ?date= names a strictly PAST, well-formed UTC date (H1 ARCHIVE). Future or
@@ -197,7 +209,8 @@ export async function GET(req: Request) {
           seed: { date, symbol, interval: "derived", source: "vibe-launch" },
           candles,
         };
-        data.runToken = signRunToken(symbol, date, candles.length, JSON.stringify(candles));
+        const tok = signRunToken(symbol, date, candles.length, JSON.stringify(candles));
+        if (tok) data.runToken = tok;
         return NextResponse.json(data, { headers: { "Cache-Control": "public, max-age=300" } });
       }
     } catch (err) {
@@ -233,7 +246,8 @@ export async function GET(req: Request) {
             seed: { date, symbol: coin.symbol, interval: "1d", source: "coingecko" as const },
             candles,
           };
-          data.runToken = signRunToken(coin.symbol, date, candles.length, JSON.stringify(candles));
+          const tok = signRunToken(coin.symbol, date, candles.length, JSON.stringify(candles));
+          if (tok) data.runToken = tok;
           return NextResponse.json(data, { headers: { "Cache-Control": "public, max-age=300" } });
         }
       }
@@ -365,7 +379,8 @@ export async function GET(req: Request) {
   // source-agnostic (contract pinned in test/robinhood-chain.test.ts). P3.5:
   // the token binds the timeframe, so per-tf boards stay server-authoritative.
   if (source !== "synthetic") {
-    data.runToken = signRunToken(symbol, date, candles.length, JSON.stringify(candles), interval);
+    const tok = signRunToken(symbol, date, candles.length, JSON.stringify(candles), interval);
+    if (tok) data.runToken = tok;
   }
   return NextResponse.json(data, {
     headers: { "Cache-Control": "public, max-age=300" },

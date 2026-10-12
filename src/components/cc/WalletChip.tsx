@@ -188,8 +188,21 @@ export default function WalletChip() {
 
   if (!enabled) return null;
 
-  // No injected provider (most testnet visitors): render nothing, keep footer clean.
-  if (!hasProvider && !addr) return null;
+  // No injected provider (most testnet visitors): render an honest hint
+  // instead of nothing — delivery fix 2026-10-13 for "wallet invisible on
+  // mobile". Plain mobile browsers have no window.ethereum; the wallet lane
+  // lives inside wallet-embedded browsers (and the WalletConnect phase is a
+  // separate, not-yet-built step). Cosmetic lane: never blocks play or rank.
+  if (!hasProvider && !addr) {
+    return (
+      <span
+        className="cc-chip cc-wallet-chip"
+        title="No wallet detected. Open this page inside a wallet's built-in browser to link a wallet — cosmetic badge only, play and scores never require it."
+      >
+        WALLET · IN-WALLET BROWSER ONLY
+      </span>
+    );
+  }
 
   if (state === "wrongnet") {
     const tip = netMsg

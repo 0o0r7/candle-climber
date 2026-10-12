@@ -10,7 +10,7 @@
 >
 > ```bash
 > bun scripts/verify-feeds.ts        # live official-feed connection test (exit 0/1/2)
-> bun test                           # 20 suites, zero network
+> bun test                           # 42 test files / 530+ tests, zero network
 > ```
 
 ## Status vocabulary
@@ -44,8 +44,12 @@
 | 15 | Airdrop **weights**: streak-based, wallet-linked ledger | WICK-ECONOMY-SPEC §7 | `src/lib/weights.ts` (pure, no I/O) + `src/lib/weights-store.ts` + `test/weights.test.ts` | ✅ VERIFIED as a mechanism — **eligibility for any distribution is NOT established** (see ECOSYSTEM-QUESTIONS) |
 | 16 | Testnet incentive pool is 5% of supply, discretionary | INTEL-UPDATE-2026-10-07 (official channel quotes) | Quoted verbatim in the intel doc; primary source = platform docs/legal terms | 📄 OFFICIAL — discretionary, no entitlement implied |
 | 17 | Live at https://candle-climber.vercel.app | README | HTTP 200 re-checked 2026-10-10 (external deployment, outside this sandbox) | ✅ VERIFIED |
-| 18 | QA: 450+ headless sim rounds + live emulated device sessions, zero exceptions | README | `qa/visual-sweep` (30), `qa/realdevice` (11), `scripts/e2e-gamer-bot.ts`, 20 test suites. The README's `scripts/qa-sim.ts` **does not exist** — the reference was stale and is corrected in this pass; the raw sim counter is not reproducible from the repo | 🟡 PARTIAL |
+| 18 | QA: 450+ headless sim rounds + live emulated device sessions, zero exceptions | README | `qa/visual-sweep` (30), `qa/realdevice` (11), `scripts/e2e-gamer-bot.ts`, 42 test files. The README's `scripts/qa-sim.ts` **does not exist** — the reference was stale and is corrected in this pass; the raw sim counter is not reproducible from the repo | 🟡 PARTIAL |
 | 19 | Zero-cost infrastructure (GitHub Student Developer Pack) | README · INFRASTRUCTURE | `docs/INFRASTRUCTURE.md` — a plan document; per-service student-pack status is not verifiable here | 🟡 PARTIAL |
+| 24 | Three chart modes: CRYPTO / STOCKS / LAUNCHPAD with deterministic per-pool daily rotation | README (2026-10-13 refresh) | `src/game/cc/level-source.ts` (`cryptoRotation`/`stocksRotation`), `cc_mode_v2` migration + legacy deep-link compat; `test/modes.test.ts` (determinism, pool disjointness, no consecutive repeats, full-cycle reachability) | ✅ VERIFIED |
+| 25 | PARTNER lane: curated hold-to-list with a phase-aware gate and on-chain verification | `docs/PARTNER-LAUNCH-ROADMAP.md` (PL ledger) | `src/lib/partner-{registry,verifier,threshold,store}.ts`; curve-phase gate = platform's own per-wallet max (19.6M WICK), graduated gate = 1.25 ETH at realizable DEX price; `test/partner-*.test.ts` | ✅ VERIFIED (mechanism; zero listings is the honest v0 state) |
+| 26 | $WICK price readers: curve formula (invariant-checked per read) + post-graduation DEX pool read (extsload slot 6, three-source pinned) | `docs/PARTNER-LANE-DESIGN.md` §4b | `src/lib/wick-price.ts` + `src/lib/keccak.ts` (dependency-free, standard-vector pinned); live re-proof: `bun scripts/smoke-dex-reader.ts` (PASS 2026-10-13: WICK meter 0.171% curve ok; BEEF word structure-consistent, tick moved 206655→206880 as the live pool traded) | ✅ VERIFIED live |
+| 27 | Integrity chain fails closed without its secret in production | `.env.example` (RUN_TOKEN_SECRET) | `src/lib/run-token.ts` — prod without a secret serves tokenless (unscored) terrain and rejects every token; pinned by `test/run-token.test.ts` fail-closed block (2026-10-13) | ✅ VERIFIED |
 | 20 | Share loop: OG/Twitter cards, PWA manifest, metadataBase, Death Card PNG | README | `public/og.png`, `public/manifest.webmanifest`, `src/app/layout.tsx` (`metadataBase`, `openGraph`), `src/game/cc/deathcard.ts` | ✅ VERIFIED |
 | 21 | The OFFICIAL board requires a valid `personal_sign` ownership proof — missing/forged/stale degrades to guest with an honest note; play never blocked | README · ECONOMY-LAWS LAW 1.2 (hardening, 2026-10-10) | `src/lib/wallet-proof.ts` (audited @noble primitives) + `src/lib/proof-message.ts`; `test/wallet-proof.test.ts` (hand-built EIP-191 envelope, independent of the module) + `test/official-proof-route.test.ts` (real handler, no mocks) | ✅ VERIFIED |
 | 22 | Official records are season-scoped (append-only season registry; S1 opened 2026-10-10) | README · ECONOMY-LAWS LAW 5.3 note | `src/lib/seasons.ts` (pure); `test/official-board.test.ts` (pre-season dates ⇒ null season) | ✅ VERIFIED |

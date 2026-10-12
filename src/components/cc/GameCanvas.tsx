@@ -1949,6 +1949,8 @@ export default function GameCanvas() {
       <footer className="cc-footer">
         <WalletChip />
         <span aria-hidden>·</span>
+        <a href="/">home</a>
+        <span aria-hidden>·</span>
         <a href="https://testnet.vibevibe.fun/" target="_blank" rel="noopener noreferrer">vibe/vibe testnet</a>
         <span aria-hidden>·</span>
         <a href="https://faucet.testnet.chain.robinhood.com/" target="_blank" rel="noopener noreferrer">faucet</a>

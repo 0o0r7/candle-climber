@@ -12,6 +12,23 @@ const nextConfig: NextConfig = {
     // but a red build locally should stop the ship).
     ignoreBuildErrors: false,
   },
+  // Delivery hardening (2026-10-13): baseline security headers on every route.
+  // Deliberately NO strict CSP yet — the game canvas and Sentry inject inline
+  // scripts; a nonce-based CSP is a follow-up, not a ship blocker.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+        ],
+      },
+    ];
+  },
   // Base44 sandbox preview: the app is served through a proxy on a different
   // origin (https://3000-<suffix>) and a different Host header, so Next's dev
   // server must allow those for /_next/* dev assets and HMR. Applied ONLY when

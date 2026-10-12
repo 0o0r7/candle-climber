@@ -12,6 +12,7 @@ export default function Navbar() {
       <div className="lp-nav-links">
         <a href="#how-to-play" className="lp-nav-link">HOW TO PLAY</a>
         <a href="#features" className="lp-nav-link">FEATURES</a>
+        <Link href="/partners" className="lp-nav-link">PARTNERS</Link>
         <Link href="/play" className="lp-nav-link">PLAY</Link>
       </div>
       <Link href="/play" className="lp-btn-primary lp-btn-sm">PLAY NOW</Link>

@@ -185,6 +185,9 @@ Owner created the Sentry account + admin token (`sntryu_…`); I did the rest en
 - **Secrets**: auth token lives only in gitignored `.env` (never commit; rotate if leaked).
 - **TODO (UI-only, API refused)**: DSN key hardening — allowedDomains + rate limit under
   Project → Settings → Client Keys (2 minutes, non-blocking).
+  *(Annotated 2026-10-13: owner = the owner (Sentry dashboard is owner-only); trigger =
+  next owner Sentry session; non-blocking for delivery — server-side event injection is
+  already gated (`/api/debug-sentry` returns 404 on production unless `DEBUG_SENTRY=on`).)*
 
 ## 5. ENV VAR MANIFEST — names only, for coding agents (added 2026-10-06)
 

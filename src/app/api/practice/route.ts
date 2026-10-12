@@ -7,6 +7,7 @@
 // proof a real historical level was played.
 import { NextResponse } from "next/server";
 import { verifyRunToken } from "@/lib/run-token";
+import { rateLimited, clientIp } from "@/lib/http-limiter"; // delivery hardening 2026-10-13
 import { utcDate, normalizeWallet, PRACTICE_POINTS, PRACTICE_DAILY_CAP } from "@/lib/weights";
 import { sanitizeName } from "@/lib/board-validation";
 import { recordPracticeRun } from "@/lib/weights-store";
@@ -20,6 +21,9 @@ const META = {
 };
 
 export async function POST(req: Request) {
+  if (rateLimited(clientIp(req), 10)) {
+    return NextResponse.json({ ok: false, error: "rate limited" }, { status: 429 });
+  }
   try {
     const body = (await req.json()) as {
       runToken?: unknown;

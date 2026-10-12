@@ -1,3 +1,12 @@
+> **STATUS ADDENDUM (2026-10-13).** This is the v1 design document; several
+> parameters have since evolved and the code/tests are authoritative:
+> §4 score cap is now `MAX_SCORE_PER_CANDLE = 175` (P3.6, was 70);
+> §5 stocks shipped 2026-09-30 (Yahoo/stooq + on-chain anchor) and the 2026-10-12
+> council added LAUNCHPAD + STOCKS as first-class modes (CRYPTO/STOCKS/LAUNCHPAD,
+> `f0d3a3b`); §7 D4–D9 shipped; §9 mascot PARKED was resolved by the owner
+> 2026-10-02 (roster shipped P3.11–P3.14); the partner hold-to-list lane and its
+> gates are specified in `PARTNER-LANE-DESIGN.md` (not part of this doc).
+
 # GAME DESIGN — Candle Climber
 
 > Pitch: **"The chart is the level."** Every run is a market. Every death is a meme.

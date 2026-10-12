@@ -30,6 +30,8 @@ next-env.d.ts
 /scripts/*
 !/scripts/deathcard/
 !/scripts/e2e-gamer-bot.ts
+!/scripts/smoke-dex-reader.ts
+!/scripts/verify-feeds.ts
 !/scripts/trailer/
 /archive/
 /.zscripts/

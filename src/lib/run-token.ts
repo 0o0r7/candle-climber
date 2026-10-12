@@ -24,31 +24,49 @@ export interface RunTokenPayload {
   interval: string; // P3.5: terrain timeframe ("1w" default; legacy tokens without it verify as "1w")
 }
 
-export function getRunTokenSecret(): string {
-  return (
+// Delivery hardening (2026-10-13): the committed dev default must NEVER be
+// the signing secret on a production deploy — this repo is public, so a
+// fail-open default makes every integrity gate forgeable by anyone who can
+// read it. On production (Vercel production env) a missing secret returns
+// null: /api/candles serves terrain honestly WITHOUT a run token (unscored
+// by construction), and verifyRunToken() rejects everything — fail closed,
+// no crash, the gap is loud in /ops and Sentry.
+function isProdDeploy(): boolean {
+  // evaluated per call (env can be mutated in tests / runtime)
+  return process.env.NODE_ENV === "production" && process.env.VERCEL_ENV === "production";
+}
+
+/** The signing secret, or null when production runs without one (fail closed). */
+export function getRunTokenSecret(): string | null {
+  const configured =
     process.env.RUN_TOKEN_SECRET ||
     process.env.MONGODB_URI ||
-    process.env.DATABASE_URL || // deployment-specific fallback (this repo's Mongo/postgres var)
-    "cc-local-dev-secret"
-  );
+    process.env.DATABASE_URL; // deployment-specific fallback (this repo's Mongo/postgres var)
+  if (configured) return configured;
+  if (isProdDeploy()) return null;
+  return "cc-local-dev-secret"; // local dev / preview convenience only
 }
 
 export function signRunToken(symbol: string, date: string, count: number, candleJson: string, interval: GameInterval = "1w"): string {
+  const secret = getRunTokenSecret();
+  if (!secret) return ""; // prod without secret: no token — terrain serves unscored
   const h = createHash("sha256").update(candleJson).digest("hex").slice(0, 16);
   const payload = Buffer.from(JSON.stringify({ symbol, date, count, h, interval })).toString("base64url");
-  const sig = createHmac("sha256", getRunTokenSecret()).update(payload).digest("base64url");
+  const sig = createHmac("sha256", secret).update(payload).digest("base64url");
   return `${payload}.${sig}`;
 }
 
-/** Returns the verified payload, or null when the token is malformed/forged. */
+/** Returns the verified payload, or null when the token is malformed/forged
+ *  (also null — fail closed — when production runs without a signing secret). */
 export function verifyRunToken(token: unknown): RunTokenPayload | null {
+  if (!getRunTokenSecret()) return null;
   if (typeof token !== "string") return null;
   const parts = token.split(".");
   if (parts.length !== 2) return null;
   const [payload, sig] = parts;
   if (!payload || !sig) return null;
 
-  const expected = createHmac("sha256", getRunTokenSecret()).update(payload).digest();
+  const expected = createHmac("sha256", getRunTokenSecret() as string).update(payload).digest();
   const given = Buffer.from(sig, "base64url");
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) return null;
 

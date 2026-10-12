@@ -39,22 +39,27 @@ and you are — obviously — **liquidated**.
 ## Status — live at https://candle-climber.vercel.app (landing) · game at /play
 
 Real daily candles, real deaths. Deployed 2026-09-29 · CI green on `main` ·
-QA: 450+ headless sim rounds + live desktop/mobile-emulated sessions, zero
-exceptions — artifacts in `qa/`, regression suites in `test/`, bot in
-`scripts/e2e-gamer-bot.ts` (see `docs/ECOSYSTEM_BAR.md`). Live deployment
-re-checked 2026-10-10.
+QA: 534/534 automated tests across 42 files + headless sim rounds + live
+desktop/mobile-emulated sessions — artifacts in `qa/`, regression suites in
+`test/`, bot in `scripts/e2e-gamer-bot.ts` (see `docs/ECOSYSTEM_BAR.md`).
+Live deployment re-checked 2026-10-10; full delivery audit 2026-10-13 in
+[`docs/DELIVERY-READINESS-REPORT.md`](docs/DELIVERY-READINESS-REPORT.md).
 
-| Shipped | Next |
+| Shipped (2026-10-13) | Next (owner-gated / triggered) |
 |---|---|
 | Canvas 2D engine (fixed-timestep physics, coyote time, jump buffering, crumble timers) | Game-feel polish + combo scoring pass |
-| Daily Seed: UTC date → symbol + window, deterministic level + daily mutations (5-pool) | Platform launch-feed levels (level-source → D10) |
-| Real market data: Binance klines via server proxy + geo-fallback + synthetic fallback | Death Card v2 (rivalry tags) |
-| OG/twitter cards, PWA manifest, metadataBase — share loop live | Global leaderboard persistence (Atlas `DATABASE_URL` — code is plug-and-play) |
-| Death Card generator (1080×1350 PNG download / WebShare) | On-chain score anchoring (wallet identity + `$WICK` balance badge already ship) |
-| Global leaderboard API (memory fallback → MongoDB Atlas, env-gated) + boards · `$WICK` launched on the vibe/vibe testnet (launchId 5963) · PvP duels + rival ghosts (`duel.ts`, `ghost.ts`, `rival/`) | Graduation economics, ranked duels, guild wars |
+| Daily Seed: UTC date → symbol + window, deterministic level + daily mutations (6-pool) | Graduation economics (staged per `docs/council/2026-10-10-GRADUATION-RUNBOOK.md`) |
+| Three chart modes — CRYPTO / STOCKS / LAUNCHPAD (`cc_mode_v2`, per-pool rotations, pool-scoped `/api/candles?pool=`) | Death Card v2 (rivalry tags) |
+| Real market data: Binance klines server proxy + geo-fallback + synthetic fallback; CoinGecko market-mode pool | On-chain score anchoring (wallet identity + `$WICK` balance badge already ship) |
+| PARTNER lane end-to-end: `/partners` + apply/pool APIs, phase-aware hold gate (19.6M WICK curve phase / 1.25 ETH graduated), on-chain verifier, curve + DEX price readers (`docs/PARTNER-LANE-DESIGN.md`) | Partner onboarding runbook (hard gate before first listing — roadmap R-2) |
 | Official on-chain stock anchor: mainnet Chainlink feed per stock level + `ON-CHAIN` badge (W6) | Live on-chain OHLC terrain — needs a historical source on the chain (see truth table) |
-| market legibility stats (REAL MOVE %, difficulty), MiniChart, hint bubbles | Real-device mobile QA pass |
-| vibe/vibe design language, WebAudio synth SFX, mobile touch controls | Mascot V2 (parked pending owner re-brief) |
+| Death Card generator (1080×1350 PNG download / WebShare) + on-chain mint (`/api/deathcard/claim`, CCDeathCard on 46630) | Real-device mobile QA pass |
+| Global leaderboard (MongoDB Atlas live) + PvP duels + rival ghosts + airdrop weights/vault/burn lanes | Ranked duels, guild wars (council-gated) |
+| vibe/vibe design language, WebAudio synth SFX, mobile touch controls, landing tutorial + interactive gameplay demo | Mascot V2 (owner re-brief) |
+
+Public surfaces: `/` · `/play` · `/partners` · `/airdrop` · `/stats` ·
+`/privacy` · `/terms` · `/ops` (noindex) — plus aggregate-only APIs
+(`/api/wick/state`, `/api/partners/pool`).
 
 ## Tech stack
 

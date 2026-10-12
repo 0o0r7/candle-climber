@@ -3,7 +3,8 @@
 > Registered 2026-10-10 per owner question ("can we mint the Death Card as an NFT
 > on testnet for users?"). **DEPLOYED 2026-10-10 evening** (see §0.1) — the
 > contract is live, owned by the $WICK launch wallet, with the burner as the
-> owner-revocable server minter. Next build item: the claim route.
+> owner-revocable server minter. **CLAIM ROUTE SHIPPED** (`/api/deathcard/claim`,
+> 7-gate server flow, `test/deathcard-claim.test.ts`; status header updated 2026-10-13 — the "next build item" line above predates it).
 
 ## 0. Implementation status (2026-10-10, same day) — build STARTED
 
