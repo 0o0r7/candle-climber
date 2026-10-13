@@ -23,7 +23,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install selenium
-        run: python -m pip install --quiet selenium
+        run: python -m pip install --quiet "selenium>=4.20,<4.30" # G5: LT grid handshake fails on selenium 4.35+ (empty-message WebDriverException on the first command); pin to the certified band
 
       - name: Run device matrix QA (prod)
         run: python scripts/lambdatest_realdevice.py
