@@ -25,17 +25,23 @@ const steps: Step[] = [
   {
     visual: "rush",
     title: "Rush mode",
-    body: "Hold Shift to rush — climb faster and earn +25% bonus score. Higher speed means tighter timing. Use it when you're confident.",
+    // Visual QA 2026-10-14: absorbed the pause-keys line from the removed
+    // inline how-to block on the entry card (owner: block was redundant).
+    body: "Hold Shift to rush — climb faster and earn +25% bonus score. Higher speed means tighter timing. P or Esc pauses the run.",
   },
   {
     visual: "combo",
     title: "Chain combos",
-    body: "Land on consecutive candles without falling to build a combo multiplier. The longer your streak, the bigger your score. One miss resets it.",
+    // Visual QA 2026-10-14: absorbed the combo cap + camera rule from the
+    // removed inline how-to block.
+    body: "Land on consecutive candles to build a combo multiplier — up to ×7. One miss resets it. The camera never stops: fall off the bottom of the chart and the run ends.",
   },
   {
     visual: "daily",
     title: "One daily chart",
-    body: "Every player worldwide climbs the same chart. A new chart drops at 00:00 UTC. Submit your score to the global leaderboard and see where you rank.",
+    // Visual QA 2026-10-14: absorbed the graduation/world-2 line from the
+    // removed inline how-to block.
+    body: "Every player worldwide climbs the same chart. A new chart drops at 00:00 UTC. Submit your score to the global leaderboard — reach the summit to GRADUATE and world 2 pays double.",
   },
 ];
 

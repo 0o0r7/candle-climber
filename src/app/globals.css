@@ -423,21 +423,9 @@ button.cc-wallet-chip { cursor: pointer; }
   color: var(--cc-faint);
 }
 
-.cc-howto {
-  margin: 14px 0 20px;
-  color: #AEB6BC;
-  font-size: 14px;
-  line-height: 1.75;
-}
-.cc-howto .lime { color: var(--cc-up); }
-.cc-howto .coral { color: var(--cc-down); }
-.cc-howto .cc-next-level {
-  margin-top: 6px;
-  color: var(--cc-purple);
-  font-weight: 600;
-  font-size: 12.5px;
-  letter-spacing: 0.02em;
-}
+/* Visual QA 2026-10-14: .cc-howto rules removed — the inline how-to block on
+   the entry card was deleted (duplicated the tutorial wizard; owner flag).
+   The surviving how-to surfaces are the 5-step wizard + the pause overlay. */
 
 .cc-btn {
   font-family: var(--cc-display);
@@ -461,6 +449,18 @@ button.cc-wallet-chip { cursor: pointer; }
 }
 .cc-btn-start:hover { background: #DBFF3D; border-color: #DBFF3D; }
 .cc-btn-ghost { background: transparent; }
+/* Visual QA 2026-10-14: HOME affordance (pause overlay + results panel) —
+   an <a> styled as a ghost button with the house glyph; the old bare footer
+   link was the only exit and read as decorative text (owner flag). */
+.cc-btn-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  text-decoration: none;
+}
+.cc-btn-home svg { flex: 0 0 auto; opacity: 0.85; }
+.cc-btn-home:hover svg { opacity: 1; }
 .cc-best {
   margin-top: 14px;
   font-family: var(--cc-mono);
@@ -935,7 +935,32 @@ button.cc-wallet-chip { cursor: pointer; }
 }
 .cc-footer a { color: var(--cc-faint); text-decoration: none; pointer-events: auto; }
 .cc-footer a:hover { color: var(--cc-lime); }
+/* Visual QA 2026-10-14: home is the exit ramp of the whole game — mark it up
+   (house glyph, brighter than the rest of the link row, touch-sized tap). */
+.cc-footer a.cc-foot-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #C6CDD3;
+  padding: 4px 6px;
+  margin: -4px -6px;
+  border-radius: 6px;
+}
+.cc-footer a.cc-foot-home svg { color: var(--cc-lime); }
+.cc-footer a.cc-foot-home:hover { color: var(--cc-lime); }
 @media (max-width: 640px) {
+  /* Visual QA 2026-10-14: HUD chips must never collide with PAUSE/score —
+     the left chip row clips under a soft fade instead of sliding underneath
+     the fixed right group (owner-reported mobile overlap). */
+  .cc-hud { gap: 8px; }
+  .cc-hud-left {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, #000 82%, transparent 100%);
+    mask-image: linear-gradient(90deg, #000 82%, transparent 100%);
+  }
+  .cc-hud-right { flex: 0 0 auto; }
   /* VD-6 fix: footer lifts above the SOUND ON chip and centers — no more
      2-line wrap crammed bottom-left against a right-parked button */
   .cc-footer {
@@ -1220,8 +1245,15 @@ button.cc-wallet-chip { cursor: pointer; }
 
 /* VD-4b: sticky scroll-hint — at short viewports the ready panel still holds
    content below the fold (15-char roster is inherently tall); a faint chevron
-   pinned to the visible bottom tells the user the panel scrolls. */
+   pinned to the visible bottom tells the user the panel scrolls.
+   Visual QA 2026-10-14: scoped to the panels that CAN scroll (entry with the
+   options fold open, death with leaderboards) — on short fixed panels
+   (pause / loading / tutorial) the chevron was pure noise. */
 .cc-panel::after {
+  content: none;
+}
+.cc-panel-entry::after,
+.cc-panel-death::after {
   content: "▾";
   position: sticky;
   bottom: 0;
@@ -1253,6 +1285,11 @@ button.cc-wallet-chip { cursor: pointer; }
   pointer-events: auto;
   width: min(560px, calc(100vw - 32px));
   max-height: calc(100dvh - 150px);
+  /* Visual QA 2026-10-14: the card can still exceed short viewports with the
+     TERRAIN & OPTIONS fold open — scroll inside the card instead of spilling
+     past the screen edge (owner-reported mobile overflow). */
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 18px 20px 12px;
 }
 .cc-title-entry { font-size: clamp(24px, 5vw, 34px); }
@@ -1725,10 +1762,9 @@ button.cc-wallet-chip { cursor: pointer; }
 }
 .cc-sec-title:first-child { margin-top: 4px; border-top: 0; padding-top: 0; }
 
-/* always-visible core how-to (audit RB-1/M-1) — slightly brighter than folded copy */
-.cc-howto-core { margin-top: 12px; }
-.cc-howto-core p { color: #AEB6BC; }
-.cc-howto-core .cc-next-level { color: var(--cc-faint); }
+/* always-visible core how-to — REMOVED 2026-10-14 (Visual QA): duplicated the
+   tutorial wizard 1:1 and overflowed short viewports; unique facts were folded
+   into the wizard steps. (.cc-howto / .cc-howto-core rules deleted as dead.) */
 
 /* pause — HUD button + overlay panel */
 button.cc-chip-pausebtn {
@@ -2374,6 +2410,14 @@ html { scroll-behavior: smooth; }
   background: var(--cc-lime);
 }
 .cc-mode-icon { font-size: 14px; line-height: 1; }
+/* Visual QA 2026-10-14: on narrow phones the 3-tab row (CRYPTO / STOCKS /
+   LAUNCHPAD) overflowed the entry card and LAUNCHPAD got clipped — tighten
+   the chips so all three fit inside min(560px, 100vw-32px) at 320-420px. */
+@media (max-width: 420px) {
+  .cc-mode-selector { max-width: 100%; }
+  .cc-mode-btn { padding: 7px 10px; font-size: 11px; letter-spacing: 0.05em; gap: 4px; }
+  .cc-mode-icon { font-size: 12px; }
+}
 
 /* Mode selection (landing) */
 .lp-modes-grid {

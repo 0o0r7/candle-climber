@@ -56,6 +56,31 @@ import {
 } from "@/lib/stats-ledger";
 
 type Phase = "loading" | "ready" | "running" | "graduated" | "dead";
+
+// Visual QA 2026-10-14: shared house glyph for the HOME affordances. The owner
+// flagged the old home affordance (a bare lowercase footer link, invisible in
+// the game loop) — HOME now exists where the player actually is: the pause
+// overlay, the results panel, and a marked-up footer link. Inline SVG keeps it
+// dependency-free and crisp at HUD sizes.
+function HomeGlyph({ size = 12 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M3 11.5 12 4l9 7.5" />
+      <path d="M5.5 10.5V20h13v-9.5" />
+    </svg>
+  );
+}
 interface BoardEntry {
   name: string;
   score: number;
@@ -1698,6 +1723,13 @@ export default function GameCanvas() {
               <div className="cc-death-actions">
                 <button className="cc-btn cc-btn-start" onClick={() => applyPause(false)}>RESUME</button>
                 <button className="cc-btn" onClick={startRun}>RESTART RUN</button>
+                {/* Visual QA 2026-10-14: HOME now lives inside the pause overlay —
+                    the old bare footer link was the only way out mid-run and was
+                    invisible there (owner flag). Abandoned runs are simply not
+                    recorded (ledger counts finished runs only — honest). */}
+                <a className="cc-btn cc-btn-ghost cc-btn-home" href="/" aria-label="Quit to home page">
+                  <HomeGlyph size={13} />HOME
+                </a>
               </div>
               <p className="cc-pause-keys">
                 {coarsePointer
@@ -1743,24 +1775,15 @@ export default function GameCanvas() {
               {currentStreak > 0 && (
                 <p className="cc-streak">🔥 {currentStreak} DAY STREAK</p>
               )}
-              {/* Audit RB-1/M-1: the objective, controls, scoring and failure
-                  condition live ABOVE the fold — no expansion required. */}
-              <div className="cc-howto cc-howto-core">
-                <p><b className="lime">GREEN</b> candles hold. <b className="coral">RED</b> candles crack, then crumble under you.</p>
-                <p>Tap = hop · <b className="lime">HOLD</b> Space (or ↑ / W) = higher jump · release early = short.</p>
-                {!coarsePointer && (
-                  <p><b className="lime">SHIFT</b> = RUSH — climb faster, +25% score while held · <b className="lime">P / ESC</b> = pause.</p>
-                )}
-                <p>Every candle you pass pays points — back-to-back GREEN candles build a combo (up to ×7). The camera never stops: fall off the bottom and the run ends.</p>
-                {archive ? (
-                  <p className="cc-next-level">famous days are famous difficulty — nobody designed this on purpose.</p>
-                ) : (
-                  <p className="cc-next-level">Same chart for everyone · resets 00:00 UTC · reach the summit to GRADUATE (world 2: gains ×2).</p>
-                )}
-              </div>
+              {/* Visual QA 2026-10-14 (owner flag): the inline how-to paragraph
+                  block is GONE — it duplicated the 5-step tutorial wizard
+                  (HOW TO PLAY re-opens it) and bloated the card enough to
+                  overflow short/mobile viewports. The three facts the wizard
+                  didn't already carry (pause keys, combo cap + camera rule,
+                  graduation ×2) were folded into the wizard steps themselves. */}
               <details className="cc-more">
                 <summary className="cc-more-summary">
-                  <span className="cc-more-arrow" aria-hidden>▸</span> HOW TO PLAY &amp; OPTIONS
+                  <span className="cc-more-arrow" aria-hidden>▸</span> TERRAIN &amp; OPTIONS
                 </summary>
                 <div className="cc-more-body">
                   <div className="cc-sec-title">TODAY&apos;S TERRAIN</div>
@@ -2086,6 +2109,11 @@ export default function GameCanvas() {
                   </button>
                 )}
                 <button className="cc-btn cc-btn-start" onClick={startRun}>RETRY</button>
+                {/* Visual QA 2026-10-14: symmetric HOME exit on the results
+                    panel — RETRY loops the same terrain; HOME leaves cleanly. */}
+                <a className="cc-btn cc-btn-ghost cc-btn-home" href="/" aria-label="Back to home page">
+                  <HomeGlyph size={13} />HOME
+                </a>
               </div>
               {mintNote}
               {archive && practiceNote && <p className="cc-vault-note" role="status">{practiceNote}</p>}
@@ -2138,7 +2166,7 @@ export default function GameCanvas() {
       <footer className="cc-footer">
         <WalletChip />
         <span aria-hidden>·</span>
-        <a href="/">home</a>
+        <a href="/" className="cc-foot-home" aria-label="Candle Climber home"><HomeGlyph size={11} />home</a>
         <span aria-hidden>·</span>
         <a href="https://testnet.vibevibe.fun/" target="_blank" rel="noopener noreferrer">vibe/vibe testnet</a>
         <span aria-hidden>·</span>
