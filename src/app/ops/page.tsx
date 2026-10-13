@@ -36,7 +36,11 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section style={{ marginBottom: 28 }}>
       <h2 style={{ fontSize: 15, marginBottom: 6, borderBottom: "1px solid #333", paddingBottom: 4 }}>{title}</h2>
-      <table style={{ borderCollapse: "collapse", fontSize: 14 }}>{children}</table>
+      {/* sweep 4 (2026-10-14): rows MUST live in a <tbody> — bare <tr> under
+          <table> is invalid HTML and broke React hydration on this page */}
+      <table style={{ borderCollapse: "collapse", fontSize: 14 }}>
+        <tbody>{children}</tbody>
+      </table>
     </section>
   );
 }

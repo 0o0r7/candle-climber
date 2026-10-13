@@ -770,6 +770,55 @@ button.cc-wallet-chip { cursor: pointer; }
   font-size: 11px;
 }
 
+/* Sweep 4 (2026-10-14, D8): corner tools group — Settings + Achievements +
+   sound in one bottom-right row. The Settings/Achievements triggers previously
+   had a class with NO CSS: an unstyled flow bar at the very top of the page,
+   rendered UNDER the game canvas (z10) and unclickable (hit-testing resolved
+   to the canvas) — Settings was unreachable in the whole play UI. The group
+   sits above the canvas (z30), keeps the chip look, and `.cc-mute` becomes a
+   static flex item inside it (its absolute fallback below still applies when
+   the group is absent). */
+.cc-corner-tools {
+  position: absolute;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  right: 14px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+.cc-corner-tools .cc-mute {
+  position: static;
+  bottom: auto;
+  right: auto;
+}
+.cc-settings-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* trigger buttons drop shadcn's default chrome for the game's chip look */
+.cc-settings-trigger > button {
+  height: auto;
+  padding: 7px 10px;
+  font-family: var(--cc-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--cc-faint);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+}
+.cc-settings-trigger > button:hover {
+  color: var(--cc-lime);
+}
+.cc-settings-trigger > button svg {
+  width: 13px;
+  height: 13px;
+}
+
 /* ---- M2 additions: mutation banner, HUD mutation chip, rival line, mini board ---- */
 .cc-hud-left {
   display: flex;

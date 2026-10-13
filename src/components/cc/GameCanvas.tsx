@@ -2187,18 +2187,25 @@ export default function GameCanvas() {
         <span>no real funds</span>
       </footer>
 
-      <button
-        className="cc-chip cc-mute"
-        onClick={toggleMute}
-        aria-label={muted ? "Turn sound on" : "Mute sound"}
-        aria-pressed={!muted}
-      >
-        {muted ? "MUTED" : "SOUND ON"}
-      </button>
-
-      <div className="cc-chip cc-settings-trigger">
-        <SettingsPanel triggerVariant="ghost" triggerSize="sm" />
-        <AchievementsPanel triggerVariant="ghost" triggerSize="sm" newCount={newAchievements.length} />
+      {/* Sweep 4 (2026-10-14, D8): the Settings/Achievements triggers used to
+          render as an UNSTYLED flow bar at the top of the page — visually
+          buried under the game canvas (z10) and unclickable (hit-testing
+          resolved to the canvas), leaving Settings unreachable in the whole
+          play UI. They now share one corner-tools group with the sound chip:
+          bottom-right, above the canvas, pointer-events restored. */}
+      <div className="cc-corner-tools">
+        <div className="cc-chip cc-settings-trigger">
+          <SettingsPanel triggerVariant="ghost" triggerSize="sm" />
+          <AchievementsPanel triggerVariant="ghost" triggerSize="sm" newCount={newAchievements.length} />
+        </div>
+        <button
+          className="cc-chip cc-mute"
+          onClick={toggleMute}
+          aria-label={muted ? "Turn sound on" : "Mute sound"}
+          aria-pressed={!muted}
+        >
+          {muted ? "MUTED" : "SOUND ON"}
+        </button>
       </div>
     </div>
   );

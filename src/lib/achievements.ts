@@ -24,8 +24,12 @@ export interface AchievementCheckInput {
 export const ACHIEVEMENT_DEFS: AchievementDef[] = [
   { id: "first_blood", name: "FIRST LIQUIDATION", desc: "Die for the first time" },
   { id: "first_grad", name: "SUMMIT REACHED", desc: "Graduate (reach the summit)" },
-  { id: "combo_10", name: "ON FIRE", desc: "Reach a 10x combo multiplier" },
-  { id: "combo_12", name: "MAX LEVERAGE", desc: "Reach the 12x combo cap" },
+  // Sweep 4 (2026-10-14) honesty fix: the old descs said "10x / 12x combo
+  // multiplier/cap" — wrong numbers. Truth (src/lib/scoring.ts): the streak
+  // caps at COMBO_CAP=12 candles and the multiplier formula is
+  // 1 + min(streak, 12) × COMBO_STEP(0.5) ⇒ max ×7 (the tutorial's "up to ×7").
+  { id: "combo_10", name: "ON FIRE", desc: "Land a 10-candle combo streak (×6 multiplier)" },
+  { id: "combo_12", name: "MAX LEVERAGE", desc: "Max the combo: 12-streak cap, ×7 multiplier" },
   { id: "candles_50", name: "HALF CHART", desc: "Pass 50 candles in one run" },
   { id: "candles_100", name: "CENTURY CLIMBER", desc: "Pass 100 candles in one run" },
   { id: "no_rush_clear", name: "DIAMOND HANDS", desc: "Graduate without using RUSH" },
