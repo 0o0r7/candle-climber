@@ -1,0 +1,24 @@
+{
+  "stamp": "20261013232145.",
+  "url": "https://candle-climber.vercel.app/play",
+  "runner": "playwright-local (G5) — LT grid bypassed, see report header",
+  "profiles": 3,
+  "passed": 0,
+  "results": [
+    {
+      "label": "pixel7-android13-touch",
+      "pass": false,
+      "checks": "0/1"
+    },
+    {
+      "label": "iphone13-ios16-touch",
+      "pass": false,
+      "checks": "0/1"
+    },
+    {
+      "label": "desktop-chrome-1440x900",
+      "pass": false,
+      "checks": "0/1"
+    }
+  ]
+}

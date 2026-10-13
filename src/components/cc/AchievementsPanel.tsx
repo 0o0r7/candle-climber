@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCallback, useState } from "react";
@@ -38,8 +38,8 @@ export default function AchievementsPanel({
   return (
     <Dialog onOpenChange={refreshOnOpen}>
       <DialogTrigger asChild>
-        <Button variant={triggerVariant} size={triggerSize} className={triggerClassName}>
-          <Trophy className="h-4 w-4" />
+        <Button variant={triggerVariant} size={triggerSize} className={triggerClassName} aria-label="Open achievements">
+          <Trophy className="h-4 w-4" aria-hidden />
           {newCount > 0 && (
             <Badge className="ml-1 h-5 min-w-5 justify-center px-1 text-[10px]" variant="default">
               {newCount}
@@ -49,6 +49,9 @@ export default function AchievementsPanel({
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
+          <DialogDescription className="sr-only">
+            Achievements unlocked in this browser — ranked against the full list.
+          </DialogDescription>
           <DialogTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5" />
             Achievements

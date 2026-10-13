@@ -268,7 +268,7 @@
   --cc-down: #E07856;
   --cc-ink: #0E1400;
   --cc-purple: #6A63C8;
-  --cc-faint: #5E636B;
+  --cc-faint: #8A9099; /* G5: 5.7:1 on the dark bg — was 3.07:1 (Lighthouse a11y) */
   --cc-display: 'Clash Display', 'Instrument Sans', sans-serif;
   --cc-ui: 'Instrument Sans', sans-serif;
   --cc-mono: var(--font-mono-cc), 'JetBrains Mono', monospace;
@@ -982,7 +982,11 @@ button.cc-wallet-chip { cursor: pointer; }
   z-index: 25;
   pointer-events: none;
 }
-.cc-footer a { color: var(--cc-faint); text-decoration: none; pointer-events: auto; }
+.cc-footer a { color: var(--cc-faint); text-decoration: none; pointer-events: auto;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+}
 .cc-footer a:hover { color: var(--cc-lime); }
 /* Visual QA 2026-10-14: home is the exit ramp of the whole game — mark it up
    (house glyph, brighter than the rest of the link row, touch-sized tap). */
@@ -1893,17 +1897,19 @@ button.cc-chip-pausebtn:hover { color: var(--cc-lime); border-color: rgba(204, 2
   margin: 16px 0;
 }
 .cc-tut-dot {
-  width: 8px; height: 8px;
+  /* G5 (Lighthouse target-size): 24x24 touch target, the 8px dot is drawn
+     inside via radial-gradient so the visual rhythm is unchanged */
+  width: 24px; height: 24px;
   border-radius: 50%;
   border: 0;
   padding: 0;
-  background: var(--cc-hairline);
+  background: radial-gradient(circle at center, var(--cc-hairline) 0 4px, transparent 4px);
   cursor: pointer;
   transition: background 0.15s;
 }
-.cc-tut-dot.on { background: var(--cc-lime); }
-.cc-tut-dot:hover { background: #4A5158; }
-.cc-tut-dot.on:hover { background: var(--cc-lime); }
+.cc-tut-dot.on { background: radial-gradient(circle at center, var(--cc-lime) 0 4px, transparent 4px); }
+.cc-tut-dot:hover { background: radial-gradient(circle at center, #4A5158 0 4px, transparent 4px); }
+.cc-tut-dot.on:hover { background: radial-gradient(circle at center, var(--cc-lime) 0 4px, transparent 4px); }
 .cc-tut-actions {
   display: flex;
   gap: 8px;
@@ -1933,7 +1939,7 @@ html { scroll-behavior: smooth; }
   --lp-lime: #CCFF00;
   --lp-up: #5BD08A;
   --lp-down: #E07856;
-  --lp-faint: #5E636B;
+  --lp-faint: #8A9099; /* G5: AA contrast on dark (was ~3.07:1) */
   --lp-text: #D8DEE3;
   --lp-display: 'Clash Display', 'Instrument Sans', sans-serif;
   --lp-ui: 'Instrument Sans', sans-serif;
@@ -2351,8 +2357,7 @@ html { scroll-behavior: smooth; }
   font-family: var(--lp-mono);
   font-size: 9px;
   letter-spacing: 0.06em;
-  color: var(--lp-faint);
-  opacity: 0.7;
+  color: var(--lp-faint); /* G5: opacity removed — 0.7 alpha dropped it back under AA */
   word-break: break-all;
 }
 

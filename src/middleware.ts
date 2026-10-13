@@ -19,10 +19,12 @@ export function middleware(req: NextRequest) {
     // strict-dynamic + nonce: Next's flight bootstrap carries the nonce; any
     // script it loads inherits trust. Dev needs 'unsafe-eval' (React refresh).
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
-    "style-src 'self' 'unsafe-inline'", // shadcn chart <style> injection (static config, no user input)
+    // fontshare stylesheet + font files are first-party brand assets loaded cross-origin
+    "style-src 'self' 'unsafe-inline' https://api.fontshare.com",
     `connect-src 'self' ${SENTRY_INGEST}`,
     "img-src 'self' data: blob:",
-    "font-src 'self' data:",
+    // fontshare: the stylesheet is api.fontshare.com, the font binaries load from cdn.fontshare.com
+    "font-src 'self' data: https://api.fontshare.com https://cdn.fontshare.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

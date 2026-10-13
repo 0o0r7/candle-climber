@@ -190,6 +190,27 @@ def run_session(cfg, lt_user, lt_key):
         d.get(PROD)
         WebDriverWait(d, 60).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-char-chip")))
+
+        # G5: WIZARD FIRST — the first-visit tutorial overlay covers the entry
+        # card and absorbs every click beneath it (venom/dialog clicks silently
+        # no-op). Fresh grid profiles ALWAYS see it: dismiss before anything else.
+        try:
+            WebDriverWait(d, 8).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-tutorial-overlay")))
+            skip = next((b for b in d.find_elements(
+                By.CSS_SELECTOR, ".cc-tutorial-overlay button")
+                if b.text.strip().upper() == "SKIP"), None)
+            if skip:
+                skip.click()
+                time.sleep(1)
+                gone = len(d.find_elements(By.CSS_SELECTOR, ".cc-tutorial-overlay")) == 0
+                check("wizard_gate", gone, f"overlay shown, SKIP dismissed={gone}")
+                shot(d, "00-wizard", out)
+            else:
+                check("wizard_gate", False, "overlay shown but SKIP not found")
+        except Exception:
+            check("wizard_gate", True, "overlay not shown (progress flag already set)")
+
         check("page_title", "candle" in (d.title or "").lower(), d.title)
 
         # G5: 3-mode era — the tablist must render with CRYPTO active.
@@ -233,30 +254,12 @@ def run_session(cfg, lt_user, lt_key):
                               "achievements_dialog_opens", idx=1)
         shot(d, "02-dialogs", out)
 
-        start = WebDriverWait(d, 20).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".cc-btn-start")))
+        start = next((b for b in d.find_elements(By.CSS_SELECTOR, ".cc-btn-start")
+                      if "cc-tut-btn" not in (b.get_attribute("class") or "")), None)
+        if not start:
+            raise RuntimeError("no start button outside the tutorial overlay")
+        WebDriverWait(d, 20).until(EC.element_to_be_clickable(start))
         start.click()
-
-        # G5: first-run tutorial wizard — must appear on a fresh profile and
-        # must be dismissable (SKIP on step 1).
-        try:
-            WebDriverWait(d, 8).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-tutorial-overlay")))
-            skip = next((b for b in d.find_elements(
-                By.CSS_SELECTOR, ".cc-tutorial-overlay button")
-                if b.text.strip().upper() == "SKIP"), None)
-            if skip:
-                skip.click()
-                time.sleep(1)
-                gone = len(d.find_elements(
-                    By.CSS_SELECTOR, ".cc-tutorial-overlay")) == 0
-                check("wizard_gate", gone,
-                      f"overlay shown, SKIP dismissed={gone}")
-            else:
-                check("wizard_gate", False, "overlay shown but SKIP not found")
-        except Exception:
-            check("wizard_gate", True,
-                  "overlay not shown (progress flag already set)")
 
         try:
             WebDriverWait(d, 20).until(

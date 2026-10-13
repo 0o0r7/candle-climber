@@ -1,0 +1,13 @@
+{
+  "stamp": "20261013231831.",
+  "label": "desktop-chrome-1440x900",
+  "url": "https://candle-climber.vercel.app/play",
+  "pass": false,
+  "checks": [
+    {
+      "check": "session_completed",
+      "ok": false,
+      "detail": "TimeoutError: waitForSelector: Timeout 60000ms exceeded.\nCall log:\n  - waiting for locator('.cc-char-chip') to be visible\n    118 × locator resolved to 15 elements. Proceeding with the first one: <but"
+    }
+  ]
+}

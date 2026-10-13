@@ -1,0 +1,78 @@
+{
+  "stamp": "20261013233029.",
+  "label": "pixel7-android13-touch",
+  "url": "https://candle-climber.vercel.app/play",
+  "pass": true,
+  "checks": [
+    {
+      "check": "wizard_gate",
+      "ok": true,
+      "detail": "overlay shown, SKIP dismissed=true"
+    },
+    {
+      "check": "page_title",
+      "ok": true,
+      "detail": "CANDLE CLIMBER — Play"
+    },
+    {
+      "check": "mode_tabs_present",
+      "ok": true,
+      "detail": "3 tabs, active=1"
+    },
+    {
+      "check": "char_chips_rendered",
+      "ok": true,
+      "detail": "15 chips"
+    },
+    {
+      "check": "venom_select",
+      "ok": true,
+      "detail": "WICK VENOM"
+    },
+    {
+      "check": "corner_tools_visible",
+      "ok": true,
+      "detail": "count=1"
+    },
+    {
+      "check": "settings_dialog_opens",
+      "ok": true,
+      "detail": "opened=true closed_by_escape=true"
+    },
+    {
+      "check": "achievements_dialog_opens",
+      "ok": true,
+      "detail": "opened=true closed_by_escape=true"
+    },
+    {
+      "check": "run_started",
+      "ok": true,
+      "detail": "HUD score chip visible"
+    },
+    {
+      "check": "mobile_rush_button",
+      "ok": true,
+      "detail": "count=1"
+    },
+    {
+      "check": "gameplay_then_death_card",
+      "ok": true,
+      "detail": "taps=6 death-score=\"125\""
+    },
+    {
+      "check": "results_home_affordance",
+      "ok": true,
+      "detail": "1 HOME element(s)"
+    },
+    {
+      "check": "sentry_sdk_loaded",
+      "ok": true,
+      "detail": "window.__SENTRY__=true"
+    },
+    {
+      "check": "no_severe_console_errors",
+      "ok": true,
+      "detail": "0 severe: "
+    }
+  ]
+}

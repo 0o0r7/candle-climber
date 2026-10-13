@@ -1,0 +1,28 @@
+{
+  "stamp": "20261013232600.",
+  "label": "desktop-chrome-1440x900",
+  "url": "https://candle-climber.vercel.app/play",
+  "pass": false,
+  "checks": [
+    {
+      "check": "page_title",
+      "ok": true,
+      "detail": "CANDLE CLIMBER — Play"
+    },
+    {
+      "check": "mode_tabs_present",
+      "ok": true,
+      "detail": "3 tabs, active=1"
+    },
+    {
+      "check": "char_chips_rendered",
+      "ok": true,
+      "detail": "15 chips"
+    },
+    {
+      "check": "session_completed",
+      "ok": false,
+      "detail": "TimeoutError: click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('.cc-char-chip').filter({ hasText: /venom/i }).first()\n    - locator resolved to <button role=\"radio\" aria-checked=\"fal"
+    }
+  ]
+}
