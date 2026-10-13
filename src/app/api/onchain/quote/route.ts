@@ -9,6 +9,7 @@
 //   from it. The two contract sets are deliberately different and never mixed.
 // - Unavailable reads return null. Nothing is ever synthesised here.
 import { NextResponse } from "next/server";
+import { rateLimited, clientIp } from "@/lib/http-limiter"; // G5: shared namespaced limiter (129-a #7)
 import {
   ROBINHOOD_MAINNET,
   ROBINHOOD_TESTNET,
@@ -25,6 +26,12 @@ const ALLOWED = Array.from(
 ).sort();
 
 export async function GET(req: Request) {
+  // G5 (129-a #7): GET throttle — this lane proxies upstreams / heavy compute;
+  // an unthrottled public relay is a free compute loop for a scripted client.
+  if (rateLimited("quote-get", clientIp(req), 30)) {
+    return NextResponse.json({ error: "slow down" }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const symbol = (searchParams.get("symbol") ?? "").toUpperCase();
 

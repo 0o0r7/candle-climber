@@ -19,6 +19,17 @@ const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
     // React rules
     "react-hooks/exhaustive-deps": "off",
     "react-hooks/purity": "off",
+    // G5 (2026-10-14): eslint-config-next 16.3+ ships the experimental
+    // React-Compiler lint rules enabled by default. They are performance
+    // ADVISORIES against imperative patterns the canvas game uses
+    // deliberately (setState inside fetch-continuation effects, refs mirroring
+    // engine state during render, manual memoization around the RAF loop).
+    // A compiler-safe refactor of the game shell is post-launch work — these
+    // four stay visible as warnings, everything else remains an error.
+    "react-hooks/set-state-in-effect": "warn",
+    "react-hooks/refs": "warn",
+    "react-hooks/preserve-manual-memoization": "warn",
+    "react-hooks/immutability": "warn",
     "react/no-unescaped-entities": "off",
     "react/display-name": "off",
     "react/prop-types": "off",

@@ -458,7 +458,12 @@ export default function GameCanvas() {
         refreshSelfGhost(d); // P2: mirror this terrain's own best ghost (if any)
         setPhase("ready");
         if (!isArch) {
-          fetch(`/api/leaderboard?date=${d.seed.date}&interval=${effTf}`)
+          // G5 (129-c #7): boards follow the TERRAIN's timeframe, not the raw
+          // selector — a launchpad run lands on the 1w board and a CoinGecko
+          // run on the 1d board, so refreshing ?interval=<selector> made the
+          // submitted run invisible on the board shown right after landing.
+          const seedIv = isInterval(d.seed.interval) ? d.seed.interval : effTf;
+          fetch(`/api/leaderboard?date=${d.seed.date}&interval=${seedIv}`)
             .then((r) => r.json())
             .then((b) => {
               if (!alive) return;
@@ -475,7 +480,7 @@ export default function GameCanvas() {
             .catch(() => {});
           // Option B: official lane loads only for wallet-linked devices
           if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) {
-            fetch(`/api/leaderboard?date=${d.seed.date}&interval=${effTf}&board=official`)
+            fetch(`/api/leaderboard?date=${d.seed.date}&interval=${seedIv}&board=official`)
               .then((r) => r.json())
               .then((b) => {
                 if (!alive) return;
@@ -495,7 +500,7 @@ export default function GameCanvas() {
             .then((b: { ok?: boolean; burned?: string }) => { if (alive && b.ok) setBurn(b.burned ?? null); })
             .catch(() => {});
           // P7.2: best submitted ghost for THIS terrain (champion first)
-          fetch(`/api/ghosts?symbol=${d.seed.symbol}&date=${d.seed.date}&interval=${effTf}`)
+          fetch(`/api/ghosts?symbol=${d.seed.symbol}&date=${d.seed.date}&interval=${seedIv}`)
             .then((r) => r.json())
             .then((g: { ghosts?: GhostEntry[] }) => {
               if (!alive || duelLockRef.current) return; // P7.3: a loaded duel owns the ghost slot
@@ -1097,7 +1102,7 @@ export default function GameCanvas() {
       // feel unnatural). Renderers draw under the resize-time fit transform and
       // save/restore internally. (Biome layers ride the v2 renderer — render-only.)
       if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv, biomeId, peakIdxRef.current, celebrateRef.current, settingsRef.current.colorblind, settingsRef.current.reducedMotion);
-      else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv);
+      else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv); // debug-only path (?renderer=v1): legacy renderer, a11y layers are v2-only by design
       rafRef.current = requestAnimationFrame(step);
     };
     rafRef.current = requestAnimationFrame(step);
@@ -1127,9 +1132,14 @@ export default function GameCanvas() {
       }
       if (pausedRef.current && phase === "running") return;
       // P3.6 RUSH (desktop): hold Shift = faster climb + 25% gains (opt-in risk)
+      // G5 (129-c #10): phase-gated like the mobile RUSH button — pressing
+      // Shift on the ready/dead screens used to mark usedRushRef for the NEXT
+      // run, silently forfeiting DIAMOND HANDS without any rush usage.
       if (ev.key === "Shift") {
-        usedRushRef.current = true; // honest DIAMOND HANDS tracking
-        engineRef.current?.pressRush();
+        if (phase === "running") {
+          usedRushRef.current = true; // honest DIAMOND HANDS tracking
+          engineRef.current?.pressRush();
+        }
         return;
       }
       if (ev.code === "Space" || ev.code === "ArrowUp" || ev.code === "KeyW") {
@@ -1170,10 +1180,11 @@ export default function GameCanvas() {
   const submitScore = async () => {
     // tokenless terrain (synthetic fallback) is unscored — never POST it
     if (!result || !data || submitting || !data.runToken) return;
-    // The interval the terrain was actually served with — stocks pin "1w"
-    // server-side, crypto echoes the requested tf, launchpad is "derived"
-    // (falls back to tf, the legacy behavior). Proof messages and board/ghost
-    // refreshes must name the PLAYED interval, never the raw selector state.
+    // The interval the terrain was actually served with — G5 (129-c #7):
+    // every seed now carries a concrete timeframe that matches its signed
+    // token (stocks pin "1w", CoinGecko "1d", launchpad "1w"), so the fallback
+    // below is legacy-defensive only. Proof messages and board/ghost refreshes
+    // name the PLAYED interval, never the raw selector state.
     const subIv: GameInterval = isInterval(data.seed.interval) ? data.seed.interval : tf;
     setSubmitting(true);
     try {

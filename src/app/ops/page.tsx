@@ -9,6 +9,7 @@ import { getBoard } from "@/lib/leaderboard-store";
 import { getWeights } from "@/lib/weights-store";
 import { getScoreReports } from "@/lib/score-report-store"; // LU-15 review queue
 import { detectAnomalies } from "@/lib/anomaly-detection"; // LU-7 live flags
+import { opsAuthorized } from "@/lib/ops-auth"; // G5: moderation detail default-gated (129-a #4)
 import { fetchBurnedWick } from "@/lib/burn";
 import { fetchMeter, ethHuman } from "@/lib/meter";
 import { graduationState, weightsFrozen, POST_GRAD_LANES } from "@/lib/graduation";
@@ -45,8 +46,18 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-export default async function OpsPage() {
+export default async function OpsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ key?: string }>;
+}) {
   const now = Date.now();
+  const { key } = await searchParams;
+  // G5 (129-a #4): the moderation DETAIL (report queue rows, flagged entries)
+  // is gated behind OPS_TOKEN. Without the credential this page renders the
+  // same aggregates as before — counts, wei, percentages — plus an honest
+  // gate note. ?key=<OPS_TOKEN> unlocks the detail for the operator.
+  const ops = opsAuthorized(key ?? null);
   const [meter, burn, laneS, wStats, grad] = await Promise.all([
     fetchMeter(),
     fetchBurnedWick(),
@@ -61,9 +72,10 @@ export default async function OpsPage() {
   let reportStore = NA;
   let flaggedGuest = NA;
   let flaggedOfficial = NA;
+  let flaggedRows: Awaited<ReturnType<ReturnType<typeof getBoard>["top"]>> = [];
   try {
     const rs = getScoreReports();
-    reports = await rs.recent(10);
+    if (ops) reports = await rs.recent(10);
     reportStore = rs.kind;
   } catch { /* fail-open */ }
   try {
@@ -72,6 +84,11 @@ export default async function OpsPage() {
     const o = await board.top(null, 100, "1w", "official");
     flaggedGuest = String(detectAnomalies(g).size);
     flaggedOfficial = String(detectAnomalies(o).size);
+    // G5 (129-c #2): anomalies are PERSISTED on the entry at submission time —
+    // surface the stored rows (the recomputed numbers above can drift from
+    // what the submission-time check saw). Names shown only to the authorized
+    // operator; the count is public below.
+    if (ops) flaggedRows = [...g, ...o].filter((e) => e.flagged === true).slice(0, 20);
   } catch { /* fail-open */ }
 
   return (
@@ -122,8 +139,41 @@ export default async function OpsPage() {
       <Block title="MODERATION (LU-7 anomalies + LU-15 reports)">
         <Row k="anomaly flags · guest" v={flaggedGuest} note="top-100 all-time, >2× median" />
         <Row k="anomaly flags · official" v={flaggedOfficial} note="wallet-proven lane" />
-        <Row k="community reports" v={String(reports.length)} note={`store: ${reportStore} · latest below`} />
-        {reports.length > 0 && (
+        <Row
+          k="community reports"
+          v={ops ? String(reports.length) : "gated"}
+          note={ops ? `store: ${reportStore} · latest below` : "set OPS_TOKEN; pass ?key= — counts stay public, detail gated (G5)"}
+        />
+        {!ops && (
+          <Row k="flagged rows stored" v="gated" note="submission-time anomaly flags persist on entries — authorize to review" />
+        )}
+        {ops && flaggedRows.length > 0 && (
+          <tr>
+            <td colSpan={3} style={{ padding: "6px 0" }}>
+              <table style={{ borderCollapse: "collapse", fontSize: 12, width: "100%" }}>
+                <thead>
+                  <tr style={{ color: "#888", textAlign: "left" }}>
+                    <th style={{ padding: "2px 10px 2px 0" }}>when</th>
+                    <th style={{ padding: "2px 10px 2px 0" }}>name</th>
+                    <th style={{ padding: "2px 10px 2px 0" }}>score</th>
+                    <th style={{ padding: "2px 0" }}>lane · date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {flaggedRows.map((e, i) => (
+                    <tr key={`${e.ts}-${i}`}>
+                      <td style={{ padding: "2px 10px 2px 0", whiteSpace: "nowrap", color: "#888" }}>{new Date(e.ts).toISOString().slice(0, 16).replace("T", " ")}</td>
+                      <td style={{ padding: "2px 10px 2px 0" }}>{e.name}</td>
+                      <td style={{ padding: "2px 10px 2px 0" }}>{e.score.toLocaleString()}</td>
+                      <td style={{ padding: "2px 0", color: "#888" }}>{e.board ?? "guest"}{e.date ? ` · ${e.date}` : ""}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        )}
+        {ops && reports.length > 0 && (
           <tr>
             <td colSpan={3} style={{ padding: "6px 0" }}>
               <table style={{ borderCollapse: "collapse", fontSize: 12, width: "100%" }}>

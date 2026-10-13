@@ -33,7 +33,7 @@ export interface OnchainVerification {
 export interface SeedInfo {
   date: string; // UTC YYYY-MM-DD
   symbol: string; // e.g. BTCUSDT / TSLA / launch ticker
-  interval: string; // e.g. 1w; "derived" for vibe-launch terrain
+  interval: string; // e.g. 1w / 1d — always a CONCRETE timeframe now (G5 129-c #7): it must match the signed run token and the board the run lands on; derived-ness shows in `source`
   source: 'binance' | 'stooq' | 'yahoo' | 'vibe-launch' | 'robinhood' | 'coingecko' | 'synthetic';
   /** Present for stock levels when the official mainnet Chainlink feed was
    *  read; absent when the ticker has no official feed or the read failed. */

@@ -27,7 +27,7 @@ const steps: Step[] = [
     title: "Rush mode",
     // Visual QA 2026-10-14: absorbed the pause-keys line from the removed
     // inline how-to block on the entry card (owner: block was redundant).
-    body: "Hold Shift to rush — climb faster and earn +25% bonus score. Higher speed means tighter timing. P or Esc pauses the run.",
+    body: "Hold Shift to rush — climb faster and gain +25% bonus score. Higher speed means tighter timing. P or Esc pauses the run.",
   },
   {
     visual: "combo",

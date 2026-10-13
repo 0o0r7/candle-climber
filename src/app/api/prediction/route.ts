@@ -13,6 +13,7 @@
 //     against the closed candle, then records the weight event
 //   · language law: "builds airdrop weights" — never "earn/guaranteed" (LAW 4)
 import { NextResponse } from "next/server";
+import { rateLimited, clientIp, bodyTooLarge } from "@/lib/http-limiter"; // G5: shared namespaced limiter (129-a #6)
 import { pickSeed } from "@/game/cc/level-source";
 import { utcDate, normalizeWallet } from "@/lib/weights";
 import { sanitizeName } from "@/lib/board-validation";
@@ -32,16 +33,6 @@ import { verifyWalletLinkProof } from "@/lib/wallet-proof";
 export const dynamic = "force-dynamic";
 
 /* per-IP rate limit: 10 writes / minute / instance */
-const hits = new Map<string, number[]>();
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const arr = (hits.get(ip) ?? []).filter((t) => now - t < 60_000);
-  if (arr.length >= 10) return true;
-  arr.push(now);
-  hits.set(ip, arr);
-  if (hits.size > 5000) hits.clear();
-  return false;
-}
 
 const META = {
   language: "a locked call builds airdrop weights if the real candle agrees — nothing earned or guaranteed; testnet",
@@ -86,6 +77,12 @@ function publicRow(p: PredictionRow) {
 }
 
 export async function GET(req: Request) {
+  // G5 (129-a #7): GET throttle — this lane proxies upstreams / heavy compute;
+  // an unthrottled public relay is a free compute loop for a scripted client.
+  if (rateLimited("predict-get", clientIp(req), 30)) {
+    return NextResponse.json({ error: "slow down" }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const store = getPredictions();
   const today = utcDate();
@@ -131,11 +128,15 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  // G5 (129-a #11): reject oversized bodies before parsing (self-host has no cap).
+  if (bodyTooLarge(req)) {
+    return NextResponse.json({ error: "payload too large" }, { status: 413 });
+  }
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("x-real-ip") ||
     "local";
-  if (rateLimited(ip)) {
+  if (rateLimited("prediction", ip, 10)) {
     return NextResponse.json({ error: "slow down" }, { status: 429 });
   }
   try {

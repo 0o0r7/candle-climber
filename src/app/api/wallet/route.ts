@@ -10,7 +10,7 @@ import {
   type WalletTier,
 } from "@/lib/wallet";
 import { captureError } from "@/lib/telemetry"; // E4.4: wallet API failures alert (P3)
-import { rateLimited, clientIp } from "@/lib/http-limiter"; // delivery hardening 2026-10-13
+import { rateLimited, clientIp, bodyTooLarge } from "@/lib/http-limiter"; // delivery hardening 2026-10-13
 
 export const dynamic = "force-dynamic";
 
@@ -62,9 +62,13 @@ async function readBalance(address: string): Promise<WalletQuery> {
 }
 
 export async function POST(req: NextRequest) {
+  // G5 (129-a #11): reject oversized bodies before parsing (self-host has no cap).
+  if (bodyTooLarge(req)) {
+    return NextResponse.json({ error: "payload too large" }, { status: 413 });
+  }
   // Delivery hardening: this POST proxies to the public RPC — throttle
   // distinct-address scanning (per-IP; the 60s per-address cache still applies).
-  if (rateLimited(clientIp(req), 30)) {
+  if (rateLimited("wallet", clientIp(req), 30)) {
     return NextResponse.json({ ok: false, error: "rate limited" }, { status: 429 });
   }
   let address = "";

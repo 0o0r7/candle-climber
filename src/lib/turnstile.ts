@@ -42,6 +42,10 @@ export async function verifyTurnstileToken(
     const res = await fetch(SITEVERIFY_URL, {
       method: "POST",
       body: form,
+      // G5 (129-a #12): a hung siteverify request must not stall the leaderboard
+      // POST lane — 3s budget, then the catch below fails OPEN (infra blip must
+      // not block play; limiter + nonce + anomaly detection still hold).
+      signal: AbortSignal.timeout(3_000),
     });
     if (!res.ok) return false;
     const data = (await res.json()) as { success?: boolean };

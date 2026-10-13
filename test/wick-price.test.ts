@@ -171,8 +171,9 @@ describe("fetchWickPrice (live reader, injected feed)", () => {
     expect(read.ok).toBe(true);
     expect(read.source).toBe("env-override");
     expect(read.priceEth).toBe(2e-9);
-    // env override is used as-is for value checks (no curve haircut)
-    expect(read.realizablePriceEth).toBe(2e-9);
+    // G5 (129-c #15): the override path applies the same ≈2% sell haircut as
+    // the live readers (curve tax 200bps, DEX fee 200bps — consistent either way)
+    expect(read.realizablePriceEth).toBeCloseTo(2e-9 * (1 - SELL_FEE_BPS / 10_000), 20);
   });
 
   test("feed down + no env → fail-closed", async () => {

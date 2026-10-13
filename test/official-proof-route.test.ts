@@ -72,12 +72,13 @@ afterAll(() => {
   delete process.env.RUN_TOKEN_SECRET;
 });
 
+let _ipn = 0;
 async function post(body: Record<string, unknown>): Promise<Record<string, unknown>> {
   const res = await POST(
     new Request("http://localhost/api/leaderboard", {
       method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
+      headers: { "content-type": "application/json", "x-real-ip": `10.77.${Math.floor(_ipn / 250) % 250}.${(_ipn++) % 250}` },
+      body: JSON.stringify({ nonce: `opr-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, ...body }),
     }),
   );
   return (await res.json()) as Record<string, unknown>;

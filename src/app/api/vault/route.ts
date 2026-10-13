@@ -14,7 +14,7 @@ import { sanitizeName } from "@/lib/board-validation";
 import { recordVaultGrant } from "@/lib/weights-store";
 import { readWickTier } from "@/lib/wick-balance";
 import { weightsFrozen, WEIGHTS_FROZEN_RESPONSE } from "@/lib/graduation"; // E6.1
-import { rateLimited, clientIp } from "@/lib/http-limiter"; // delivery hardening 2026-10-13
+import { rateLimited, clientIp, bodyTooLarge } from "@/lib/http-limiter"; // delivery hardening 2026-10-13
 // LU-2: wallet ownership proof — the vault requires a wallet, so proof is mandatory
 import { verifyWalletLinkProof } from "@/lib/wallet-proof";
 
@@ -26,7 +26,12 @@ const META = {
 };
 
 export async function POST(req: Request) {
-  if (rateLimited(clientIp(req), 10)) {
+  // G5 (129-a #11): reject oversized bodies before parsing (self-host has no cap).
+  if (bodyTooLarge(req)) {
+    return NextResponse.json({ error: "payload too large" }, { status: 413 });
+  }
+
+  if (rateLimited("vault", clientIp(req), 10)) {
     return NextResponse.json({ ok: false, error: "rate limited" }, { status: 429 });
   }
   try {

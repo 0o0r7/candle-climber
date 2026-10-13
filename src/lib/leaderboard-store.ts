@@ -33,6 +33,7 @@ export interface BoardEntry {
   wallet?: string | null; // lowercase address on official rows; null on guest
   season?: string | null; // seasonOf(date) on new rows (pre-season dates ⇒ null)
   ref?: string; // E5.5: opaque referral stamp (sanitizeRef-bounded); metadata only
+  flagged?: boolean; // LU-7: statistical anomaly flag — accept-but-flag, persisted for /ops review (G5 129-c #2)
 }
 
 export type BoardFilter = "guest" | "official" | "all";
@@ -52,7 +53,11 @@ export interface LaneStats {
 
 export interface BoardStore {
   readonly kind: "memory" | "mongo";
-  add(entry: BoardEntry): Promise<number>; // returns rank (1-based) within the entry's own lane + interval
+  /** Returns the entry's rank (1-based) within its own lane + interval, or
+   *  null when the backing store is DOWN (G5 129-c #5: the old behavior
+   *  returned a fake rank 1 while silently dropping the entry — the route now
+   *  answers 503 honestly instead of a lie). MemoryStore never returns null. */
+  add(entry: BoardEntry): Promise<number | null>;
   top(date: string | null, n: number, interval?: string, board?: BoardFilter): Promise<BoardEntry[]>;
   /** LU-17: entries around a given rank (±window/2), scoped to lane + interval + date. */
   around(date: string | null, rank: number, window: number, interval?: string, board?: BoardFilter): Promise<BoardEntry[]>;
@@ -70,7 +75,7 @@ export class MemoryStore implements BoardStore {
   private rows: BoardEntry[] = [];
   private readonly max = 2000;
 
-  async add(entry: BoardEntry): Promise<number> {
+  async add(entry: BoardEntry): Promise<number | null> {
     if (entry.board === "official") return this.addOfficial(entry);
     // guest lane — legacy semantics byte-preserved (every submission stored)
     this.rows.push(entry);
@@ -213,6 +218,32 @@ class MongoStore implements BoardStore {
         await coll.createIndex({ date: 1, score: -1 });
         // official lane lookups (best-per-wallet) + lane filters stay indexed
         await coll.createIndex({ board: 1, wallet: 1, date: 1, interval: 1 });
+        // G5 (129-c #6): the official lane is best-run-per-wallet — enforce it in
+        // the DATABASE, not just in findOne→insert sequencing. Partial unique
+        // index (official rows only — legacy guest rows share wallet:null). A
+        // pre-existing collection with duplicate wallet records would make this
+        // index creation throw — that must not disable the whole store, so it is
+        // best-effort (the application-level replace-if-better stays as backstop).
+        try {
+          await coll.createIndex(
+            { board: 1, wallet: 1, date: 1, interval: 1 },
+            { unique: true, partialFilterExpression: { board: "official" } },
+          );
+        } catch (idxErr) {
+          console.error("[leaderboard] unique official-lane index not created (existing dupes?):", (idxErr as Error).message);
+        }
+        // G5 (129-a #8): the guest lane is unbounded by design (every submission
+        // stored) — on Mongo that means Atlas M0 fills up and the whole store
+        // falls over. TTL: guest rows expire 45 days after submission (official
+        // best-run records persist — they are bounded by wallet count).
+        try {
+          await coll.createIndex(
+            { ts: 1 },
+            { expireAfterSeconds: 45 * 86_400, partialFilterExpression: { board: "guest" } },
+          );
+        } catch (idxErr) {
+          console.error("[leaderboard] guest TTL index not created:", (idxErr as Error).message);
+        }
         this.coll = coll;
         return coll;
       } catch (err) {
@@ -227,9 +258,9 @@ class MongoStore implements BoardStore {
     return this.connecting;
   }
 
-  async add(entry: BoardEntry): Promise<number> {
+  async add(entry: BoardEntry): Promise<number | null> {
     const coll = await this.connect();
-    if (!coll) return 1; // unreachable in practice — route falls back to memory store
+    if (!coll) return null; // G5 (129-c #5): store down — the ROUTE decides the honest response
     const iv = IV(entry);
     const ivq =
       iv === "1w"
@@ -258,7 +289,34 @@ class MongoStore implements BoardStore {
         }
         await coll.replaceOne({ _id: prev._id }, { ...entry }); // BoardEntry has no _id field
       } else {
-        await coll.insertOne({ ...entry });
+        try {
+          await coll.insertOne({ ...entry });
+        } catch (err) {
+          // G5 (129-c #6): two concurrent official submissions from one wallet
+          // both see prev=null and both insert — the DB-level unique index turns
+          // the loser into E11000; re-read and replace-if-better so the wallet
+          // can never appear twice on the official board.
+          if ((err as { code?: number }).code !== 11000) throw err;
+          const cur = entry.wallet
+            ? await coll.findOne({
+                board: "official",
+                wallet: entry.wallet,
+                date: entry.date,
+                ...ivq,
+              })
+            : null;
+          if (!cur) throw err;
+          if (cur.score >= entry.score) {
+            const better = await coll.countDocuments({
+              board: "official",
+              date: cur.date,
+              ...ivq,
+              score: { $gt: cur.score },
+            });
+            return better + 1;
+          }
+          await coll.replaceOne({ _id: cur._id }, { ...entry });
+        }
       }
       const better = await coll.countDocuments({
         board: "official",

@@ -24,7 +24,6 @@ export async function GET(request: Request) {
 
   const prodLocked =
     process.env.NODE_ENV === "production" &&
-    process.env.VERCEL_ENV === "production" &&
     process.env.DEBUG_SENTRY !== "on";
   if (prodLocked) {
     return NextResponse.json(

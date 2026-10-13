@@ -6,6 +6,7 @@
 // Cross-day history/durability lands with O1 (DATABASE_URL); the memory store
 // serves same-instance aggregates until then.
 import { NextResponse } from "next/server";
+import { rateLimited, clientIp } from "@/lib/http-limiter"; // G5: shared namespaced limiter (129-a #7)
 import { getBoard } from "@/lib/leaderboard-store";
 import { aggregateDay, reportNarrative, emptyNarrative, type ReportContext } from "@/lib/report";
 import { pickSeed } from "@/game/cc/level-source";
@@ -17,6 +18,12 @@ function yesterdayStr(today: string): string {
 }
 
 export async function GET(req: Request) {
+  // G5 (129-a #7): GET throttle — this lane proxies upstreams / heavy compute;
+  // an unthrottled public relay is a free compute loop for a scripted client.
+  if (rateLimited("report-get", clientIp(req), 20)) {
+    return NextResponse.json({ error: "slow down" }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const today = utcDateStr();
   const requested = searchParams.get("date");

@@ -505,10 +505,14 @@ async function readGraduatedPrice(
 }
 
 function envOverrideRead(price: number, note: string): WickPriceRead {
+  // G5 (129-c #15): the override path now applies the same sell-side haircut as
+  // the live readers — both phases measure ≈2% (curve taxBps 200, DEX fee 200),
+  // so the realizable figure is consistent no matter which lifecycle holds.
+  const realizable = price * (1 - SELL_FEE_BPS / 10_000);
   return {
     ok: true,
     priceEth: price,
-    realizablePriceEth: price,
+    realizablePriceEth: realizable,
     source: "env-override",
     lifecycle: null,
     graduated: null,

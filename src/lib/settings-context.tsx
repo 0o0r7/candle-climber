@@ -90,7 +90,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         } catch { /* private mode */ }
       }
       if (!loaded.reducedMotion && detectReducedMotion()) {
-        loaded.reducedMotion = true;
+        // G5 (129-c #11): the OS preference only seeds the DEFAULT — once the
+        // user has explicitly chosen a reduced-motion value (explicit bit set
+        // in update/toggle below), their choice wins over the OS on every
+        // reload (the old code re-forced the OS preference over an explicit
+        // "off" on every load).
+        let rmExplicit: string | null = null;
+        try {
+          rmExplicit = localStorage.getItem("cc_rm_explicit_v1");
+        } catch { /* private mode */ }
+        if (rmExplicit === null) loaded.reducedMotion = true;
       }
       return loaded;
     } catch {
@@ -103,6 +112,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const next = { ...prev, ...patch };
       try {
         localStorage.setItem(SETTINGS_KEY, saveSettings(next));
+        // G5 (129-c #11): an explicit user choice beats the OS preference forever
+        if (patch.reducedMotion !== undefined) localStorage.setItem("cc_rm_explicit_v1", "1");
       } catch {
         // ignore storage errors
       }
@@ -115,6 +126,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const next = { ...prev, [key]: !prev[key] };
       try {
         localStorage.setItem(SETTINGS_KEY, saveSettings(next));
+        if (key === "reducedMotion") localStorage.setItem("cc_rm_explicit_v1", "1");
       } catch {
         // ignore
       }

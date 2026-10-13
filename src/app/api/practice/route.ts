@@ -3,15 +3,21 @@
 // capped at 2 per identity per UTC day (folded into one ledger row).
 // Integrity: the runToken must be a server-signed token for a strictly PAST
 // date — today's tokens are rejected (the classic lane covers those via
-// /api/leaderboard). Archive terrain is immutable, so a valid token IS the
-// proof a real historical level was played.
+// /api/leaderboard). Archive terrain is immutable, so a valid token proves the
+// request names a REAL historical level. G5 honesty fix (129-c #9): it does
+// NOT prove that level was PLAYED — the token is deterministic and publicly
+// fetchable via GET /api/candles?date=<past>, so token-only banking is
+// possible without a run. The honest residual bounds: 0.5×2 weights/identity/
+// day (≈3% of one classic-run day), unlinked identities are excluded from
+// snapshots, wallet-linked caps apply (600/wallet) and >2 identities/day is
+// anomaly-flagged. Stated here rather than overstated.
 import { NextResponse } from "next/server";
 import { verifyRunToken } from "@/lib/run-token";
 import { utcDate, normalizeWallet, PRACTICE_POINTS, PRACTICE_DAILY_CAP } from "@/lib/weights";
 import { sanitizeName } from "@/lib/board-validation";
 import { recordPracticeRun } from "@/lib/weights-store";
 import { weightsFrozen, WEIGHTS_FROZEN_RESPONSE } from "@/lib/graduation"; // E6.1
-import { rateLimited, clientIp } from "@/lib/http-limiter"; // delivery hardening 2026-10-13
+import { rateLimited, clientIp, bodyTooLarge } from "@/lib/http-limiter"; // delivery hardening 2026-10-13
 // LU-2: wallet ownership proof — optional, fail-open (wallet ignored without proof)
 import { verifyWalletLinkProof } from "@/lib/wallet-proof";
 
@@ -23,7 +29,12 @@ const META = {
 };
 
 export async function POST(req: Request) {
-  if (rateLimited(clientIp(req), 10)) {
+  // G5 (129-a #11): reject oversized bodies before parsing (self-host has no cap).
+  if (bodyTooLarge(req)) {
+    return NextResponse.json({ error: "payload too large" }, { status: 413 });
+  }
+
+  if (rateLimited("practice", clientIp(req), 10)) {
     return NextResponse.json({ ok: false, error: "rate limited" }, { status: 429 });
   }
   try {

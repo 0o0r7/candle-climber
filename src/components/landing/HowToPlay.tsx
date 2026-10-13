@@ -31,7 +31,7 @@ const instructions = [
     label: "Rush mode",
     desc: (
       <>
-        Hold <span className="lp-howto-key">SHIFT</span> to rush — climb faster and earn +25% score
+        Hold <span className="lp-howto-key">SHIFT</span> to rush — climb faster and gain +25% score
         while held. Higher risk, higher reward.
       </>
     ),

@@ -148,8 +148,9 @@ describe("E6.1 WEIGHTS_FROZEN — honest pause across the four lanes", () => {
     delete process.env.WEIGHTS_FROZEN;
   });
 
+  let _ipn = 0;
   const post = async (url: string, body: Record<string, unknown>) => {
-    const h = { "content-type": "application/json" };
+    const h = { "content-type": "application/json", "x-real-ip": `10.78.${Math.floor(_ipn / 250) % 250}.${(_ipn++) % 250}` };
     if (url.endsWith("/api/practice")) {
       const r = await PR_POST(new Request("http://localhost" + url, { method: "POST", headers: h, body: JSON.stringify(body) }));
       return { status: r.status, json: (await r.json()) as Record<string, unknown> };
@@ -162,7 +163,8 @@ describe("E6.1 WEIGHTS_FROZEN — honest pause across the four lanes", () => {
       const r = await VAULT_POST(new Request("http://localhost" + url, { method: "POST", headers: h, body: JSON.stringify(body) }));
       return { status: r.status, json: (await r.json()) as Record<string, unknown> };
     }
-    const r = await LB_POST(new Request("http://localhost" + url, { method: "POST", headers: h, body: JSON.stringify(body) }));
+    const lbBody = url.endsWith("/api/leaderboard") ? { nonce: `e5e6-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, ...body } : body;
+    const r = await LB_POST(new Request("http://localhost" + url, { method: "POST", headers: h, body: JSON.stringify(lbBody) }));
     return { status: r.status, json: (await r.json()) as Record<string, unknown> };
   };
 
@@ -215,8 +217,8 @@ describe("E6.1 unfreeze — the same POST banks weights again", () => {
     const r = await LB_POST(
       new Request("http://localhost/api/leaderboard", {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(body),
+        headers: { "content-type": "application/json", "x-real-ip": "10.78.200.1" },
+        body: JSON.stringify({ nonce: `e5e6-unfreeze-${Date.now()}`, ...body }),
       }),
     );
     const j = (await r.json()) as Record<string, unknown>;

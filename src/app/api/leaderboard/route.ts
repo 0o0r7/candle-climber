@@ -26,6 +26,9 @@ import { NextResponse } from "next/server";
 import { getBoard, type BoardEntry, type BoardFilter } from "@/lib/leaderboard-store";
 import { verifyRunToken, isTokenStale } from "@/lib/run-token";
 import { isInterval } from "@/game/cc/level-source";
+// G5 (129-a #6): one namespaced limiter repo-wide — the inline copy here carried
+// its own clear()-on-overflow bug (a rotating attacker reset EVERYONE's budget).
+import { rateLimited, clientIp, bodyTooLarge } from "@/lib/http-limiter";
 // W5: pure validation core (shape + anti-cheat caps) extracted to
 // src/lib/board-validation.ts — contract pinned by test/leaderboard-contract.test.ts.
 import { validateSubmission } from "@/lib/board-validation";
@@ -62,24 +65,13 @@ function maskWallets(entries: BoardEntry[]): BoardEntry[] {
   return entries.map((e) => (e.wallet ? { ...e, wallet: shortAddress(e.wallet) } : e));
 }
 
-/* per-IP rate limit: 20 submissions / minute / instance */
-const hits = new Map<string, number[]>();
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const arr = (hits.get(ip) ?? []).filter((t) => now - t < 60_000);
-  if (arr.length >= 20) return true;
-  arr.push(now);
-  hits.set(ip, arr);
-  if (hits.size > 5000) hits.clear(); // crude memory guard
-  return false;
-}
-
 /* Audit fix: guest-lane identity-flood guard. The run token is deterministic
  * and SHARED by every player on the same terrain (by design, W1) — so a token
  * alone cannot identify a submitter, and replaying it under new names was
  * previously unlimited. Cap DISTINCT guest names per IP per UTC day; the
  * official lane is already capped by best-run-per-wallet dedupe. In-memory
- * per instance — same accepted tradeoff as the rate limiter above. */
+ * per instance — same accepted tradeoff as the rate limiter above. G5:
+ * overflow EVICTS the oldest IPs instead of clearing everyone. */
 const guestNamesByIp = new Map<string, { day: string; names: Set<string> }>();
 const GUEST_NAME_CAP = 8; // generous for humans, hostile to name-flooding
 function guestNameCapExceeded(ip: string, name: string): boolean {
@@ -87,16 +79,27 @@ function guestNameCapExceeded(ip: string, name: string): boolean {
   let rec = guestNamesByIp.get(ip);
   if (!rec || rec.day !== day) {
     rec = { day, names: new Set() };
+    guestNamesByIp.delete(ip);
     guestNamesByIp.set(ip, rec);
   }
   if (rec.names.has(name)) return false; // same name again = normal retry
   if (rec.names.size >= GUEST_NAME_CAP) return true;
   rec.names.add(name);
-  if (guestNamesByIp.size > 5000) guestNamesByIp.clear();
+  while (guestNamesByIp.size > 5000) {
+    const oldest = guestNamesByIp.keys().next().value;
+    if (oldest === undefined) break;
+    guestNamesByIp.delete(oldest);
+  }
   return false;
 }
 
 export async function GET(req: Request) {
+  // G5 (129-a #7): GETs are throttled too now — every unthrottled public lane
+  // is a free compute relay for a scripted client. 120/min is far above human
+  // board-refresh behavior (the client polls on run end, not on a timer).
+  if (rateLimited("lb-get", clientIp(req), 120)) {
+    return NextResponse.json({ error: "slow down" }, { status: 429 });
+  }
   const { searchParams } = new URL(req.url);
   const date = searchParams.get("date");
   // P3.5: boards are per-timeframe ("1w" classic default) — never mixed
@@ -142,16 +145,19 @@ export async function GET(req: Request) {
     board,
     ...((board === "official" || (official && official.length > 0)) ? { season: currentSeason() } : {}),
     store: store.kind,
-    ...(store.lastError ? { dbError: store.lastError } : {}),
+    // G5 (129-a #3/#10): internal store errors no longer echo to the public
+    // GET — a driver message can embed connection configuration (e.g. the
+    // DATABASE_URL). Server-side logs + /ops + Sentry carry the detail.
   });
 }
 
 export async function POST(req: Request) {
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "local";
-  if (rateLimited(ip)) {
+  // G5 (129-a #11): reject oversized bodies before parsing (self-host has no cap).
+  if (bodyTooLarge(req)) {
+    return NextResponse.json({ error: "payload too large" }, { status: 413 });
+  }
+  const ip = clientIp(req);
+  if (rateLimited("leaderboard", ip, 20)) {
     return NextResponse.json({ error: "slow down" }, { status: 429 });
   }
   try {
@@ -175,11 +181,11 @@ export async function POST(req: Request) {
 
     // LU-8: per-submission unique nonce — the run token is shared (by design,
     // W1) so a token alone cannot identify a submitter. A client-supplied nonce
-    // (random string) is consumed on first use and rejected on replay. This
-    // closes the residual vector of replaying one token under unlimited names.
-    // Backward-compatible: if no nonce is sent, the request still processes
-    // (existing clients and tests are not broken), but the replay protection
-    // only applies when both client and server participate.
+    // (random string) is consumed on first use and rejected on replay.
+    // G5 (129-c #4): replay protection is no longer opt-in — the shipped client
+    // always sends the nonce, so a MISSING nonce on the guest lane is now a 400.
+    // (The official lane keeps the old leniency: it is wallet-proven and capped
+    // by best-run-per-wallet dedupe, so replay there is a no-op by construction.)
     const nonce = typeof body.nonce === "string" ? body.nonce : null;
     if (nonce && (nonce.length < 8 || nonce.length > 64)) {
       return NextResponse.json({ error: "invalid nonce" }, { status: 400 });
@@ -262,6 +268,12 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!wallet && !nonce) {
+      // G5 (129-c #4): guest-lane submissions REQUIRE the nonce (no nonce was
+      // claimed above, so there is nothing to release on this path).
+      return NextResponse.json({ error: "missing nonce" }, { status: 400 });
+    }
+
     // LU-8: the nonce was claimed atomically above; on success, refresh its
     // TTL so the single-use window runs from the accepted submission.
     if (nonce) consumeNonce(nonce);
@@ -271,11 +283,23 @@ export async function POST(req: Request) {
     // LU-7: statistical anomaly detection — if the new entry would be a top-1%
     // outlier (>2× median) among existing entries in its lane, flag it. The
     // entry is still accepted (false positives must never block legit runs);
-    // the flag is surfaced in the response and visible in /ops for review.
+    // the flag is surfaced in the response AND PERSISTED on the entry so /ops
+    // can actually review flagged rows (G5 129-c #2: the flag used to live only
+    // in this HTTP response — the submitter saw it, the operator could not).
     const existing = await store.top(verdict.entry.date, 100, verdict.entry.interval ?? "1w", verdict.entry.board ?? "guest");
     const anomaly = wouldBeAnomaly(verdict.entry, existing);
+    if (anomaly) verdict.entry.flagged = true;
 
     const rank = await store.add(verdict.entry);
+    if (rank === null) {
+      // G5 (129-c #5): the backing store is DOWN — answer honestly instead of
+      // the old fake rank 1 with a silently dropped entry. Play is unaffected
+      // (LAW 1.2); the board write failing loudly is the point.
+      return NextResponse.json(
+        { error: "board temporarily unavailable — run not recorded, please retry" },
+        { status: 503 },
+      );
+    }
     // E2.2: ledger fire-and-forget — a weights failure must never fail the score
     // submission or even be observable in this response (ECONOMY-LAWS LAW 1).
     // E6.1 freeze etiquette: during the graduation snapshot the operator pauses
