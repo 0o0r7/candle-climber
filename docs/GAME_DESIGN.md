@@ -116,3 +116,9 @@ fallback= synthetic candle generator driven by the same seed (weekends/gaps)
   re-briefs the character intent; the procedural blockbot ships as the zero-coupling
   gameplay placeholder meanwhile. See AUDIT.md + ECOSYSTEM_BAR E6.
 - Audio: WebAudio synth (blips, crumbles, liquidation sting) — zero assets.
+
+---
+
+## Addendum 2026-10-14 (G5 docs audit) — §4b mutation pool is SIX
+
+The §4b table lists five mutations (clean/lowgrav/heavy/rush/fragile); P3.2 (2026-10-02) added the sixth, `rain` (decor-only). `src/game/cc/mutations.ts` POOL is authoritative: 6 ids.

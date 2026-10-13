@@ -39,13 +39,13 @@ and you are — obviously — **liquidated**.
 ## Status — live at https://candle-climber.vercel.app (landing) · game at /play
 
 Real daily candles, real deaths. Deployed 2026-09-29 · CI green on `main` ·
-QA: 534/534 automated tests across 42 files + headless sim rounds + live
+QA: 604/604 automated tests across 52 files + headless sim rounds + real-device matrix sessions + live
 desktop/mobile-emulated sessions — artifacts in `qa/`, regression suites in
 `test/`, bot in `scripts/e2e-gamer-bot.ts` (see `docs/ECOSYSTEM_BAR.md`).
 Live deployment re-checked 2026-10-10; full delivery audit 2026-10-13 in
 [`docs/DELIVERY-READINESS-REPORT.md`](docs/DELIVERY-READINESS-REPORT.md).
 
-| Shipped (2026-10-13) | Next (owner-gated / triggered) |
+| Shipped (2026-10-14) | Next (owner-gated / triggered) |
 |---|---|
 | Canvas 2D engine (fixed-timestep physics, coyote time, jump buffering, crumble timers) | Game-feel polish + combo scoring pass |
 | Daily Seed: UTC date → symbol + window, deterministic level + daily mutations (6-pool) | Graduation economics (staged per `docs/council/2026-10-10-GRADUATION-RUNBOOK.md`) |
@@ -53,9 +53,10 @@ Live deployment re-checked 2026-10-10; full delivery audit 2026-10-13 in
 | Real market data: Binance klines server proxy + geo-fallback + synthetic fallback; CoinGecko market-mode pool | On-chain score anchoring (wallet identity + `$WICK` balance badge already ship) |
 | PARTNER lane end-to-end: `/partners` + apply/pool APIs, phase-aware hold gate (19.6M WICK curve phase / 1.25 ETH graduated), on-chain verifier, curve + DEX price readers (`docs/PARTNER-LANE-DESIGN.md`) | Partner onboarding runbook (hard gate before first listing — roadmap R-2) |
 | Official on-chain stock anchor: mainnet Chainlink feed per stock level + `ON-CHAIN` badge (W6) | Live on-chain OHLC terrain — needs a historical source on the chain (see truth table) |
-| Death Card generator (1080×1350 PNG download / WebShare) + on-chain mint (`/api/deathcard/claim`, CCDeathCard on 46630) | Real-device mobile QA pass |
+| Death Card generator (1080×1350 PNG download / WebShare) + on-chain mint (`/api/deathcard/claim`, CCDeathCard on 46630) | LambdaTest grid re-run (grid handshake fails from CI — runs #8/#9; script ready, owner dashboard look needed) |
 | Global leaderboard (MongoDB Atlas live) + PvP duels + rival ghosts + airdrop weights/vault/burn lanes | Ranked duels, guild wars (council-gated) |
 | vibe/vibe design language, WebAudio synth SFX, mobile touch controls, landing tutorial + interactive gameplay demo | Mascot V2 (owner re-brief) |
+| **G5 prelaunch wave (2026-10-14)**: strict CSP with per-request nonces (middleware + dynamic-render nonce propagation), Lighthouse a11y/SEO/best-practices 100 across landing/play/stats/partners, real-browser device matrix 3/3 PASS on prod (Pixel7/iPhone13/desktop), ops moderation gate (`OPS_TOKEN`), world-2 marathon submissions fixed, anomaly flags persisted to /ops, honest 503 on store-down, nonce required on guest lane, next 16.4 security bump, 21 dead deps pruned | React-Compiler advisory refactor of the game shell (post-launch) |
 
 Public surfaces: `/` · `/play` · `/partners` · `/airdrop` · `/stats` ·
 `/privacy` · `/terms` · `/ops` (noindex) — plus aggregate-only APIs
@@ -90,7 +91,7 @@ src/game/cc/
   types.ts      Candle, SeedInfo, RunResult — shared contracts
   rng.ts        hashString, mulberry32 — seeded daily PRNG
   level.ts      daily seed → symbol + window; candles → platforms
-  mutations.ts  5-pool daily mutations → physics modifiers (deterministic)
+  mutations.ts  6-pool daily mutations (clean/lowgrav/heavy/rush/fragile/rain) → physics modifiers (deterministic)
   market.ts     legibility stats: REAL MOVE %, FRIENDLY/SPICY/BRUTAL
   level-source.ts  pluggable level feed: Binance daily · vibe-launch terrain · Robinhood on-chain price anchors (official), synthetic fallback
   engine.ts     fixed-timestep loop, physics, crumble timers, scoring

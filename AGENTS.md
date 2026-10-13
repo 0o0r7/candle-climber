@@ -30,7 +30,7 @@ Every external integration is optional and degrades gracefully:
   reports the active backend via `"store": "memory"`.
 - `SENTRY_AUTH_TOKEN` / `NEXT_PUBLIC_SENTRY_DSN` — source-map upload and error
   reporting only. `sentry.server.config.ts` ships a public default DSN.
-- `RUN_TOKEN_SECRET` — HMAC key for run tokens; falls back to `DATABASE_URL` then a
+- `RUN_TOKEN_SECRET` — HMAC key for run tokens. Dev/preview keeps a zero-setup local-dev constant fallback; **production fails closed without it** (G5 2026-10-14: the `MONGODB_URI`/`DATABASE_URL` fallbacks are gone — a DB URI is a high-visibility credential; the prod gate keys on `NODE_ENV` alone, so a non-Vercel `next start` fails closed too)
   local-dev constant, so leaderboard submissions work with no setup.
 - Candle data comes from a Binance proxy route with a synthetic fallback; no API key.
 - Stock levels read the official Robinhood Chain Chainlink feed over the public mainnet
@@ -71,7 +71,7 @@ rather than a prebuilt bundle.
 
 ## Marketing assets
 
-The X trailer kit in `docs/assets/x-launch` (the 15s cuts `x-08`…`x-10`) is built by
+The X trailer kit in `docs/assets/x-launch` (the three 15s trailer cuts produced 2026-10-11 (NEVER COMMITTED — binary-lossy branch rescue; only x-01…x-07 exist in-repo. Restore from backup before relying on them)) is built by
 `scripts/trailer` — see that folder's README. It runs on the sandbox **host**, not in the
 container: `node scripts/trailer/build.mjs --out docs/assets/x-launch` (needs `ffmpeg` /
 `ffprobe`, and Playwright's chromium from the repo's `node_modules`). The deterministic
@@ -79,7 +79,7 @@ timeline step shells into the web container itself. `scripts/trailer/` is the on
 subtree that is not gitignored — see `.gitignore`.
 
 `docs/` is not served by Next, so to watch or download the finished trailers during
-review, copies of `x-08`…`x-10` (mp4 + poster) live in `public/media/` and open at
+review. The three 15s cuts `x-08`…`x-10` were produced 2026-10-11 but were NEVER COMMITTED (binary-lossy branch rescue) — `public/media/` does not exist; only x-01…x-07 are in-repo. Restore from backup before relying on them (see docs/assets/x-launch/README.md note)
 `/media/<file>` on the dev server. Re-copy them after a rebuild (see the kit README).
 
 ## Checks (from CI)

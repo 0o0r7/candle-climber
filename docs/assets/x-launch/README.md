@@ -1,4 +1,5 @@
 # X (Twitter) Launch Asset Kit — captured from LIVE production
+> **G5 NOTE (2026-10-14):** the three 15s trailer files (`x-08`…`x-10`, mp4 + posters) were produced on 2026-10-11 but never committed — a branch rescue could not carry binaries. They do NOT exist in the repo; `public/media/` does not exist either. Restore from the owner's backup before using the copy commands below; the table rows below are historical.
 
 Captured **2026-10-06** against `https://candle-climber.vercel.app/?renderer=v2`
 (today's chart: `DOGEUSDT · 2026-10-06`, mutation `CANDLE RAIN`, weather `STORM · CLEAR`,
