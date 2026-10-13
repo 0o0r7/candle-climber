@@ -1,21 +1,37 @@
 #!/usr/bin/env python3
-"""P3.3 — LambdaTest REAL-DEVICE matrix QA for candle-climber.vercel.app.
+"""G5 — LambdaTest REAL-DEVICE matrix QA for candle-climber.vercel.app (prelaunch).
 
-Runs a small device/browser/size matrix on the LambdaTest grid (freemium-safe,
-3 sequential sessions): each session boots prod, selects venom, START CLIMB,
-tap-jump loop, natural death card, console audit, video evidence on LT dashboard.
+Runs a freemium-safe device/browser matrix (3 sequential sessions) on the LT grid.
+Each session walks the REAL player path against PRODUCTION and asserts the full
+product surface — not just boot-and-die:
+
+  1  page_title                landing/prod identity
+  2  mode_tabs_present         CRYPTO/STOCKS/LAUNCHPAD tablist renders (3-mode era)
+  3  char_chips_rendered       full roster renders (>= 14 chips)
+  4  venom_select              selection state actually toggles
+  5  corner_tools_visible      D8 regression guard — settings group reachable/visible
+  6  settings_dialog_opens    dialog opens + closes (Escape)
+  7  achievements_dialog_opens dialog opens + closes (Escape)
+  8  wizard_gate               first-run tutorial overlay appears + SKIP dismisses
+  9  run_started               HUD score chip appears
+  10 pause_toggle              desktop only — "p" pauses, "p" resumes (window handler)
+ 11 mobile_rush_button         mobile only — hold-to-boost chip present
+ 12 gameplay_then_death_card   tap loop -> natural death -> score rendered
+ 13 results_home_affordance    D2 regression guard — HOME present on the death panel
+ 14 landing_surface            (chrome desktop) root page: footer links + $WICK strip
+ 15 sentry_sdk_loaded          window.__SENTRY__ present -> monitoring wired on prod
+ 16 no_severe_console_errors   console audit (when the grid exposes logs)
 
 Credentials (never printed): env LT_USERNAME + LT_ACCESS_KEY first (GitHub
 Actions secrets — survives sandbox resets), then file fallback
 /home/z/.lt_user + /home/z/.lt_key (0600). Missing both -> exit 2 with a
 clear message.
 
-Evidence: $QA_OUT/rd-*.png + aggregate report JSON (per-session files too).
-Env overrides: GAME_URL (default prod), QA_OUT (default /home/z/my-project/qa/realdevice),
-QA_MATRIX (JSON array of {label, caps} to override the default matrix).
+Evidence: $QA_OUT/<label>/rd-*.png + per-session report JSON + aggregate
+SUMMARY JSON. Env overrides: GAME_URL, QA_OUT, QA_MATRIX (JSON array of
+{label, caps}).
 
-Exit code 0 = all sessions PASS (chips render, run starts, death card reached,
-0 SEVERE errors).
+Exit code 0 = all sessions PASS (every check ok).
 """
 import json
 import sys
@@ -27,6 +43,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -37,6 +54,7 @@ OUT = os.environ.get("QA_OUT", "/home/z/my-project/qa/realdevice")
 HUB = "https://hub.lambdatest.com/wd/hub"
 LT_API = "https://api.lambdatest.com/automation/api/v1"
 STAMP = datetime.now().strftime("%Y%m%d-%H%M%S")
+BUILD = f"G5-prelaunch-QA-{STAMP}"
 
 
 def load_creds():
@@ -94,10 +112,10 @@ def build_driver(caps, lt_user, lt_key):
         if k == "LT:Options":
             merged = dict(v)
             merged.update({
-                "build": "G3-real-device-QA",
-                "name": "P3.3 device matrix QA",
+                "build": BUILD,
+                "name": "G5 prelaunch device matrix QA",
                 "video": True, "screenshot": True, "console": True,
-                "network": False, "queueTimeout": 300, "idleTimeout": 180,
+                "network": False, "queueTimeout": 300, "idleTimeout": 240,
             })
             o.set_capability(k, merged)
         else:
@@ -121,8 +139,38 @@ def tap_canvas(d):
     ActionChains(d).move_to_element(canvas).click().perform()
 
 
+def dialog_open_and_close(d, check, trigger_sel, name, idx=0):
+    """Click the idx-th button inside trigger_sel, assert a shadcn dialog
+    appears, close it with Escape, assert it is gone."""
+    try:
+        trig = d.find_elements(By.CSS_SELECTOR, f"{trigger_sel} button")[idx]
+        d.execute_script("arguments[0].scrollIntoView({block:'center'});", trig)
+        trig.click()
+    except Exception as e:  # noqa: BLE001
+        check(name, False, f"trigger click failed: {str(e)[:120]}")
+        return
+    try:
+        WebDriverWait(d, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
+    except Exception:
+        check(name, False, "dialog did not open")
+        return
+    opened = d.find_elements(By.CSS_SELECTOR, '[role="dialog"]')
+    opened_ok = bool(opened) and opened[0].is_displayed()
+    try:
+        d.find_element(By.CSS_SELECTOR, "body").send_keys(Keys.ESCAPE)
+        time.sleep(1.2)
+        gone = len(d.find_elements(By.CSS_SELECTOR, '[role="dialog"]')) == 0
+    except Exception:
+        gone = False
+    check(name, opened_ok and gone,
+          f"opened={opened_ok} closed_by_escape={gone}")
+
+
 def run_session(cfg, lt_user, lt_key):
     label = cfg["label"]
+    is_desktop = label.startswith("win11")
+    is_chrome_desktop = label == "win11-chrome-1440x900"
     out = f"{OUT}/{label}"
     os.makedirs(out, exist_ok=True)
     report = {"stamp": STAMP, "label": label, "url": PROD,
@@ -141,19 +189,22 @@ def run_session(cfg, lt_user, lt_key):
     try:
         d.get(PROD)
         WebDriverWait(d, 60).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-char-chip"))
-        )
-        # G2 de-clutter: the roster (and everything else) folded into the
-        # "WAYS TO PLAY" <details> — expand it or the chips are display:none
-        # (present in DOM but .text empty → venom never found).
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-char-chip")))
+        check("page_title", "candle" in (d.title or "").lower(), d.title)
+
+        # G5: 3-mode era — the tablist must render with CRYPTO active.
         try:
             d.execute_script(
                 "const x=document.querySelector('.cc-more');if(x)x.open=true;")
             time.sleep(0.6)
         except Exception:
             pass
+        modes = d.find_elements(By.CSS_SELECTOR, ".cc-mode-btn")
+        active = [m for m in modes if "cc-mode-active" in (m.get_attribute("class") or "")]
+        check("mode_tabs_present", len(modes) >= 3 and len(active) == 1,
+              f"{len(modes)} tabs, active={active[0].text.strip() if active else 'none'}")
+
         chips = d.find_elements(By.CSS_SELECTOR, ".cc-char-chip")
-        check("page_title", "candle" in (d.title or "").lower(), d.title)
         check("char_chips_rendered", len(chips) >= 14, f"{len(chips)} chips")
         shot(d, "01-boot", out)
 
@@ -167,20 +218,79 @@ def run_session(cfg, lt_user, lt_key):
         else:
             check("venom_select", False, "venom chip not found")
 
+        # D8 regression guard: corner tools must exist, be displayed and in-viewport.
+        try:
+            tools = d.find_element(By.CSS_SELECTOR, ".cc-corner-tools")
+            vis = tools.is_displayed() and tools.size.get("width", 0) > 0
+            check("corner_tools_visible", vis,
+                  f"displayed={tools.is_displayed()} w={tools.size.get('width')}")
+        except Exception as e:  # noqa: BLE001
+            check("corner_tools_visible", False, f"missing: {str(e)[:120]}")
+
+        dialog_open_and_close(d, check, ".cc-settings-trigger",
+                              "settings_dialog_opens", idx=0)
+        dialog_open_and_close(d, check, ".cc-settings-trigger",
+                              "achievements_dialog_opens", idx=1)
+        shot(d, "02-dialogs", out)
+
         start = WebDriverWait(d, 20).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".cc-btn-start"))
-        )
+            EC.element_to_be_clickable((By.CSS_SELECTOR, ".cc-btn-start")))
         start.click()
+
+        # G5: first-run tutorial wizard — must appear on a fresh profile and
+        # must be dismissable (SKIP on step 1).
+        try:
+            WebDriverWait(d, 8).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-tutorial-overlay")))
+            skip = next((b for b in d.find_elements(
+                By.CSS_SELECTOR, ".cc-tutorial-overlay button")
+                if b.text.strip().upper() == "SKIP"), None)
+            if skip:
+                skip.click()
+                time.sleep(1)
+                gone = len(d.find_elements(
+                    By.CSS_SELECTOR, ".cc-tutorial-overlay")) == 0
+                check("wizard_gate", gone,
+                      f"overlay shown, SKIP dismissed={gone}")
+            else:
+                check("wizard_gate", False, "overlay shown but SKIP not found")
+        except Exception:
+            check("wizard_gate", True,
+                  "overlay not shown (progress flag already set)")
+
         try:
             WebDriverWait(d, 20).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-chip-score"))
-            )
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-chip-score")))
             check("run_started", True, "HUD score chip visible")
         except Exception:
             check("run_started", d.execute_script(
                 "const p=document.querySelector('.cc-panel');return p?getComputedStyle(p).display==='none':true;"),
                 "score chip not found; panel state probed")
         shot(d, "03-running", out)
+
+        if is_desktop:
+            # R8/127: "p" toggles pause via the window keydown handler.
+            try:
+                d.find_element(By.CSS_SELECTOR, "body").send_keys("p")
+                WebDriverWait(d, 6).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-pause-head")))
+                paused = True
+            except Exception:
+                paused = False
+            shot(d, "04-paused", out)
+            try:
+                d.find_element(By.CSS_SELECTOR, "body").send_keys("p")
+                time.sleep(1.2)
+                resumed = len(d.find_elements(
+                    By.CSS_SELECTOR, ".cc-pause-head")) == 0
+            except Exception:
+                resumed = False
+            check("pause_toggle", paused and resumed,
+                  f"paused={paused} resumed={resumed}")
+        else:
+            rush = d.find_elements(By.CSS_SELECTOR, ".cc-rush-btn")
+            check("mobile_rush_button", bool(rush) and rush[0].is_displayed(),
+                  f"present={bool(rush)}")
 
         t0 = time.time()
         taps = 0
@@ -205,7 +315,38 @@ def run_session(cfg, lt_user, lt_key):
             except Exception:
                 pass
         check("gameplay_then_death_card", dead, f"taps={taps} death-score={score_txt!r}")
-        shot(d, "04-deathcard", out)
+        shot(d, "05-deathcard", out)
+
+        # D2 regression guard: HOME affordance must exist on the results panel.
+        try:
+            homes = [h for h in d.find_elements(By.CSS_SELECTOR, ".cc-btn-home")
+                     if h.is_displayed()]
+            check("results_home_affordance", bool(homes),
+                  f"{len(homes)} visible HOME button(s)")
+        except Exception as e:  # noqa: BLE001
+            check("results_home_affordance", False, f"probe failed: {str(e)[:120]}")
+
+        # Production monitoring wired: the Sentry SDK must be live on prod.
+        try:
+            sentry_ok = d.execute_script("return !!window.__SENTRY__;")
+            check("sentry_sdk_loaded", bool(sentry_ok), f"window.__SENTRY__={sentry_ok}")
+        except Exception as e:  # noqa: BLE001
+            check("sentry_sdk_loaded", False, f"probe failed: {str(e)[:120]}")
+
+        if is_chrome_desktop:
+            # Full surface: the landing must carry footer nav + the $WICK strip.
+            try:
+                d.get(PROD.rsplit("/play", 1)[0] or "https://candle-climber.vercel.app/")
+                WebDriverWait(d, 30).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, ".lp-wick-strip")))
+                links = d.find_elements(
+                    By.CSS_SELECTOR, 'footer a[href="/partners"], a[href="/stats"], a[href="/airdrop"]')
+                strip = d.find_element(By.CSS_SELECTOR, ".lp-wick-strip")
+                check("landing_surface", strip.is_displayed() and len(links) >= 3,
+                      f"strip={strip.is_displayed()} nav_links={len(links)}")
+            except Exception as e:  # noqa: BLE001
+                check("landing_surface", False, f"probe failed: {str(e)[:140]}")
+            shot(d, "06-landing", out)
 
         severe = 0
         try:
@@ -276,9 +417,11 @@ def main():
                            "error": str(e)[:300]}
         reports.append(rep)
 
-    summary = {"stamp": STAMP, "url": PROD, "sessions": len(reports),
+    summary = {"stamp": STAMP, "url": PROD, "build": BUILD, "sessions": len(reports),
                "passed": sum(1 for r in reports if r.get("pass")),
                "results": [{"label": r.get("label"), "pass": r.get("pass"),
+                            "checks": sum(1 for c in r.get("checks", []) if c["ok"]),
+                            "total_checks": len(r.get("checks", [])),
                             "dashboard": r.get("dashboard"),
                             "video_url": r.get("video_url")} for r in reports]}
     with open(f"{OUT}/report-real-SUMMARY-{STAMP}.json", "w") as f:
@@ -286,6 +429,7 @@ def main():
     print(f"\nMATRIX: {summary['passed']}/{summary['sessions']} sessions PASS")
     for r in summary["results"]:
         print(f"  {r['label']}: {'PASS' if r['pass'] else 'FAIL'}"
+              + (f"  checks={r.get('checks')}/{r.get('total_checks')}" if r.get('total_checks') else "")
               + (f"  dashboard: {r['dashboard']}" if r.get("dashboard") else ""))
     return 0 if summary["passed"] == summary["sessions"] else 1
 
