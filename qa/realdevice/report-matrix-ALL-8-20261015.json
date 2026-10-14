@@ -1,0 +1,89 @@
+{
+  "consolidated": "8-profile Apple+iOS+Android+desktop sweep vs PRODUCTION",
+  "date": "2026-10-15",
+  "url": "https://candle-climber.vercel.app/play",
+  "profiles": 8,
+  "passed": 8,
+  "results": [
+    {
+      "label": "desktop-chrome-1440x900",
+      "viewport": "1440x900",
+      "stamp": "20261014211603.",
+      "pass": true,
+      "checks_passed": 15,
+      "checks_total": 15,
+      "wizard": "SKIP dismissed=true skip_hit_ok=true",
+      "home": "1 visible, hit_ok=true hit_tag=cc-btn cc-btn-ghost cc-btn-home"
+    },
+    {
+      "label": "iphone-se-375x667",
+      "viewport": "375x667",
+      "stamp": "20261014211317.",
+      "pass": true,
+      "checks_passed": 14,
+      "checks_total": 14,
+      "wizard": "SKIP dismissed=true skip_hit_ok=true",
+      "home": "1 visible, hit_ok=true hit_tag=cc-btn cc-btn-ghost cc-btn-home"
+    },
+    {
+      "label": "iphone13-ios16-touch",
+      "viewport": "390x844",
+      "stamp": "20261014211317.",
+      "pass": true,
+      "checks_passed": 14,
+      "checks_total": 14,
+      "wizard": "SKIP dismissed=true skip_hit_ok=true",
+      "home": "1 visible, hit_ok=true hit_tag=cc-btn cc-btn-ghost cc-btn-home"
+    },
+    {
+      "label": "iphone15-promax-430x932",
+      "viewport": "430x932",
+      "stamp": "20261014211317.",
+      "pass": true,
+      "checks_passed": 14,
+      "checks_total": 14,
+      "wizard": "SKIP dismissed=true skip_hit_ok=true",
+      "home": "1 visible, hit_ok=true hit_tag=cc-btn cc-btn-ghost cc-btn-home"
+    },
+    {
+      "label": "ipad-mini-768x1024",
+      "viewport": "768x1024",
+      "stamp": "20261014211405.",
+      "pass": true,
+      "checks_passed": 14,
+      "checks_total": 14,
+      "wizard": "SKIP dismissed=true skip_hit_ok=true",
+      "home": "1 visible, hit_ok=true hit_tag=cc-btn cc-btn-ghost cc-btn-home"
+    },
+    {
+      "label": "ipad-air-820x1180",
+      "viewport": "820x1180",
+      "stamp": "20261014211405.",
+      "pass": true,
+      "checks_passed": 14,
+      "checks_total": 14,
+      "wizard": "SKIP dismissed=true skip_hit_ok=true",
+      "home": "1 visible, hit_ok=true hit_tag=cc-btn cc-btn-ghost cc-btn-home"
+    },
+    {
+      "label": "ipad-pro-129-1024x1366",
+      "viewport": "1024x1366",
+      "stamp": "20261014211405.",
+      "pass": true,
+      "checks_passed": 14,
+      "checks_total": 14,
+      "wizard": "SKIP dismissed=true skip_hit_ok=true",
+      "home": "1 visible, hit_ok=true hit_tag=cc-btn cc-btn-ghost cc-btn-home"
+    },
+    {
+      "label": "pixel7-android13-touch",
+      "viewport": "412x915",
+      "stamp": "20261014211515.",
+      "pass": true,
+      "checks_passed": 14,
+      "checks_total": 14,
+      "wizard": "SKIP dismissed=true skip_hit_ok=true",
+      "home": "1 visible, hit_ok=true hit_tag=cc-btn cc-btn-ghost cc-btn-home"
+    }
+  ]
+}
