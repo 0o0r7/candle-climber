@@ -373,6 +373,23 @@ def run_session(cfg, lt_user, lt_key):
         check("no_severe_console_errors", severe == 0, f"{severe} SEVERE entries")
         report["console_severe"] = severe
     except Exception:
+        # on-grid forensics — capture the page AS THE GRID SAW IT at death:
+        # screenshot + body text + severe console (the Oct 14-15 mystery: the
+        # page loads on grid VMs but the app never hydrates -> chips timeout)
+        try:
+            d.get_screenshot_as_file(f"{out}/rd-99-fatal-{STAMP}.png")
+            body_txt = d.find_element(By.TAG_NAME, "body").text[:400]
+            _sev = []
+            try:
+                _sev = [e.get("message", "")[:180] for e in d.get_log("browser")
+                        if e.get("level") == "SEVERE"]
+            except Exception:
+                pass
+            print(f"[{label}] FATAL FORENSICS: title={d.title!r} "
+                  f"url={d.current_url[:90]} body={body_txt!r} "
+                  f"severe_console={_sev[:4]}", flush=True)
+        except Exception as fe:  # noqa: BLE001
+            print(f"[{label}] forensics failed: {str(fe)[:150]}", flush=True)
         # 2026-10-15 husk cleanup: a dead session (empty-message first-command
         # era) can linger grid-side holding the freemium concurrency slot and
         # cascade into every later target (runs #7-#11 pattern). Best-effort

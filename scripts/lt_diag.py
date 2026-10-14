@@ -228,6 +228,7 @@ def diag_live_repro(tok, report):
     try:
         sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
         import lambdatest_realdevice as rd
+        user, key = os.environ["LT_USERNAME"].strip(), os.environ["LT_ACCESS_KEY"].strip()
         rd.OUT = OUT  # keep evidence inside the diag artifact
         rd.PROD = os.environ.get("GAME_URL", rd.PROD)
         entry_d = {"label": "D_full_realdevice_body",

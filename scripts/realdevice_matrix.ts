@@ -304,13 +304,20 @@ async function main(): Promise<number> {
       check("sentry_sdk_loaded", sentry, `window.__SENTRY__=${sentry}`);
 
       if (!prof.touch) {
-        // Full landing surface: footer nav + $WICK strip.
+        // Full landing surface: $WICK strip + the footer lane links.
+        // 2026-10-15 reality check: the landing footer carries PARTNERS +
+        // AIRDROP (G5 restructure); /stats is linked from the in-game footer
+        // only — so the bar is strip + partners + airdrop, with the full link
+        // census recorded in the detail for the ledger.
         try {
           await page.goto(LANDING, { waitUntil: "domcontentloaded", timeout: 30_000 });
           await page.waitForSelector(".lp-wick-strip", { timeout: 30_000 });
-          const links = await page.locator('footer a[href="/partners"], footer a[href="/stats"], footer a[href="/airdrop"]').count();
+          const partners = await page.locator('footer a[href="/partners"]').count();
+          const airdrop = await page.locator('footer a[href="/airdrop"]').count();
+          const stats = await page.locator('a[href="/stats"]').count();
           const stripVis = await page.locator(".lp-wick-strip").first().isVisible();
-          check("landing_surface", stripVis && links >= 3, `strip=${stripVis} nav_links=${links}`);
+          check("landing_surface", stripVis && partners >= 1 && airdrop >= 1,
+            `strip=${stripVis} partners=${partners} airdrop=${airdrop} stats_anywhere=${stats}`);
         } catch (e) {
           check("landing_surface", false, `probe failed: ${String(e).slice(0, 140)}`);
         }
