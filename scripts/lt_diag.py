@@ -140,54 +140,74 @@ def diag_static(tok, report):
 
 
 def diag_live_repro(tok, report):
-    print("\n=== 4. LIVE REPRO — one minimal session on the CI hub ===")
-    entry = {"started_utc": STAMP}
+    """A/B capability probes — isolate which realdevice-script cap kills the
+    session. Baseline (proven good 2026-10-14): idle 300, media OFF."""
+    print("\n=== 4. LIVE REPRO — capability A/B probes on the CI hub ===")
     try:
         from selenium import webdriver
         from selenium.webdriver.chrome.options import Options
-
-        o = Options()
-        o.set_capability("platformName", "Windows 10")
-        o.set_capability("browserName", "Chrome")
-        o.set_capability("browserVersion", "latest")
-        o.set_capability("LT:Options", {
-            "resolution": "1280x800", "w3c": True,
-            "build": f"lt-diag-{STAMP}", "name": "handshake repro (diag)",
-            "video": False, "screenshot": False, "console": False,
-            "network": False, "queueTimeout": 300, "idleTimeout": 300,
-        })
-        hub = (f"https://{urllib.parse.quote(os.environ['LT_USERNAME'])}:"
-               f"{urllib.parse.quote(os.environ['LT_ACCESS_KEY'])}@hub.lambdatest.com/wd/hub")
-        t0 = time.time()
-        d = webdriver.Remote(hub, options=o)
-        entry["session_create_s"] = round(time.time() - t0, 1)
-        sid = d.session_id
-        entry["session_id"] = sid
-        print(f"  session created in {entry['session_create_s']}s  id={sid}")
-        t1 = time.time()
-        try:
-            d.get(GAME)
-            title = d.title
-            entry["first_command"] = {"ok": True, "title": title,
-                                      "seconds": round(time.time() - t1, 1)}
-            print(f"  FIRST COMMAND OK in {entry['first_command']['seconds']}s  title={title!r}")
-        except Exception as e:  # noqa: BLE001
-            entry["first_command"] = {"ok": False, "error": str(e)[:400]}
-            print(f"  FIRST COMMAND FAILED: {type(e).__name__}: {str(e)[:300]}")
-        try:
-            d.quit()
-            entry["quit"] = "ok"
-        except Exception as e:  # noqa: BLE001
-            entry["quit"] = f"error: {str(e)[:120]}"
-        code, meta = get(tok, f"{LT_API}/sessions/{sid}")
-        if code == 200:
-            dd = meta.get("data", meta)
-            entry["grid_status"] = dd.get("status")
-            print(f"  grid session status: {entry['grid_status']}")
     except Exception as e:  # noqa: BLE001
-        entry["session_create"] = f"FAILED: {type(e).__name__}: {str(e)[:400]}"
-        print(f"  SESSION CREATE FAILED: {type(e).__name__}: {str(e)[:300]}")
-    report["live_repro"] = entry
+        print(f"  selenium import failed: {e}")
+        report["live_repro"] = {"import_error": str(e)[:200]}
+        return
+
+    probes = [
+        {"label": "A_realdevice_caps_exact",
+         "note": "idle 240 + video/screenshot/console True — the realdevice.py set",
+         "caps": {"resolution": "1440x900", "w3c": True, "video": True,
+                  "screenshot": True, "console": True, "network": False,
+                  "queueTimeout": 300, "idleTimeout": 240}},
+        {"label": "B_idle_300_media_off",
+         "note": "idle 300, media off — the proven-good baseline",
+         "caps": {"resolution": "1440x900", "w3c": True, "video": False,
+                  "screenshot": False, "console": False, "network": False,
+                  "queueTimeout": 300, "idleTimeout": 300}},
+    ]
+    results = []
+    for p in probes:
+        entry = {"label": p["label"], "note": p["note"]}
+        try:
+            o = Options()
+            o.set_capability("platformName", "Windows 10")
+            o.set_capability("browserName", "Chrome")
+            o.set_capability("browserVersion", "latest")
+            caps = dict(p["caps"])
+            caps.update({"build": f"lt-diag-{STAMP}", "name": f"cap probe {p['label']}"})
+            o.set_capability("LT:Options", caps)
+            hub = (f"https://{urllib.parse.quote(os.environ['LT_USERNAME'])}:"
+                   f"{urllib.parse.quote(os.environ['LT_ACCESS_KEY'])}@hub.lambdatest.com/wd/hub")
+            t0 = time.time()
+            d = webdriver.Remote(hub, options=o)
+            entry["session_create_s"] = round(time.time() - t0, 1)
+            sid = d.session_id
+            entry["session_id"] = sid
+            print(f"  [{p['label']}] session {sid} created in {entry['session_create_s']}s")
+            t1 = time.time()
+            try:
+                d.get(GAME)
+                entry["first_command"] = {"ok": True, "title": d.title,
+                                          "seconds": round(time.time() - t1, 1)}
+                print(f"  [{p['label']}] FIRST COMMAND OK in {entry['first_command']['seconds']}s  title={d.title!r}")
+            except Exception as e:  # noqa: BLE001
+                entry["first_command"] = {"ok": False, "error": str(e)[:300]}
+                print(f"  [{p['label']}] FIRST COMMAND FAILED: {type(e).__name__}: {str(e)[:200]}")
+            try:
+                d.quit()
+            except Exception:  # noqa: BLE001
+                pass
+        except Exception as e:  # noqa: BLE001
+            entry["session_create"] = f"FAILED: {type(e).__name__}: {str(e)[:300]}"
+            print(f"  [{p['label']}] SESSION CREATE FAILED: {str(e)[:200]}")
+        results.append(entry)
+    report["live_repro"] = results
+    okA = any(r.get("label") == "A_realdevice_caps_exact" and (r.get("first_command") or {}).get("ok") for r in results)
+    okB = any(r.get("label") == "B_idle_300_media_off" and (r.get("first_command") or {}).get("ok") for r in results)
+    if okA:
+        print("VERDICT: A passes too — caps are NOT the killer; grid healthy for the realdevice script shape")
+    elif okB:
+        print("VERDICT: A fails / B passes — a realdevice-script CAP (idle 240 or media flags) kills sessions; fix the caps")
+    else:
+        print("VERDICT: both probes fail — grid-side issue persists for this shape")
 
 
 def main():
@@ -206,9 +226,6 @@ def main():
     with open(path, "w") as f:
         json.dump(report, f, indent=2, default=str)
     print(f"\nartifact -> {path}")
-    repro = report.get("live_repro", {})
-    ok = (repro.get("first_command") or {}).get("ok") is True
-    print(f"VERDICT: live repro first-command {'OK — grid recovered / infra-only in past' if ok else 'STILL FAILING — grid-side issue confirmed today'}")
     return 0
 
 
