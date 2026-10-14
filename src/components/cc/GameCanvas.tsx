@@ -2026,175 +2026,177 @@ export default function GameCanvas() {
           </div>
         )}
 
-        {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
 
-        {phase === "graduated" && result && (
-          <div className="cc-overlay">
-            <div className="cc-panel cc-panel-death">
-              {/* ART V4: token-era celebration scene — flame crown + wax confetti.
-                  Pure CSS, aria-hidden: the canvas behind the panel carries the
-                  summit beacon; this strip is the panel's own celebration. */}
-              <div className="cc-grad-scene" aria-hidden="true">
-                <i className="cc-gcf gc1" /><i className="cc-gcf gc2" /><i className="cc-gcf gc3" />
-                <i className="cc-gcf gc4" /><i className="cc-gcf gc5" /><i className="cc-gcf gc6" />
-                <span className="cc-grad-flame" />
-              </div>
-              <h2 className="cc-grad-headline">GRADUATED</h2>
-              <p className="cc-grad-flavor">curve summit reached · summit class</p>
-              <div className="cc-death-score">
-                <span className="cc-death-num">{result.score.toLocaleString()}</span>
-                <span className="cc-death-sub">
-                  {result.candlesPassed} candles · best streak x{result.bestStreak} · PB {best.toLocaleString()}
-                </span>
-              </div>
-              {verdict && <p className="cc-vs-verdict" role="status">{verdict}</p>}
-              <div className="cc-death-actions">
-                <button className="cc-btn cc-btn-start" onClick={enterWorld2}>WORLD 2 →</button>
-                <button className="cc-btn cc-btn-ghost" onClick={downloadCard}>DEATH CARD ↓</button>
-                {mintBtn}
-                <button
-                  className="cc-btn"
-                  onClick={submitScore}
-                  disabled={submitting || !canSubmit}
-                  title={canSubmit ? undefined : unscoredMsg}
-                >
-                  {submitting ? "…" : "SUBMIT SCORE"}
-                  {!canSubmit && <span className="sr-only">{unscoredMsg}</span>}
-                </button>
-                <button className="cc-btn" onClick={startRun}>RETRY</button>
-              </div>
-              {mintNote}
-              <p className="cc-grad-next">world 2: the climb continues · gains ×2</p>
-              {reachedPeak && (
-                <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
-                  {vaultBusy ? "…" : "OPEN WICK VAULT"}
-                </button>
-              )}
-              {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
-              {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
-              {rank !== null && laneNote && <p className="cc-rank cc-rank-note" role="status">{laneNote}</p>}
-            </div>
-          </div>
-        )}
-
-        {phase === "dead" && result && (
-          <div className="cc-overlay">
-            <div className="cc-panel cc-panel-death" ref={deathPanelRef} tabIndex={-1} role="dialog" aria-label="Run ended — results and actions">
-              <h2 className="cc-liquidated" role="alert">LIQUIDATED</h2>
-              {result.graduated && (
-                <p className="cc-rival cc-rival-grad">
-                  graduated{result.world2 ? " · world 2 reached" : ""}
-                </p>
-              )}
-              <div className="cc-death-score">
-                <span className="cc-death-num">{result.score.toLocaleString()}</span>
-                <span className="cc-death-sub">
-                  {result.candlesPassed} candles · best streak x{result.bestStreak} · PB {best.toLocaleString()}
-                </span>
-              </div>
-              {rivalGap > 0 && top && (
-                <p className="cc-rival">
-                  TOP TODAY: <b>{top.name}</b> · {top.score.toLocaleString()} — you were <b>{rivalGap.toLocaleString()}</b> pts behind
-                </p>
-              )}
-              {rivalGap === 0 && myLane.length > 0 && <p className="cc-rival cc-rival-lead">YOU LEAD THE DAILY CHART. FLEX IT.</p>}
-              {verdict && <p className="cc-vs-verdict" role="status">{verdict}</p>}
-              {duelCode && (
-                <p className="cc-duel-live" role="status">
-                  DUEL LIVE · <b>{duelCode}</b> · {duelCopied ? "INVITATION COPIED ✓" : "SHARE THE CODE"}
-                </p>
-              )}
-              {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
-              {rank !== null && laneNote && <p className="cc-rank cc-rank-note" role="status">{laneNote}</p>}
-              <div className="cc-death-actions">
-                <input
-                  className="cc-input"
-                  placeholder="YOUR NAME"
-                  maxLength={14}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-                <input
-                  className="cc-input cc-input-rival"
-                  placeholder="RIVAL @HANDLE (OPTIONAL)"
-                  maxLength={16}
-                  value={rival}
-                  onChange={(e) => setRival(e.target.value)}
-                  aria-label="Rival X handle — stamped on the death card as a challenge"
-                />
-                <button
-                  className="cc-btn"
-                  onClick={submitScore}
-                  disabled={submitting || !canSubmit}
-                  title={canSubmit ? undefined : unscoredMsg}
-                >
-                  {submitting ? "…" : "SUBMIT SCORE"}
-                  {!canSubmit && <span className="sr-only">{unscoredMsg}</span>}
-                </button>
-                <button className="cc-btn cc-btn-ghost" onClick={downloadCard}>DEATH CARD ↓</button>
-                {mintBtn}
-                {canSubmit && data?.seed.source !== "vibe-launch" && !duelCode && (
-                  <button
-                    className="cc-btn"
-                    onClick={createDuel}
-                    disabled={duelBusy}
-                    title="create an async duel — a rival opens the code and races your exact run"
-                  >
-                    {duelBusy ? "…" : "DUEL →"}
-                  </button>
-                )}
-                <button className="cc-btn cc-btn-start" onClick={startRun}>RETRY</button>
-                {/* Visual QA 2026-10-14: symmetric HOME exit on the results
-                    panel — RETRY loops the same terrain; HOME leaves cleanly. */}
-                <a className="cc-btn cc-btn-ghost cc-btn-home" href="/" aria-label="Back to home page">
-                  <HomeGlyph size={13} />HOME
-                </a>
-              </div>
-              {mintNote}
-              {archive && practiceNote && <p className="cc-vault-note" role="status">{practiceNote}</p>}
-              {reachedPeak && (
-                <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
-                  {vaultBusy ? "…" : "OPEN WICK VAULT"}
-                </button>
-              )}
-              {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
-              {officialBoard.length > 0 && (
-                <div className="cc-board cc-board-official">
-                  <div className="cc-board-title">🏆 OFFICIAL · {data?.seed.symbol}</div>
-                  <div className="cc-board-sub">
-                    wallet-verified · best run per wallet{officialSeason ? ` · season ${officialSeason}` : ""}
-                  </div>
-                  {officialBoard.slice(0, 10).map((e, i) => (
-                    <div key={`off-${e.ts ?? i}-${e.wallet ?? e.name}`} className="cc-board-row">
-                      <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
-                      <span className="cc-board-name">
-                        {e.name}
-                        {e.wallet ? <i className="cc-board-wallet">{e.wallet}</i> : null}
-                      </span>
-                      <span className="cc-board-score">{e.score.toLocaleString()}</span>
-                      <button className="cc-report-btn" onClick={() => reportScore(e)} title="Report suspicious score" aria-label={`Report ${e.name}'s score`}>🚩</button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {board.length > 0 && (
-                <div className="cc-board">
-                  <div className="cc-board-title">{officialBoard.length > 0 ? "CASUAL" : "GUEST"} · {data?.seed.symbol}</div>
-                  <div className="cc-board-sub">typed names · unofficial · play stays free &amp; walletless</div>
-                  {board.slice(0, 10).map((e, i) => (
-                    <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
-                      <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
-                      <span className="cc-board-name">{e.name}</span>
-                      <span className="cc-board-score">{e.score.toLocaleString()}</span>
-                      <button className="cc-report-btn" onClick={() => reportScore(e)} title="Report suspicious score" aria-label={`Report ${e.name}'s score`}>🚩</button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
+
+      {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
+
+      {phase === "graduated" && result && (
+        <div className="cc-overlay">
+          <div className="cc-panel cc-panel-death">
+            {/* ART V4: token-era celebration scene — flame crown + wax confetti.
+                Pure CSS, aria-hidden: the canvas behind the panel carries the
+                summit beacon; this strip is the panel's own celebration. */}
+            <div className="cc-grad-scene" aria-hidden="true">
+              <i className="cc-gcf gc1" /><i className="cc-gcf gc2" /><i className="cc-gcf gc3" />
+              <i className="cc-gcf gc4" /><i className="cc-gcf gc5" /><i className="cc-gcf gc6" />
+              <span className="cc-grad-flame" />
+            </div>
+            <h2 className="cc-grad-headline">GRADUATED</h2>
+            <p className="cc-grad-flavor">curve summit reached · summit class</p>
+            <div className="cc-death-score">
+              <span className="cc-death-num">{result.score.toLocaleString()}</span>
+              <span className="cc-death-sub">
+                {result.candlesPassed} candles · best streak x{result.bestStreak} · PB {best.toLocaleString()}
+              </span>
+            </div>
+            {verdict && <p className="cc-vs-verdict" role="status">{verdict}</p>}
+            <div className="cc-death-actions">
+              <button className="cc-btn cc-btn-start" onClick={enterWorld2}>WORLD 2 →</button>
+              <button className="cc-btn cc-btn-ghost" onClick={downloadCard}>DEATH CARD ↓</button>
+              {mintBtn}
+              <button
+                className="cc-btn"
+                onClick={submitScore}
+                disabled={submitting || !canSubmit}
+                title={canSubmit ? undefined : unscoredMsg}
+              >
+                {submitting ? "…" : "SUBMIT SCORE"}
+                {!canSubmit && <span className="sr-only">{unscoredMsg}</span>}
+              </button>
+              <button className="cc-btn" onClick={startRun}>RETRY</button>
+            </div>
+            {mintNote}
+            <p className="cc-grad-next">world 2: the climb continues · gains ×2</p>
+            {reachedPeak && (
+              <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
+                {vaultBusy ? "…" : "OPEN WICK VAULT"}
+              </button>
+            )}
+            {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
+            {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
+            {rank !== null && laneNote && <p className="cc-rank cc-rank-note" role="status">{laneNote}</p>}
+          </div>
+        </div>
+      )}
+
+      {phase === "dead" && result && (
+        <div className="cc-overlay">
+          <div className="cc-panel cc-panel-death" ref={deathPanelRef} tabIndex={-1} role="dialog" aria-label="Run ended — results and actions">
+            <h2 className="cc-liquidated" role="alert">LIQUIDATED</h2>
+            {result.graduated && (
+              <p className="cc-rival cc-rival-grad">
+                graduated{result.world2 ? " · world 2 reached" : ""}
+              </p>
+            )}
+            <div className="cc-death-score">
+              <span className="cc-death-num">{result.score.toLocaleString()}</span>
+              <span className="cc-death-sub">
+                {result.candlesPassed} candles · best streak x{result.bestStreak} · PB {best.toLocaleString()}
+              </span>
+            </div>
+            {rivalGap > 0 && top && (
+              <p className="cc-rival">
+                TOP TODAY: <b>{top.name}</b> · {top.score.toLocaleString()} — you were <b>{rivalGap.toLocaleString()}</b> pts behind
+              </p>
+            )}
+            {rivalGap === 0 && myLane.length > 0 && <p className="cc-rival cc-rival-lead">YOU LEAD THE DAILY CHART. FLEX IT.</p>}
+            {verdict && <p className="cc-vs-verdict" role="status">{verdict}</p>}
+            {duelCode && (
+              <p className="cc-duel-live" role="status">
+                DUEL LIVE · <b>{duelCode}</b> · {duelCopied ? "INVITATION COPIED ✓" : "SHARE THE CODE"}
+              </p>
+            )}
+            {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
+            {rank !== null && laneNote && <p className="cc-rank cc-rank-note" role="status">{laneNote}</p>}
+            <div className="cc-death-actions">
+              <input
+                className="cc-input"
+                placeholder="YOUR NAME"
+                maxLength={14}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <input
+                className="cc-input cc-input-rival"
+                placeholder="RIVAL @HANDLE (OPTIONAL)"
+                maxLength={16}
+                value={rival}
+                onChange={(e) => setRival(e.target.value)}
+                aria-label="Rival X handle — stamped on the death card as a challenge"
+              />
+              <button
+                className="cc-btn"
+                onClick={submitScore}
+                disabled={submitting || !canSubmit}
+                title={canSubmit ? undefined : unscoredMsg}
+              >
+                {submitting ? "…" : "SUBMIT SCORE"}
+                {!canSubmit && <span className="sr-only">{unscoredMsg}</span>}
+              </button>
+              <button className="cc-btn cc-btn-ghost" onClick={downloadCard}>DEATH CARD ↓</button>
+              {mintBtn}
+              {canSubmit && data?.seed.source !== "vibe-launch" && !duelCode && (
+                <button
+                  className="cc-btn"
+                  onClick={createDuel}
+                  disabled={duelBusy}
+                  title="create an async duel — a rival opens the code and races your exact run"
+                >
+                  {duelBusy ? "…" : "DUEL →"}
+                </button>
+              )}
+              <button className="cc-btn cc-btn-start" onClick={startRun}>RETRY</button>
+              {/* Visual QA 2026-10-14: symmetric HOME exit on the results
+                  panel — RETRY loops the same terrain; HOME leaves cleanly. */}
+              <a className="cc-btn cc-btn-ghost cc-btn-home" href="/" aria-label="Back to home page">
+                <HomeGlyph size={13} />HOME
+              </a>
+            </div>
+            {mintNote}
+            {archive && practiceNote && <p className="cc-vault-note" role="status">{practiceNote}</p>}
+            {reachedPeak && (
+              <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
+                {vaultBusy ? "…" : "OPEN WICK VAULT"}
+              </button>
+            )}
+            {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
+            {officialBoard.length > 0 && (
+              <div className="cc-board cc-board-official">
+                <div className="cc-board-title">🏆 OFFICIAL · {data?.seed.symbol}</div>
+                <div className="cc-board-sub">
+                  wallet-verified · best run per wallet{officialSeason ? ` · season ${officialSeason}` : ""}
+                </div>
+                {officialBoard.slice(0, 10).map((e, i) => (
+                  <div key={`off-${e.ts ?? i}-${e.wallet ?? e.name}`} className="cc-board-row">
+                    <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
+                    <span className="cc-board-name">
+                      {e.name}
+                      {e.wallet ? <i className="cc-board-wallet">{e.wallet}</i> : null}
+                    </span>
+                    <span className="cc-board-score">{e.score.toLocaleString()}</span>
+                    <button className="cc-report-btn" onClick={() => reportScore(e)} title="Report suspicious score" aria-label={`Report ${e.name}'s score`}>🚩</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {board.length > 0 && (
+              <div className="cc-board">
+                <div className="cc-board-title">{officialBoard.length > 0 ? "CASUAL" : "GUEST"} · {data?.seed.symbol}</div>
+                <div className="cc-board-sub">typed names · unofficial · play stays free &amp; walletless</div>
+                {board.slice(0, 10).map((e, i) => (
+                  <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
+                    <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
+                    <span className="cc-board-name">{e.name}</span>
+                    <span className="cc-board-score">{e.score.toLocaleString()}</span>
+                    <button className="cc-report-btn" onClick={() => reportScore(e)} title="Report suspicious score" aria-label={`Report ${e.name}'s score`}>🚩</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {archOpen && <ArchiveBrowser onClose={() => setArchOpen(false)} />}
 

@@ -107,21 +107,57 @@ async function main(): Promise<number> {
       page.on("pageerror", (e) => consoleErrors.push(`pageerror: ${String(e).slice(0, 200)}`));
 
       await page.goto(GAME_URL, { waitUntil: "domcontentloaded", timeout: 60_000 });
+      // App-hydration signal FIRST: the roster renders only after the client
+      // bundle boots (canvas app). ATTACHED (not visible) is the right signal:
+      // the entry panel is hidden while the tutorial wizard is up, so chips
+      // only become visible AFTER the wizard is dismissed below.
+      await page.waitForSelector(".cc-char-chip", { timeout: 60_000, state: "attached" });
 
-      // WIZARD FIRST — fresh context always sees the tutorial overlay; it
-      // absorbs every click beneath it, so dismiss before anything else.
+      // WIZARD SECOND — fresh context sees the step-by-step tutorial overlay;
+      // it appears right after hydration and absorbs every click beneath it,
+      // so dismiss before anything else. While it is up, capture the geometric
+      // truth: are SKIP/NEXT actually on top (hit-test) and inside viewport?
       try {
-        await page.waitForSelector(".cc-tutorial-overlay", { timeout: 8_000 });
+        await page.waitForSelector(".cc-tutorial-overlay", { timeout: 12_000 });
         const skip = page.locator(".cc-tutorial-overlay button", { hasText: /^SKIP$/i }).first();
         if (await skip.count()) {
+          const geom = await page.evaluate(() => {
+            const pick = (sel: string) => {
+              const el = document.querySelector(sel) as HTMLElement | null;
+              if (!el) return null;
+              const r = el.getBoundingClientRect();
+              const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+              return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height),
+                       hit_ok: !!(top && (el === top || el.contains(top) || (top as HTMLElement).contains?.(el))),
+                       hit_tag: top ? `${(top as HTMLElement).className || top.tagName}`.slice(0, 60) : "none" };
+            };
+            const btns = Array.from(document.querySelectorAll(".cc-tutorial-overlay button"));
+            const next = btns.find((b) => /^(NEXT|GOT IT)$/i.test(b.textContent || ""));
+            return { viewport: `${innerWidth}x${innerHeight}`, scroll_y: scrollY,
+                     skip: pick(".cc-tutorial-overlay button.cc-btn-ghost"),
+                     next: next ? ((): ReturnType<typeof JSON.parse> => {
+                       const r = next!.getBoundingClientRect();
+                       const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+                       return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height),
+                                hit_ok: !!(top && (next === top || next!.contains(top))),
+                                hit_tag: top ? `${(top as HTMLElement).className || top.tagName}`.slice(0, 60) : "none" } as never;
+                     })() : null };
+          });
+          console.log(`    wizard geom ${prof.label}: ${JSON.stringify(geom)}`);
+          await shot(page, "00-wizard");
           await skip.click();
           await page.waitForTimeout(1_000);
           const gone = (await page.locator(".cc-tutorial-overlay").count()) === 0;
-          check("wizard_gate", gone, `overlay shown, SKIP dismissed=${gone}`);
-          await shot(page, "00-wizard");
+          const hitOk = Boolean((geom as { skip?: { hit_ok?: boolean } | null })?.skip?.hit_ok);
+          check("wizard_gate", gone, `SKIP dismissed=${gone} skip_hit_ok=${hitOk}`);
         } else check("wizard_gate", false, "overlay shown but SKIP not found");
       } catch {
-        check("wizard_gate", true, "overlay not shown (progress flag already set)");
+        // Honest reporting: a thrown SKIP flow with the overlay still up is a
+        // FAILURE (D15 class), not a passable "already seen" state.
+        const stillThere = await page.locator(".cc-tutorial-overlay").count();
+        check("wizard_gate", stillThere === 0,
+          stillThere ? "SKIP flow threw and the overlay is STILL up (D15 trap?)"
+                     : "overlay not shown (progress flag already set)");
       }
 
       check("page_title", /candle/i.test(await page.title()), await page.title());
@@ -240,12 +276,28 @@ async function main(): Promise<number> {
       check("gameplay_then_death_card", dead, `taps=${taps} death-score=${JSON.stringify(deathScore)}`);
       await shot(page, "05-deathcard");
 
-      // D2 regression guard: HOME affordance on the results panel.
+      // D2 regression guard: HOME affordance on the results panel — and it
+      // must actually OWN the click at its center (D15 stacking-trap guard:
+      // a visible button buried under the footer/wallet chip is a failure).
       const homes = page.locator(".cc-btn-home");
       const nHomes = await homes.count();
-      let visHomes = 0;
-      for (let i = 0; i < nHomes; i++) if (await homes.nth(i).isVisible()) visHomes++;
-      check("results_home_affordance", visHomes > 0, `${visHomes} visible HOME element(s)`);
+      let visHomes = 0, homeHitOk = false, homeHitTag = "";
+      for (let i = 0; i < nHomes; i++) {
+        if (await homes.nth(i).isVisible()) {
+          visHomes++;
+          if (!homeHitOk) {
+            const probe = await homes.nth(i).evaluate((el) => {
+              const r = el.getBoundingClientRect();
+              const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+              return { ok: !!(top && (el === top || el.contains(top) || (top as HTMLElement).contains?.(el))),
+                       tag: top ? `${(top as HTMLElement).className || top.tagName}`.slice(0, 60) : "none" };
+            }).catch(() => ({ ok: false, tag: "probe-failed" }));
+            homeHitOk = probe.ok; homeHitTag = probe.tag;
+          }
+        }
+      }
+      check("results_home_affordance", visHomes > 0 && homeHitOk,
+        `${visHomes} visible, hit_ok=${homeHitOk} hit_tag=${homeHitTag}`);
 
       // Production monitoring wired.
       const sentry = await page.evaluate(() => !!(window as unknown as { __SENTRY__?: unknown }).__SENTRY__);
@@ -268,6 +320,25 @@ async function main(): Promise<number> {
       check("no_severe_console_errors", consoleErrors.length === 0, `${consoleErrors.length} severe: ${consoleErrors.slice(0, 2).join(" | ")}`);
       report["console_severe"] = consoleErrors.length;
     } catch (e) {
+      // Failure forensics: what did the page actually look like when it died?
+      try {
+        if (context) {
+          const pages = context.pages();
+          const pg = pages[pages.length - 1];
+          if (pg) {
+            await pg.screenshot({ path: join(out, `rd-99-fatal-${STAMP}.png`) }).catch(() => {});
+            const state = await pg.evaluate(() => ({
+              url: location.href, title: document.title,
+              ready: document.readyState,
+              chips: document.querySelectorAll(".cc-char-chip").length,
+              overlay: document.querySelectorAll(".cc-tutorial-overlay").length,
+              body_chars: document.body.innerText.length,
+              body_head: document.body.innerText.slice(0, 200),
+            })).catch(() => null);
+            console.log(`    FATAL state: ${JSON.stringify(state)}`);
+          }
+        }
+      } catch { /* forensics best-effort */ }
       check("session_fatal", false, String(e).slice(0, 300));
     } finally {
       if (context) await context.close().catch(() => {});
