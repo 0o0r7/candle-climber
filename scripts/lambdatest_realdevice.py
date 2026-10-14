@@ -353,11 +353,16 @@ def run_session(cfg, lt_user, lt_key):
                 d.get(PROD.rsplit("/play", 1)[0] or "https://candle-climber.vercel.app/")
                 WebDriverWait(d, 30).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, ".lp-wick-strip")))
-                links = d.find_elements(
-                    By.CSS_SELECTOR, 'footer a[href="/partners"], a[href="/stats"], a[href="/airdrop"]')
+                partners = d.find_elements(By.CSS_SELECTOR, 'footer a[href="/partners"]')
+                airdrop = d.find_elements(By.CSS_SELECTOR, 'footer a[href="/airdrop"]')
+                stats = d.find_elements(By.CSS_SELECTOR, 'a[href="/stats"]')
                 strip = d.find_element(By.CSS_SELECTOR, ".lp-wick-strip")
-                check("landing_surface", strip.is_displayed() and len(links) >= 3,
-                      f"strip={strip.is_displayed()} nav_links={len(links)}")
+                # 2026-10-15 reality: the landing footer carries PARTNERS + AIRDROP
+                # (G5 restructure); /stats lives in the in-game footer only.
+                check("landing_surface",
+                      strip.is_displayed() and bool(partners) and bool(airdrop),
+                      f"strip={strip.is_displayed()} partners={len(partners)} "
+                      f"airdrop={len(airdrop)} stats_anywhere={len(stats)}")
             except Exception as e:  # noqa: BLE001
                 check("landing_surface", False, f"probe failed: {str(e)[:140]}")
             shot(d, "06-landing", out)
