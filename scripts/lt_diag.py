@@ -153,25 +153,37 @@ def diag_live_repro(tok, report):
         return
 
     probes = [
-        {"label": "A_realdevice_caps_exact",
-         "note": "idle 240 + video/screenshot/console True — the realdevice.py set",
+        {"label": "A_win11_exact_realdevice_caps",
+         "note": "platformName Windows 11 — the realdevice.py desktop targets",
+         "platform": "Windows 11",
          "caps": {"resolution": "1440x900", "w3c": True, "video": True,
                   "screenshot": True, "console": True, "network": False,
                   "queueTimeout": 300, "idleTimeout": 240}},
-        {"label": "B_idle_300_media_off",
-         "note": "idle 300, media off — the proven-good baseline",
-         "caps": {"resolution": "1440x900", "w3c": True, "video": False,
-                  "screenshot": False, "console": False, "network": False,
-                  "queueTimeout": 300, "idleTimeout": 300}},
+        {"label": "B_win10_same_caps",
+         "note": "platformName Windows 10, identical caps — isolates the OS pool",
+         "platform": "Windows 10",
+         "caps": {"resolution": "1440x900", "w3c": True, "video": True,
+                  "screenshot": True, "console": True, "network": False,
+                  "queueTimeout": 300, "idleTimeout": 240}},
+        {"label": "C_pixel7_real_device_min",
+         "note": "the real-device leg: create + first command + immediate quit",
+         "platform": "Android",
+         "caps": {"deviceName": "Pixel 7", "platformVersion": "13",
+                  "isRealMobile": True, "w3c": True,
+                  "queueTimeout": 300, "idleTimeout": 240},
+         "browserName": "Chrome", "android": True},
     ]
     results = []
     for p in probes:
         entry = {"label": p["label"], "note": p["note"]}
         try:
             o = Options()
-            o.set_capability("platformName", "Windows 10")
-            o.set_capability("browserName", "Chrome")
-            o.set_capability("browserVersion", "latest")
+            o.set_capability("platformName", p["platform"])
+            if not p.get("android"):
+                o.set_capability("browserName", "Chrome")
+                o.set_capability("browserVersion", "latest")
+            else:
+                o.set_capability("browserName", p["browserName"])
             caps = dict(p["caps"])
             caps.update({"build": f"lt-diag-{STAMP}", "name": f"cap probe {p['label']}"})
             o.set_capability("LT:Options", caps)
@@ -196,19 +208,31 @@ def diag_live_repro(tok, report):
                 d.quit()
             except Exception:  # noqa: BLE001
                 pass
+            # best-effort slot cleanup — a husk session must not eat the
+            # freemium concurrency slots and cascade into later probes/runs
+            try:
+                stop = urllib.request.Request(f"{LT_API}/sessions/{sid}", method="DELETE",
+                                              headers={"Authorization": tok})
+                urllib.request.urlopen(stop, timeout=30)
+                entry["cleanup"] = "stopped via API"
+            except Exception as e:  # noqa: BLE001
+                entry["cleanup"] = f"skip: {str(e)[:100]}"
         except Exception as e:  # noqa: BLE001
             entry["session_create"] = f"FAILED: {type(e).__name__}: {str(e)[:300]}"
             print(f"  [{p['label']}] SESSION CREATE FAILED: {str(e)[:200]}")
         results.append(entry)
     report["live_repro"] = results
-    okA = any(r.get("label") == "A_realdevice_caps_exact" and (r.get("first_command") or {}).get("ok") for r in results)
-    okB = any(r.get("label") == "B_idle_300_media_off" and (r.get("first_command") or {}).get("ok") for r in results)
-    if okA:
-        print("VERDICT: A passes too — caps are NOT the killer; grid healthy for the realdevice script shape")
-    elif okB:
-        print("VERDICT: A fails / B passes — a realdevice-script CAP (idle 240 or media flags) kills sessions; fix the caps")
+    def _ok(lbl):
+        return any(r.get("label") == lbl and (r.get("first_command") or {}).get("ok") for r in results)
+    a, b, c = _ok("A_win11_exact_realdevice_caps"), _ok("B_win10_same_caps"), _ok("C_pixel7_real_device_min")
+    if a and b and c:
+        print("VERDICT: ALL pass — pools healthy right now; earlier failure was transient")
+    elif not a and b:
+        print("VERDICT: Windows-11 pool broken / Windows-10 fine — point the desktop targets at win10")
+    elif not c and b:
+        print("VERDICT: real-device pool broken / desktop fine — quota or device-pool issue")
     else:
-        print("VERDICT: both probes fail — grid-side issue persists for this shape")
+        print(f"VERDICT: mixed A={a} B={b} C={c} — see per-probe lines above")
 
 
 def main():
