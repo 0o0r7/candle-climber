@@ -33,6 +33,7 @@ next-env.d.ts
 !/scripts/smoke-dex-reader.ts
 !/scripts/verify-feeds.ts
 !/scripts/lt_diag.py
+!/scripts/lt_dashboard_view.py
 !/scripts/realdevice_matrix.ts
 !/scripts/trailer/
 /archive/
