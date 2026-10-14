@@ -70,21 +70,27 @@ def clip(obj, n=1500):
 
 def diag_static(tok, report):
     print("\n=== 1. PLAN / QUOTA (tolerant) ===")
-    code, plan = get(tok, PLAN_API)
-    report["plan"] = {"http": code, "body": plan if code == 200 else None,
-                      "note": "non-200 tolerated (endpoint differs per plan)"}
-    print(f"  plan_detail HTTP {code}: {clip(plan, 900)}")
+    report["plan"] = {}
+    for label, url in (("plan_detail", PLAN_API),
+                       ("plan_alt", "https://api.lambdatest.com/api/v1/plan"),
+                       ("usage", "https://api.lambdatest.com/api/v1/usage")):
+        code, plan = get(tok, url)
+        report["plan"][label] = {"http": code, "body": plan if code == 200 else None}
+        print(f"  {label} HTTP {code}: {clip(plan, 600)}")
+    report["plan"]["note"] = "non-200 tolerated (endpoints differ per plan)"
 
     print("\n=== 2. RECENT AUTOMATION BUILDS ===")
-    code, builds = get(tok, f"{LT_API}/builds?limit=15&sort=created_at.desc")
+    code, builds = get(tok, f"{LT_API}/builds?limit=15")
     rows = []
     if code == 200:
-        for b in builds.get("data", [])[:15]:
+        for b in (builds.get("data") or [])[:15]:
             rows.append({"build_id": b.get("build_id"), "name": b.get("name"),
                          "status": b.get("status"),
                          "created_at": b.get("created_at"),
                          "sessions_passed": (b.get("metrics") or {}).get("passed"),
                          "sessions_failed": (b.get("metrics") or {}).get("failed")})
+    else:
+        rows = [{"builds_api_http": code, "body": clip(builds, 400)}]
     report["builds"] = {"http": code, "rows": rows}
     for r in rows:
         print(f"  {r.get('created_at','?')[:19]}  {r.get('name','?')!r}  "
@@ -147,7 +153,7 @@ def diag_live_repro(tok, report):
             "resolution": "1280x800", "w3c": True,
             "build": f"lt-diag-{STAMP}", "name": "handshake repro (diag)",
             "video": False, "screenshot": False, "console": False,
-            "network": False, "queueTimeout": 120, "idleTimeout": 60,
+            "network": False, "queueTimeout": 300, "idleTimeout": 300,
         })
         hub = (f"https://{urllib.parse.quote(os.environ['LT_USERNAME'])}:"
                f"{urllib.parse.quote(os.environ['LT_ACCESS_KEY'])}@hub.lambdatest.com/wd/hub")
