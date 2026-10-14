@@ -32,6 +32,7 @@ GAME = os.environ.get("GAME_URL", "https://candle-climber.vercel.app/")
 STAMP = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
 
 # Runs #8/#9 (2026-10-13, workflow realdevice-qa) — the six failing sessions.
+# Extend via env LT_DIAG_SESSIONS (comma-separated) to autopsy any new run.
 KNOWN_SESSIONS = [
     "8c925a84-8293-4bb4-82db-a579ac27a4d9",
     "dd82288b-af5d-46ca-91fe-d6ec2ecdd05f",
@@ -39,7 +40,7 @@ KNOWN_SESSIONS = [
     "06aad5e467d37152ff636cf89d0389fe",
     "6eb2b7ab-22c9-4bdb-a049-55d57a6856f3",
     "142c0cd3-421e-4ec5-9ebf-61b28e218b5b",
-]
+] + [s.strip() for s in os.environ.get("LT_DIAG_SESSIONS", "").split(",") if s.strip()]
 
 
 def auth_header():
