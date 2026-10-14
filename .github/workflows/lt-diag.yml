@@ -1,0 +1,32 @@
+# LT DIAG — LambdaTest account/grid diagnostics (manual dispatch only, sanitized)
+#
+# Purpose: the standing «grid handshake fails from CI — runs #8/#9» question.
+# Queries the platform as the CI credentials do and prints ONLY sanitized data
+# (IDs, statuses, error messages) — credentials are never printed. Also runs
+# ONE minimal live-repro session against the same hub to answer whether the
+# handshake still fails right now.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --quiet "selenium>=4.20,<4.30"
+      - run: python scripts/lt_diag.py
+        env:
+          LT_USERNAME: ${{ secrets.LT_USERNAME }}
+          LT_ACCESS_KEY: ${{ secrets.LT_ACCESS_KEY }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lt-diag
+          path: qa/lt-diag/

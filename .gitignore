@@ -32,6 +32,7 @@ next-env.d.ts
 !/scripts/e2e-gamer-bot.ts
 !/scripts/smoke-dex-reader.ts
 !/scripts/verify-feeds.ts
+!/scripts/lt_diag.py
 !/scripts/trailer/
 /archive/
 /.zscripts/
