@@ -233,10 +233,10 @@ def run_session(cfg, lt_user, lt_key):
         active = [m for m in modes if "cc-mode-active" in (m.get_attribute("class") or "")]
         check("mode_tabs_present", len(modes) >= 3 and len(active) == 1,
               f"{len(modes)} tabs, active={active[0].text.strip() if active else 'none'}")
-        # restore the resting state: on real phones the expanded panel overlaps
-        # the roster and intercepts the character tap (run #15 finding)
-        d.execute_script("const x=document.querySelector('.cc-more');if(x)x.open=false;")
-        time.sleep(0.4)
+        # NOTE (run #16): the roster chips LIVE inside .cc-more — closing it
+        # hides them (and selenium .text reads empty for hidden elements), so
+        # the expander stays OPEN for the venom tap; the interception is
+        # handled by scrollIntoView below instead.
 
         chips = d.find_elements(By.CSS_SELECTOR, ".cc-char-chip")
         check("char_chips_rendered", len(chips) >= 14, f"{len(chips)} chips")
