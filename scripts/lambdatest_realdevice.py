@@ -193,13 +193,16 @@ def run_session(cfg, lt_user, lt_key):
     report["session_id"] = sid
     print(f"[{label}] session: {sid}")
     try:
+        print(f"[{label}] phase:get", flush=True)
         d.get(PROD)
+        print(f"[{label}] phase:wait-chips", flush=True)
         WebDriverWait(d, 60).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-char-chip")))
 
         # G5: WIZARD FIRST — the first-visit tutorial overlay covers the entry
         # card and absorbs every click beneath it (venom/dialog clicks silently
         # no-op). Fresh grid profiles ALWAYS see it: dismiss before anything else.
+        print(f"[{label}] phase:wizard", flush=True)
         try:
             WebDriverWait(d, 8).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-tutorial-overlay")))
@@ -260,6 +263,7 @@ def run_session(cfg, lt_user, lt_key):
                               "achievements_dialog_opens", idx=1)
         shot(d, "02-dialogs", out)
 
+        print(f"[{label}] phase:start", flush=True)
         start = next((b for b in d.find_elements(By.CSS_SELECTOR, ".cc-btn-start")
                       if "cc-tut-btn" not in (b.get_attribute("class") or "")), None)
         if not start:
@@ -301,6 +305,7 @@ def run_session(cfg, lt_user, lt_key):
             check("mobile_rush_button", bool(rush) and rush[0].is_displayed(),
                   f"present={bool(rush)}")
 
+        print(f"[{label}] phase:death-loop", flush=True)
         t0 = time.time()
         taps = 0
         dead = False
@@ -437,7 +442,7 @@ def main():
                 rep["attempt"] = attempt
                 break
             except Exception as e:  # noqa: BLE001
-                print(f"[RETRY {attempt}] {label} :: session error: {str(e)[:160]}")
+                print(f"[RETRY {attempt}] {label} :: {type(e).__name__}: {str(e)[:160]} :: repr={repr(str(e))[:120]}", flush=True)
                 if attempt == 2:
                     rep = {"label": label, "pass": False, "attempt": 2,
                            "error": str(e)[:300]}

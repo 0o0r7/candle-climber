@@ -26,7 +26,7 @@ jobs:
         run: python -m pip install --quiet "selenium>=4.20,<4.30" # G5: LT grid handshake fails on selenium 4.35+ (empty-message WebDriverException on the first command); pin to the certified band
 
       - name: Run device matrix QA (prod)
-        run: python scripts/lambdatest_realdevice.py
+        run: python -u scripts/lambdatest_realdevice.py
         env:
           LT_USERNAME: ${{ secrets.LT_USERNAME }}
           LT_ACCESS_KEY: ${{ secrets.LT_ACCESS_KEY }}

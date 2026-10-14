@@ -221,6 +221,35 @@ def diag_live_repro(tok, report):
             entry["session_create"] = f"FAILED: {type(e).__name__}: {str(e)[:300]}"
             print(f"  [{p['label']}] SESSION CREATE FAILED: {str(e)[:200]}")
         results.append(entry)
+    # Probe D — THE BISECT: run the REAL lambdatest_realdevice.run_session()
+    # body (full 16-check walk) inside THIS diag workflow. If D passes while
+    # the realdevice.yml run husks in the same window, the difference is the
+    # workflow context; if D fails, the script body itself kills sessions.
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
+        import lambdatest_realdevice as rd
+        rd.OUT = OUT  # keep evidence inside the diag artifact
+        rd.PROD = os.environ.get("GAME_URL", rd.PROD)
+        entry_d = {"label": "D_full_realdevice_body",
+                   "note": "full 16-check run_session() executed from the diag workflow"}
+        t0 = time.time()
+        try:
+            rep = rd.run_session(rd.DEFAULT_MATRIX[0], user, key)
+            entry_d["seconds"] = round(time.time() - t0, 1)
+            entry_d["pass"] = rep.get("pass")
+            entry_d["session_id"] = rep.get("session_id")
+            failed = [c for c in rep.get("checks", []) if not c.get("ok")]
+            entry_d["failed_checks"] = [c["check"] for c in failed]
+            entry_d["detail"] = {c["check"]: c["detail"][:120] for c in failed}
+            print(f"  [D_full_realdevice_body] {'PASS' if rep.get('pass') else 'FAIL'} "
+                  f"in {entry_d['seconds']}s failed_checks={entry_d['failed_checks']}")
+        except Exception as e:  # noqa: BLE001
+            entry_d["seconds"] = round(time.time() - t0, 1)
+            entry_d["fatal"] = f"{type(e).__name__}: {str(e)[:300]}"
+            print(f"  [D_full_realdevice_body] FATAL: {entry_d['fatal'][:200]}")
+        results.append(entry_d)
+    except Exception as e:  # noqa: BLE001
+        print(f"  probe D import failed: {e}")
     report["live_repro"] = results
     def _ok(lbl):
         return any(r.get("label") == lbl and (r.get("first_command") or {}).get("ok") for r in results)
