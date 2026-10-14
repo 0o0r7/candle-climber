@@ -54,7 +54,10 @@ OUT = os.environ.get("QA_OUT", "/home/z/my-project/qa/realdevice")
 HUB = "https://hub.lambdatest.com/wd/hub"
 LT_API = "https://api.lambdatest.com/automation/api/v1"
 STAMP = datetime.now().strftime("%Y%m%d-%H%M%S")
-BUILD = f"G5-prelaunch-QA-{STAMP}"
+# 2026-10-15: fresh build-name prefix — after the Oct 12-14 empty-message husk
+# streak on the G5-prelaunch-QA-* series while bare diag sessions kept passing
+# in the SAME windows, the recurring name series is rule-out suspect #1.
+BUILD = os.environ.get("LT_BUILD_PREFIX", "CC-DEV-QA") + f"-{STAMP}"
 
 
 def load_creds():
@@ -72,19 +75,11 @@ def load_creds():
     return None, None, "missing"
 
 
-# Freemium-safe default matrix: 1 real device + 2 desktop browser/size combos.
+# Freemium-safe matrix, DESKTOP-FIRST (2026-10-15): the real-device leg is the
+# flakiest (runs #7-#11 always died on it FIRST) and a husked real-device
+# session may hold the freemium concurrency slot, cascading into every later
+# target. Cheap desktop signal first; real device last, isolated.
 DEFAULT_MATRIX = [
-    {
-        "label": "pixel7-real-android13-chrome",
-        "caps": {
-            "platformName": "Android",
-            "browserName": "Chrome",
-            "LT:Options": {
-                "deviceName": "Pixel 7", "platformVersion": "13",
-                "isRealMobile": True, "w3c": True,
-            },
-        },
-    },
     {
         "label": "win11-chrome-1440x900",
         "caps": {
@@ -101,6 +96,17 @@ DEFAULT_MATRIX = [
             "browserName": "Firefox",
             "browserVersion": "latest",
             "LT:Options": {"resolution": "1280x800", "w3c": True},
+        },
+    },
+    {
+        "label": "pixel7-real-android13-chrome",
+        "caps": {
+            "platformName": "Android",
+            "browserName": "Chrome",
+            "LT:Options": {
+                "deviceName": "Pixel 7", "platformVersion": "13",
+                "isRealMobile": True, "w3c": True,
+            },
         },
     },
 ]
@@ -361,6 +367,23 @@ def run_session(cfg, lt_user, lt_key):
             report["console_logs"] = f"unsupported: {e}"
         check("no_severe_console_errors", severe == 0, f"{severe} SEVERE entries")
         report["console_severe"] = severe
+    except Exception:
+        # 2026-10-15 husk cleanup: a dead session (empty-message first-command
+        # era) can linger grid-side holding the freemium concurrency slot and
+        # cascade into every later target (runs #7-#11 pattern). Best-effort
+        # API stop, then re-raise so the retry/fail bookkeeping proceeds.
+        try:
+            import base64
+            import urllib.request as _ur
+            _req = _ur.Request(
+                f"{LT_API}/sessions/{sid}", method="DELETE",
+                headers={"Authorization": "Basic " + base64.b64encode(
+                    f"{lt_user}:{lt_key}".encode()).decode()})
+            _ur.urlopen(_req, timeout=30)
+            print(f"[{label}] husk session {sid} stopped via API")
+        except Exception as e:  # noqa: BLE001
+            print(f"[{label}] husk cleanup skipped: {str(e)[:120]}")
+        raise
     finally:
         try:
             d.quit()
