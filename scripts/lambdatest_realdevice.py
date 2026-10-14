@@ -119,7 +119,7 @@ def build_driver(caps, lt_user, lt_key):
             merged = dict(v)
             merged.update({
                 "build": BUILD,
-                "name": "G5 prelaunch device matrix QA",
+                "name": f"device matrix QA {STAMP}",
                 "video": True, "screenshot": True, "console": True,
                 "network": False, "queueTimeout": 300, "idleTimeout": 240,
             })

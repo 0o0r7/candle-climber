@@ -17,6 +17,7 @@ import os
 import sys
 import time
 import urllib.parse
+import urllib.request
 from datetime import datetime, timezone
 
 OUT = os.environ.get("QA_OUT", "qa/lt-diag")
@@ -94,7 +95,6 @@ def main() -> int:
             pass
         # best-effort slot cleanup (may 403 on freemium — ignored)
         try:
-            import urllib.request
             req = urllib.request.Request(
                 f"https://api.lambdatest.com/automation/api/v1/sessions/{d.session_id}",
                 method="DELETE",
