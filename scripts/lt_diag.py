@@ -93,7 +93,8 @@ def diag_static(tok, report):
         rows = [{"builds_api_http": code, "body": clip(builds, 400)}]
     report["builds"] = {"http": code, "rows": rows}
     for r in rows:
-        print(f"  {r.get('created_at','?')[:19]}  {r.get('name','?')!r}  "
+        print(f"  {(str(r.get('created_at')) if r.get('created_at') else '?')[:19]}  "
+              f"{str(r.get('name') or '?')!r}  "
               f"status={r.get('status')} passed={r.get('sessions_passed')} "
               f"failed={r.get('sessions_failed')}")
 
@@ -194,8 +195,13 @@ def main():
     print(f"creds source: env (values never printed)  stamp={STAMP}")
     os.makedirs(OUT, exist_ok=True)
     report = {"stamp": STAMP, "game": GAME}
-    diag_static(tok, report)
-    diag_live_repro(tok, report)
+    for section in (lambda: diag_static(tok, report),
+                    lambda: diag_live_repro(tok, report)):
+        try:
+            section()
+        except Exception as e:  # noqa: BLE001
+            print(f"  SECTION CRASH (continuing): {type(e).__name__}: {str(e)[:300]}")
+            report.setdefault("section_errors", []).append(str(e)[:300])
     path = f"{OUT}/diag-{STAMP}.json"
     with open(path, "w") as f:
         json.dump(report, f, indent=2, default=str)
