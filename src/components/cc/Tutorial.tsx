@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { Zap, Flame, CalendarClock } from "lucide-react";
-
-const TUTORIAL_KEY = "cc_tutorial_seen_v1";
+import { TUTORIAL_KEY } from "@/lib/tutorial-key";
 
 interface Step {
   visual: "candles" | "jump" | "rush" | "combo" | "daily";

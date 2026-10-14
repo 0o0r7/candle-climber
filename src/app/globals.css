@@ -1919,12 +1919,23 @@ button.cc-chip-pausebtn:hover { color: var(--cc-lime); border-color: rgba(204, 2
   font-size: 13px;
   padding: 9px 18px;
 }
+/* 2026-10-15 onboarding fix (owner flag): the wizard never auto-shows for
+   returning players (seen-flag), so this re-open affordance is the ONLY
+   tutorial surface they get — promote it from a bare ghost chip to a
+   lime-tinted, glyph-carrying button that reads as a real entry point. */
 .cc-tut-reopen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   margin-top: 6px;
-  font-size: 12px;
-  padding: 8px 16px;
+  font-size: 13px;
+  padding: 10px 18px;
   letter-spacing: 0.1em;
+  color: var(--cc-lime);
+  border-color: rgba(204, 255, 0, 0.35);
 }
+.cc-tut-reopen:hover { border-color: var(--cc-lime); background: rgba(204, 255, 0, 0.06); }
 
 /* ============================================================
    LANDING PAGE

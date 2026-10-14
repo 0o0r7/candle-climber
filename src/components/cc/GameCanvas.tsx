@@ -42,6 +42,7 @@ import {
   type DuelChallenge, type DuelTally,
 } from "@/game/cc/duel";
 import type { CandleData, RunResult } from "@/game/cc/types";
+import { TUTORIAL_KEY } from "@/lib/tutorial-key";
 import Tutorial from "@/components/cc/Tutorial";
 import ModeSelector, { type GameMode, loadMode, normalizeModeParam, saveMode } from "@/components/cc/ModeSelector";
 // P2 self-ghost — this device's OWN best run per terrain (local, cosmetic,
@@ -78,6 +79,27 @@ function HomeGlyph({ size = 12 }: { size?: number }) {
     >
       <path d="M3 11.5 12 4l9 7.5" />
       <path d="M5.5 10.5V20h13v-9.5" />
+    </svg>
+  );
+}
+// 2026-10-15 onboarding fix (owner flag): the HOW TO PLAY re-open affordance
+// now carries a book glyph so it reads as the wizard entry point, not decor.
+function BookGlyph({ size = 13 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21V5.5Z" />
+      <path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20" />
     </svg>
   );
 }
@@ -286,10 +308,12 @@ export default function GameCanvas() {
   const [showTutorial, setShowTutorial] = useState(false);
   const showTutorialRef = useRef(false);
   useEffect(() => { showTutorialRef.current = showTutorial; }, [showTutorial]);
-  // Tutorial: auto-show for first-time players when the ready screen appears
+  // Tutorial: auto-show when the ready screen appears and the current-version
+  // seen-flag is absent (first visit — plus exactly one re-show per key bump;
+  // see src/lib/tutorial-key.ts for the bump policy).
   useEffect(() => {
     if (phase === "ready") {
-      try { if (!localStorage.getItem("cc_tutorial_seen_v1")) setShowTutorial(true); } catch { /* private mode */ }
+      try { if (!localStorage.getItem(TUTORIAL_KEY)) setShowTutorial(true); } catch { /* private mode */ }
     }
   }, [phase]);
   // Audit fix (touch UX): the SHIFT = RUSH line is keyboard-only — hide it on
@@ -1779,7 +1803,7 @@ export default function GameCanvas() {
               )}
               <button className="cc-btn cc-btn-start cc-cta" onClick={startRun}>START CLIMB</button>
               <div className="cc-ready-actions">
-                <button className="cc-btn cc-btn-ghost cc-tut-reopen" onClick={() => setShowTutorial(true)}>HOW TO PLAY</button>
+                <button className="cc-btn cc-btn-ghost cc-tut-reopen" onClick={() => setShowTutorial(true)}><BookGlyph size={13} />HOW TO PLAY</button>
                 <AchievementsPanel triggerVariant="ghost" triggerSize="sm" triggerClassName="cc-btn cc-btn-ghost" newCount={newAchievements.length} />
               </div>
               {best > 0 && <p className="cc-best">PERSONAL BEST <b>{best.toLocaleString()}</b></p>}
