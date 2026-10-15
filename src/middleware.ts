@@ -18,12 +18,12 @@ const SENTRY_INGEST = "https://o4512112704028672.ingest.us.sentry.io";
 // Flag absent = byte-identical legacy CSP (no Privy origins, no loosening).
 const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 const PRIVY_CONNECT = PRIVY_APP_ID
-  ? " https://auth.privy.io https://api.privy.io wss://relay.walletconnect.com https://relay.walletconnect.com"
+  ? " https://auth.privy.io https://api.privy.io wss://relay.walletconnect.com https://relay.walletconnect.com https://explorer-api.walletconnect.com"
   : "";
 const PRIVY_FRAMES = PRIVY_APP_ID
   ? ["frame-src https://privy-io.web.app https://auth.privy.io https://verify.walletconnect.com https://iframe.walletconnect.com"]
   : [];
-const PRIVY_IMG = PRIVY_APP_ID ? " https://api.privy.io https://auth.privy.io" : "";
+const PRIVY_IMG = PRIVY_APP_ID ? " https://api.privy.io https://auth.privy.io https://explorer-api.walletconnect.com" : "";
 
 export function middleware(req: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
