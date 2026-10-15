@@ -46,6 +46,10 @@ export default function WalletChipPrivy() {
   const queried = useRef<string | null>(null);
   const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const linkRef = useRef<(() => void) | null>(null);
+  // Concurrency guard for link() itself — chip state must never gate the
+  // linker: a "busy" left over from the connect→modal sequence would
+  // otherwise freeze the chip on the WALLET… label forever (2026-10-16 fix).
+  const linkBusy = useRef(false);
 
   const query = useCallback(async (a: string) => {
     if (queried.current === a) return;
@@ -82,9 +86,20 @@ export default function WalletChipPrivy() {
   // Link: verify the wallet sits on Robinhood Chain testnet (add/switch when
   // needed — the embedded wallet handles this without popups for most paths),
   // persist the identity key, broadcast, query the cosmetic balance.
+  // Idempotent by design: fires from the login onComplete, the auth-state
+  // effect and manual clicks — re-runs with the same address are no-ops.
   const link = useCallback(async () => {
+    if (linkBusy.current) return;
     const picked = pickWallet();
-    if (!picked || state === "busy") return;
+    if (!picked) {
+      // Wallets can still be hydrating right after a first login (embedded
+      // wallet creation is async) — clear any pending busy so the chip stays
+      // clickable instead of freezing on the WALLET… label.
+      setState((s) => (s === "busy" ? "idle" : s));
+      return;
+    }
+    if (addr === picked.address) return; // already linked
+    linkBusy.current = true;
     setState("busy");
     try {
       if (picked.wallet) {
@@ -103,38 +118,47 @@ export default function WalletChipPrivy() {
       await query(picked.address);
     } catch {
       setState("idle");
+    } finally {
+      linkBusy.current = false;
     }
-  }, [pickWallet, query, state]);
+  }, [addr, pickWallet, query]);
   // Keep the latest linker reachable for the login-modal onComplete callback
   // (assigned in an effect — refs must not be written during render).
   useEffect(() => {
     linkRef.current = () => void link();
   }, [link]);
 
-  // Session restore: once Privy is ready —
+  // Session restore + post-login auto-link: once Privy is ready —
   //  · authenticated → auto-link (mirrors the legacy boot restore);
   //  · not authenticated → clear any stale local identity so the official
   //    lane never outlives the actual auth state.
+  // link IS in the deps on purpose: it re-runs when the wallet list hydrates
+  // (pickWallet identity), covering the async embedded-wallet creation that
+  // lands a beat after the login modal's onComplete. Safe: link is idempotent
+  // and ref-guarded.
   useEffect(() => {
     if (!ready) return;
     if (authenticated) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- link() is async: its setStates all run after awaits, never synchronously in this effect body (same boot-restore pattern as GameCanvas)
       void link();
     } else if (localStorage.getItem(WALLET_ADDRESS_KEY)) {
       localStorage.removeItem(WALLET_ADDRESS_KEY);
       window.dispatchEvent(new Event(WALLET_CHANGED_EVENT));
     }
-    // link intentionally excluded — runs on auth-state transitions only
-  }, [ready, authenticated]);
+  }, [ready, authenticated, link]);
 
   const connect = useCallback(() => {
-    if (state === "busy") return;
     if (!authenticated) {
-      setState("busy");
+      // No pre-set busy here: the Privy modal owns the pending UX. Setting
+      // chip-busy before the modal and clearing it only inside link() is
+      // exactly what froze the chip on WALLET… after a successful login
+      // (link() early-returned on the busy guard). The modal itself blocks
+      // double-opens, and link() is ref-guarded against concurrency.
       login(); // modal; onComplete → linkRef → link()
       return;
     }
     void link();
-  }, [authenticated, link, login, state]);
+  }, [authenticated, link, login]);
 
   const doDisconnect = useCallback(async () => {
     if (confirmTimer.current) clearTimeout(confirmTimer.current);
