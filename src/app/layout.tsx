@@ -3,6 +3,7 @@ import { JetBrains_Mono } from "next/font/google";
 import { headers } from "next/headers"; // G5: nonce read — opts routes into dynamic rendering so Next can stamp the CSP nonce onto its script tags (static HTML cannot carry per-request nonces)
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import PrivyAuthGate from "@/components/cc/PrivyAuthGate";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono-cc",
@@ -88,7 +89,7 @@ export default async function RootLayout({
       <body
         className={`${jetbrainsMono.variable} antialiased bg-background text-foreground`}
       >
-        {children}
+        <PrivyAuthGate>{children}</PrivyAuthGate>
         <Toaster position="top-center" richColors closeButton />
       </body>
     </html>
