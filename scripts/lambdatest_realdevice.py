@@ -7,20 +7,18 @@ product surface — not just boot-and-die:
 
   1  page_title                landing/prod identity
   2  mode_tabs_present         CRYPTO/STOCKS/LAUNCHPAD tablist renders (3-mode era)
-  3  char_chips_rendered       full roster renders (>= 14 chips)
-  4  venom_select              selection state actually toggles
-  5  corner_tools_visible      D8 regression guard — settings group reachable/visible
-  6  settings_dialog_opens    dialog opens + closes (Escape)
-  7  achievements_dialog_opens dialog opens + closes (Escape)
-  8  wizard_gate               first-run tutorial overlay appears + SKIP dismisses
-  9  run_started               HUD score chip appears
-  10 pause_toggle              desktop only — "p" pauses, "p" resumes (window handler)
- 11 mobile_rush_button         mobile only — hold-to-boost chip present
- 12 gameplay_then_death_card   tap loop -> natural death -> score rendered
- 13 results_home_affordance    D2 regression guard — HOME present on the death panel
- 14 landing_surface            (chrome desktop) root page: footer links + $WICK strip
- 15 sentry_sdk_loaded          window.__SENTRY__ present -> monitoring wired on prod
- 16 no_severe_console_errors   console audit (when the grid exposes logs)
+  3  corner_tools_visible      D8 regression guard — settings group reachable/visible
+  4  settings_dialog_opens    dialog opens + closes (Escape)
+  5  achievements_dialog_opens dialog opens + closes (Escape)
+  6  wizard_gate               first-run tutorial overlay appears + SKIP dismisses
+  7  run_started               HUD score chip appears
+   8 pause_toggle              desktop only — "p" pauses, "p" resumes (window handler)
+  9 mobile_rush_button         mobile only — hold-to-boost chip present
+ 10 gameplay_then_death_card   tap loop -> natural death -> score rendered
+ 11 results_home_affordance    D2 regression guard — HOME present on the death panel
+ 12 landing_surface            (chrome desktop) root page: footer links + $WICK strip
+ 13 sentry_sdk_loaded          window.__SENTRY__ present -> monitoring wired on prod
+ 14 no_severe_console_errors   console audit (when the grid exposes logs)
 
 Credentials (never printed): env LT_USERNAME + LT_ACCESS_KEY first (GitHub
 Actions secrets — survives sandbox resets), then file fallback
@@ -195,12 +193,12 @@ def run_session(cfg, lt_user, lt_key):
     try:
         print(f"[{label}] phase:get", flush=True)
         d.get(PROD)
-        print(f"[{label}] phase:wait-chips", flush=True)
+        print(f"[{label}] phase:wait-boot", flush=True)
         WebDriverWait(d, 60).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-char-chip")))
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".cc-mode-btn")))
 
         # G5: WIZARD FIRST — the first-visit tutorial overlay covers the entry
-        # card and absorbs every click beneath it (venom/dialog clicks silently
+        # card and absorbs every click beneath it (dialog clicks silently
         # no-op). Fresh grid profiles ALWAYS see it: dismiss before anything else.
         print(f"[{label}] phase:wizard", flush=True)
         try:
@@ -233,26 +231,9 @@ def run_session(cfg, lt_user, lt_key):
         active = [m for m in modes if "cc-mode-active" in (m.get_attribute("class") or "")]
         check("mode_tabs_present", len(modes) >= 3 and len(active) == 1,
               f"{len(modes)} tabs, active={active[0].text.strip() if active else 'none'}")
-        # NOTE (run #16): the roster chips LIVE inside .cc-more — closing it
-        # hides them (and selenium .text reads empty for hidden elements), so
-        # the expander stays OPEN for the venom tap; the interception is
-        # handled by scrollIntoView below instead.
-
-        chips = d.find_elements(By.CSS_SELECTOR, ".cc-char-chip")
-        check("char_chips_rendered", len(chips) >= 14, f"{len(chips)} chips")
+        # R-1 2026-10-15: roster checks (char_chips_rendered / venom_select)
+        # retired together with the selection UI — docs/RETIRED-FEATURES.md.
         shot(d, "01-boot", out)
-
-        venom = next((c for c in chips if "venom" in c.text.lower()), None)
-        if venom:
-            d.execute_script("arguments[0].scrollIntoView({block:'center'});", venom)
-            time.sleep(0.4)
-            venom.click()
-            time.sleep(1)
-            sel = d.find_elements(By.CSS_SELECTOR, ".cc-char-chip.cc-char-on")
-            ok = len(sel) == 1 and "venom" in sel[0].text.lower()
-            check("venom_select", ok, sel[0].text.strip() if sel else "none selected")
-        else:
-            check("venom_select", False, "venom chip not found")
 
         # D8 regression guard: corner tools must exist, be displayed and in-viewport.
         try:

@@ -22,7 +22,7 @@ import { deriveWeather } from "@/game/cc/weather";
 import { deriveBiome, type BiomeId } from "@/game/cc/biome";
 import { recordWreck, wrecksFor, loadWreckDB, saveWreckDB, type WreckDB, type Wreck } from "@/game/cc/wreckage";
 import { makeDeathCard, normalizeRivalTag } from "@/game/cc/deathcard";
-import { rosterList, isValidCharId, DEFAULT_CHAR_ID, CHAR_KEY, getChar } from "@/game/cc/characters";
+import { DEFAULT_CHAR_ID, getChar } from "@/game/cc/characters";
 import { sfx, setMuted, setVolume, unlockAudio } from "@/game/cc/sound";
 import { vibrate, isCoarsePointer as detectCoarsePointer } from "@/game/cc/haptics";
 import SettingsPanel from "@/components/cc/SettingsPanel";
@@ -134,7 +134,6 @@ const RIVAL_KEY = "cc_rival_v1"; // P3.1: remembered rivalry tag
 const RUNS_KEY = "cc_runs_v1";
 const TF_KEY = "cc_tf_v1"; // P3.5: remembered timeframe ("1w" classic default)
 const DUEL_TALLY_KEY = "cc_duel_v1"; // P7.3: local duel W-L-D tally (no server identity exists)
-const CC_CHAR_KEY = CHAR_KEY; // P3.12: remembered character id ("default" = procedural)
 const REF_KEY = "cc_ref_v1"; // E5.5: referral attribution — last ?ref= landing param on this device
 // E5.5: every traveling text carries a measurable link. The ref is the sharer's
 // sanitized name ("cc" fallback) — Gate G5's "referral traffic measurable in
@@ -222,8 +221,10 @@ export default function GameCanvas() {
   const [tf, setTf] = useState<GameInterval>("1w"); // timeframe selector
   const [mode, setMode] = useState<GameMode>("crypto"); // 3-mode: crypto | stocks | launchpad
   const [booted, setBooted] = useState(false); // init ran → loader may fetch
-  // P3.12: selected character — ref feeds the RAF renderer without re-subscribing
-  const [charId, setCharId] = useState<string>(DEFAULT_CHAR_ID);
+  // R-1 (docs/RETIRED-FEATURES.md): the character-SELECTION UI was retired
+  // 2026-10-15 by owner directive — everyone climbs as CLASSIC. The ref still
+  // feeds the RAF renderer; the registry stays for bot skins, ?char= deep-link
+  // removal is intentional, and archived-run/ghost champion names still resolve.
   const charIdRef = useRef<string>(DEFAULT_CHAR_ID);
   // P7.1: rival bot — local headless engine + heuristic planner; zero network,
   // its score/height are local UI only (W5 anti-cheat red line: never submitted)
@@ -394,12 +395,6 @@ export default function GameCanvas() {
     const reqIv = params.get("interval"); // P3.5: deep link beats the saved pref
     if (isInterval(reqIv)) setTf(reqIv);
     else if (isInterval(localStorage.getItem(TF_KEY))) setTf(localStorage.getItem(TF_KEY) as GameInterval);
-    // P3.12: character — localStorage first, deep-link ?char= wins (same pattern as ?interval=)
-    const savedChar = localStorage.getItem(CC_CHAR_KEY) ?? DEFAULT_CHAR_ID;
-    const urlChar = new URLSearchParams(window.location.search).get("char");
-    const picked = isValidCharId(urlChar) ? (urlChar as string) : isValidCharId(savedChar) ? savedChar : DEFAULT_CHAR_ID;
-    setCharId(picked);
-    charIdRef.current = picked;
     // P7.1/P7.2: SOLO-vs-bot and ghost toggles live in the settings store now
     // (cc_settings_v1 — settings-context migrates the legacy cc_vsbot_v1 /
     // cc_ghost_v1 keys). The mirror effect below keeps RAF refs + UI in sync.
@@ -572,15 +567,6 @@ export default function GameCanvas() {
   const changeMode = useCallback((m: GameMode) => {
     setMode(m);
     saveMode(m);
-    sfx.land();
-  }, []);
-
-  // P3.12: character pick — persists + updates the renderer ref immediately
-  const pickChar = useCallback((id: string) => {
-    if (!isValidCharId(id)) return;
-    setCharId(id);
-    charIdRef.current = id;
-    try { localStorage.setItem(CC_CHAR_KEY, id); } catch { /* private mode — cosmetic only */ }
     sfx.land();
   }, []);
 
@@ -1942,33 +1928,10 @@ export default function GameCanvas() {
                   {!duel && !archive && (
                     <p className="cc-vs-note">a duel pins the SAME chart for a friend — make a code from any finished run (DUEL → on the results panel).</p>
                   )}
-                  {/* P3.12 character select — roster row. Portraits are the sprites'
-                      own frame0; selection persists (CC_CHAR_KEY) and feeds renderV2
-                      via charIdRef. Decor-only: no gameplay/physics reads anywhere. */}
-                  <div className="cc-sec-title">YOUR CLIMBER</div>
-                  <div className="cc-char-block">
-                    <div className="cc-char-label">CHOOSE YOUR CLIMBER</div>
-                    <div className="cc-char-row" role="radiogroup" aria-label="Character select — cosmetic only">
-                      {rosterList().map((c) => (
-                        <button
-                          key={c.id}
-                          role="radio"
-                          aria-checked={charId === c.id}
-                          title={`${c.name} — ${c.blurb}`}
-                          className={`cc-char-chip${charId === c.id ? " cc-char-on" : ""}`}
-                          onClick={() => pickChar(c.id)}
-                        >
-                          {c.sheet ? (
-                            <img src={`/cc/chars/${c.id}/frame0.png`} alt="" width={34} height={48} loading="lazy" />
-                          ) : (
-                            <span className="cc-char-classic" aria-hidden>▚</span>
-                          )}
-                          <span className="cc-char-name">{c.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                    <p className="cc-vs-note">looks only — every climber plays exactly the same.</p>
-                  </div>
+                  {/* R-1 (docs/RETIRED-FEATURES.md 2026-10-15): the P3.12 "YOUR CLIMBER"
+                      roster row was removed here by owner directive. Selection UI must
+                      NOT come back in first-paint or anywhere else — see the binding
+                      rules in that record. Registry/sprites stay for bot skins + art. */}
                   <div className="cc-sec-title">MORE</div>
                   <div className="cc-btn-row">
                     <button className="cc-btn cc-btn-ghost" onClick={() => setArchOpen(true)} title="famous past days as practice terrain — unscored">PAST CHARTS →</button>

@@ -115,10 +115,10 @@ fallback= synthetic candle generator driven by the same seed (weekends/gaps)
   ⚠️ PARKED (owner order): V2 character-identity work is on hold until the owner
   re-briefs the character intent; the procedural blockbot ships as the zero-coupling
   gameplay placeholder meanwhile. See AUDIT.md + ECOSYSTEM_BAR E6.
-  ⚠️ RETIRED LAYER (owner directive 2026-10-15): the P3.11–P3.14 character-SELECTION
-  UX is retired by owner directive — do not re-expose, rebuild, or grow it.
-  Full record + binding rules: docs/RETIRED-FEATURES.md (R-1). The sprite
-  registry itself STAYS (rival-bot skin source + project mascot art).
+  ⚠️ RETIRED LAYER (owner directive 2026-10-15, EXECUTED same day): the P3.11–P3.14
+  character-SELECTION UX was removed from the product — do not re-expose, rebuild,
+  or grow it. Full record + binding rules: docs/RETIRED-FEATURES.md (R-1). The
+  sprite registry itself STAYS (rival-bot skin source + project mascot art).
 - Audio: WebAudio synth (blips, crumbles, liquidation sting) — zero assets.
 
 ---

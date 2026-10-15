@@ -4,19 +4,23 @@
  * Rebuilt 2026-10-15 (the 2026-10-13 original was sandbox-local and lost in
  * the sandbox reset; this commit makes it a REPO artifact so it can never be
  * lost again). Walks the REAL player path against PRODUCTION per device
- * profile: fresh context -> tutorial wizard gate -> mode tabs -> character
- * roster -> dialogs -> run start -> input path (touch RUSH / keyboard pause)
- * -> natural death -> results panel -> Sentry wiring -> console audit.
+ * profile: fresh context -> tutorial wizard gate -> mode tabs -> dialogs ->
+ * run start -> input path (touch RUSH / keyboard pause) -> natural death ->
+ * results panel -> Sentry wiring -> console audit.
  *
  * 2026-10-15 owner request: Apple-device dimension sweep — iPhone (SE / 13 /
  * 15 Pro Max) and iPad (mini / Air / Pro 12.9) join the existing profiles so
  * every coarse-pointer class and every practical viewport is covered.
  *
- * Checks per touch profile (14): wizard_gate, page_title, mode_tabs_present,
- * char_chips_rendered, venom_select, corner_tools_visible,
- * settings_dialog_opens, achievements_dialog_opens, run_started,
- * mobile_rush_button, gameplay_then_death_card, results_home_affordance,
- * sentry_sdk_loaded, no_severe_console_errors.
+ * 2026-10-15 R-1 EXECUTED (docs/RETIRED-FEATURES.md): the character-selection
+ * roster was removed from the product by owner directive, so the roster checks
+ * (char_chips_rendered / venom_select) were retired with it; the hydration
+ * signal moved from .cc-char-chip to the mode tablist (also client-rendered).
+ *
+ * Checks per touch profile (12): wizard_gate, page_title, mode_tabs_present,
+ * corner_tools_visible, settings_dialog_opens, achievements_dialog_opens,
+ * run_started, mobile_rush_button, gameplay_then_death_card,
+ * results_home_affordance, sentry_sdk_loaded, no_severe_console_errors.
  * Desktop swaps mobile_rush_button for pause_toggle + adds landing_surface.
  *
  * Evidence: qa/realdevice/matrix-<label>/rd-*.png +
@@ -107,11 +111,12 @@ async function main(): Promise<number> {
       page.on("pageerror", (e) => consoleErrors.push(`pageerror: ${String(e).slice(0, 200)}`));
 
       await page.goto(GAME_URL, { waitUntil: "domcontentloaded", timeout: 60_000 });
-      // App-hydration signal FIRST: the roster renders only after the client
-      // bundle boots (canvas app). ATTACHED (not visible) is the right signal:
-      // the entry panel is hidden while the tutorial wizard is up, so chips
-      // only become visible AFTER the wizard is dismissed below.
-      await page.waitForSelector(".cc-char-chip", { timeout: 60_000, state: "attached" });
+      // App-hydration signal FIRST: the entry card renders only after the
+      // client bundle boots (canvas app). ATTACHED (not visible) is the right
+      // signal: the panel is covered while the tutorial wizard is up, so the
+      // tablist only becomes visible AFTER the wizard is dismissed below.
+      // (R-1: was .cc-char-chip — that surface no longer exists.)
+      await page.waitForSelector(".cc-mode-btn", { timeout: 60_000, state: "attached" });
 
       // WIZARD SECOND — fresh context sees the step-by-step tutorial overlay;
       // it appears right after hydration and absorbs every click beneath it,
@@ -175,19 +180,9 @@ async function main(): Promise<number> {
       const nActive = await page.locator(".cc-mode-btn.cc-mode-active").count();
       check("mode_tabs_present", nModes >= 3 && nActive === 1, `${nModes} tabs, active=${nActive}`);
 
-      const chips = page.locator(".cc-char-chip");
-      const nChips = await chips.count();
-      check("char_chips_rendered", nChips >= 14, `${nChips} chips`);
+      // R-1 2026-10-15: character roster + venom_select checks retired with
+      // the selection UI itself (docs/RETIRED-FEATURES.md).
       await shot(page, "01-boot");
-
-      const venom = chips.filter({ hasText: /venom/i }).first();
-      if (await venom.count()) {
-        await venom.click();
-        await page.waitForTimeout(1_000);
-        const sel = page.locator(".cc-char-chip.cc-char-on");
-        const selTxt = (await sel.count()) === 1 ? (await sel.first().innerText()).trim() : "none";
-        check("venom_select", (await sel.count()) === 1 && /venom/i.test(selTxt), selTxt);
-      } else check("venom_select", false, "venom chip not found");
 
       // D8 regression guard: corner tools group must exist and be visible.
       const tools = page.locator(".cc-corner-tools");
@@ -337,7 +332,7 @@ async function main(): Promise<number> {
             const state = await pg.evaluate(() => ({
               url: location.href, title: document.title,
               ready: document.readyState,
-              chips: document.querySelectorAll(".cc-char-chip").length,
+              mode_btns: document.querySelectorAll(".cc-mode-btn").length,
               overlay: document.querySelectorAll(".cc-tutorial-overlay").length,
               body_chars: document.body.innerText.length,
               body_head: document.body.innerText.slice(0, 200),
