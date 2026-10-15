@@ -1,4 +1,4 @@
-// Airdrop-weights ledger storage (E2.2 / P4.4 — spec: docs/WICK-ECONOMY-SPEC.md §7).
+// Airdrop-weights ledger storage (E2.2 / P4.4 — spec: the economy spec §7).
 // Same contract as leaderboard-store: MemoryStore default (zero-config), MongoStore
 // auto-activates when DATABASE_URL is a mongodb:// URI (Atlas M0 — verified serving
 // prod since 2026-10-08). Every failure degrades gracefully; the ledger NEVER blocks

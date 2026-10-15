@@ -5,7 +5,7 @@
 // Graduated phase: the launch's OWN V4 pool read live on-chain (PoolManager
 // extsload slot0), pinned byte-exact against THREE independent sources via
 // the real graduated launch fixture (vibe-graduated-beef-20261012.json).
-// Full derivation: docs/PARTNER-LANE-DESIGN.md §2 + §4b.
+// Full derivation: the partner-lane design doc §2 + §4b.
 import { describe, expect, test, beforeEach } from "bun:test";
 import {
   curvePriceEthPerToken,

@@ -1,4 +1,4 @@
-// Prediction ledger storage (E2.3 — spec: docs/WICK-ECONOMY-SPEC.md §7.2 row 3).
+// Prediction ledger storage (E2.3 — spec: the economy spec §7.2 row 3).
 // Same contract pattern as weights-store: MemoryStore default, MongoStore when
 // DATABASE_URL is a mongodb:// URI. One prediction per identity per target date
 // (unique index). Predictions are STORED SERVER-SIDE at lock time and scored

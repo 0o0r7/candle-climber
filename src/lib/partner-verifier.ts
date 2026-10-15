@@ -24,7 +24,7 @@
 // wick-launch-record.json). The v0 "wait for the owner to set WICK_ETH_PRICE"
 // stance is retired: wick-price.ts derives the price from the platform's OWN
 // feed using the platform's OWN curve formula (validated to ≤6e-5 against two
-// pinned chain states — docs/PARTNER-LANE-DESIGN.md §2). The env var remains
+// pinned chain states — the partner-lane design doc §2). The env var remains
 // as an optional owner override only.
 // THE RULE IS PHASE-AWARE (partner-threshold.ts):
 //   · CURVE TRADING → the curve-phase rule: hold the platform's own maximum

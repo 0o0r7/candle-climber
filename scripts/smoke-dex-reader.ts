@@ -1,7 +1,7 @@
 /**
  * SMOKE-DEX-READER — the repeatable LIVE re-proof for the $WICK price readers
- * (docs/PARTNER-LAUNCH-ROADMAP.md §0 re-verification command; see
- * docs/PARTNER-LANE-DESIGN.md §4b for the full DEX-pool derivation).
+ * (the partner-lane roadmap §0 re-verification command; see
+ * the partner-lane design doc §4b for the full DEX-pool derivation).
  *
  * It proves BOTH price regimes against the real chain in one run:
  *

@@ -17,7 +17,7 @@ captures — no edits, no fake numbers.**
 | `x-04-ready-mobile-1170x2532.png` | Mobile ready screen incl. PERSONAL BEST | Mobile audience / quote tweets |
 | `x-05-gameplay-mobile-1170x2532.png` | Mobile mid-run, score 80, wreckage visible | Mobile audience |
 | `x-06-gameplay-clip-1280x720.mp4` | 29s real gameplay: boot → climb (+15/+29) → LIQUIDATED → retry → climb again | **Pinned-tweet video (X converts natively, H.264 faststart)** |
-| `x-07-gameplay-loop-800px.gif` | 5s loop: climb → LIQUIDATED reveal | **The pack's literal ask: "یک اسکرین‌شات یا GIF"** |
+| `x-07-gameplay-loop-800px.gif` | 5s loop: climb → LIQUIDATED reveal | **Pinned-tweet GIF** |
 | `x-08-trailer-15s-crumble.mp4` | 15s produced trailer — hook: a red candle collapses under the player at 0.45s, then the climb runs temperate → desert → storm into the end card | **Primary X trailer (attach to the launch / quote tweet)** |
 | `x-09-trailer-15s-leap.mp4` | Same 15s body, alternate hook: opens at the takeoff of a long leap | Hook A/B test |
 | `x-10-trailer-15s-storm.mp4` | Same 15s body, alternate hook: the storm front slams in at 0.8s, climb exits into the winter | Hook A/B test |
@@ -33,12 +33,12 @@ stores them once. Re-copy after a rebuild:
 `cp docs/assets/x-launch/x-0*-trailer-15s-*.{mp4,jpg} public/media/`.
 The rest of the kit is viewable on GitHub on this branch.
 
-## Recommendation for the pinned tweet (WICK-LAUNCH-FORM-PACK §4)
+## Recommendation for the pinned tweet
 
-- Primary: attach **`x-07-gameplay-loop-800px.gif`** (matches the pack line exactly) or
+- Primary: attach **`x-07-gameplay-loop-800px.gif`** (the loop in one file) or
   **`x-06-gameplay-clip-1280x720.mp4`** (29s, autoplay-friendly, shows the loop).
-- Text stays exactly as written in the pack (230 chars). Do NOT add monetary-value
-  claims around the assets (ECONOMY-LAWS / pack §8 red lines).
+- Text stays exactly as written in the pinned-tweet copy (230 chars). Do NOT add monetary-value
+  claims around the assets (ECONOMY-LAWS red lines).
 - If replying with a screenshot instead, use `x-02` (desktop) or `x-05` (mobile).
 
 ## The 15s X trailer (`x-08`…`x-10`) — produced 2026-10-11

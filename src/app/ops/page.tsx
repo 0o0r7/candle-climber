@@ -204,7 +204,7 @@ export default async function OpsPage({
       </Block>
 
       <p style={{ color: "#777", fontSize: 12, marginTop: 32 }}>
-        runbook: docs/council/2026-10-10-GRADUATION-RUNBOOK.md · laws: docs/ECONOMY-LAWS.md ·
+        runbook: the internal runbook 2026-10-10-GRADUATION-RUNBOOK.md · laws: docs/ECONOMY-LAWS.md ·
         metrics definitions: docs/ECONOMY-CHECKLIST.md (E4.2)
       </p>
     </main>

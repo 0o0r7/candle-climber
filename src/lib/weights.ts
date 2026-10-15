@@ -1,4 +1,4 @@
-// Airdrop-weights — PURE math core (E2.2 / P4.4, spec: docs/WICK-ECONOMY-SPEC.md §7).
+// Airdrop-weights — PURE math core (E2.2 / P4.4, spec: the economy spec §7).
 // No I/O here (W5 purity rule): the store feeds rows in, this module decides what
 // they are worth. Deterministic: same event log ⇒ same weights, always.
 // LAWS (docs/ECONOMY-LAWS.md): weights are entitlements to future distributions —

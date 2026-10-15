@@ -5,7 +5,7 @@
 > council added LAUNCHPAD + STOCKS as first-class modes (CRYPTO/STOCKS/LAUNCHPAD,
 > `f0d3a3b`); §7 D4–D9 shipped; §9 mascot PARKED was resolved by the owner
 > 2026-10-02 (roster shipped P3.11–P3.14); the partner hold-to-list lane and its
-> gates are specified in `PARTNER-LANE-DESIGN.md` (not part of this doc).
+> gates are specified in the partner-lane design doc (private archive).
 
 # GAME DESIGN — Candle Climber
 
@@ -40,7 +40,7 @@ SEE the chart layout → CLIMB green candles → DODGE red candles
 | Horizontal edges | Wrap-around | Keeps routes readable |
 
 Movement quality gates: coyote time, jump buffering, jump cut, fixed-timestep
-physics (60 Hz) — feel is prioritized over feature count (see CC-PLAN §7).
+physics (60 Hz) — feel is prioritized over feature count (see the original project plan §7).
 
 ## 4. Scoring
 
@@ -86,7 +86,7 @@ fallback= synthetic candle generator driven by the same seed (weekends/gaps)
 - Phase p2: **Rivalry Tag** — optionally stamp a rival's X handle; the mockery
   card pulls their audience in.
 
-## 7. Roadmap (14-day arc, from CC-PLAN §6)
+## 7. Roadmap
 
 - **D1–3 ✅** core engine + real candles + daily seed (M1 slice)
 - **D4–7 (in progress)** leaderboard v2 (env-gated Atlas M0 + memory fallback, anti-cheat) +
@@ -114,7 +114,7 @@ fallback= synthetic candle generator driven by the same seed (weekends/gaps)
   Platform character language respected, zero IP copying.
   ⚠️ PARKED (owner order): V2 character-identity work is on hold until the owner
   re-briefs the character intent; the procedural blockbot ships as the zero-coupling
-  gameplay placeholder meanwhile. See AUDIT.md + ECOSYSTEM_BAR E6.
+  gameplay placeholder meanwhile. See the internal audit ledger (private archive).
   ⚠️ RETIRED LAYER (owner directive 2026-10-15, EXECUTED same day): the P3.11–P3.14
   character-SELECTION UX was removed from the product — do not re-expose, rebuild,
   or grow it. Full record + binding rules: docs/RETIRED-FEATURES.md (R-1). The

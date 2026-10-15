@@ -1,7 +1,7 @@
 // /api/report — H4 DAILY REPORT (P2.4): pure aggregation over the day's real
 // leaderboard entries. Default report = YESTERDAY (a completed day); any past
 // UTC date is allowed via ?date= (archive-friendly), future/malformed dates
-// fall back to yesterday. Honesty rule (GROWTH-AND-HOOKS §8): every number is
+// fall back to yesterday. Honesty rule (the growth strategy §8): every number is
 // read off the store — an empty day reports "unclimbed", never invented data.
 // Cross-day history/durability lands with O1 (DATABASE_URL); the memory store
 // serves same-instance aggregates until then.

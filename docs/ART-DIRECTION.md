@@ -1,9 +1,10 @@
 # ART DIRECTION — from candlesticks to a world (Canvas 2D visual upgrade plan)
 
-> Written 2026-09-30. Extends — never replaces — the LOCKED design system in CC-PLAN §2
+> Written 2026-09-30. Extends — never replaces — the locked design system of the
+> original project plan §2
 > (palette `#101214`/`#CCFF00`/`#5BD08A`/`#E07856`/`#6A63C8`, Clash Display / JetBrains
 > Mono / Instrument Sans, mascot **Wick** the blockbot). Companion docs:
-> GROWTH-AND-HOOKS-STRATEGY.md (what the visuals must serve), TOKEN-LAUNCHPAD-RESEARCH.md.
+> the internal growth strategy (private archive).
 > Chat language FA · Doc language EN.
 
 ## 1. The thesis: the risk is grammar, not resolution
