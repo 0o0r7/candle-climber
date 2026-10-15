@@ -1,0 +1,29 @@
+{
+  "stamp": "20261015020656.",
+  "url": "https://candle-climber.vercel.app/play",
+  "profiles": 3,
+  "passed": 3,
+  "results": [
+    {
+      "label": "ipad-mini-768x1024",
+      "viewport": "768x1024",
+      "pass": true,
+      "checks": 12,
+      "total_checks": 12
+    },
+    {
+      "label": "ipad-air-820x1180",
+      "viewport": "820x1180",
+      "pass": true,
+      "checks": 12,
+      "total_checks": 12
+    },
+    {
+      "label": "ipad-pro-129-1024x1366",
+      "viewport": "1024x1366",
+      "pass": true,
+      "checks": 12,
+      "total_checks": 12
+    }
+  ]
+}

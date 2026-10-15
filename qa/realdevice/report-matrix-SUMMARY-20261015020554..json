@@ -1,0 +1,15 @@
+{
+  "stamp": "20261015020554.",
+  "url": "https://candle-climber.vercel.app/play",
+  "profiles": 1,
+  "passed": 1,
+  "results": [
+    {
+      "label": "iphone13-ios16-touch",
+      "viewport": "390x844",
+      "pass": true,
+      "checks": 12,
+      "total_checks": 12
+    }
+  ]
+}
