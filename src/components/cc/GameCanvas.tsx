@@ -1762,7 +1762,7 @@ export default function GameCanvas() {
         )}
 
         {phase === "ready" && data && mutation && (
-          // Merge-back wave 1 (game-first entry, VARIANT-REVIEW-2026-10-05):
+          // Merge-back wave 1 (game-first entry):
           // the landing card anchors to the bottom of the LIVE terrain preview
           // (the canvas now renders the level's start pose) with ONE primary
           // CTA. Every secondary panel — stats, mutation, how-to, timeframe,

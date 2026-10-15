@@ -101,7 +101,7 @@ export function stocksRotation(date: string): string {
   return poolRotationSymbol(STOCK_ROTATION_ORDER, date);
 }
 
-// Merge-back wave 1 (VARIANT-REVIEW-2026-10-05) — provenance badge. The ONE
+// Merge-back wave 1 — provenance badge. The ONE
 // shared mapping from a terrain seed's source field to the always-visible HUD
 // label. Both seed producers route through this module (the server proxy's
 // feed chain and the client-side offline fallback), so the badge reflects

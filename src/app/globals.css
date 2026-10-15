@@ -1319,7 +1319,7 @@ button.cc-wallet-chip { cursor: pointer; }
   pointer-events: none;
 }
 
-/* ---- Merge-back wave 1 (VARIANT-REVIEW-2026-10-05): game-first entry ----
+/* ---- Merge-back wave 1: game-first entry ----
    The landing surface IS the game. The ready phase renders the level's start
    pose on the canvas (engine built, never stepped) and anchors ONE entry card
    with a single primary CTA at the bottom; every secondary panel folds below
