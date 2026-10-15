@@ -23,6 +23,18 @@ export const MINTS_PER_WALLET_PER_DAY = 3;
 /** How long the POST route waits for a receipt before answering "pending". */
 export const MINT_POLL_MS = 24_000;
 
+/** The public art every death card points to — a 1024x1024 square crop of the
+ *  project's OWN shipped "liquidation chase" landing illustration (the finalized
+ *  mascots with their full background; regenerate via
+ *  scripts/deathcard/make-card-art.py). Pinned as a constant, NOT env-derived,
+ *  so every mint bakes the exact same stable URL into on-chain metadata.
+ *  Owner request 2026-10-15: minted cards showed no image; this fixes new mints
+ *  WITHOUT any contract change (metadata is minter-supplied, contract stores it
+ *  verbatim). Cards minted BEFORE this change keep their image-less metadata —
+ *  tokenURIData is immutable on-chain; that is recorded honestly in
+ *  docs/DEATHCARD-NFT-TESTNET-NOTE.md. */
+export const DEATH_CARD_IMAGE_URL = "https://candle-climber.vercel.app/nft/death-card.png";
+
 /** Deterministic ERC-721 run key — keccak256 over the canonical fact line.
  *  Same facts + same wallet ⇒ same key ⇒ on-chain mint-once; any changed
  *  field ⇒ a new, mintable run. Wallet case is normalized away. */
@@ -63,6 +75,7 @@ export function buildDeathCardMetadata(o: {
     name: `Death Card — ${o.symbol} ${o.date}`,
     description:
       "Candle Climber Death Card (Robinhood Chain TESTNET demo). Proves one real run on the chart — has no monetary value.",
+    image: DEATH_CARD_IMAGE_URL,
     attributes: [
       { trait_type: "Ticker", value: o.symbol },
       { trait_type: "Terrain", value: o.date },
