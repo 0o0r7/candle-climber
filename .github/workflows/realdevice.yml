@@ -30,9 +30,9 @@ jobs:
         env:
           LT_USERNAME: ${{ secrets.LT_USERNAME }}
           LT_ACCESS_KEY: ${{ secrets.LT_ACCESS_KEY }}
-          # GAME_URL MUST be /play: the wait-chips gate (.cc-char-chip) exists
-          # only on the game page; the root landing (rebuilt 2026-10-13) has no
-          # roster, so the session died 60s later with an EMPTY-message
+          # GAME_URL MUST be /play: the boot gate (mode tablist) renders only
+          # on the game page; the root landing (rebuilt 2026-10-13) has no game
+          # UI, so the session died 60s later with an EMPTY-message
           # TimeoutException that masqueraded as a grid handshake failure (#7-#14).
           GAME_URL: https://candle-climber.vercel.app/play
           QA_OUT: qa/realdevice
