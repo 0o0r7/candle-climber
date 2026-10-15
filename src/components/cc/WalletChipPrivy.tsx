@@ -89,7 +89,11 @@ export default function WalletChipPrivy() {
   // Idempotent by design: fires from the login onComplete, the auth-state
   // effect and manual clicks — re-runs with the same address are no-ops.
   const link = useCallback(async () => {
-    if (linkBusy.current) return;
+    // Identity guard: link attaches a Privy identity to the official lane —
+    // without an authenticated session there is nothing to link. This also
+    // blocks the logout-teardown race where a not-yet-purged wallet fires a
+    // doomed chain check and parks the chip on WRONG NETWORK (2026-10-16).
+    if (linkBusy.current || !authenticated) return;
     const picked = pickWallet();
     if (!picked) {
       // Wallets can still be hydrating right after a first login (embedded
@@ -121,7 +125,7 @@ export default function WalletChipPrivy() {
     } finally {
       linkBusy.current = false;
     }
-  }, [addr, pickWallet, query]);
+  }, [addr, authenticated, pickWallet, query]);
   // Keep the latest linker reachable for the login-modal onComplete callback
   // (assigned in an effect — refs must not be written during render).
   useEffect(() => {
@@ -141,10 +145,17 @@ export default function WalletChipPrivy() {
     if (authenticated) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- link() is async: its setStates all run after awaits, never synchronously in this effect body (same boot-restore pattern as GameCanvas)
       void link();
-    } else if (localStorage.getItem(WALLET_ADDRESS_KEY)) {
+      return;
+    }
+    // Un-authed: the official lane never outlives the actual auth state —
+    // clear the local identity AND any transient chip state (a wrongnet /
+    // busy parked by the logout-teardown race must not survive logout).
+    if (localStorage.getItem(WALLET_ADDRESS_KEY)) {
       localStorage.removeItem(WALLET_ADDRESS_KEY);
       window.dispatchEvent(new Event(WALLET_CHANGED_EVENT));
     }
+    // state restore on an external-system (Privy) transition — cannot run during render
+    setState((s) => (s === "wrongnet" || s === "busy" ? "idle" : s));
   }, [ready, authenticated, link]);
 
   const connect = useCallback(() => {
