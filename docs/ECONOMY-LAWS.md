@@ -88,9 +88,9 @@ Every economy-facing sentence inherits the pack's red lines:
 5.1 Review gate: any PR/commit touching scoring, the leaderboard, wallets, or
 cosmetics must state in its description which laws apply and how it complies.
 
-5.2 Audit hook: the periodic code audits (the LOOPBACK/variant-review
-protocol) now include an economy-laws check — any coupling of balance state
-to score or base access is filed as a P0 defect.
+5.2 Audit hook: the periodic code audits now include an economy-laws
+check — any coupling of balance state to score or base access is filed as
+a P0 defect.
 
 5.3 Precedence: pack §8 red lines and these laws are jointly supreme over
 older design prose. Neither may be amended casually; changes require a dated
@@ -183,5 +183,5 @@ existing lanes (LAW 5.1 gate: docs/PR-CHECKLIST.md):
 - Suite 329 → 346 (`test/e5-e6.test.ts` pins gate truth table + all four freeze paths).
 
 ---
-*Adopted: 2026-10-06 · Source: variant-review merge-back wave 1 ·
-Related internal docs live in the project's private archive.*
+*Adopted: 2026-10-06 · Related process docs live in the project's
+private archive.*
