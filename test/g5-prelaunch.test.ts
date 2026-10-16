@@ -19,6 +19,12 @@ import { opsAuthorized } from "@/lib/ops-auth";
 
 const CANDLE_JSON = JSON.stringify([{ t: 1, o: 1, h: 1, l: 1, c: 1, v: 1 }]);
 
+// Tokens are only valid today-or-yesterday (isTokenStale), so a hardcoded
+// terrain date is a time bomb: this file went red on 2026-10-16 when the
+// pinned "2026-10-14" crossed the 1-day window. Always sign with the
+// current UTC date.
+const TODAY = () => new Date().toISOString().slice(0, 10);
+
 describe("G5: world-2 marathon submissions (129-c #1)", () => {
   beforeEach(() => {
     process.env.RUN_TOKEN_SECRET = "g5-world2-secret";
@@ -27,7 +33,7 @@ describe("G5: world-2 marathon submissions (129-c #1)", () => {
 
   test("a world-2 run passing more candles than the base terrain is ACCEPTED", () => {
     // classic 1w base terrain: 220 closed candles; world 2 extends indefinitely
-    const tok = verifyRunToken(signRunToken("BTCUSDT", "2026-10-14", 220, CANDLE_JSON))!;
+    const tok = verifyRunToken(signRunToken("BTCUSDT", TODAY(), 220, CANDLE_JSON))!;
     const verdict = validateSubmission(
       { name: "MARATHON", score: 3000 * 70, candlesPassed: 3000, bestStreak: 12 },
       tok,
@@ -37,7 +43,7 @@ describe("G5: world-2 marathon submissions (129-c #1)", () => {
   });
 
   test("score still must be physically reachable from candles passed", () => {
-    const tok = verifyRunToken(signRunToken("BTCUSDT", "2026-10-14", 220, CANDLE_JSON))!;
+    const tok = verifyRunToken(signRunToken("BTCUSDT", TODAY(), 220, CANDLE_JSON))!;
     const verdict = validateSubmission(
       { name: "CHEAT", score: 9_000_000, candlesPassed: 100, bestStreak: 12 },
       tok,
@@ -47,7 +53,7 @@ describe("G5: world-2 marathon submissions (129-c #1)", () => {
   });
 
   test("candlesPassed still capped by the engine ceiling (MAX_CANDLES)", () => {
-    const tok = verifyRunToken(signRunToken("BTCUSDT", "2026-10-14", 220, CANDLE_JSON))!;
+    const tok = verifyRunToken(signRunToken("BTCUSDT", TODAY(), 220, CANDLE_JSON))!;
     const verdict = validateSubmission(
       { name: "VOID", score: 100, candlesPassed: 9999, bestStreak: 1 },
       tok,
@@ -66,11 +72,11 @@ describe("G5: run-token hardening (129-a #2/#3, 129-c #13)", () => {
       delete process.env.RUN_TOKEN_SECRET;
       process.env.MONGODB_URI = "mongodb+srv://attacker:creds@cluster.example/db";
       (process.env as Record<string, string | undefined>).NODE_ENV = "development"; // non-prod keeps the DEV DEFAULT, not the DB URI
-      const tok = signRunToken("BTCUSDT", "2026-10-14", 220, CANDLE_JSON);
+      const tok = signRunToken("BTCUSDT", TODAY(), 220, CANDLE_JSON);
       // the token signed under dev default must NOT verify as if signed by the DB URI
       expect(tok).not.toBe("");
       (process.env as Record<string, string | undefined>).NODE_ENV = "production";
-      expect(signRunToken("BTCUSDT", "2026-10-14", 220, CANDLE_JSON)).toBe(""); // prod fail-closed
+      expect(signRunToken("BTCUSDT", TODAY(), 220, CANDLE_JSON)).toBe(""); // prod fail-closed
     } finally {
       process.env.RUN_TOKEN_SECRET = prevSecret;
       if (prevMongo === undefined) delete process.env.MONGODB_URI; else process.env.MONGODB_URI = prevMongo;
@@ -83,7 +89,7 @@ describe("G5: run-token hardening (129-a #2/#3, 129-c #13)", () => {
     delete process.env.RUN_TOKEN_SECRET;
     try {
       (process.env as Record<string, string | undefined>).NODE_ENV = "production";
-      expect(signRunToken("BTCUSDT", "2026-10-14", 220, CANDLE_JSON)).toBe("");
+      expect(signRunToken("BTCUSDT", TODAY(), 220, CANDLE_JSON)).toBe("");
       expect(verifyRunToken("x.y")).toBeNull();
     } finally {
       (process.env as Record<string, string | undefined>).NODE_ENV = "development";
@@ -169,7 +175,7 @@ describe("G5: nonce required on the guest lane (129-c #4)", () => {
 
   test("guest POST without a nonce ⇒ 400 (replay protection is no longer opt-in)", async () => {
     const { POST } = await import("@/app/api/leaderboard/route");
-    const tok = signRunToken("BTCUSDT", "2026-10-14", 220, CANDLE_JSON);
+    const tok = signRunToken("BTCUSDT", TODAY(), 220, CANDLE_JSON);
     const res = await POST(new Request("http://localhost/api/leaderboard", {
       method: "POST",
       headers: { "content-type": "application/json", "x-real-ip": "10.79.0.1" },
@@ -182,7 +188,7 @@ describe("G5: nonce required on the guest lane (129-c #4)", () => {
 
   test("nonce replay ⇒ 409", async () => {
     const { POST } = await import("@/app/api/leaderboard/route");
-    const tok = signRunToken("BTCUSDT", "2026-10-14", 220, CANDLE_JSON);
+    const tok = signRunToken("BTCUSDT", TODAY(), 220, CANDLE_JSON);
     const body = JSON.stringify({ name: "REPLAY", score: 100, candlesPassed: 5, bestStreak: 1, runToken: tok, nonce: "g5-replay-nonce-1" });
     const mk = () => new Request("http://localhost/api/leaderboard", {
       method: "POST", headers: { "content-type": "application/json", "x-real-ip": "10.79.0.2" }, body,
