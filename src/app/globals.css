@@ -2623,3 +2623,35 @@ a.cc-btn { text-decoration: none; display: inline-flex; align-items: center; jus
   cursor: pointer;
 }
 .cc-stats-wipe:hover { color: var(--cc-down); border-color: rgba(224, 120, 86, 0.4); }
+
+/* ===================== /leaderboard public board (side 3) ================= */
+.cc-lb-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; }
+.cc-lb-tab {
+  font-family: var(--cc-mono); font-size: 12px; letter-spacing: 0.08em;
+  padding: 7px 13px; border: 1px solid var(--cc-hairline); border-radius: 999px;
+  color: var(--cc-faint); text-decoration: none; background: transparent;
+}
+.cc-lb-tab:hover { color: #DDE2E5; border-color: rgba(204, 255, 0, 0.35); }
+.cc-lb-tab.on { color: var(--cc-ink); background: var(--cc-lime); border-color: var(--cc-lime); font-weight: 700; }
+.cc-lb-meta { color: var(--cc-faint); font-family: var(--cc-mono); font-size: 12px; margin: 16px 0 12px; }
+.cc-lb-table { border-top: 1px solid var(--cc-hairline); margin-top: 4px; }
+.cc-lb-row {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) auto auto;
+  gap: 10px; align-items: baseline; padding: 10px 4px;
+  border-bottom: 1px solid var(--cc-hairline); font-family: var(--cc-mono);
+}
+.cc-lb-row:hover { background: rgba(255, 255, 255, 0.03); }
+.cc-lb-rank { color: var(--cc-faint); }
+.cc-lb-rank.top { color: var(--cc-lime); font-weight: 700; }
+.cc-lb-name { color: #DDE2E5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cc-lb-name i { font-style: normal; color: var(--cc-faint); font-size: 11px; margin-left: 8px; }
+.cc-lb-score { color: var(--cc-up); font-weight: 700; font-variant-numeric: tabular-nums; }
+.cc-lb-sub { color: var(--cc-faint); font-size: 11px; font-variant-numeric: tabular-nums; }
+.cc-lb-empty { color: var(--cc-faint); font-family: var(--cc-mono); font-size: 13px; padding: 30px 4px; }
+.cc-lb-foot { margin-top: 22px; color: var(--cc-faint); font-size: 12px; line-height: 1.7; }
+/* FULL BOARD link inside the in-game death panel board */
+.cc-board-more {
+  display: inline-block; margin-left: 10px; color: var(--cc-lime);
+  font-family: var(--cc-mono); font-size: 10px; letter-spacing: 0.08em; text-decoration: none;
+}
+.cc-board-more:hover { text-decoration: underline; }

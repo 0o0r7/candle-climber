@@ -2126,7 +2126,10 @@ export default function GameCanvas() {
             {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
             {officialBoard.length > 0 && (
               <div className="cc-board cc-board-official">
-                <div className="cc-board-title">🏆 OFFICIAL · {data?.seed.symbol}</div>
+                <div className="cc-board-title">
+                  🏆 OFFICIAL · {data?.seed.symbol}
+                  <a className="cc-board-more" href={`/leaderboard?board=official&scope=daily&interval=${tf}`}>FULL BOARD ↗</a>
+                </div>
                 <div className="cc-board-sub">
                   wallet-verified · best run per wallet{officialSeason ? ` · season ${officialSeason}` : ""}
                 </div>
@@ -2145,7 +2148,10 @@ export default function GameCanvas() {
             )}
             {board.length > 0 && (
               <div className="cc-board">
-                <div className="cc-board-title">{officialBoard.length > 0 ? "CASUAL" : "GUEST"} · {data?.seed.symbol}</div>
+                <div className="cc-board-title">
+                  {officialBoard.length > 0 ? "CASUAL" : "GUEST"} · {data?.seed.symbol}
+                  <a className="cc-board-more" href={`/leaderboard?board=guest&scope=daily&interval=${tf}`}>FULL BOARD ↗</a>
+                </div>
                 <div className="cc-board-sub">typed names · unofficial · play stays free &amp; walletless</div>
                 {board.slice(0, 10).map((e, i) => (
                   <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
@@ -2179,6 +2185,8 @@ export default function GameCanvas() {
         <a href="/partners">partners</a>
         <span aria-hidden>·</span>
         <a href="/stats">stats</a>
+        <span aria-hidden>·</span>
+        <a href="/leaderboard">leaderboard</a>
         <span aria-hidden>·</span>
         <a href="/privacy">privacy</a>
         <span aria-hidden>·</span>

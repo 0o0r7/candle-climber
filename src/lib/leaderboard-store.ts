@@ -61,6 +61,12 @@ export interface BoardStore {
   top(date: string | null, n: number, interval?: string, board?: BoardFilter): Promise<BoardEntry[]>;
   /** LU-17: entries around a given rank (±window/2), scoped to lane + interval + date. */
   around(date: string | null, rank: number, window: number, interval?: string, board?: BoardFilter): Promise<BoardEntry[]>;
+  /** Side 4 (career boards): best run per IDENTITY across dates — wallet on the
+   *  official lane, case-folded typed name on the guest lane. since=null reads
+   *  all-time; since=YYYY-MM-DD reads a season window (date >= since, inclusive).
+   *  Equal scores keep the EARLIEST run ("first to set it"). Lanes never mix
+   *  (LAW 1.2 Option B) — the route rejects board="all" for career reads. */
+  topCareer(n: number, interval: string, board: "guest" | "official", since: string | null): Promise<BoardEntry[]>;
   /** E4.1: privacy-safe lane aggregates for the /ops page (counts only). */
   laneStats(now: number): Promise<LaneStats>;
   /** last connection error when a backing store is down (diagnostics) */
@@ -158,6 +164,27 @@ export class MemoryStore implements BoardStore {
       .sort((a, b) => b.score - a.score);
     const start = Math.max(0, rank - 1 - Math.floor(window / 2));
     return all.slice(start, start + window);
+  }
+
+  async topCareer(
+    n: number,
+    interval: string = "1w",
+    board: "guest" | "official" = "guest",
+    since: string | null = null,
+  ): Promise<BoardEntry[]> {
+    const best = new Map<string, BoardEntry>();
+    for (const r of this.rows) {
+      if (board === "official" && r.board !== "official") continue;
+      if (board === "guest" && r.board === "official") continue;
+      if (IV(r) !== interval) continue;
+      if (since && r.date < since) continue; // ISO dates compare lexically
+      const key =
+        board === "official" ? (r.wallet ?? "").toLowerCase() : r.name.trim().toLowerCase();
+      if (!key) continue;
+      const cur = best.get(key);
+      if (!cur || r.score > cur.score || (r.score === cur.score && r.ts < cur.ts)) best.set(key, r);
+    }
+    return [...best.values()].sort((a, b) => b.score - a.score || a.ts - b.ts).slice(0, n);
   }
 
   async laneStats(now: number): Promise<LaneStats> {
@@ -374,6 +401,34 @@ class MongoStore implements BoardStore {
     const q = { ...lane, ...(date ? { date } : {}), ...ivq };
     const start = Math.max(0, rank - 1 - Math.floor(window / 2));
     return coll.find(q).sort({ score: -1 }).skip(start).limit(window).toArray();
+  }
+
+  async topCareer(
+    n: number,
+    interval: string = "1w",
+    board: "guest" | "official" = "guest",
+    since: string | null = null,
+  ): Promise<BoardEntry[]> {
+    const coll = await this.connect();
+    if (!coll) return [];
+    const ivq =
+      interval === "1w"
+        ? { $or: [{ interval: "1w" }, { interval: { $exists: false } }] }
+        : { interval };
+    const lane = board === "official" ? OFFICIAL_Q : GUEST_Q;
+    // identity: wallet (official) / case-folded typed name (guest). The $sort
+    // before $group makes $first the best run; ts asc breaks score ties as
+    // "first to set it" — same semantics as the memory store, byte for byte.
+    const identity = (board === "official" ? "$wallet" : { $toLower: "$name" }) as import("mongodb").Document;
+    const pipeline: import("mongodb").Document[] = [
+      { $match: { ...lane, ...ivq, ...(since ? { date: { $gte: since } } : {}) } },
+      { $sort: { score: -1, ts: 1 } },
+      { $group: { _id: identity, doc: { $first: "$$ROOT" } } },
+      { $replaceRoot: { newRoot: "$doc" } },
+      { $sort: { score: -1, ts: 1 } },
+      { $limit: n },
+    ];
+    return coll.aggregate<BoardEntry>(pipeline).toArray();
   }
 
   async laneStats(now: number): Promise<LaneStats> {

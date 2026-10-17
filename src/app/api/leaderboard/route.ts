@@ -40,7 +40,7 @@ import type { ProofRejectReason } from "@/lib/wallet-proof";
 import { recordClassicRun } from "@/lib/weights-store";
 import { normalizeWallet } from "@/lib/weights";
 import { shortAddress } from "@/lib/wallet";
-import { currentSeason } from "@/lib/seasons";
+import { currentSeason, SEASONS, SEASON_1_START } from "@/lib/seasons";
 import { weightsFrozen } from "@/lib/graduation"; // E6.1: snapshot freeze etiquette
 // LU-9: warn loudly when production runs without a database
 import { checkProductionDatabase } from "@/lib/production-check";
@@ -107,6 +107,34 @@ export async function GET(req: Request) {
   // Option B: lane selector — default keeps the classic (guest) board contract
   const board = boardParam(searchParams.get("board"));
   const store = getBoard();
+
+  // Side 4 (career reads): scope=season|alltime — best run per identity across
+  // dates (season scopes to the open season's start; alltime has no floor).
+  // Lanes never mix (LAW 1.2 Option B), so board=all is rejected honestly here.
+  // The daily contract below stays byte-identical when scope is absent.
+  const scopeRaw = searchParams.get("scope");
+  if (scopeRaw === "season" || scopeRaw === "alltime") {
+    if (board === "all") {
+      return NextResponse.json(
+        { error: "career scopes require board=guest or board=official" },
+        { status: 400 },
+      );
+    }
+    const seasonId = currentSeason();
+    const since =
+      scopeRaw === "season"
+        ? SEASONS.find((s) => s.id === seasonId)?.start ?? SEASON_1_START
+        : null;
+    const entries = maskWallets(await store.topCareer(50, interval, board, since));
+    return NextResponse.json({
+      entries,
+      interval,
+      board,
+      scope: scopeRaw,
+      ...(scopeRaw === "season" ? { season: seasonId, seasonStart: since } : {}),
+      store: store.kind,
+    });
+  }
 
   // LU-17: rank-around-me — ?around=<rank>&window=<n> returns entries
   // centered on the given rank (5 above, 5 below by default), scoped to the
