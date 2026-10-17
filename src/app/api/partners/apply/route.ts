@@ -16,7 +16,6 @@
 //   (LAW 1.1/1.2/1.3 untouched by construction — no score inputs here).
 // - Economy telemetry (E4.4 pattern): store failures alert at warning level.
 import { NextRequest, NextResponse } from "next/server";
-import { rateLimited, clientIp, bodyTooLarge } from "@/lib/http-limiter"; // G5: shared namespaced limiter (129-a #6)
 import {
   buildPartnerApplication,
   getPartnerStore,
@@ -26,15 +25,28 @@ import { captureError } from "@/lib/telemetry";
 export const runtime = "nodejs";
 
 /* per-IP rate limit: 5 applications / minute / instance */
+const hits = new Map<string, number[]>();
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const arr = (hits.get(ip) ?? []).filter((t) => now - t < 60_000);
+  if (arr.length >= 5) return true;
+  arr.push(now);
+  hits.set(ip, arr);
+  if (hits.size > 5000) hits.clear(); // crude memory guard
+  return false;
+}
 
+function clientIp(req: NextRequest): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip")?.trim() ||
+    "unknown"
+  );
+}
 
 export async function POST(req: NextRequest) {
-  // G5 (129-a #11): reject oversized bodies before parsing (self-host has no cap).
-  if (bodyTooLarge(req)) {
-    return NextResponse.json({ error: "payload too large" }, { status: 413 });
-  }
   const ip = clientIp(req);
-  if (rateLimited("partners-apply", ip, 5)) {
+  if (rateLimited(ip)) {
     return NextResponse.json({ error: "slow down" }, { status: 429 });
   }
 

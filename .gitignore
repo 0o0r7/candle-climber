@@ -12,6 +12,8 @@ dev.log
 server.log
 *.tsbuildinfo
 next-env.d.ts
+# process core dumps — never tracked (a 1 GB dump was committed by mistake)
+core
 
 # env & secrets — NEVER commit
 .env*
@@ -32,9 +34,6 @@ next-env.d.ts
 !/scripts/e2e-gamer-bot.ts
 !/scripts/smoke-dex-reader.ts
 !/scripts/verify-feeds.ts
-!/scripts/lt_diag.py
-!/scripts/lt_dashboard_view.py
-!/scripts/realdevice_matrix.ts
 !/scripts/trailer/
 /archive/
 /.zscripts/
@@ -95,4 +94,3 @@ e2e-artifacts/
 worklog.md
 download/
 upload/
-x_vibegames.json

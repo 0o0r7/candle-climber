@@ -16,7 +16,7 @@
 // with he = 1e27 raw units (1B supply × 1e18) and target = targetPairUnits
 // (WICK: 4e18 = the launch's own 4 ETH cap — docs/evidence/wick-launch-record.json).
 //
-// VALIDATION AGAINST REAL CHAIN STATE (the partner-lane design doc §2):
+// VALIDATION AGAINST REAL CHAIN STATE (docs/PARTNER-LANE-DESIGN.md §2):
 // the companion reserve model r(s) = 5·target·sold / (16·he − 15·sold) was
 // fitted against BOTH pinned real states and matches to dust level:
 //   launch record (block 129495061): r_actual 0.0992851 vs model 0.0992849 (+6e-5)
@@ -505,14 +505,10 @@ async function readGraduatedPrice(
 }
 
 function envOverrideRead(price: number, note: string): WickPriceRead {
-  // G5 (129-c #15): the override path now applies the same sell-side haircut as
-  // the live readers — both phases measure ≈2% (curve taxBps 200, DEX fee 200),
-  // so the realizable figure is consistent no matter which lifecycle holds.
-  const realizable = price * (1 - SELL_FEE_BPS / 10_000);
   return {
     ok: true,
     priceEth: price,
-    realizablePriceEth: realizable,
+    realizablePriceEth: price,
     source: "env-override",
     lifecycle: null,
     graduated: null,

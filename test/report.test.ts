@@ -1,7 +1,7 @@
 /// <reference types="bun-types" />
 // W5 pins for H4 DAILY REPORT (P2.4, bun test, zero deps). aggregateDay must
 // be PURE and deterministic; the narrative may only contain numbers read off
-// the report (the growth strategy §8 honesty red line — no invented counts).
+// the report (GROWTH-AND-HOOKS §8 honesty red line — no invented counts).
 import { describe, test, expect } from "bun:test";
 import {
   aggregateDay,

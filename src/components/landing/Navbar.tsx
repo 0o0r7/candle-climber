@@ -13,6 +13,8 @@ export default function Navbar() {
         <a href="#how-to-play" className="lp-nav-link">HOW TO PLAY</a>
         <a href="#features" className="lp-nav-link">FEATURES</a>
         <Link href="/partners" className="lp-nav-link">PARTNERS</Link>
+        <Link href="/city" className="lp-nav-link" style={{ color: "#22d3ee" }}>CHAIN CITY ↗</Link>
+        <Link href="/forge" className="lp-nav-link" style={{ color: "#B28DFF" }}>SIGNAL FORGE ↗</Link>
         <Link href="/play" className="lp-nav-link">PLAY</Link>
       </div>
       <Link href="/play" className="lp-btn-primary lp-btn-sm">PLAY NOW</Link>

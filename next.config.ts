@@ -58,7 +58,13 @@ const nextConfig: NextConfig = {
 // builds fall back to git rev-parse; explicit SENTRY_RELEASE always wins.
 const GIT_SHA = (() => {
   try {
-    return execSync("git rev-parse HEAD").toString().trim();
+    // stderr suppressed: where git is absent (e.g. the sandbox dev image) the
+    // shell would otherwise print "/bin/sh: git: not found" on every startup.
+    return execSync("git rev-parse HEAD", {
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+      .toString()
+      .trim();
   } catch {
     return "unknown-release";
   }

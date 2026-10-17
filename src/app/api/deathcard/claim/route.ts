@@ -20,7 +20,6 @@
 //
 // GET ?txHash=0x… — stateless receipt poll for "pending" answers.
 import { NextResponse } from "next/server";
-import { rateLimited, clientIp, bodyTooLarge } from "@/lib/http-limiter"; // G5: shared namespaced limiter (129-a #6)
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -47,6 +46,16 @@ const CONTRACT = (
 ).address.toLowerCase();
 
 /* per-IP rate limit: 10 mint requests / minute / instance */
+const hits = new Map<string, number[]>();
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const arr = (hits.get(ip) ?? []).filter((t) => now - t < 60_000);
+  if (arr.length >= 10) return true;
+  arr.push(now);
+  hits.set(ip, arr);
+  if (hits.size > 5000) hits.clear();
+  return false;
+}
 
 // --------------------------------------------------------------- mint record
 
@@ -175,14 +184,8 @@ class DeathMongoStore implements Store {
 
 function getStore(): Store {
   const url = process.env.DATABASE_URL ?? "";
-  // G5 (129-c #14): memoize the Mongo store — news-ing a DeathMongoStore per
-  // request means a fresh MongoClient per mint (the exact AUDIT-F3 pattern
-  // fixed in leaderboard-store; Atlas M0 caps connections).
-  if (!/^mongodb(\+srv)?:\/\//.test(url)) return memoryStore;
-  if (!deathMongoSingleton) deathMongoSingleton = new DeathMongoStore();
-  return deathMongoSingleton;
+  return /^mongodb(\+srv)?:\/\//.test(url) ? new DeathMongoStore() : memoryStore;
 }
-let deathMongoSingleton: DeathMongoStore | null = null;
 
 // --------------------------------------------------------------- minter key
 
@@ -267,15 +270,11 @@ async function sendMintTx(
 // -------------------------------------------------------------------- POST
 
 export async function POST(req: Request) {
-  // G5 (129-a #11): reject oversized bodies before parsing (self-host has no cap).
-  if (bodyTooLarge(req)) {
-    return NextResponse.json({ error: "payload too large" }, { status: 413 });
-  }
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("x-real-ip") ||
     "local";
-  if (rateLimited("deathcard", ip, 10)) {
+  if (rateLimited(ip)) {
     return NextResponse.json({ error: "slow down" }, { status: 429 });
   }
 
@@ -463,12 +462,6 @@ export async function POST(req: Request) {
 
 /** Stateless pending-mint poll: GET ?txHash=0x… → receipt-derived status. */
 export async function GET(req: Request) {
-  // G5 (129-a #7): GET throttle — this lane proxies upstreams / heavy compute;
-  // an unthrottled public relay is a free compute loop for a scripted client.
-  if (rateLimited("dcclaim-get", clientIp(req), 20)) {
-    return NextResponse.json({ error: "slow down" }, { status: 429 });
-  }
-
   const { searchParams } = new URL(req.url);
   const txHash = searchParams.get("txHash") ?? "";
   if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) {

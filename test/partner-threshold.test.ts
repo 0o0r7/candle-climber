@@ -3,7 +3,7 @@
 //   · curve phase  → hold the platform's own max per-wallet position (19.6M)
 //   · graduated    → 1.25 ETH value (5 ETH sizing basis / 4-partner cohort)
 // If any of these pins break, the policy changed — say so in the commit,
-// loudly. Full derivation: the partner-lane design doc.
+// loudly. Full derivation: docs/PARTNER-LANE-DESIGN.md.
 import { describe, expect, test } from "bun:test";
 import {
   GRADUATION_TARGET_ETH,

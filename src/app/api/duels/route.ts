@@ -9,24 +9,29 @@
 // (shape/bounds/physical caps); duel verdicts are social truth and never
 // touch leaderboard ranks/scores (W5 untouched).
 import { NextResponse } from "next/server";
-import { rateLimited, clientIp, bodyTooLarge } from "@/lib/http-limiter"; // G5: shared namespaced limiter (129-a #6)
 import { getDuelStore } from "@/lib/duel-store";
 import { verifyRunToken, isTokenStale } from "@/lib/run-token";
 import { validateDuelChallenge, DUEL_CODE_RE } from "@/game/cc/duel";
 import { MAX_CANDLES } from "@/lib/board-validation";
 
 /* per-IP rate limit: 20 requests / minute / instance (same as leaderboard) */
+const hits = new Map<string, number[]>();
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const arr = (hits.get(ip) ?? []).filter((t) => now - t < 60_000);
+  if (arr.length >= 20) return true;
+  arr.push(now);
+  hits.set(ip, arr);
+  if (hits.size > 5000) hits.clear(); // crude memory guard
+  return false;
+}
 
 export async function POST(req: Request) {
-  // G5 (129-a #11): reject oversized bodies before parsing (self-host has no cap).
-  if (bodyTooLarge(req)) {
-    return NextResponse.json({ error: "payload too large" }, { status: 413 });
-  }
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("x-real-ip") ||
     "local";
-  if (rateLimited("duels", ip, 20)) {
+  if (rateLimited(ip)) {
     return NextResponse.json({ error: "slow down" }, { status: 429 });
   }
   try {

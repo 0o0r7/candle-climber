@@ -1,0 +1,469 @@
+# MASTER CHECKLIST — canonical execution order & tick-tracker
+
+> Written 2026-09-30. This file is the SINGLE source of truth for what comes next.
+> It exists so the project never jumps phases or loses its place (owner directive).
+> Chat language FA · Doc language EN.
+> Naming: product phases are **P0–P6** (this file). Growth sub-tracks are **G0–G2**
+> (GROWTH-AND-HOOKS-STRATEGY §7) and visual versions **V1–V4** (ART-DIRECTION §7);
+> both map INTO the P-phases below — never used standalone.
+
+## 0. Rules of engagement (how this file is used)
+
+1. **Next-task rule:** the first unticked, unblocked item in the lowest-numbered open
+   phase is THE next task. No phase jumping. New ideas are appended to the correct
+   phase as new items — never executed mid-air.
+2. **Tick format:** `[x] YYYY-MM-DD @<commit> — one line of evidence`. An unticked box
+   with a commit hash is a bug.
+3. **Gates:** a phase is DONE only when its Gate criteria pass AND the owner confirms
+   the gate in chat (FA). Precedent: Gate G1 was confirmed by the owner 2026-09-30.
+4. **Session ritual:** read `worklog.md` → work → append worklog → tick items here →
+   commit docs+code together.
+5. Legend: 🔒 owner-dependent (blocked, not skippable) · ⛓ `<id>` depends on item ·
+   🧪 has an automated verification (W5 suite / build / curl check).
+6. **Autonomous-run delegation (owner directive 2026-10-02):** gate confirmations and
+   phase-closure sign-offs are PRE-APPROVED for this run — evidence-based closure
+   (W5 suite + e2e-gamer-bot + LambdaTest real-device + Sentry clean + live probe)
+   substitutes for owner chat confirmation. Ping the owner ONLY for actions that are
+   physically his (wallet txs, account creation, platform balance top-ups). Never
+   loop/retry blindly; never fabricate results — bots and platform APIs are the
+   source of truth.
+
+## 1. Completed (for the record)
+
+### P0 — MVP & production ship ✅
+- [x] 2026-09-29 — Engine (fixed-timestep physics, coyote/buffer, crumble), Daily Seed
+  (deterministic), mutations 5-pool, leaderboard v2 (env-gated Atlas + memory fallback,
+  anti-cheat + rate limit), share loop (OG/meta/manifest), Death Card v1, deploy live
+  @ https://candle-climber.vercel.app
+- [x] 2026-09-29 — ECOSYSTEM_BAR v2 audit: 4🟢 5🟡 2🔴 (E1 deploy converted the big blocker)
+
+### P1 — product rails ✅ Gate G1 PASS (owner-confirmed)
+- [x] W3 stock-token rails (TSLA/AMZN/NFLX via stooq + vibe/vibe launch-of-the-day
+  derived source, server date-clamp) 🧪
+- [x] **W3.1** 2026-10-02 — **Yahoo v8 chart = primary stock feed** (no-key, no owner
+  decision needed): stooq's anti-bot challenge blocks Vercel egress -> prod stock rails
+  were honest-but-tokenless synthetic. New pure parser `src/lib/yahoo.ts`
+  (parseYahooChart, contract-pinned incl. null-OHLC-must-not-become-0 rule) + fetch
+  chain yahoo (query1/query2, 1wk/10y) -> stooq fallback -> synthetic tokenless;
+  source label `yahoo` -> "live data", tf chips hidden for stocks; run token pins
+  whichever feed served (two feeds can never mix one leaderboard). Live probe: Yahoo
+  523 weekly rows w/ volume from sandbox; **PROD VERIFIED: /api/candles?symbol=TSLA ->
+  source:"yahoo" + runToken present + 521 candles** (deploy 21a991a). W5 +6 tests
+  (205/205), tsc+lint+build green
+- [x] W4 graduation arc (SUMMIT milestone, GRADUATED victory state, post-grad WORLD 2)
+- [x] W5 vitest/bun anti-cheat & determinism suite — 25/25 (run-token, board-validation,
+  stooq parser, vibe-launch, level determinism) 🧪
+- [x] Evidence: prod @ `214eb03`, suite green, honest synthetic fallback documented
+- [x] 2026-09-30 @ `d4d717d` — docs sweep: TOKEN-LAUNCHPAD-RESEARCH + GROWTH-AND-HOOKS-
+  STRATEGY + ART-DIRECTION + CC-PLAN refs (owner directive: nothing must be lost)
+
+## 2. Open phases (canonical order)
+
+### P2 — Daily hooks & visual quality (contains growth G0) — no owner dependency
+- [x] **P2.1** 2026-09-30 @ `6b1a699` — Visual **V1** shipped: terrain-v2.ts (pure
+  translation) + render-v2.ts (sky/ghosts/ridge/playfield/foreground + squash-stretch,
+  trail, pre-rendered glow sprites) behind `?renderer=v2` + HUD chip; engine untouched
+- [x] **P2.2** 2026-09-30 @ `2295e97` — Hook **H1 ARCHIVE** shipped: archive.ts (pure:
+  date validation no-future-absolute, closed-candle clamping, difficulty auto-tag
+  CALM/ROCKY/BRUTAL/LEGENDARY, recent-dailies replay, whitelisted deep links) ·
+  /api/candles honors `?date=` for PAST UTC dates only (today path byte-identical;
+  launch source skipped for archive) · ArchiveBrowser (6 curated eras + 10 recent
+  dailies, lazily computed tags, renderer=v2 carried) · archive runs are PRACTICE
+  (submission suppressed; W1 staleness untouched) · live-verified: COVID/SNL/May-crash/
+  FTX tag LEGENDARY on real binance data 🧪
+- [x] **P2.3** 2026-09-30 @ `a0f6484` — Visual **V2 / H2 WEATHER** shipped:
+  weather.ts (pure deriveWeather: ATR→wind 0..1 + seed-pinned direction,
+  volume→fog lookahead veil w/ honest MIST baseline when feed lacks volume,
+  red-tail→tremor; fixed label ladders DEAD CALM/BREEZE/GALE/STORM +
+  CLEAR/MIST/FOG/SOUP) · render-v2: background-only wind sway (caps NEVER move —
+  ART §1), wind streaks, cloud veil, right-edge fog, ≤2.2px cosmetic tremor ·
+  Candle.v? optional volume plumbed binance+stooq (JSON/token fingerprint stable
+  for volume-less feeds; feeds.test contract updated) · WEATHER HUD chip when v2
+  finds real weather · live-verified: COVID terrain = STORM .99/FOG .49/LEGENDARY,
+  today = GALE .41/CLEAR 🧪
+- [x] **P2.4** 2026-09-30 @ `73a940f` — Hook **H4 DAILY REPORT** (minimal) shipped:
+  report.ts (PURE aggregateDay: climbers/top/median/best-streak/total-height/
+  top-mutation mode w/ deterministic tiebreak + reportNarrative/emptyNarrative —
+  every figure read off the store, §8 honesty red line: no invented counts, no
+  synthetic terrain claims) · /api/report (past completed days only, default
+  yesterday; future/malformed fall back) · ready-panel episode block + COPY
+  EPISODE share text (X posting lands with P5.1/O4) · live smoke: seeded W1-valid
+  submission accepted (rank 1), empty-day episode honest, tomorrow-cliffhanger
+  from public deterministic rotation 🧪
+- [x] **P2.5** 2026-09-30 @ `2f90536` — Hook **H3 WRECKAGE** (minimal per-device)
+  shipped: wreckage.ts (PURE recordWreck: immutable db, 30 wrecks/level cap,
+  24-level eviction by latest-fatal ts, non-finite rejected; localStorage thin
+  wrapper try/catch) · deaths freeze at the exact fall point (engine px/py via
+  onDeath — decor only) · render-v2 ghost mini-candles tinted by cause
+  (fell=faint/crumbled=coral/wicked=purple) + ×N cluster badges = honest danger
+  map · archive levels keep their own wreck map per (symbol,date) · cross-user
+  wreckage ⛓ O1 (core is storage-agnostic, survives the move) 🧪
+- [x] **P2.6** 2026-09-30 @ `6b1a699` — W5 extension shipped: test/terrain-v2.test.ts
+  (purity, byte-determinism, no-mutation, world2-append stability, semantics/grammar
+  pins) — suite 36/36 green; lint + build green 🧪
+- [x] **P2.7** 2026-10-01 @ `31f19fd` — **G2 owner-feedback hotfix** (owner playtest
+  notes, accepted by tech review): control curve readable again (CAM_BASE 175→148,
+  CAM_ACCEL 5.5→3.2, CAM_MAX 470→400, JUMP_V 760→815 ≈158px reach, COYOTE .09→.12,
+  BUFFER .12→.16) · wider caps PLATFORM_W 62→72 + rarer full gaps .18→.13 ·
+  **name-input bug fixed** (stage pointer-down + window keydown no longer hijack
+  focus/Space while typing) · ready-panel de-clutter (DAILY REPORT folds to one
+  line, howto teaches HOLD=higher jump, compliance line merged into footer) —
+  suite 89/89, lint + build green 🧪
+
+**Gate G2:** owner A/B-accepts V1 · H1/H2/H4 live on prod · bun test/lint/build green ·
+determinism invariants intact (W5). Owner confirmation in chat required → then P3.
+
+> ✅ **G2 PASS 2026-10-01 — owner-confirmed in chat**: "قطعا ورژن جدید خیلی خیلی
+> بهتر هست… طبق پلن تایید میدم ادامه بدی" (A/B accepted; feedback landed as P2.7).
+
+### P3 — Share loop & identity completion
+- [x] **P3.1** Rivalry-tag input on Death Card (CC-PLAN D9 leftover) ⛓ none — DONE `normalizeRivalTag` pure normalizer (X alphabet, 1–15, leading @ tolerated, invalid ⇒ stamp omitted) + `RIVAL_KEY` persistence + optional input on death panel (gold-focus) + card stamp `CHALLENGE ISSUED → @handle — YOU'RE UP` + share text tags the rival. W5 94/94
+- [x] **P3.2** Candle-rain mutation variant (CC-PLAN D9 leftover) — DONE `rain.ts` pure glyph math (34 falling candles, ~70/30 red/green, α≤0.32, engine-time driven, drawn BEHIND playfield in BOTH renderers) + pool 6th entry `rain` (DECOR-ONLY: mods ≡ BASE_MODS, daily difficulty untouched) + W5 tests pin fairness + determinism. 100/100
+- [x] **P3.5** **Timeframe selector** (owner proposal 2026-10-01, tech-reviewed ACCEPT) — DONE 4 chips on ready panel (1W classic default · 1D · 4H · 1H), hidden for stooq/launch/archive. Interval whitelist in level-source (INTERVALS + isInterval + INTERVAL_MS); synthetic terrains seeded per date|interval (legacy 1w byte-identical); cache key + binance klines carry interval; run-token HMAC binds interval (legacy tokens verify as 1w, forged tf → null); boards PER-TF in memory+Mongo (legacy rows read as 1w, never mixed); submission interval pinned from token; report stays classic-board; deep link ?interval= + TF_KEY persistence; card shows honest tf label. Archive stays daily-only V1. W5 108/108
+- [x] **P3.6** **Skill-jump controls** (PLATFORMER-UX-RESEARCH contract §6) — DONE RUSH: `Engine.rush` + `pressRush()/releaseRush()`, SHIFT held = camera ×1.28 (after mods, may exceed un-rushed cap) + gains ×1.25 (RUSH_GAIN in scoring.ts, composed after mode/combo, rounded last); gravity-hang: GRAVITY×0.5 while rising with jump held (Celeste #3); MAX_SCORE_PER_CANDLE 140→175 covers rushed world2 full-combo; Shift wired in GameCanvas (repeat/typing-safe, release unconditional); howto line + hint bubble teach RUSH; free-brake stays REJECTED per research. W5 116/116
+- [x] **P3.7** **Sentry production monitoring** (owner directive 2026-10-01) — DONE org `james-thomas-st` · project `candle-climber` · `@sentry/nextjs@11.1.0` wired for client/server/edge (`instrumentation.ts` + `instrumentation-client.ts` + runtime configs), `onRequestError` hook, `global-error.tsx` boundary, `GET /api/debug-sentry?go=1` probe; replay on-error 100% / session 0%; privacy `dataCollection{userInfo,cookies:false}`; release pinned to git SHA + source maps uploaded at build (SENTRY_AUTH_TOKEN); verified end-to-end — probe event `70d24b51…` landed as `CANDLE-CLIMBER-1` with correct release/file attribution. W5 116/116, build+lint green
+- [x] **P3.8** **E2E gamer bot** (owner directive 2026-10-01, GitHub Actions + Playwright — free)
+  — DONE `scripts/e2e-gamer-bot.ts` robot player boots LIVE prod `?renderer=v2`, starts via Space/button,
+  plays jump bursts + RUSH, retries on death panels (valid behavior), captures boot/play/death screenshots +
+  console log; FAILS on uncaught pageerror, non-whitelisted console.error, or static canvas (render liveness via
+  frame diff). `.github/workflows/e2e.yml`: push main + nightly cron 04:00 UTC + manual dispatch, artifacts
+  uploaded 14d. Verified locally against prod: PASS 24s, 4 deaths (valid), 0 errors, canvas animating —
+  death rate also quantitatively re-confirms owner feedback F1 (early deaths). W5 116/116
+- [x] **P3.9** **G2-F1 second pass — start fairness** (gamer-bot metric, owner full-delegation
+  2026-10-01) — DONE clean NO_RUSH bot baseline (3x60s vs prod): naive input still died at 2–3s exactly at the
+  pad→terrain transition; fix LAUNCH_PAD 4→6 + EASE window (first 2 post-pad candles |Δy|≤48px + gapless) —
+  deterministic, identical for all players, real-chart shape resumes after ease; re-measure on prod: first-death
+  10–31s (immediate-death mode eliminated), deaths/60s unchanged (3–5 = normal naive cadence). W5 +ease pin
+  117/117, tsc+lint green
+- [x] **P3.10** **Sentry incident CANDLE-CLIMBER-2 — production unhandled rejection** (2026-10-01,
+  owner emailed the new-issue alert) — real player (Chrome 156/Win) on `/?renderer=v2`: `sound.ts ac()` used
+  `void ctx.resume()` → Chrome rejects with DOMException (keys exactly `code, message, stack` — the Sentry
+  synthetic signature) when resume() fires outside a user-gesture window; setTimeout-deferred sfx (milestone/
+  victory) do that by design. Fix `.catch(()=>{})` (audio = best-effort) + same-class hardening: submitScore
+  try/finally had NO catch (any POST/JSON failure escaped as unhandled rejection) → caught with graceful
+  fallback. Verified end-to-end: event ff17c94e → root cause → fix pushed `be9b97a` → CI + e2e-bot + Vercel
+  green → issue resolved with note. Lesson: DOMException inherits Error.stack in Chrome — enumerate keys, not
+  message, when triaging synthetic rejections. W5 117/117, tsc+lint green
+- [x] **P3.3** 🔒→🔓 **O6** Real-device mobile QA pass (E10) — LambdaTest cloud real-device
+  session (org 3358645, creds on file) replaces the "owner's own phones" reading of E10;
+  owner authorized platform-driven QA 2026-10-02 — REQUIRED before any launch announcement
+  → History: mobile-emulation PASS first (session d7574597efeeed8418b85c36eb76bd0e);
+  real-device was plan-gated ("Real Mobile Automation not allowed on your current plan",
+  3 rounds × 3 devices failed). **UNBLOCKED 2026-10-02: owner received KaneAI freemium
+  email → real-device automation became entitled → entitlement probe PASS (Pixel 7
+  session create 200) → FULL REAL-DEVICE QA PASS** — session f6c2f0ac-dc95-4135-9c09-51bd3a146903,
+  status=success, real Pixel 7 / Android 13 / Chrome: title ✓ · 15 char chips ✓ ·
+  WICK VENOM select ✓ · START→HUD ✓ · gameplay→LIQUIDATED death card (score 115,
+  8 candles, streak x2, PB) ✓ · 0 SEVERE console errors ✓. Evidence:
+  `qa/realdevice/rd-0*-{boot,selected,running,deathcard}-*.png` + report JSON + video
+  (RMA-AND — Real Mobile Automation) on dashboard. Script committed:
+  `scripts/lambdatest_realdevice.py`. Karma note: sandbox reset mid-run → creds
+  recovered via Codespaces-secrets channel (KB tools/codespace-exec.py, single-conn
+  base64 bundle, values never displayed); gh reinstalled to /home/z/bin/bin/gh 🧪
+- [x] **P3.15** **Cosmetic fix from mobile QA** — `TODAY&apos;S` rendered literally
+  (HTML entity inside a JS string literal, not JSX text) → real apostrophe; found in
+  LambdaTest emulation screenshot; bun test 126/126, tsc+lint+build green (2026-10-02)
+- [x] **P3.4** ✅ **O5 RESOLVED by owner himself 2026-10-02**: mascot V2 = our own VIBES
+  pipeline (owner reviewed VIBES-CONTACT-SHEET + venom-variants). Final directives:
+  (a) 03_superwick + 06_pump-bubble rejected & archived in `rejected/`; (b) venom final
+  design = `MASCOT/VIBES/venom-variants/venom-v3-half-fused.png`; (c) USE ALL OTHER
+  characters — VIBES (cop/bull/frost) + all MASCOT root concepts — "همشون خوبن و با کیفیت".
+  Game integration landed as P3.11–P3.14 — TICKED 2026-10-10 (resolution predates this
+  bookkeeping pass; nothing further exists under O5).
+- [x] **P3.11** **Character roster → game sprites (14 chars)** — DONE 2026-10-02. 4-frame
+  96px transparent sheets via proven pipeline (image-edit side-profile prompt + magenta/green-key
+  postprocess + alpha-erosion + column-split): 5 existing (trader frame0 restored from manifest
+  coords / bot / cowboy / dapper / zombie) + 5 MASCOT concepts (scarfrunner green-key,
+  visordroid, grump, goblin, cadet) + 4 VIBES (wickvenom-from-v3 assembled from dual-raw
+  best-frames, wickcop, goldenbull, frostliquidator). Venom identity rule held in all 4 frames
+  (half-cream/half-black). Shipped to `public/cc/chars/*` + KB `MASCOT/SPRITES/` + contact sheet
+  `ROSTER-CONTACT-SHEET.png` (commit `fe6f8a0` — hash lost in the 2026-10-06 branch rescue/rewrite; asset verified in-tree) 🧪
+- [x] **P3.12** **Character registry + pre-game SELECT screen** — DONE 2026-10-02.
+  `src/game/cc/characters.ts` AUTO-GENERATED from manifests (gen_characters_ts.py): 15 entries
+  (14 sprites + procedural CLASSIC), pure data + getChar/isValidCharId/rosterList, no I/O (W5).
+  Select UI on ready panel: 15 portrait chips (frame0), aria radiogroup, persists
+  `cc_char_v1`, deep-link `?char=` wins over stored, invalid→classic. Renderer feed via
+  charIdRef (RAF never re-subscribes) 🧪
+- [x] **P3.13** **Vibe mood→effect profiles in render-v2** — DONE 2026-10-02. drawCharFx:
+  15 profiles (venom=red glitch+vignette, cop=cyan scanlines, bull=golden halo+coin sparks,
+  frost=snow+ice vignette, scarf=rose petals, visor=lavender glow, grump=moss motes,
+  goblin=whisper fog, cadet=steel glints, trader=ticker shimmer, scout=neon grid, cowboy=dust,
+  dapper=film grain, zombie=toxic haze) — DECOR-ONLY, drawn last inside shake transform,
+  every particle a pure function of (charId, engine.time) via hashString — deterministic, zero
+  gameplay/physics impact (W5 purity rule) 🧪
+- [x] **P3.14** **Multi-char verification + ship** — DONE 2026-10-02. W5 extension
+  `test/characters.test.ts` 9 tests (purity/manifest safety/fx coverage/guard); suite 126/126;
+  tsc+lint clean; build green; e2e-gamer-bot PASS (20s, 3 valid deaths, 0 errors); NEW
+  `scripts/e2e-char-select.ts` — sheet:200 · picked:true · stored:wickvenom · chipImgs:14 ·
+  onChip:WICK VENOM · animating:true · errors:0 🧪
+
+**Gate G3: ✅ CLOSED 2026-10-02 (evidence-based, owner pre-approved)** — rivalry tag ✓ ·
+candle-rain ✓ · character system P3.11–P3.14 merged ✓ · **clean real-device session ✓**
+(LambdaTest Pixel 7, session f6c2f0ac, video+screenshots, 0 SEVERE errors) → P7.1–P7.3
+already shipped (bot→ghost→duel). REMAINING in repo: P7.4 realtime (traction-gated),
+P4–P6 (owner-side actions), visual debt VD-5..7 (LOW, accepted).
+
+### P-V — Visual & launch-polish phase (the "visuals LAST" phase) — ✅ CLOSED 2026-10-02
+- [x] **P-V.1** **Canvas fit system (V-1, HIGH)** — owner flagged a stretched look;
+  root cause = width-locked canvas transform (800×480 world overflowed viewport
+  height on wide/short desktops → ground row below fold, 2.4× giant zoom;
+  unframed strip on portrait phones). Fixed with contain-fit
+  `s=min(w/800,h/480)` + bottom-weighted band (62%) + full-canvas screen-space
+  clear + CSS letterbox bg. Input coordinate-free → zero gameplay impact.
+  Evidence: v2-fhd/laptop/mobile sweeps + real-device re-run (session 0a8f64e3).
+- [x] **P-V.2** **VD-5 + VD-6 + VD-7 closed** — char names wrap 2 lines (no ellipsis),
+  mobile footer lifted above SOUND ON + centered, archive lazy tags pulse+title.
+  Ledger `docs/VISUAL-DEBT.md` now EMPTY of open debt. All P-V gates green:
+  tsc / lint / 205 tests / build; engine/W5 untouched. Visual phase COMPLETE —
+  nothing visual blocks launch announcement.
+
+### P7 — Rival AI & async duels (owner brainstorm, approved direction 2026-10-02)
+> Executable whenever P4–P6 are owner-blocked; does NOT gate them. Order below is
+> build order. All items decor/economy-side, W5 untouched.
+- [x] **P7.1** **Rival AI bot (local, zero-infra)** ✅ 84c0f10 (2026-10-02): headless engine + forward-sim planner, 4 personalities, translucent rival, SOLO/VS BOT toggle; gates tsc/lint/152 tests/build green — second headless Engine instance in the
+  same world, heuristic jump planner (lookahead + jump-feasibility), character-personality
+  params (risk/precision per vibe: venom reckless, cop precise, bull greedy, frost patient);
+  rendered as translucent rival climber with its own skin+FX; toggle: "solo / vs bot" 🧪
+- [x] **P7.2** **Ghost runs** — record position-stream (NOT inputs — physics determinism not
+  required) per run, replay translucent ghost with rival's skin; storage: leaderboard-store
+  pattern (memory/Mongo) ⛓ none · server route ⛓ O1 (durability) ✅ shipped (2026-10-02): 30Hz recorder cap 3600, /api/ghosts token-pinned top-5 + 7d TTL, replay w/ recorded skin, GHOST toggle default ON; E2E verified (valid 200/GET/forged 403/horizon 400)
+- [x] **P7.3** **Async duel** — challenge link/code → both climb SAME symbol+date+interval
+  (buildPlatforms already byte-deterministic per (candles,seed)) → duel record + winner
+  verdict + death-card integration (rivalry tag P3.1 becomes the invitation channel) ⛓ O1
+  ✅ shipped (2026-10-02): /api/duels (POST token-pinned create w/ physical caps, GET by code),
+  6-char unambiguous codes (?duel=CODE deep link pins terrain + replays challenger's stream),
+  duel banner + verdict (score → candles → draw) + local W-L-D tally + DUEL → button on death
+  panel + duel stamp on death card; bot/dual coexist, verdicts local-only, W5 untouched;
+  25 new tests (199 total); E2E: create/fetch/forged 403/physical 403/horizon 400/bad-code null
+- [ ] **P7.4** **Realtime live race** (only on traction) — external WS service (PartyKit or
+  self-hosted); both clients simulate locally, avatar sync ~200ms; matchmaking queue
+  ⛓ infra decision (owner ping required for new service spend)
+
+### P4 — $WICK launch (contains growth G1) — launch DONE 2026-10-05, activation wave next
+- [x] **P4.0** 🔒 **O2** Owner: faucet test ETH into launch wallet — DONE (wallet
+  0x3cF5…f683 funded) 🧪
+- [x] **P4.1** 🔒 **O3** Owner: wizard launch per TOKEN-LAUNCHPAD-RESEARCH §9 — DONE
+  2026-10-05T22:22:32Z · launch #5963 · category **Product & Utility** · tax 200 bps ·
+  tx 0x8e78b7fabab4f9a8e7aa4611e299f5a2165e151169be25f38fa46ec62e6e61b1 (status ok,
+  block 129,493,865) · token 0xE2cE0Be4e3D420C1e4b5C46493b3d5e03595216c · curve
+  0x9e00b42b8a9c12acde9974054a05852dc692640c · lifecycle CURVE_TRADING (verified via
+  pad API /v6/launches/{token} + explorer) · pad wizard prebuilt X-share link saved 🧪
+- [x] **P4.M1** Merge-back wave 1 (game-first entry + provenance badge REAL FEED/
+  SYNTHETIC FALLBACK wired to level-source + docs/ECONOMY-LAWS.md) — DONE 2026-10-06 ·
+  branch task-a-merge-back commit 4be4393 (Z Code local) → sandbox-verified on merge
+  aaac187: build ✓ · tests 205/205 ✓ · lint no-new-errors (GameCanvas 9→8) ✓ ·
+  visual acceptance 1280×720 + 390×844 ✓ · fast-forwarded to main 🧪
+- [x] **P4.2** 2026-10-08 @ `cd1d828` — Balance Gate tiers — ACTIVATED: server-side
+  on-chain balance read (`/api/wallet`, read-only RPC, 60s cache, fail-open) live-verified
+  on prod (0xdEaD → 164,944 $WICK → whale); `NEXT_PUBLIC_WALLET_ENABLED=on` set on Vercel
+  by agent via API (O-W closed; WalletConnect id not needed — injected-provider impl);
+  "CONNECT WALLET" + tier labels confirmed in the deployed bundle; wallet identity ADDITIVE
+  to W1 run-tokens (W5 untouched, 230/230); cosmetic-only per ECONOMY-LAWS (chip invisible
+  for walletless visitors — E8 zero-friction intact) 🧪
+- [x] **P4.3** Hook **H7 WICK VAULT** — RAILS COMPLETE 2026-10-08 @ `4b3997b` (E2.4: server
+  verify chain token+tier+unique-insert, /api/vault, client peak-wick detection, PROD E2E
+  0xdEaD whale gold-trail, dup→409) — REMAINING: in-terrain chest sprite = VISUAL polish,
+  deferred to the visual phase by owner directive 2026-10-10 🧪
+- [x] **P4.4** Airdrop-weight accounting — COMPLETE 2026-10-10: streak lane (E2.2) +
+  practice lane (E2.3) + prediction lane (E2.3) + vault lane (E2.4) all LIVE + durable
+  (Mongo); official-lane submissions now link the PROOF-VERIFIED wallet; snapshot tooling
+  = E2.5 + freeze etiquette (E6.1). Box was open only until those lanes landed — they did.
+- [ ] **P4.5** #project-showcase post (game URL + token URL + how-to-play, DRGN/FORGE
+  template) ⛓ P4.1 🔒 owner (E5.1; copy + media kit ready)
+- [x] **P4.6** Hook **H5 ROUTE PREDICTION** — LIVE 2026-10-08 @ `4b3997b` (E2.3:
+  /api/prediction lock-one-per-day, server-pinned rotation symbol+tomorrow date, tiered
+  4/3/3 lazy idempotent scoring vs REAL closed candle, Mongo-unique; TOMORROW'S MARKET
+  panel; PROD E2E dup→409 + weights visible) — weights landed with P4.4 ✅
+
+**Gate G4:** token contract verified on explorer · Balance Gate live on prod · showcase
+post live → owner confirmation → P5.
+
+### P5 — Community flywheel
+- [ ] **P5.1** 🔒 **O4** Owner: W7 X account creation → Daily Report posting cadence starts
+- [ ] **P5.2** Discord scan with saved `.discord_token` (scripts/discord_scan.py) →
+  builders' launch-tx archive (research op, gitignored output)
+- [ ] **P5.3** Platform-side visibility ops (Discover tabs, guild presence, leaderboard
+  cross-promo)
+
+**Gate G5:** 7 consecutive daily-report posts · referral traffic measurable in board
+metadata → owner confirmation → P6.
+
+### P6 — Graduation & token economy (contains growth G2) — ⛓ the 4-ETH meter itself
+> (RECONCILED 2026-10-08: $WICK launched via legacy factory 0xe7942178… → per-launch
+> target = 4 ETH net per its own launch record + live pad API; the 5-ETH figure is the
+> CURRENT-factory policy, not ours. See ECONOMY-CHECKLIST §0 + TOKEN-LAUNCHPAD-RESEARCH §5.)
+> PRE-GRAD RUNTIME BUILT 2026-10-10 (before the meter fills, per checklist rule):
+> graduation gate fail-closed (E6.2), weights-freeze etiquette (E6.1), Merkle delivery
+> rehearsal live (E2.5), runbook docs/council/2026-10-10-GRADUATION-RUNBOOK.md,
+> watch plan 2026-10-10-MAINNET-WATCH-PLAN.md (E6.3), KPI targets (E4.2).
+> REMAINING here: the celebration scene (ART V4) = VISUAL phase; lanes P6.2–P6.5 =
+> gated on the tx itself.
+- [ ] **P6.1** Graduation-day event runtime — CODE HALF SHIPPED 2026-10-10 (gate + freeze
+  + runbook + Merkle path); celebration scene ⛓ visual phase
+- [ ] **P6.2** Hook **H6 MIRROR** — $WICK's own chart as a level ⛓ graduation
+  (STAGED: POST_GRAD_LANES registry + fail-closed gate shipped 2026-10-10)
+- [ ] **P6.3** In-game spend/burn (legal once transfers unlock) ⛓ graduation (STAGED)
+- [ ] **P6.4** Treasury-funded tournaments ⛓ graduation (STAGED)
+- [ ] **P6.5** Burn-counter HUD ("the game eats its own supply") ⛓ graduation — READ PATH
+  LIVE since E2.6 (2026-10-08: /api/burn + SUPPLY BURNED line); fee-EVENT attribution +
+  HUD polish = post-grad (HUD = visual phase)
+
+**Gate G6:** graduation tx confirmed on explorer · Mirror live · burn counter live →
+owner confirmation → mainnet watch (CC-PLAN D11–14).
+
+## 3. Owner-dependency register 🔒
+
+| ID | Item | Blocks | Owner action |
+|---|---|---|---|
+| **O1** | ~~`DATABASE_URL` set in the **Vercel dashboard**~~ ✅ **CLOSED 2026-10-08** — agent probe: prod `/api/leaderboard` → `store:"mongo"`, `dbError:null`; Atlas serving in production (var targets `production`; preview/dev stay on memory fallback) | ~~H3 full · H4 full · P4.4 durability · E9~~ — unblocked | ~~add env var in Vercel → redeploy~~ none — closed |
+| **O2** | Faucet test ETH | P4.0 | wallet action |
+| **O3** | W6 wizard launch signature | all of P4 | wallet action (§9 checklist ready) |
+| **O4** | W7 X account | P5.1 | account creation |
+| **O5** | Mascot V2 brief | P3.4, E6 | character re-brief |
+| **O6** | Real devices for QA | P3.3 | 1 session, 1–2 phones |
+| **O7** | ~~`SENTRY_AUTH_TOKEN` in the **Vercel dashboard**~~ ✅ **DONE 2026-10-01** — owner supplied new Vercel API token → env vars `SENTRY_AUTH_TOKEN` (secret) + `NEXT_PUBLIC_SENTRY_DSN` added via API to all targets → redeployed → root-caused missing source-map upload (no explicit `release` in `withSentryConfig` + Next 16 emits no client `.map` by default) → fixed in `next.config.ts` (commit `c8b8301`) → verified end-to-end: prod probe event attributed to release `c8b8301c…` with symbolicated frame `src/app/api/debug-sentry/route.ts` | ~~source maps + release pinning on Vercel builds~~ none | none — closed |
+
+## 4. Gate ledger
+
+| Gate | Phase | Status |
+|---|---|---|
+| G1 | P1 | ✅ PASS 2026-09-30 (owner-confirmed) |
+| G2 | P2 | ✅ PASS 2026-10-01 (owner-confirmed in chat; feedback → P2.7) |
+| G3 | P3 | ✅ CLOSED 2026-10-02 (evidence-based, pre-approved — real-device QA PASS) |
+| G-V | P-V | ✅ CLOSED 2026-10-02 (canvas fit + all visual debt closed, re-swept) |
+| G4 | P4 | ⬜ pending |
+| G5 | P5 | ⬜ pending |
+| G6 | P6 | ⬜ pending |
+
+## 5. Current pointer
+
+> ▶ **UPDATE 2026-10-10 (owner directive: "finish all coding phases, visuals last"):**
+> ALL non-visual, non-owner-blocked coding items are CLOSED in one build-out:
+> wallet identity (2d5a660) + personal_sign hardening (476cbb1) + economy build-out
+> (a906a04: E4.4 sentry-on-economy-paths, E5.5 ?ref= attribution loop, E6.2 fail-closed
+> graduation gate, E6.1 weights-freeze etiquette, E4.1 /ops dashboard) + the doc set
+> (graduation runbook, anti-sybil audit, KPI definitions, PR gate, mainnet watch plan,
+> incentive memo, launch-copy sweep #3). Suite 329→346. REMAINING in the whole repo:
+> (a) the VISUAL/graphics phase — owner-defined final stage (vault sprite, celebration
+> scene, P6.5 HUD polish, VD-4 full CTA already accepted); (b) owner-side P4.5/P5.x
+> (reach); (c) P7.4 realtime (traction-gated); (d) post-grad lanes P6.2–P6.5 (tx-gated;
+> staged). Nothing else is codeable today.
+
+> ▶ **UPDATE 2026-10-12/13 (partner-lane build-out + delivery audit):** the
+> remaining codeable surface was built and audited: 3-mode restructure
+> CRYPTO/STOCKS/LAUNCHPAD (`f0d3a3b`), partner lane PL-0..PL-10
+> (`9e617aa`/`e5dd19e`/`3de36d0`, ledger in PARTNER-LAUNCH-ROADMAP), indexer
+> fix P3-1 (`4f354a9`), DEX pool reader + keccak (`3de36d0`), roadmap ledger
+> (`df217de`). Delivery audit 2026-10-13 (DELIVERY-READINESS-REPORT.md):
+> 534/534 tests, tsc/eslint/build clean, live smoke PASS; security hardening
+> (fail-closed run-token secret, rate limits on open lanes, debug-sentry
+> production gate, security headers) + landing/product-surface gaps closed
+> (landing $WICK strip, /partners links, wallet in-wallet-browser hint,
+> /play home link, per-page metadata, sitemap).
+
+> ▶ ~~**NEXT ACTION (autonomous run, owner directive 2026-10-02):** P3.11 → P3.12 →
+> P3.13 → P3.14 (character system) → P3.3 LambdaTest real-device QA → close Gate
+> G3 with evidence → P7.1–P7.3 (rival AI + ghost + async duel) while P4–P6 remain
+> owner-blocked (wallet/account/balance actions). Krea API image-gen still 402
+> (separate API balance from workspace) — internal image-edit engine is the active
+> asset engine; Krea pipeline ready for when the owner tops up.~~
+> *(SUPERSEDED 2026-10-13 — the 2026-10-02 queue it described is fully executed; see the 2026-10-12 update above. Kept struck-through for the audit trail.)*
+> ALL code items of P3 are shipped: P3.1 rivalry tag, P3.2 candle-rain,
+> P3.5 timeframe selector, P3.6 skill-jump (RUSH + gravity-hang).
+>
+> **UPDATE 2026-10-02 (later session):** character system verified LIVE on prod via
+> LambdaTest mobile-emulation QA (PASS: 15 chips, animating, 0 errors) + P3.15
+> cosmetic fix shipped; real-device session still pending (plan slots — owner
+> verify). Infra: Codespace exec channel LIVE (paramiko-over-stdio bridge, KB
+> tools/), 8 service secrets migrated to repo-level Codespaces secrets. G3 closure
+> remains blocked ONLY on the real-device session; everything else of G3 verified.
+> UPDATE 2026-10-02 (latest): P7.1 @ 84c0f10 + P7.2 ghost runs SHIPPED (gates green: tsc/lint/174 tests/build; E2E: token-verify 403/400 contracts live). Next active build item: P7.3 async duel (challenge link/code → same symbol+date+interval → duel record + winner verdict + death-card integration).
+> UPDATE 2026-10-02 (final): P7.3 async duel SHIPPED — P7 social loop complete (bot → ghost → duel). Gates: tsc/lint/199 tests/build green + live E2E on /api/duels. Also fixed: pre-existing test-dir typecheck gap in ghost.test.ts (missing maxCandles arg). NEXT: no active build item — P7.4 realtime only on traction; G3 blocked ONLY on LambdaTest real-device session (owner); P4–P6 owner-blocked. Suggested owner items: LambdaTest slots, Copilot web signup + $0 spending cap, Azure no-card activation.
+>
+> **UPDATE 2026-10-02 (autonomous run 2, owner directive "raise execution level — don't stop"):**
+> W3.1 CLOSED via Yahoo v8 primary stock feed (no-key, no owner decision needed) —
+> prod stock rails become real+scored pending deploy probe. P3.3 root cause confirmed
+> via direct API error: "Real Mobile Automation not allowed on your current plan" —
+> plan-gated, NOT a queue issue; interactive Real-Time-Testing route needs dashboard
+> email+password (username+accesskey on file → API/grid only; login test → "Invalid
+> email"). Three unblock paths documented on P3.3. Recovery of the reset sandbox done
+> via KB + Codespaces secrets channel (fantastic-space-journey vault, now stopped;
+> .lt_user/.lt_key restored 0600; bridge script paramiko-5.0-compatible). Gates this
+> run: 205/205 tests, tsc+lint+build green. NEXT in queue: visual-debt sweep (now
+> unblocked — tech layers P7.1–P7.3 done), then idle until owner input.
+>
+> **UPDATE 2026-10-02 (autonomous run 2, later):** W3.1 PROD-VERIFIED (yahoo +
+> runToken + 521 candles). VISUAL-DEBT SWEEP 1 EXECUTED (ledger: docs/VISUAL-DEBT.md,
+> evidence: qa/visual-sweep/): VD-1 HUD/title overlap FIXED (overlay 76px clearance),
+> VD-2+2b archive edge-clip FIXED (panel calc-width + blurbs wrap, h-scroll gone),
+> VD-3 seed-chip 3-line wrap FIXED (nowrap + compact chips), VD-4 desktop invisible
+> fold PARTIAL (visible scrollbar + sticky ▾ hint + compact paddings; full above-fold
+> CTA at 800px deferred — content problem, not CSS). Footer z-index below overlay.
+> Commits 830cf30 → e80b359 → f34c32e, both remotes; CSS-only, engine/W5 untouched.
+> OPEN VISUAL DEBT: VD-5 chip-label truncation, VD-6 footer 2-line mobile, VD-7 lazy
+> tag placeholders (all LOW, accepted). NEXT: idle until owner input — G3 needs ONE
+> owner action (LambdaTest dashboard creds / plan / own phone); P4–P6 owner-blocked.
+>
+> **UPDATE 2026-10-10 (owner find): render-v2 PROMOTION is visual-phase step 0.**
+> The v1/v2 A/B (`?renderer=v2`, P2.1/P2.3/P2.5/P3.13 all DONE) was never promoted
+> to default — owner flagged it as "forgotten". Owner also suspected v2 had stale
+> gameplay feel (old jump/speed/gaps). FORENSICS: tuning (JUMP_V 815, COYOTE .12,
+> BUFFER .16, CAM 148/3.2/400, caps 72, gaps .13) landed 20:43 UTC 09-30 (31f19fd)
+> in the SHARED core (engine.ts + level.ts) — 5h AFTER v2 shipped 15:35 UTC (6b1a699);
+> that 5-hour window is where the stale-v2 memory comes from. Since then physics is
+> provably identical: single Engine.step regardless of renderer (audited every v2
+> gate in GameCanvas — render call + chips only), playfield drawn 1:1 ("v1 geometry,
+> v2 materials"), live prod A/B bot runs PASS on both with identical terrain
+> (screenshots compared). PROMOTION SHIPPED same day: default = v2, `?renderer=v1`
+> = explicit legacy opt-out, chip now marks the opt-out instead of v2. All
+> remaining visual work (vault sprite, graduation scene, burn HUD, VD-4 CTA) lands
+> on render-v2 as the default face.
+>
+> **UPDATE 2026-10-02 (autonomous run 3): GATE G3 CLOSED — real-device unlock.**
+> Owner forwarded KaneAI freemium email (TestMu AI / LambdaTest) asking whether
+> GitHub-OAuth login could substitute the dashboard password. Answer delivered: PATs
+> cannot drive OAuth web login (needs browser session), BUT the freemium activation
+> had unlocked **Real Mobile Automation** entitlement — verified via direct API probe
+> (Pixel 7 session create → 200, vs yesterday's plan-gate error). Full QA script
+> shipped (`scripts/lambdatest_realdevice.py`, selenium → LT hub, creds-in-URL auth)
+> → **REAL-DEVICE QA PASS** on real Pixel 7/Android 13: title, 15 chips, venom select,
+> START→HUD, gameplay→LIQUIDATED death card (score 115), 0 SEVERE console errors;
+> video RMA-AND on dashboard. Sandbox-reset recovery executed first (codespace vault
+> → 5 cred files 0600, single-connection base64 bundle, zero secret display).
+> Evidence: qa/realdevice/rd-0*.png + report-real-*.json. Remaining build items:
+> P7.4 (traction-gated), P4–P6 (owner actions), VD-5..7 (LOW accepted). No code
+> changes — QA-only run, W5/engine untouched.
+>
+> **UPDATE 2026-10-02 (autonomous run 4): P-V VISUAL PHASE CLOSED — the visuals-LAST
+> phase is done.** Owner flagged a "stretched" visual and authorized autonomous
+> phase selection. Chose P-V (launch-polish) — all tech layers were done and P4–P6
+> owner-blocked. Root-caused the stretch: width-locked canvas transform (V-1 HIGH).
+> Shipped V-1 contain-fit + VD-5/6/7 closures in `f9502a7` (tsc/lint/205 tests/build
+> green; engine/W5 untouched), deployed, then re-swept PROD: 3 viewports (1920×937
+> / 1280×800 / 412×915) × 4 states + REAL-DEVICE Pixel 7 re-run PASS ×5 (session
+> 0a8f64e3, 0 SEVERE). `docs/VISUAL-DEBT.md` open list now EMPTY. REMAINING:
+> P4–P6 owner actions (faucet ETH, wizard launch, X account), P7.4 traction-gated,
+> VD-4 full CTA (content problem, accepted). **Nothing in-repo blocks the launch
+> announcement — the next moves are the owner-side P4 wallet/account actions.**
+
+> **UPDATE 2026-10-11 (owner: «تصمیمش با تو» → ART V4 token-era visuals shipped):**
+> the owner-defined final visual stage is CLOSED — all four items from the V4 row
+> of ART-DIRECTION §7 that were in-repo scope landed on render-v2 (the default face):
+> (1) **Wick Vault sprite** — a wax chest with the bent-wick+flame signature drawn ON
+> the peak-wick candle (display-only; server still re-verifies every vault open),
+> idle heartbeat glow → lid opens + light column once the run passes the peak candle,
+> honest rules: never on a chasm, never on archive terrain, culled off-frame;
+> (2) **graduation celebration scene** — summit light column that settles into a
+> resting beacon, 46 wax-confetti shards (palette-locked, candle-shaped chips with
+> wick hairlines), 9 rising embers — ballistics are a pure function of a seeded
+> per-level RNG (`src/game/cc/grad.ts`), clocked by an explicit RAF-fed param while
+> the engine stays frozen (its time contract intact); GRADUATED panel gets a CSS
+> flame-crown + wax-confetti strip (aria-hidden, reduced-motion honored);
+> (3) **burn-counter HUD (P6.5)** — flame glyph + tabular lime count in a hairline
+> pill, ember pulse, honest title unchanged; (4) **VD-4** — formally closed
+> (superseded by the wave-1 entry redesign; re-measured at 1280×800: CTA fully
+> above the fold — `docs/VISUAL-DEBT.md`). Engine/physics/scoring untouched; W5
+> intact. Gates: tsc clean, 427→**441** (6 grad-data + 8 render-probe tests pin
+> geometry, determinism — identical op traces per seed/state — and the 3.2s
+> confetti envelope), lint/build green, e2e bot PASS on the local build, browser
+> probe 0 console errors. Evidence: `qa/visual-sweep/v4-*.png`.

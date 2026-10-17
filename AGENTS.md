@@ -30,7 +30,7 @@ Every external integration is optional and degrades gracefully:
   reports the active backend via `"store": "memory"`.
 - `SENTRY_AUTH_TOKEN` / `NEXT_PUBLIC_SENTRY_DSN` — source-map upload and error
   reporting only. `sentry.server.config.ts` ships a public default DSN.
-- `RUN_TOKEN_SECRET` — HMAC key for run tokens. Dev/preview keeps a zero-setup local-dev constant fallback; **production fails closed without it** (G5 2026-10-14: the `MONGODB_URI`/`DATABASE_URL` fallbacks are gone — a DB URI is a high-visibility credential; the prod gate keys on `NODE_ENV` alone, so a non-Vercel `next start` fails closed too)
+- `RUN_TOKEN_SECRET` — HMAC key for run tokens; falls back to `DATABASE_URL` then a
   local-dev constant, so leaderboard submissions work with no setup.
 - Candle data comes from a Binance proxy route with a synthetic fallback; no API key.
 - Stock levels read the official Robinhood Chain Chainlink feed over the public mainnet
@@ -55,6 +55,9 @@ served from a different origin, and Next gates `/_next/*` dev assets and HMR by 
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/          # 200
 curl -s http://localhost:3000/api/candles | head -c 200                  # seed + candles
 curl -s http://localhost:3000/api/leaderboard                            # {"store":"memory"}
+curl -s http://localhost:3000/api/forge/leaderboard                      # Signal Forge daily board (guest + official lanes)
+curl -s http://localhost:3000/api/city/leaderboard                       # Chain City board (rank by city level; wallets masked)
+curl -s "http://localhost:3000/api/city/save?wallet=0x…"                 # 404 when no city is saved; POST needs a wallet proof
 curl -s "http://localhost:3000/api/leaderboard?board=official"           # wallet-bound lane (only submissions with a VALID personal_sign ownership proof land here)
 curl -s http://localhost:3000/ops                                        # E4.1 economy dashboard (noindex, aggregate counts only)
 curl -s "http://localhost:3000/api/onchain/quote?symbol=TSLA"            # live official Chainlink price (W6)
@@ -69,9 +72,48 @@ A dev-server response contains `turbopack` / `next-dev` markers and unhashed sou
 modules; the log line `Compiling / ... GET / 200 (compile: 3.8s)` confirms live source
 rather than a prebuilt bundle.
 
+## Alt-games lane (Signal Forge + Chain City) — additive only
+
+The alternative products live beside the flagship and never touch `src/game/cc/**`:
+
+- **Signal Forge** (`src/game/vg/`, `/forge`) — arena survival on the daily chart.
+  Integrity core: `forge-token.ts` (HMAC run token) + `forge-board-validation.ts`
+  (mutation/seed re-derivation + physical caps) + `forge-board-store.ts`
+  (guest/official lanes, own collection). Board route `/api/forge/leaderboard`.
+- **Chain City** (`src/game/city/`, `/city`) — economy city builder. Local save
+  `cc_city_save_v1` (`game/city/persistence.ts`) + **server save v1**
+  (`/api/city/save` + `/api/city/leaderboard`, `src/lib/city-save*.ts`). The
+  server save is identity-proofed (`verifyCitySaveProof`) but is a convenience
+  save, NOT a competitive-integrity gate — the city sim is client-side.
+- **Chain City 3D (Phase V)** — `/city` renders through three.js
+  (`@react-three/fiber`, orthographic isometric camera). The scene is a pure
+  VIEW over the existing state layer: `game/city/engine.ts` + economy +
+  persistence stay authoritative and were not changed. Renderer lives in
+  `src/components/city/scene3d/`; the pure grid↔world / ray-picking / camera
+  math is `game/city/math3d.ts`, unit-tested by `test/city-3d.test.ts`. The
+  scene is dynamically imported with `ssr: false`, so three.js never enters the
+  landing bundle. `game/city/render.ts` (the old 2D canvas path) is RETAINED —
+  `components/city/GameplayWalkthrough.tsx` (the tutorial video) still renders
+  through it.
+  - Canvas gestures are driven by **pointer events** on the WebGL canvas
+    (drag = pan, tap = place, wheel/pinch = zoom). A test harness that only
+    dispatches `click` will not move the camera or place anything; dispatch
+    `pointerdown`/`pointerup` at real coordinates instead.
+  - Keep the orthographic camera's `near` POSITIVE: a negative near plane puts
+    the picking ray's origin past the ground plane and every tap resolves to
+    nothing.
+- **Guilds** — `src/lib/guild-registry.ts` is the STATIC, operator-curated list.
+  A `?guild=<code>` link tags a player (opaque metadata, same alphabet as the
+  `?ref=` stamp) and a REGISTERED code applies a modest Chain City income buff
+  (unregistered = tag only, buff 1.0). Append entries as guilds are onboarded.
+
+Persistence stores (leaderboard / forge / city / weights) all fall back to
+in-memory when `DATABASE_URL` is unset, so a restart clears them — useful for
+clearing test rows during review.
+
 ## Marketing assets
 
-The X trailer kit in `docs/assets/x-launch` (the three 15s trailer cuts produced 2026-10-11 (NEVER COMMITTED — binary-lossy branch rescue; only x-01…x-07 exist in-repo. Restore from backup before relying on them)) is built by
+The X trailer kit in `docs/assets/x-launch` (the 15s cuts `x-08`…`x-10`) is built by
 `scripts/trailer` — see that folder's README. It runs on the sandbox **host**, not in the
 container: `node scripts/trailer/build.mjs --out docs/assets/x-launch` (needs `ffmpeg` /
 `ffprobe`, and Playwright's chromium from the repo's `node_modules`). The deterministic
@@ -79,7 +121,7 @@ timeline step shells into the web container itself. `scripts/trailer/` is the on
 subtree that is not gitignored — see `.gitignore`.
 
 `docs/` is not served by Next, so to watch or download the finished trailers during
-review. The three 15s cuts `x-08`…`x-10` were produced 2026-10-11 but were NEVER COMMITTED (binary-lossy branch rescue) — `public/media/` does not exist; only x-01…x-07 are in-repo. Restore from backup before relying on them (see docs/assets/x-launch/README.md note)
+review, copies of `x-08`…`x-10` (mp4 + poster) live in `public/media/` and open at
 `/media/<file>` on the dev server. Re-copy them after a rebuild (see the kit README).
 
 ## Checks (from CI)

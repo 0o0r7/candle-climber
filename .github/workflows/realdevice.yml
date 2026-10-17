@@ -23,18 +23,14 @@ jobs:
           python-version: "3.12"
 
       - name: Install selenium
-        run: python -m pip install --quiet "selenium>=4.20,<4.30" # certified band — the 2026-10-13 "4.35 handshake" blame was a misdiagnosis; the real killer was GAME_URL pointing at the landing (see env below)
+        run: python -m pip install --quiet selenium
 
       - name: Run device matrix QA (prod)
-        run: python -u scripts/lambdatest_realdevice.py
+        run: python scripts/lambdatest_realdevice.py
         env:
           LT_USERNAME: ${{ secrets.LT_USERNAME }}
           LT_ACCESS_KEY: ${{ secrets.LT_ACCESS_KEY }}
-          # GAME_URL MUST be /play: the boot gate (mode tablist) renders only
-          # on the game page; the root landing (rebuilt 2026-10-13) has no game
-          # UI, so the session died 60s later with an EMPTY-message
-          # TimeoutException that masqueraded as a grid handshake failure (#7-#14).
-          GAME_URL: https://candle-climber.vercel.app/play
+          GAME_URL: https://candle-climber.vercel.app
           QA_OUT: qa/realdevice
 
       - name: Upload artifacts (screenshots + reports + dashboard links)

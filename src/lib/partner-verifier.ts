@@ -24,7 +24,7 @@
 // wick-launch-record.json). The v0 "wait for the owner to set WICK_ETH_PRICE"
 // stance is retired: wick-price.ts derives the price from the platform's OWN
 // feed using the platform's OWN curve formula (validated to ≤6e-5 against two
-// pinned chain states — the partner-lane design doc §2). The env var remains
+// pinned chain states — docs/PARTNER-LANE-DESIGN.md §2). The env var remains
 // as an optional owner override only.
 // THE RULE IS PHASE-AWARE (partner-threshold.ts):
 //   · CURVE TRADING → the curve-phase rule: hold the platform's own maximum
@@ -233,15 +233,8 @@ export async function verifyPartner(entry: PartnerEntry, opts: VerifyOpts = {}):
     } else {
       // Reader failed — fall back to the owner-verified env figure if present,
       // else fail closed. The reader's reason is surfaced for honest display.
-      // G5 (129-c #3): with the PHASE unknown, even the env figure cannot
-      // produce a definitive verdict — the env price is not phase-aware, so
-      // applying the 1.25 ETH "value" rule to a curve-phase wallet demands
-      // ≈992M WICK (provably unreachable vs the 20M cap) and would advance the
-      // 7-day grace clock during a pure infra outage. An outage must never
-      // delist a partner (this module's own contract): price stays null ⇒
-      // meets=null ⇒ UNVERIFIABLE, the clock does not move.
       rule = "value";
-      price = null;
+      price = readWickPriceEth();
       readerError = read.error;
     }
   }

@@ -1,6 +1,6 @@
-// H4 DAILY REPORT — "every night, one episode" (P2.4 / the growth strategy §6).
+// H4 DAILY REPORT — "every night, one episode" (P2.4 / GROWTH-AND-HOOKS §6).
 // PURE aggregation core: real leaderboard entries in, an honest day-summary
-// out. RED LINE (the growth strategy §8): every number in the narrative comes
+// out. RED LINE (GROWTH-AND-HOOKS §8): every number in the narrative comes
 // from the store — we never fabricate death counts or play counts we do not
 // record; an empty day says "unclimbed", not a made-up story. The route
 // (transport) wraps this; W5 pins the math.
@@ -67,7 +67,7 @@ export function aggregateDay(entries: BoardEntry[]): DayReport | null {
 /** Narrative lines — the serial cliffhanger. Every figure is read straight
  *  off the report; nothing is invented. Terrain-flavor lines (the day's real
  *  move/difficulty) are deliberately omitted until the report route can fetch
- *  live closed candles — a synthetic move would violate the growth strategy §8. */
+ *  live closed candles — a synthetic move would violate GROWTH-AND-HOOKS §8. */
 export function reportNarrative(rep: DayReport, ctx: ReportContext): string[] {
   const lines: string[] = [];
   lines.push(

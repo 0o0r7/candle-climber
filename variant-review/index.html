@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#071014" />
+  <meta name="description" content="Candle Current — read the synthetic tape, steer the signal boat, cross the current." />
+  <title>CANDLE CURRENT — read the flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="wordmark" href="/" aria-label="Candle Current home"><span class="mark">◒</span> CANDLE CURRENT</a>
+      <div class="topbar-meta"><span class="status-dot"></span><span>SYNTHETIC DEMO TAPE</span><button id="soundBtn" class="quiet-btn" aria-label="Toggle sound">SOUND ON</button></div>
+    </header>
+
+    <section class="intro" id="intro">
+      <div class="intro-copy">
+        <p class="eyebrow">SIGNAL PILOT / TAPE CROSSING 01</p>
+        <h1>Read the flow.<br><em>Stay out of red.</em></h1>
+        <p class="lede">A market tape becomes a current map. Move one lane at a time, chase the clean signal, and cross 24 cells before turbulence takes your hull.</p>
+        <div class="quick-rules"><span><b>← →</b> steer</span><span><b>CYAN</b> calm</span><span><b>SAFFRON</b> boost</span><span><b>CORAL</b> turbulence</span></div>
+        <button id="startBtn" class="primary-btn">LAUNCH CURRENT <span>↗</span></button>
+        <p class="microcopy">No wallet. No live prices. Purely synthetic practice tape.</p>
+      </div>
+      <div class="intro-instrument" aria-label="Demo tape preview">
+        <div class="instrument-head"><span>ROUTE PREVIEW</span><span>01—06 / 24</span></div>
+        <div class="preview-grid" id="previewGrid"></div>
+        <div class="preview-caption"><span class="sonar"></span><span>CALM ROUTE HIGHLIGHTED</span></div>
+      </div>
+    </section>
+
+    <section class="game-wrap hidden" id="gameWrap">
+      <div class="game-head">
+        <div><p class="eyebrow">CURRENT / CROSSING <span id="cellCount">01 / 24</span></p><h2 id="phaseTitle">Find the calm lane.</h2></div>
+        <div class="telemetry"><div><span>SCORE</span><strong id="score">0000</strong></div><div><span>STREAK</span><strong id="streak">00</strong></div><div><span>HULL</span><strong id="hull">●●●</strong></div></div>
+      </div>
+      <div class="playfield" id="playfield">
+        <div class="lane-labels"><span>HIGH</span><span>MID</span><span>LOW</span></div>
+        <div class="lanes" id="lanes"><div class="lane" data-lane="0"></div><div class="lane" data-lane="1"></div><div class="lane" data-lane="2"></div></div>
+        <div class="boat" id="boat"><span class="boat-core">◒</span><span class="wake"></span></div>
+        <div class="next-readout" id="nextReadout">NEXT / READ THE TAPE</div>
+        <div class="scanline"></div>
+      </div>
+      <div class="game-footer"><div class="tape-rail"><span class="rail-label">TAPE</span><div class="rail-bars" id="railBars"></div></div><div class="controls"><button class="control-btn" data-move="-1" aria-label="Move up">↑</button><button class="control-btn" data-move="1" aria-label="Move down">↓</button></div><p class="hint">A / D or ↑ / ↓ · tap lane to steer</p></div>
+    </section>
+
+    <section class="summary hidden" id="summary">
+      <div class="summary-stamp" id="summaryStamp">CROSSING COMPLETE</div>
+      <p class="eyebrow">ROUTE REPORT / <span id="summaryTape">SYNTHETIC DEMO TAPE</span></p>
+      <h2 id="summaryTitle">Clean signal.</h2>
+      <div class="summary-grid"><div class="big-stat"><span>FINAL SCORE</span><strong id="finalScore">0000</strong></div><div><span>CLEAN CELLS</span><strong id="cleanCells">00 / 24</strong></div><div><span>BEST STREAK</span><strong id="bestStreak">00</strong></div><div><span>PERSONAL BEST</span><strong id="personalBest">0000</strong></div></div>
+      <p class="summary-note" id="summaryNote"></p>
+      <div class="summary-actions"><button id="retryBtn" class="primary-btn">CROSS AGAIN <span>↗</span></button><button id="resetBtn" class="text-btn">RESET LOCAL LOG</button></div>
+    </section>
+
+    <footer class="footer"><span>PROTOTYPE VARIANT / CANDLE CURRENT</span><span>BASE GAME IS FREE · TESTNET TOKEN LANGUAGE IS FUTURE-ONLY</span></footer>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-// Route Prediction — PURE math core (E2.3 / P4.6 / H5, spec: the economy spec §7.2).
+// Route Prediction — PURE math core (E2.3 / P4.6 / H5, spec: docs/WICK-ECONOMY-SPEC.md §7.2).
 // No I/O here (W5 purity rule): the route feeds a verified real daily candle in,
 // this module decides what the call was worth. Deterministic: same call + same
 // candle ⇒ same points, always. Language law applies — a call "builds weights",

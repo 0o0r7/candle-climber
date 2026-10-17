@@ -73,22 +73,6 @@ button → e2e real-browser mint proof.
 3. **Metadata = the card's existing facts only:** ticker + terrain source,
    peak height, UTC date, interval, rank. Nothing invented, no scarcity claims,
    no utility promises.
-   - **Image (added 2026-10-15):** metadata carries an `image` field pointing at
-     `https://candle-climber.vercel.app/nft/death-card.png` — a 1024x1024 square
-     crop of our own shipped "liquidation chase" landing illustration (the
-     finalized mascots with their full background; owner request after minting
-     an image-less card). The URL is a pinned constant
-     (`DEATH_CARD_IMAGE_URL` in `src/lib/deathcard-claim.ts`), the asset ships
-     from `public/nft/death-card.png` (regenerate:
-     `python3 scripts/deathcard/make-card-art.py`), and a unit test pins both
-     the constant and the file's existence so the on-chain URL can never silently
-     404. The art is project-owned brand art — no AI generation, no external
-     assets, no scarcity language added.
-   - **Already-minted cards are NOT retroactive:** `tokenURIData` is immutable
-     on-chain, so cards minted before this change (e.g. CCDC #1–#4) keep their
-     image-less metadata. Fixing those would require a contract redeploy, which
-     the owner explicitly ruled out — the honest state is: new mints carry the
-     image, old mints are documented as image-less testnet artifacts.
 4. **Gating:** mint is **optional and wallet-only**; guest mode byte-unchanged;
    archive/practice runs are NOT mintable (they are submission-suppressed — that
    honesty carries over); idempotent mint-once per run id.

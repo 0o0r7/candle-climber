@@ -1,6 +1,6 @@
 /// <reference types="bun-types" />
 // W5 — airdrop-weights ledger contract tests (E2.2/P4.4, bun test, zero deps).
-// Pins the economy spec §7: streak chain math (incl. month/year
+// Pins docs/WICK-ECONOMY-SPEC.md §7: streak chain math (incl. month/year
 // boundaries), streak points cap, per-identity idempotency (same-day dedupe),
 // wallet linking, and the pure per-wallet snapshot (cap + anomaly flags).
 // Pure lib only — no network, no sleeps; the Mongo store stays untested here

@@ -1,212 +1,146 @@
-<div align="center">
+# CANDLE CLIMBER
 
-<img src="public/landing/banner-v2-liquidation-chase1.jpg" width="100%" alt="Candle Climber — the chart is the level" />
-
-# 🕯️ Candle Climber — $WICK
-
-**The chart is the level.** A browser precision-platformer whose terrain *is* the real market chart.
-
-[▶ PLAY](https://candle-climber.vercel.app/play) · [$WICK token (testnet)](https://testnet.vibevibe.fun/token/0xe2ce0be4e3d420c1e4b5c46493b3d5e03595216c) · [Architecture](#-architecture) · [Documentation](#-documentation)
-
-![tests](https://img.shields.io/badge/unit_tests-608%20passing-brightgreen)
-![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
-![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)
-![Bun](https://img.shields.io/badge/runtime-bun-f472b6?logo=bun&logoColor=white)
-![chain](https://img.shields.io/badge/chain-Robinhood%20Chain%20testnet-8b5cf6)
-![status](https://img.shields.io/badge/status-LIVE-success)
-
-</div>
-
-> ⚠️ **Honesty first — this is a TESTNET project.** $WICK launched on the VibeVibe
-> testnet bonding curve (Robinhood Chain testnet) on **2026-10-05**. No real money
-> is involved anywhere; the Death Card NFTs are on-chain proofs of play with
-> **zero monetary value**. We say this everywhere on purpose. Not affiliated with
-> Robinhood Marketplaces, Inc. — built on the public Robinhood Chain testnet.
+> **The chart is the level.** A vertical skill platformer whose terrain is built from
+> real candlestick data. Built for the **vibe builders** program on Robinhood Chain.
 
 You are a small blocky trader running up a live chart. Green candles are solid
-jump pads. Red candles crumble under your feet. Fall off the bottom of the
-screen and you are — obviously — **liquidated**. One life per run, exactly like
-the market: no rewinds.
+jump pads. Red candles crumble under your feet. Fall off the bottom of the screen
+and you are — obviously — **liquidated**.
 
-- **Free to play, no wallet needed.** A wallet connects only for the official
-  competitive lane (leaderboards / seasons).
-- **Every UTC day = one fresh deterministic terrain** built from one real
-  symbol's chart — identical for every player worldwide, plus 6-pool daily
-  mutations.
-- **3 modes:** CRYPTO · STOCKS · LAUNCHPAD (launch-of-the-day curves).
-- **Death Cards (ERC-721):** die on the chart and the run can be minted as an
-  on-chain proof — ticker, terrain date, peak height, streak. Mint-once
-  enforced by the contract.
-- **Shareable everything:** 1080×1350 Death Card PNG download / WebShare,
-  PvP duels on the same chart, rival AI bot, global leaderboard.
+## Why it fits the ecosystem
 
-## 🎮 The loop
+- **Utility / vibecoded track** — ships a real, playable MVP (browser, desktop + mobile).
+- **Every vibe/vibe launch is content** — one daily level = one real symbol's chart,
+  identical for every player worldwide (deterministic daily seed).
+- **Shareable death loop** — every run ends in an auto-generated, downloadable
+  Death Card (score, symbol, funny liquidation cause, rank) built for X/Twitter.
+- **Anti-sybil by design** — no reward loops tied to self-play; score = pure skill.
 
-```mermaid
-flowchart LR
-    A["Real market chart<br/>crypto · stock · launchpad"] --> B["Daily seed<br/>UTC date → symbol + window"]
-    B --> C["Deterministic terrain<br/>+ daily mutations"]
-    C --> D["One run · one life<br/>green = pads · red = crumble"]
-    D --> E{"Reached the peak?"}
-    E -->|-- death --| F["Death Card<br/>score · ticker · liquidation cause"]
-    E -->|-- survival --| G["Leaderboard<br/>global · duels · rivals"]
-    F --> H["Download / share PNG<br/>or mint ERC-721 proof"]
-    G --> C
-```
-
-Terrain physics is a fixed-timestep Canvas 2D engine with coyote time, jump
-buffering and crumble timers — the game part is a real platformer, not a
-clicker. Levels derived from official spot feeds are labeled `derived`; when
-official data is unavailable the value stays `null` and nothing is synthesised
-to look official.
-
-## 🏗️ Architecture
-
-```mermaid
-graph TB
-    subgraph Client["Browser — Canvas 2D"]
-        GAME["Game engine<br/>fixed-timestep physics · input replay"]
-        UI["HUD · tutorial wizard · touch controls<br/>ON-CHAIN price chip"]
-    end
-    subgraph Server["Next.js 16 (App Router) on Vercel"]
-        CANDLES["/api/candles<br/>Binance klines proxy · geo-fallback · synthetic fallback"]
-        QUOTE["/api/onchain/quote<br/>keyless public JSON-RPC"]
-        CLAIM["/api/deathcard/claim<br/>server-side metadata + mint"]
-        OPS["leaderboard · duels · partners · /ops moderation"]
-    end
-    subgraph Chain["Robinhood Chain"]
-        TN["TESTNET 46630<br/>$WICK bonding curve · CCDeathCard NFT"]
-        MN["MAINNET 4663<br/>official Chainlink stock feeds (read-only)"]
-    end
-    DB[("MongoDB Atlas<br/>scores · seasons")]
-    GAME --> CANDLES
-    GAME --> CLAIM
-    UI --> QUOTE
-    OPS --> DB
-    CANDLES --> BN["Binance klines API"]
-    QUOTE --> MN
-    CLAIM --> TN
-```
-
-| Layer | Choice |
-|---|---|
-| App | Next.js 16 (App Router, React 19, TypeScript strict) on Vercel |
-| Game | Canvas 2D, fixed-timestep physics, deterministic daily seeds |
-| Runtime | Bun (dev · test · scripts), 608 tests across 52 files |
-| Data | Binance klines (server proxy + fallbacks) · Chainlink AggregatorV3 reads |
-| Chain | viem-style raw `eth_call` JSON-RPC — keyless, no third-party key service |
-| DB | MongoDB Atlas (leaderboard, seasons, duels) |
-| Quality | GitHub Actions (CI, E2E, LambdaTest real-device grid), ESLint, `tsc --noEmit` |
-
-## 💰 $WICK — the token loop (testnet)
-
-`0xe2ce0be4e3d420c1e4b5c46493b3d5e03595216c` · launched 2026-10-05 · curve launch #5963
-
-```mermaid
-flowchart LR
-    T["Every $WICK trade"] -->|"2% tax"| S["Tax splitter"]
-    S -->|"75%"| H["Holder reflections"]
-    S -->|"20%"| C["Cash-out lane"]
-    S -->|"5%"| B["Burn"]
-```
-
-Scores are **never** tied to holdings — the ladder is pure skill
-(anti-sybil by design: no reward loop is tied to self-play or balance size).
-Pre-graduation the token is transfer-locked; all economy lanes ship behind
-explicit on-chain gates.
-
-## 🃏 Death Cards — on-chain proof of play
-
-`CCDeathCard` · `0x3e2735c670ac6d6412a79153602d7e9c58640c64` · ERC-721 on testnet 46630
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant P as Player
-    participant S as Server
-    participant C as CCDeathCard
-    P->>S: run ends — death on the chart
-    S->>S: build metadata — name, ticker, terrain date, peak, streak, mascot art
-    S->>C: mint() from server minter
-    C-->>P: CCDC token — immutable tokenURI, mint-once per run
-    Note over P,C: TESTNET demo — proofs of play, no monetary value
-```
-
-The card art is the project's own mascot work (same art system as the landing
-banner — see [ART-DIRECTION](docs/ART-DIRECTION.md)). The metadata builder is
-pinned by tests so the on-chain image URL can never silently 404. Honest
-caveat: cards minted before the image upgrade stay image-less forever —
-`tokenURIData` is immutable by design
-([full note](docs/DEATHCARD-NFT-TESTNET-NOTE.md)).
-
-## ✅ Engineering quality
-
-- **608 automated tests, all green** — unit + integration + economics +
-  contract-model suites (`bun test`).
-- **8-profile real-browser matrix against production** — iPhone SE/13/15 Pro
-  Max, iPad mini/Air/Pro 12.9, Pixel 7, desktop Chrome: **97/97 checks PASS**,
-  artifacts committed under `qa/realdevice/`.
-- **LambdaTest real-device grid** — win11-chrome, win11-firefox + a **physical
-  Pixel 7**: session validates the full player path on every push to `main`
-  ([workflow](.github/workflows/realdevice.yml)).
-- **Security posture** — strict CSP with per-request nonces, Lighthouse
-  a11y/SEO/best-practices 100 across landing/play/stats/partners, honest 503s,
-  ops moderation gate.
-
-## 📡 Data honesty — official feeds, never invented
+## Data honesty — official feeds, never invented
 
 - **Official stock price.** Every stock level is checked against the official
   Chainlink price feed on **Robinhood Chain mainnet (chain 4663)**, read keyless
   over the public JSON-RPC. The HUD shows an `ON-CHAIN <SYM> $…` chip when the
-  level's final close agrees with it, and
-  `GET /api/onchain/quote?symbol=TSLA` exposes the same read with no game
-  involved. Re-verify any time with `bun scripts/verify-feeds.ts`.
+  level's final close agrees with it (verified 2026-10-10: TSLA `$382.95`,
+  `deltaPct -3.23%`), and `GET /api/onchain/quote?symbol=TSLA` exposes the same
+  read with no game involved. Re-verify any time with
+  `bun scripts/verify-feeds.ts`.
 - **Mainnet ≠ testnet.** The testnet faucet Stock Tokens (chain 46630) are a
   *different contract set* with **mock** feeds — read for identity only, never
-  priced. Raw `eth_call` evidence:
-  [ROBINHOOD-CHAIN-INTEGRATION](docs/ROBINHOOD-CHAIN-INTEGRATION.md).
+  priced. Raw `eth_call` evidence: [`docs/ROBINHOOD-CHAIN-INTEGRATION.md`](docs/ROBINHOOD-CHAIN-INTEGRATION.md).
 - **No on-chain OHLC exists.** The official feed is a *spot* price, so derived
   terrain is labeled `derived` / "official on-chain price" — never "live data".
   When official data is unavailable the value stays `null`; nothing is
   synthesised to look official.
-- Every public claim is tracked against code and evidence in
-  [TRUTH-TABLE](docs/TRUTH-TABLE.md); every feed is registered in
-  [FEEDS](docs/FEEDS.md).
+- Every claim is tracked against code and evidence in
+  [`docs/TRUTH-TABLE.md`](docs/TRUTH-TABLE.md); every feed is registered in
+  [`docs/FEEDS.md`](docs/FEEDS.md).
 
-## 🚀 Quickstart
+## Status — live at https://candle-climber.vercel.app (landing) · game at /play
+
+Real daily candles, real deaths. Deployed 2026-09-29 · CI green on `main` ·
+QA: 534/534 automated tests across 42 files + headless sim rounds + live
+desktop/mobile-emulated sessions — artifacts in `qa/`, regression suites in
+`test/`, bot in `scripts/e2e-gamer-bot.ts` (see `docs/ECOSYSTEM_BAR.md`).
+Live deployment re-checked 2026-10-10; full delivery audit 2026-10-13 in
+[`docs/DELIVERY-READINESS-REPORT.md`](docs/DELIVERY-READINESS-REPORT.md).
+
+| Shipped (2026-10-13) | Next (owner-gated / triggered) |
+|---|---|
+| Canvas 2D engine (fixed-timestep physics, coyote time, jump buffering, crumble timers) | Game-feel polish + combo scoring pass |
+| Daily Seed: UTC date → symbol + window, deterministic level + daily mutations (6-pool) | Graduation economics (staged per `docs/council/2026-10-10-GRADUATION-RUNBOOK.md`) |
+| Three chart modes — CRYPTO / STOCKS / LAUNCHPAD (`cc_mode_v2`, per-pool rotations, pool-scoped `/api/candles?pool=`) | Death Card v2 (rivalry tags) |
+| Real market data: Binance klines server proxy + geo-fallback + synthetic fallback; CoinGecko market-mode pool | On-chain score anchoring (wallet identity + `$WICK` balance badge already ship) |
+| PARTNER lane end-to-end: `/partners` + apply/pool APIs, phase-aware hold gate (19.6M WICK curve phase / 1.25 ETH graduated), on-chain verifier, curve + DEX price readers (`docs/PARTNER-LANE-DESIGN.md`) | Partner onboarding runbook (hard gate before first listing — roadmap R-2) |
+| Official on-chain stock anchor: mainnet Chainlink feed per stock level + `ON-CHAIN` badge (W6) | Live on-chain OHLC terrain — needs a historical source on the chain (see truth table) |
+| Death Card generator (1080×1350 PNG download / WebShare) + on-chain mint (`/api/deathcard/claim`, CCDeathCard on 46630) | Real-device mobile QA pass |
+| Global leaderboard (MongoDB Atlas live) + PvP duels + rival ghosts + airdrop weights/vault/burn lanes | Ranked duels, guild wars (council-gated) |
+| vibe/vibe design language, WebAudio synth SFX, mobile touch controls, landing tutorial + interactive gameplay demo | Mascot V2 (owner re-brief) |
+
+Public surfaces: `/` · `/play` · `/partners` · `/airdrop` · `/stats` ·
+`/privacy` · `/terms` · `/ops` (noindex) — plus aggregate-only APIs
+(`/api/wick/state`, `/api/partners/pool`).
+
+## Tech stack
+
+- **Next.js 16 (App Router) + TypeScript** — app shell, API routes
+- **Canvas 2D** custom engine (`src/game/cc/`) — no heavy game frameworks
+- **Tailwind CSS 4** — vibe/vibe palette (`#CCFF00` lime on `#101214`)
+- **WebAudio** synthesized sound — zero audio assets
+- **Bun** — package manager and runtime
+- Zero-cost infrastructure mapped to the **GitHub Student Developer Pack**
+  → see [`docs/INFRASTRUCTURE.md`](docs/INFRASTRUCTURE.md)
+
+## Quickstart
 
 ```bash
-bun install            # bun >= 1.x
-bun run dev            # Next.js dev server on :3000
-bun test               # 608 tests
-bun run lint           # ESLint
-bunx tsc --noEmit      # type check
-bun scripts/verify-feeds.ts   # re-verify on-chain stock feeds
+bun install
+bun run dev        # http://localhost:3000
+bun run lint       # eslint
+bun run build      # production build (Vercel-style)
 ```
 
-Play locally at `http://localhost:3000/play`. Every external integration
-(feeds, chain, DB) degrades gracefully — the game boots with zero credentials.
+Production runs on Vercel with `build` (plain `next build`); `build:standalone`
+exists for self-hosted/`bun start` runs.
 
-## 📚 Documentation
+## Architecture
 
-| Doc | What's inside |
-|---|---|
-| [GAME_DESIGN](docs/GAME_DESIGN.md) | mechanics, scoring, modes, retired-layers ledger |
-| [INFRASTRUCTURE](docs/INFRASTRUCTURE.md) | deployment topology, env vars, ops gates |
-| [FEEDS](docs/FEEDS.md) · [TRUTH-TABLE](docs/TRUTH-TABLE.md) | registered feeds · claim-by-claim honesty audit |
-| [ROBINHOOD-CHAIN-INTEGRATION](docs/ROBINHOOD-CHAIN-INTEGRATION.md) | raw `eth_call` evidence for every chain read |
-| [DEATHCARD-NFT-TESTNET-NOTE](docs/DEATHCARD-NFT-TESTNET-NOTE.md) | NFT contract, metadata, immutability caveats |
-| [ART-DIRECTION](docs/ART-DIRECTION.md) · [ART_PROMPTS_V2](docs/ART_PROMPTS_V2.md) | visual system and asset pipeline |
-| [PLATFORMER-UX-RESEARCH](docs/PLATFORMER-UX-RESEARCH.md) | input/UX research behind the engine feel |
-| [RETIRED-FEATURES](docs/RETIRED-FEATURES.md) | decisions ledger — retired layers and why they stay retired |
-| [PR-CHECKLIST](docs/PR-CHECKLIST.md) | review gates |
+```
+src/game/cc/
+  types.ts      Candle, SeedInfo, RunResult — shared contracts
+  rng.ts        hashString, mulberry32 — seeded daily PRNG
+  level.ts      daily seed → symbol + window; candles → platforms
+  mutations.ts  5-pool daily mutations → physics modifiers (deterministic)
+  market.ts     legibility stats: REAL MOVE %, FRIENDLY/SPICY/BRUTAL
+  level-source.ts  pluggable level feed: Binance daily · vibe-launch terrain · Robinhood on-chain price anchors (official), synthetic fallback
+  engine.ts     fixed-timestep loop, physics, crumble timers, scoring
+  render.ts     canvas renderer (vibe/vibe palette, particles, camera)
+  deathcard.ts  offscreen-canvas 1080×1350 share card
+  sound.ts      WebAudio synth SFX
+src/app/api/candles/route.ts      GET seed + klines (Binance proxy + geo-fallback, cached)
+src/app/api/leaderboard/route.ts  GET top / POST entry (?board=guest|official|all; official POST requires a valid personal_sign ownership proof — anything less degrades to guest with a note; memory fallback → MongoDB Atlas when DATABASE_URL set)
+src/lib/leaderboard-store.ts      storage adapter: two lanes (guest walletless · official wallet-bound, best run per wallet), env-gated Atlas M0, memoized clients
+src/lib/proof-message.ts          isomorphic canonical proof message (client and server build the exact same bytes)
+src/lib/wallet-proof.ts           server-side EIP-191 personal_sign verification (ECDSA secp256k1 recovery, ±10-min freshness)
+src/lib/seasons.ts                append-only season registry (S1 opened 2026-10-10) — official records are season-stamped
+src/components/cc/GameCanvas.tsx  client shell: canvas + HUD + modals (+ wallet personal_sign before official submissions)
+```
 
-<div align="center">
+## Docs
 
-**▶ [Play the current day's chart](https://candle-climber.vercel.app/play)** — one terrain per UTC day, same for everyone.
+- [`docs/README.md`](docs/README.md) — **start here:** which doc is the source of truth, and what is only history
+- [`docs/TRUTH-TABLE.md`](docs/TRUTH-TABLE.md) — every product claim vs the code, the tests and the primary source
+- [`docs/FEEDS.md`](docs/FEEDS.md) — every data feed: URL, cadence, failure mode, honesty label
+- [`docs/ROBINHOOD-CHAIN-INTEGRATION.md`](docs/ROBINHOOD-CHAIN-INTEGRATION.md) — the official on-chain read + raw evidence
+- [`docs/ECOSYSTEM-QUESTIONS.md`](docs/ECOSYSTEM-QUESTIONS.md) — what we still need answered (eligibility, weights, Stock Token support)
+- [`docs/CC-PLAN.md`](docs/CC-PLAN.md) — technical master plan (locked)
+- [`docs/GAME_DESIGN.md`](docs/GAME_DESIGN.md) — design spec: rules, scoring, virality loop
+- [`docs/ECOSYSTEM_BAR.md`](docs/ECOSYSTEM_BAR.md) — honest scoreboard vs the vibe/vibe ecosystem bar (E1–E10)
+- [`docs/ECONOMY-LAWS.md`](docs/ECONOMY-LAWS.md) — fairness/weights laws (the language rule lives here)
+- [`docs/ECONOMY-CHECKLIST.md`](docs/ECONOMY-CHECKLIST.md) — economy-phase tracker (E0–E6; graduation runbook + watch plan live in `docs/council/`)
+- [`docs/PR-CHECKLIST.md`](docs/PR-CHECKLIST.md) — LAW 5.1 review gate, mechanical form (scoring/leaderboard/wallet/cosmetics PRs)
+- [`docs/INFRASTRUCTURE.md`](docs/INFRASTRUCTURE.md) — zero-cost infra map (Student Pack)
 
-$WICK and CCDC are testnet artifacts. Nothing here is financial advice, an
-investment, or a promise of value — it is a game with an honest on-chain
-demo economy.
+## Official ecosystem references
 
-</div>
+- **vibe/vibe testnet docs** — https://testnet.vibevibe.fun/docs (quickstart,
+  launch overview, **safety essentials**, FAQ). Its testnet terms are the primary
+  source of truth for participation and for any reward expectation.
+- **Robinhood Chain docs** — [connecting](https://docs.robinhood.com/chain/connecting) ·
+  [token contracts](https://docs.robinhood.com/chain/contracts) ·
+  [oracles & price feeds](https://docs.robinhood.com/chain/oracles-and-price-feeds) ·
+  [building with Stock Tokens](https://docs.robinhood.com/chain/building-with-stock-tokens)
+- **Chainlink tokenized-equity feeds on Robinhood Chain** —
+  https://docs.chain.link/data-feeds/tokenized-equity-feeds/robinhood
+- **`$WICK` launch record (testnet)** — [`docs/evidence/wick-launch-record.json`](docs/evidence/wick-launch-record.json)
+- **Open questions owed to us by the ecosystem team** — [`docs/ECOSYSTEM-QUESTIONS.md`](docs/ECOSYSTEM-QUESTIONS.md)
+
+> **Participation note.** Candle Climber is a **testnet** product. Any rewards,
+> weights or allocations are **discretionary and unconfirmed** — see the
+> platform's [testnet docs and legal/safety terms](https://testnet.vibevibe.fun/docs).
+> Weights are ledger entries that accrue in the product; they are not a promise of
+> a payout, a listing, or a price. Runs build weights — they do not earn them.
+
+## License
+
+[MIT](LICENSE) — candles are not liable for your liquidation.

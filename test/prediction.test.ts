@@ -1,6 +1,6 @@
 /// <reference types="bun-types" />
 // W5 — Route Prediction contract tests (E2.3/P4.6, bun test, zero deps).
-// Pins the economy spec §7.2 row 3: call shape, deterministic tier
+// Pins docs/WICK-ECONOMY-SPEC.md §7.2 row 3: call shape, deterministic tier
 // math (dir 4 / vol 3 / tail 3 = ≤10), tomorrow-only targeting, and the
 // "same call + same candle ⇒ same points" determinism rule.
 import { describe, test, expect } from "bun:test";

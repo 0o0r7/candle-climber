@@ -67,7 +67,7 @@ export async function graduationState(now: number = Date.now()): Promise<GradSta
  * E6.1 freeze etiquette: during the graduation-snapshot window the operator sets
  * WEIGHTS_FROZEN=1 — weight events pause with an HONEST response while scores
  * keep flowing (the game is never blocked, LAW 1.2 substance). The Merkle
- * snapshot then reads a frozen, consistent ledger (runbook: the internal runbook ).
+ * snapshot then reads a frozen, consistent ledger (runbook: docs/council/).
  */
 export function weightsFrozen(): boolean {
   return process.env.WEIGHTS_FROZEN === "1";

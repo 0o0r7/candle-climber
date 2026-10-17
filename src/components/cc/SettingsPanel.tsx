@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -26,17 +26,14 @@ export default function SettingsPanel({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant={triggerVariant} size={triggerSize} className={triggerClassName} aria-label="Open settings">
-          <Settings className="h-4 w-4" aria-hidden />
+        <Button variant={triggerVariant} size={triggerSize} className={triggerClassName}>
+          <Settings className="h-4 w-4" />
           {triggerLabel && <span className="ml-1.5">{triggerLabel}</span>}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
-          <DialogDescription className="sr-only">
-            Sound, accessibility and gameplay preferences for this device.
-          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-2">

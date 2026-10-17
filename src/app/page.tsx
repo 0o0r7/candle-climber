@@ -5,6 +5,8 @@ import HowToPlay from "@/components/landing/HowToPlay";
 import Features from "@/components/landing/Features";
 import Footer from "@/components/landing/Footer";
 import WickStrip from "@/components/landing/WickStrip";
+import ForgeBanner from "@/components/landing/ForgeBanner";
+import CityBanner from "@/components/landing/CityBanner";
 
 export default function Home() {
   return (
@@ -12,6 +14,8 @@ export default function Home() {
       <Navbar />
       <Hero />
       <WickStrip />
+      <ForgeBanner />
+      <CityBanner />
       <ModeSelect />
       <HowToPlay />
       <Features />

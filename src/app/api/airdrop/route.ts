@@ -6,7 +6,6 @@
 // pre-graduation with transfers locked; the real snapshot freezes + publishes
 // its salt/root when the meter fills. Language law applies everywhere.
 import { NextResponse } from "next/server";
-import { rateLimited, clientIp } from "@/lib/http-limiter"; // G5: shared namespaced limiter (129-a #7)
 import { WALLET_SNAPSHOT_CAP } from "@/lib/weights";
 import { getWeights } from "@/lib/weights-store";
 import {
@@ -42,12 +41,6 @@ async function draftTree() {
 }
 
 export async function GET(req: Request) {
-  // G5 (129-a #7): GET throttle — this lane proxies upstreams / heavy compute;
-  // an unthrottled public relay is a free compute loop for a scripted client.
-  if (rateLimited("airdrop-get", clientIp(req), 20)) {
-    return NextResponse.json({ error: "slow down" }, { status: 429 });
-  }
-
   const { searchParams } = new URL(req.url);
   try {
     const { snap, clean, tree } = await draftTree();

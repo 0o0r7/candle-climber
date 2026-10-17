@@ -16,19 +16,12 @@
 // RED LINES: this endpoint exposes no buy/sell surface, takes no input that
 // touches scores or access, and never reads the application store.
 import { NextResponse } from "next/server";
-import { rateLimited, clientIp } from "@/lib/http-limiter"; // G5: shared namespaced limiter (129-a #7)
 import { fetchWickPrice, WICK_TRADE_URL } from "@/lib/wick-price";
 import { CURVE_PHASE_MIN_UNITS } from "@/lib/partner-threshold";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request) {
-  // G5 (129-a #7): GET throttle — this lane proxies upstreams / heavy compute;
-  // an unthrottled public relay is a free compute loop for a scripted client.
-  if (rateLimited("wickstate-get", clientIp(req), 60)) {
-    return NextResponse.json({ error: "slow down" }, { status: 429 });
-  }
-
+export async function GET() {
   const read = await fetchWickPrice();
   return NextResponse.json(
     {

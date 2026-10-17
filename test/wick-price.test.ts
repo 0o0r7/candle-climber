@@ -5,7 +5,7 @@
 // Graduated phase: the launch's OWN V4 pool read live on-chain (PoolManager
 // extsload slot0), pinned byte-exact against THREE independent sources via
 // the real graduated launch fixture (vibe-graduated-beef-20261012.json).
-// Full derivation: the partner-lane design doc §2 + §4b.
+// Full derivation: docs/PARTNER-LANE-DESIGN.md §2 + §4b.
 import { describe, expect, test, beforeEach } from "bun:test";
 import {
   curvePriceEthPerToken,
@@ -171,9 +171,8 @@ describe("fetchWickPrice (live reader, injected feed)", () => {
     expect(read.ok).toBe(true);
     expect(read.source).toBe("env-override");
     expect(read.priceEth).toBe(2e-9);
-    // G5 (129-c #15): the override path applies the same ≈2% sell haircut as
-    // the live readers (curve tax 200bps, DEX fee 200bps — consistent either way)
-    expect(read.realizablePriceEth).toBeCloseTo(2e-9 * (1 - SELL_FEE_BPS / 10_000), 20);
+    // env override is used as-is for value checks (no curve haircut)
+    expect(read.realizablePriceEth).toBe(2e-9);
   });
 
   test("feed down + no env → fail-closed", async () => {

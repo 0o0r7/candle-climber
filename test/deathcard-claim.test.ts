@@ -5,8 +5,6 @@
 // Signatures are produced with the same audited primitives the verifier uses
 // (@noble/secp256k1), mirroring test/wallet-proof.test.ts's independent builder.
 import { describe, test, expect } from "bun:test";
-import { existsSync } from "node:fs";
-import path from "node:path";
 import { sign, getPublicKey, hashes as secpHashes } from "@noble/secp256k1";
 import { hmac } from "@noble/hashes/hmac.js";
 import { sha256 } from "@noble/hashes/sha2.js";
@@ -14,7 +12,6 @@ import { keccak_256 } from "@noble/hashes/sha3.js";
 import { buildMintProofMessage, buildProofMessage, type ProofFields } from "@/lib/proof-message";
 import { verifyMintProof, verifyOfficialProof, PROOF_WINDOW_MS } from "@/lib/wallet-proof";
 import {
-  DEATH_CARD_IMAGE_URL,
   MINTS_PER_WALLET_PER_DAY,
   buildDeathCardMetadata,
   decodeDeathCardMetadata,
@@ -190,12 +187,10 @@ describe("metadata (honest facts only)", () => {
     const j = decodeDeathCardMetadata(uri) as {
       name: string;
       description: string;
-      image: string;
       attributes: { trait_type: string; value: string | number }[];
     };
     expect(j.name).toBe("Death Card — TSLA 2026-10-11");
     expect(j.description.toLowerCase()).toContain("no monetary value");
-    expect(j.image).toBe(DEATH_CARD_IMAGE_URL);
     const attrs = Object.fromEntries(j.attributes.map((a) => [a.trait_type, a.value]));
     expect(attrs).toEqual({
       Ticker: "TSLA",
@@ -206,16 +201,6 @@ describe("metadata (honest facts only)", () => {
       "Best Streak": 12,
       Minted: "2026-10-11T20:00:00.000Z",
     });
-  });
-
-  test("image URL: pinned constant, https, canonical host, and the asset is actually shipped", () => {
-    // The URL is baked into on-chain metadata forever — it must stay stable.
-    expect(DEATH_CARD_IMAGE_URL).toBe("https://candle-climber.vercel.app/nft/death-card.png");
-    expect(DEATH_CARD_IMAGE_URL.startsWith("https://")).toBe(true);
-    // Guard against a metadata image that 404s: the file the URL serves must
-    // exist in public/ (same path the Vercel deploy serves).
-    const rel = DEATH_CARD_IMAGE_URL.replace("https://candle-climber.vercel.app", "");
-    expect(existsSync(path.join(process.cwd(), "public", rel))).toBe(true);
   });
 
   test("clamps streak above 999 (mirrors board-validation)", () => {

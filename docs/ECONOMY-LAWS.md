@@ -1,17 +1,17 @@
 # ECONOMY LAWS — CANDLE CLIMBER ($WICK)
 
-> Status: **LAW** — adopted 2026-10-06 (merge-back wave 1, item
-> "rank ≠ recognition").
+> Status: **LAW** — adopted 2026-10-06 (merge-back wave 1 from
+> `docs/VARIANT-REVIEW-2026-10-05.md`, item "rank ≠ recognition").
 > This document wires **no code**. It is the policy every present and future
-> economy-touching change must satisfy — including the Balance Gate,
-> airdrop weights, and anything after graduation (the internal growth
-> strategy, private archive).
+> economy-touching change must satisfy — including the planned P4.2 Balance
+> Gate, P4.4 airdrop weights, and anything after graduation (§4 of
+> `docs/GROWTH-AND-HOOKS-STRATEGY.md`).
 > Where an earlier doc conflicts with these laws, **these laws win**.
 
 ## Why this law exists
 
-An independent review of the Candle Current variant landed on one strategic
-takeaway: a market-native
+The independent review of the Candle Current variant (and the KB founder
+intel it cross-validated) landed on one strategic takeaway: a market-native
 game only stays credible if the scoreboard is unbuyable. The moment holding
 (or spending) the token changes who ranks where, the leaderboard stops being
 a skill record and the game stops being a game. So the separation between
@@ -61,7 +61,7 @@ public leaderboard with any advantage a non-holder cannot earn by skill.**
 ## LAW 3 — SUPREMACY AND EXISTING DESIGNS
 
 3.1 This law governs all future economy work. Concretely: the Balance Gate
-sketch in the internal growth strategy §3 (private archive) (tier-gated "higher score
+sketch in `docs/GROWTH-AND-HOOKS-STRATEGY.md` §3 (tier-gated "higher score
 multiplier, better loot weights") is **void in the parts that touch score or
 loot advantage** — tiers may gate only the LAW 2 lanes.
 
@@ -74,7 +74,7 @@ distributions, never rank, and never a scoreboard input. Language stays
 only inside the LAW 2 lanes plus entry to events; a burned token may never
 convert into ranked score, ranked access, or score-affecting state.
 
-## LAW 4 — LANGUAGE AND HONESTY RED LINES
+## LAW 4 — LANGUAGE AND HONESTY RED LINES (WICK-LAUNCH-FORM-PACK §8)
 
 Every economy-facing sentence inherits the pack's red lines:
 
@@ -88,9 +88,9 @@ Every economy-facing sentence inherits the pack's red lines:
 5.1 Review gate: any PR/commit touching scoring, the leaderboard, wallets, or
 cosmetics must state in its description which laws apply and how it complies.
 
-5.2 Audit hook: the periodic code audits now include an economy-laws
-check — any coupling of balance state to score or base access is filed as
-a P0 defect.
+5.2 Audit hook: the periodic code audits (the LOOPBACK/variant-review
+protocol) now include an economy-laws check — any coupling of balance state
+to score or base access is filed as a P0 defect.
 
 5.3 Precedence: pack §8 red lines and these laws are jointly supreme over
 older design prose. Neither may be amended casually; changes require a dated
@@ -175,13 +175,14 @@ existing lanes (LAW 5.1 gate: docs/PR-CHECKLIST.md):
 - **E6.1** — weights-freeze etiquette: `WEIGHTS_FROZEN=1` pauses weight EVENTS with
   honest 503s while SCORES keep flowing (1.2 substance: play never blocked); prediction
   calls stay open and score idempotently after the unfreeze — no points invented, none
-  lost. Runbook: internal graduation runbook (private archive).
+  lost. Runbook: `docs/council/2026-10-10-GRADUATION-RUNBOOK.md`.
 - **E4.1** — `/ops` internal dashboard (noindex, aggregate counts only, zero PII).
 - Compliance sweep #3 on the launch copy: "archive marathons" → "archive runs" (the
   shipped lane is per-run practice, E2.3 — no marathon mechanic exists to promise).
-- Anti-sybil residual register: internal audit (private archive).
+- Anti-sybil residual register: `docs/council/2026-10-10-ANTI-SYBIL-AUDIT.md`.
 - Suite 329 → 346 (`test/e5-e6.test.ts` pins gate truth table + all four freeze paths).
 
 ---
-*Adopted: 2026-10-06 · Related process docs live in the project's
-private archive.*
+*Adopted: 2026-10-06 · Source: VARIANT-REVIEW-2026-10-05 merge-back wave 1 ·
+Related: `docs/GROWTH-AND-HOOKS-STRATEGY.md`, `docs/WICK-LAUNCH-FORM-PACK.md` §8,
+`docs/HANDOFF-2026-10-04.md` (P4.2/P4.4).*

@@ -6,7 +6,7 @@ import { getWeights } from "@/lib/weights-store";
 export const dynamic = "force-dynamic";
 
 // /api/weights — PUBLIC READ view of the airdrop-weights ledger (E2.2/P4.4).
-// Spec: the economy spec §7. There is NO write path here by design:
+// Spec: docs/WICK-ECONOMY-SPEC.md §7. There is NO write path here by design:
 // the ledger only accrues from W1-HMAC-verified leaderboard submissions wired
 // server-side (anti-sybil red line §8.4). Weights are entitlements to future
 // distributions — never rank, never score, never access (ECONOMY-LAWS LAW 1).
@@ -27,7 +27,7 @@ export async function GET(req: Request) {
           meta: {
             cap: WALLET_SNAPSHOT_CAP,
             status: "accruing", // Merkle rehearsal: GET /api/airdrop (E2.5) · board: /airdrop
-            numbers: "provisional — the economy spec §7",
+            numbers: "provisional — docs/WICK-ECONOMY-SPEC.md §7",
             laws: "docs/ECONOMY-LAWS.md",
           },
         },

@@ -27,24 +27,21 @@ export interface RunTokenPayload {
 // Delivery hardening (2026-10-13): the committed dev default must NEVER be
 // the signing secret on a production deploy — this repo is public, so a
 // fail-open default makes every integrity gate forgeable by anyone who can
-// read it. On production a missing secret returns null: /api/candles serves
-// terrain honestly WITHOUT a run token (unscored by construction), and
-// verifyRunToken() rejects everything — fail closed, no crash, the gap is
-// loud in /ops and Sentry.
-// G5 prelaunch hardening (129-a #2/#3): the prod gate keys on NODE_ENV alone
-// (the VERCEL_ENV conjunct silently re-opened the gate on every non-Vercel
-// self-host: `next start` standalone would have signed with the committed dev
-// constant). The MONGODB_URI/DATABASE_URL fallbacks are gone too — a database
-// URI is a high-visibility credential and a rotated one silently invalidates
-// every live token; only RUN_TOKEN_SECRET may sign.
+// read it. On production (Vercel production env) a missing secret returns
+// null: /api/candles serves terrain honestly WITHOUT a run token (unscored
+// by construction), and verifyRunToken() rejects everything — fail closed,
+// no crash, the gap is loud in /ops and Sentry.
 function isProdDeploy(): boolean {
   // evaluated per call (env can be mutated in tests / runtime)
-  return process.env.NODE_ENV === "production";
+  return process.env.NODE_ENV === "production" && process.env.VERCEL_ENV === "production";
 }
 
 /** The signing secret, or null when production runs without one (fail closed). */
 export function getRunTokenSecret(): string | null {
-  const configured = process.env.RUN_TOKEN_SECRET;
+  const configured =
+    process.env.RUN_TOKEN_SECRET ||
+    process.env.MONGODB_URI ||
+    process.env.DATABASE_URL; // deployment-specific fallback (this repo's Mongo/postgres var)
   if (configured) return configured;
   if (isProdDeploy()) return null;
   return "cc-local-dev-secret"; // local dev / preview convenience only
@@ -95,13 +92,10 @@ export function verifyRunToken(token: unknown): RunTokenPayload | null {
   return { symbol: p.symbol, date: p.date, count: p.count, h: p.h, interval: interval as GameInterval };
 }
 
-/** Expired when the current UTC date is past token date + 1 day (pure date-string compare).
- *  G5 (129-c #13): a shape-valid but semantically invalid date (e.g. 2026-13-45
- *  passes the YYYY-MM-DD regex) parses to NaN — return stale (fail closed)
- *  instead of throwing RangeError from toISOString on a NaN date. */
+/** Expired when the current UTC date is past token date + 1 day (pure date-string compare). */
 export function isTokenStale(tokenDate: string, now: Date = new Date()): boolean {
-  const base = Date.parse(tokenDate + "T00:00:00Z");
-  if (!Number.isFinite(base)) return true; // malformed semantic date: fail closed
-  const lastValid = new Date(base + 86_400_000).toISOString().slice(0, 10);
+  const lastValid = new Date(Date.parse(tokenDate + "T00:00:00Z") + 86_400_000)
+    .toISOString()
+    .slice(0, 10);
   return now.toISOString().slice(0, 10) > lastValid;
 }

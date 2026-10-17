@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Zap, Flame, CalendarClock } from "lucide-react";
-import { TUTORIAL_KEY } from "@/lib/tutorial-key";
+
+const TUTORIAL_KEY = "cc_tutorial_seen_v1";
 
 interface Step {
   visual: "candles" | "jump" | "rush" | "combo" | "daily";
@@ -24,23 +25,17 @@ const steps: Step[] = [
   {
     visual: "rush",
     title: "Rush mode",
-    // Visual QA 2026-10-14: absorbed the pause-keys line from the removed
-    // inline how-to block on the entry card (owner: block was redundant).
-    body: "Hold Shift to rush — climb faster and gain +25% bonus score. Higher speed means tighter timing. P or Esc pauses the run.",
+    body: "Hold Shift to rush — climb faster and earn +25% bonus score. Higher speed means tighter timing. Use it when you're confident.",
   },
   {
     visual: "combo",
     title: "Chain combos",
-    // Visual QA 2026-10-14: absorbed the combo cap + camera rule from the
-    // removed inline how-to block.
-    body: "Land on consecutive candles to build a combo multiplier — up to ×7. One miss resets it. The camera never stops: fall off the bottom of the chart and the run ends.",
+    body: "Land on consecutive candles without falling to build a combo multiplier. The longer your streak, the bigger your score. One miss resets it.",
   },
   {
     visual: "daily",
     title: "One daily chart",
-    // Visual QA 2026-10-14: absorbed the graduation/world-2 line from the
-    // removed inline how-to block.
-    body: "Every player worldwide climbs the same chart. A new chart drops at 00:00 UTC. Submit your score to the global leaderboard — reach the summit to GRADUATE and world 2 pays double.",
+    body: "Every player worldwide climbs the same chart. A new chart drops at 00:00 UTC. Submit your score to the global leaderboard and see where you rank.",
   },
 ];
 

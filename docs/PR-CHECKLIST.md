@@ -16,7 +16,7 @@ LAW 5.1 REVIEW GATE
 - LAW 2 (economy lanes: cosmetics/weights/events only): affected? which lane?
 - LAW 4 (language: "builds weights", testnet stated, no earn/guaranteed): new copy swept?
 - LAW 5 (evidence): tests added/updated (count), gates run (bun test / tsc --incremental false / lint / build)
-- Anti-sybil (internal audit, private archive): new residual risk? one paragraph added there?
+- Anti-sybil (docs/council/2026-10-10-ANTI-SYBIL-AUDIT.md): new residual risk? one paragraph added there?
 ```
 
 ## Rules of use

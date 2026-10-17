@@ -22,7 +22,7 @@ import { deriveWeather } from "@/game/cc/weather";
 import { deriveBiome, type BiomeId } from "@/game/cc/biome";
 import { recordWreck, wrecksFor, loadWreckDB, saveWreckDB, type WreckDB, type Wreck } from "@/game/cc/wreckage";
 import { makeDeathCard, normalizeRivalTag } from "@/game/cc/deathcard";
-import { DEFAULT_CHAR_ID, getChar } from "@/game/cc/characters";
+import { rosterList, isValidCharId, DEFAULT_CHAR_ID, CHAR_KEY, getChar } from "@/game/cc/characters";
 import { sfx, setMuted, setVolume, unlockAudio } from "@/game/cc/sound";
 import { vibrate, isCoarsePointer as detectCoarsePointer } from "@/game/cc/haptics";
 import SettingsPanel from "@/components/cc/SettingsPanel";
@@ -42,7 +42,6 @@ import {
   type DuelChallenge, type DuelTally,
 } from "@/game/cc/duel";
 import type { CandleData, RunResult } from "@/game/cc/types";
-import { TUTORIAL_KEY } from "@/lib/tutorial-key";
 import Tutorial from "@/components/cc/Tutorial";
 import ModeSelector, { type GameMode, loadMode, normalizeModeParam, saveMode } from "@/components/cc/ModeSelector";
 // P2 self-ghost — this device's OWN best run per terrain (local, cosmetic,
@@ -57,52 +56,6 @@ import {
 } from "@/lib/stats-ledger";
 
 type Phase = "loading" | "ready" | "running" | "graduated" | "dead";
-
-// Visual QA 2026-10-14: shared house glyph for the HOME affordances. The owner
-// flagged the old home affordance (a bare lowercase footer link, invisible in
-// the game loop) — HOME now exists where the player actually is: the pause
-// overlay, the results panel, and a marked-up footer link. Inline SVG keeps it
-// dependency-free and crisp at HUD sizes.
-function HomeGlyph({ size = 12 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d="M3 11.5 12 4l9 7.5" />
-      <path d="M5.5 10.5V20h13v-9.5" />
-    </svg>
-  );
-}
-// 2026-10-15 onboarding fix (owner flag): the HOW TO PLAY re-open affordance
-// now carries a book glyph so it reads as the wizard entry point, not decor.
-function BookGlyph({ size = 13 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21V5.5Z" />
-      <path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20" />
-    </svg>
-  );
-}
 interface BoardEntry {
   name: string;
   score: number;
@@ -134,6 +87,7 @@ const RIVAL_KEY = "cc_rival_v1"; // P3.1: remembered rivalry tag
 const RUNS_KEY = "cc_runs_v1";
 const TF_KEY = "cc_tf_v1"; // P3.5: remembered timeframe ("1w" classic default)
 const DUEL_TALLY_KEY = "cc_duel_v1"; // P7.3: local duel W-L-D tally (no server identity exists)
+const CC_CHAR_KEY = CHAR_KEY; // P3.12: remembered character id ("default" = procedural)
 const REF_KEY = "cc_ref_v1"; // E5.5: referral attribution — last ?ref= landing param on this device
 // E5.5: every traveling text carries a measurable link. The ref is the sharer's
 // sanitized name ("cc" fallback) — Gate G5's "referral traffic measurable in
@@ -221,10 +175,8 @@ export default function GameCanvas() {
   const [tf, setTf] = useState<GameInterval>("1w"); // timeframe selector
   const [mode, setMode] = useState<GameMode>("crypto"); // 3-mode: crypto | stocks | launchpad
   const [booted, setBooted] = useState(false); // init ran → loader may fetch
-  // R-1 (docs/RETIRED-FEATURES.md): the character-SELECTION UI was retired
-  // 2026-10-15 by owner directive — everyone climbs as CLASSIC. The ref still
-  // feeds the RAF renderer; the registry stays for bot skins, ?char= deep-link
-  // removal is intentional, and archived-run/ghost champion names still resolve.
+  // P3.12: selected character — ref feeds the RAF renderer without re-subscribing
+  const [charId, setCharId] = useState<string>(DEFAULT_CHAR_ID);
   const charIdRef = useRef<string>(DEFAULT_CHAR_ID);
   // P7.1: rival bot — local headless engine + heuristic planner; zero network,
   // its score/height are local UI only (W5 anti-cheat red line: never submitted)
@@ -309,12 +261,10 @@ export default function GameCanvas() {
   const [showTutorial, setShowTutorial] = useState(false);
   const showTutorialRef = useRef(false);
   useEffect(() => { showTutorialRef.current = showTutorial; }, [showTutorial]);
-  // Tutorial: auto-show when the ready screen appears and the current-version
-  // seen-flag is absent (first visit — plus exactly one re-show per key bump;
-  // see src/lib/tutorial-key.ts for the bump policy).
+  // Tutorial: auto-show for first-time players when the ready screen appears
   useEffect(() => {
     if (phase === "ready") {
-      try { if (!localStorage.getItem(TUTORIAL_KEY)) setShowTutorial(true); } catch { /* private mode */ }
+      try { if (!localStorage.getItem("cc_tutorial_seen_v1")) setShowTutorial(true); } catch { /* private mode */ }
     }
   }, [phase]);
   // Audit fix (touch UX): the SHIFT = RUSH line is keyboard-only — hide it on
@@ -395,6 +345,12 @@ export default function GameCanvas() {
     const reqIv = params.get("interval"); // P3.5: deep link beats the saved pref
     if (isInterval(reqIv)) setTf(reqIv);
     else if (isInterval(localStorage.getItem(TF_KEY))) setTf(localStorage.getItem(TF_KEY) as GameInterval);
+    // P3.12: character — localStorage first, deep-link ?char= wins (same pattern as ?interval=)
+    const savedChar = localStorage.getItem(CC_CHAR_KEY) ?? DEFAULT_CHAR_ID;
+    const urlChar = new URLSearchParams(window.location.search).get("char");
+    const picked = isValidCharId(urlChar) ? (urlChar as string) : isValidCharId(savedChar) ? savedChar : DEFAULT_CHAR_ID;
+    setCharId(picked);
+    charIdRef.current = picked;
     // P7.1/P7.2: SOLO-vs-bot and ghost toggles live in the settings store now
     // (cc_settings_v1 — settings-context migrates the legacy cc_vsbot_v1 /
     // cc_ghost_v1 keys). The mirror effect below keeps RAF refs + UI in sync.
@@ -477,12 +433,7 @@ export default function GameCanvas() {
         refreshSelfGhost(d); // P2: mirror this terrain's own best ghost (if any)
         setPhase("ready");
         if (!isArch) {
-          // G5 (129-c #7): boards follow the TERRAIN's timeframe, not the raw
-          // selector — a launchpad run lands on the 1w board and a CoinGecko
-          // run on the 1d board, so refreshing ?interval=<selector> made the
-          // submitted run invisible on the board shown right after landing.
-          const seedIv = isInterval(d.seed.interval) ? d.seed.interval : effTf;
-          fetch(`/api/leaderboard?date=${d.seed.date}&interval=${seedIv}`)
+          fetch(`/api/leaderboard?date=${d.seed.date}&interval=${effTf}`)
             .then((r) => r.json())
             .then((b) => {
               if (!alive) return;
@@ -499,7 +450,7 @@ export default function GameCanvas() {
             .catch(() => {});
           // Option B: official lane loads only for wallet-linked devices
           if (isValidAddress(localStorage.getItem(WALLET_ADDRESS_KEY))) {
-            fetch(`/api/leaderboard?date=${d.seed.date}&interval=${seedIv}&board=official`)
+            fetch(`/api/leaderboard?date=${d.seed.date}&interval=${effTf}&board=official`)
               .then((r) => r.json())
               .then((b) => {
                 if (!alive) return;
@@ -519,7 +470,7 @@ export default function GameCanvas() {
             .then((b: { ok?: boolean; burned?: string }) => { if (alive && b.ok) setBurn(b.burned ?? null); })
             .catch(() => {});
           // P7.2: best submitted ghost for THIS terrain (champion first)
-          fetch(`/api/ghosts?symbol=${d.seed.symbol}&date=${d.seed.date}&interval=${seedIv}`)
+          fetch(`/api/ghosts?symbol=${d.seed.symbol}&date=${d.seed.date}&interval=${effTf}`)
             .then((r) => r.json())
             .then((g: { ghosts?: GhostEntry[] }) => {
               if (!alive || duelLockRef.current) return; // P7.3: a loaded duel owns the ghost slot
@@ -567,6 +518,15 @@ export default function GameCanvas() {
   const changeMode = useCallback((m: GameMode) => {
     setMode(m);
     saveMode(m);
+    sfx.land();
+  }, []);
+
+  // P3.12: character pick — persists + updates the renderer ref immediately
+  const pickChar = useCallback((id: string) => {
+    if (!isValidCharId(id)) return;
+    setCharId(id);
+    charIdRef.current = id;
+    try { localStorage.setItem(CC_CHAR_KEY, id); } catch { /* private mode — cosmetic only */ }
     sfx.land();
   }, []);
 
@@ -1112,7 +1072,7 @@ export default function GameCanvas() {
       // feel unnatural). Renderers draw under the resize-time fit transform and
       // save/restore internally. (Biome layers ride the v2 renderer — render-only.)
       if (v2) renderV2(ctx, e, seedRef.current, weather ?? undefined, wrecksRef.current, mutationIdRef.current, charIdRef.current, bot, gv, biomeId, peakIdxRef.current, celebrateRef.current, settingsRef.current.colorblind, settingsRef.current.reducedMotion);
-      else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv); // debug-only path (?renderer=v1): legacy renderer, a11y layers are v2-only by design
+      else render(ctx, e, seedRef.current, mutationIdRef.current, bot, gv);
       rafRef.current = requestAnimationFrame(step);
     };
     rafRef.current = requestAnimationFrame(step);
@@ -1142,14 +1102,9 @@ export default function GameCanvas() {
       }
       if (pausedRef.current && phase === "running") return;
       // P3.6 RUSH (desktop): hold Shift = faster climb + 25% gains (opt-in risk)
-      // G5 (129-c #10): phase-gated like the mobile RUSH button — pressing
-      // Shift on the ready/dead screens used to mark usedRushRef for the NEXT
-      // run, silently forfeiting DIAMOND HANDS without any rush usage.
       if (ev.key === "Shift") {
-        if (phase === "running") {
-          usedRushRef.current = true; // honest DIAMOND HANDS tracking
-          engineRef.current?.pressRush();
-        }
+        usedRushRef.current = true; // honest DIAMOND HANDS tracking
+        engineRef.current?.pressRush();
         return;
       }
       if (ev.code === "Space" || ev.code === "ArrowUp" || ev.code === "KeyW") {
@@ -1190,11 +1145,10 @@ export default function GameCanvas() {
   const submitScore = async () => {
     // tokenless terrain (synthetic fallback) is unscored — never POST it
     if (!result || !data || submitting || !data.runToken) return;
-    // The interval the terrain was actually served with — G5 (129-c #7):
-    // every seed now carries a concrete timeframe that matches its signed
-    // token (stocks pin "1w", CoinGecko "1d", launchpad "1w"), so the fallback
-    // below is legacy-defensive only. Proof messages and board/ghost refreshes
-    // name the PLAYED interval, never the raw selector state.
+    // The interval the terrain was actually served with — stocks pin "1w"
+    // server-side, crypto echoes the requested tf, launchpad is "derived"
+    // (falls back to tf, the legacy behavior). Proof messages and board/ghost
+    // refreshes must name the PLAYED interval, never the raw selector state.
     const subIv: GameInterval = isInterval(data.seed.interval) ? data.seed.interval : tf;
     setSubmitting(true);
     try {
@@ -1744,13 +1698,6 @@ export default function GameCanvas() {
               <div className="cc-death-actions">
                 <button className="cc-btn cc-btn-start" onClick={() => applyPause(false)}>RESUME</button>
                 <button className="cc-btn" onClick={startRun}>RESTART RUN</button>
-                {/* Visual QA 2026-10-14: HOME now lives inside the pause overlay —
-                    the old bare footer link was the only way out mid-run and was
-                    invisible there (owner flag). Abandoned runs are simply not
-                    recorded (ledger counts finished runs only — honest). */}
-                <a className="cc-btn cc-btn-ghost cc-btn-home" href="/" aria-label="Quit to home page">
-                  <HomeGlyph size={13} />HOME
-                </a>
               </div>
               <p className="cc-pause-keys">
                 {coarsePointer
@@ -1762,7 +1709,7 @@ export default function GameCanvas() {
         )}
 
         {phase === "ready" && data && mutation && (
-          // Merge-back wave 1 (game-first entry):
+          // Merge-back wave 1 (game-first entry, VARIANT-REVIEW-2026-10-05):
           // the landing card anchors to the bottom of the LIVE terrain preview
           // (the canvas now renders the level's start pose) with ONE primary
           // CTA. Every secondary panel — stats, mutation, how-to, timeframe,
@@ -1789,22 +1736,31 @@ export default function GameCanvas() {
               )}
               <button className="cc-btn cc-btn-start cc-cta" onClick={startRun}>START CLIMB</button>
               <div className="cc-ready-actions">
-                <button className="cc-btn cc-btn-ghost cc-tut-reopen" onClick={() => setShowTutorial(true)}><BookGlyph size={13} />HOW TO PLAY</button>
+                <button className="cc-btn cc-btn-ghost cc-tut-reopen" onClick={() => setShowTutorial(true)}>HOW TO PLAY</button>
                 <AchievementsPanel triggerVariant="ghost" triggerSize="sm" triggerClassName="cc-btn cc-btn-ghost" newCount={newAchievements.length} />
               </div>
               {best > 0 && <p className="cc-best">PERSONAL BEST <b>{best.toLocaleString()}</b></p>}
               {currentStreak > 0 && (
                 <p className="cc-streak">🔥 {currentStreak} DAY STREAK</p>
               )}
-              {/* Visual QA 2026-10-14 (owner flag): the inline how-to paragraph
-                  block is GONE — it duplicated the 5-step tutorial wizard
-                  (HOW TO PLAY re-opens it) and bloated the card enough to
-                  overflow short/mobile viewports. The three facts the wizard
-                  didn't already carry (pause keys, combo cap + camera rule,
-                  graduation ×2) were folded into the wizard steps themselves. */}
+              {/* Audit RB-1/M-1: the objective, controls, scoring and failure
+                  condition live ABOVE the fold — no expansion required. */}
+              <div className="cc-howto cc-howto-core">
+                <p><b className="lime">GREEN</b> candles hold. <b className="coral">RED</b> candles crack, then crumble under you.</p>
+                <p>Tap = hop · <b className="lime">HOLD</b> Space (or ↑ / W) = higher jump · release early = short.</p>
+                {!coarsePointer && (
+                  <p><b className="lime">SHIFT</b> = RUSH — climb faster, +25% score while held · <b className="lime">P / ESC</b> = pause.</p>
+                )}
+                <p>Every candle you pass pays points — back-to-back GREEN candles build a combo (up to ×7). The camera never stops: fall off the bottom and the run ends.</p>
+                {archive ? (
+                  <p className="cc-next-level">famous days are famous difficulty — nobody designed this on purpose.</p>
+                ) : (
+                  <p className="cc-next-level">Same chart for everyone · resets 00:00 UTC · reach the summit to GRADUATE (world 2: gains ×2).</p>
+                )}
+              </div>
               <details className="cc-more">
                 <summary className="cc-more-summary">
-                  <span className="cc-more-arrow" aria-hidden>▸</span> TERRAIN &amp; OPTIONS
+                  <span className="cc-more-arrow" aria-hidden>▸</span> HOW TO PLAY &amp; OPTIONS
                 </summary>
                 <div className="cc-more-body">
                   <div className="cc-sec-title">TODAY&apos;S TERRAIN</div>
@@ -1928,10 +1884,33 @@ export default function GameCanvas() {
                   {!duel && !archive && (
                     <p className="cc-vs-note">a duel pins the SAME chart for a friend — make a code from any finished run (DUEL → on the results panel).</p>
                   )}
-                  {/* R-1 (docs/RETIRED-FEATURES.md 2026-10-15): the P3.12 "YOUR CLIMBER"
-                      roster row was removed here by owner directive. Selection UI must
-                      NOT come back in first-paint or anywhere else — see the binding
-                      rules in that record. Registry/sprites stay for bot skins + art. */}
+                  {/* P3.12 character select — roster row. Portraits are the sprites'
+                      own frame0; selection persists (CC_CHAR_KEY) and feeds renderV2
+                      via charIdRef. Decor-only: no gameplay/physics reads anywhere. */}
+                  <div className="cc-sec-title">YOUR CLIMBER</div>
+                  <div className="cc-char-block">
+                    <div className="cc-char-label">CHOOSE YOUR CLIMBER</div>
+                    <div className="cc-char-row" role="radiogroup" aria-label="Character select — cosmetic only">
+                      {rosterList().map((c) => (
+                        <button
+                          key={c.id}
+                          role="radio"
+                          aria-checked={charId === c.id}
+                          title={`${c.name} — ${c.blurb}`}
+                          className={`cc-char-chip${charId === c.id ? " cc-char-on" : ""}`}
+                          onClick={() => pickChar(c.id)}
+                        >
+                          {c.sheet ? (
+                            <img src={`/cc/chars/${c.id}/frame0.png`} alt="" width={34} height={48} loading="lazy" />
+                          ) : (
+                            <span className="cc-char-classic" aria-hidden>▚</span>
+                          )}
+                          <span className="cc-char-name">{c.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <p className="cc-vs-note">looks only — every climber plays exactly the same.</p>
+                  </div>
                   <div className="cc-sec-title">MORE</div>
                   <div className="cc-btn-row">
                     <button className="cc-btn cc-btn-ghost" onClick={() => setArchOpen(true)} title="famous past days as practice terrain — unscored">PAST CHARTS →</button>
@@ -1989,184 +1968,177 @@ export default function GameCanvas() {
           </div>
         )}
 
+        {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
 
-      </div>
-
-      {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
-
-      {phase === "graduated" && result && (
-        <div className="cc-overlay">
-          <div className="cc-panel cc-panel-death">
-            {/* ART V4: token-era celebration scene — flame crown + wax confetti.
-                Pure CSS, aria-hidden: the canvas behind the panel carries the
-                summit beacon; this strip is the panel's own celebration. */}
-            <div className="cc-grad-scene" aria-hidden="true">
-              <i className="cc-gcf gc1" /><i className="cc-gcf gc2" /><i className="cc-gcf gc3" />
-              <i className="cc-gcf gc4" /><i className="cc-gcf gc5" /><i className="cc-gcf gc6" />
-              <span className="cc-grad-flame" />
-            </div>
-            <h2 className="cc-grad-headline">GRADUATED</h2>
-            <p className="cc-grad-flavor">curve summit reached · summit class</p>
-            <div className="cc-death-score">
-              <span className="cc-death-num">{result.score.toLocaleString()}</span>
-              <span className="cc-death-sub">
-                {result.candlesPassed} candles · best streak x{result.bestStreak} · PB {best.toLocaleString()}
-              </span>
-            </div>
-            {verdict && <p className="cc-vs-verdict" role="status">{verdict}</p>}
-            <div className="cc-death-actions">
-              <button className="cc-btn cc-btn-start" onClick={enterWorld2}>WORLD 2 →</button>
-              <button className="cc-btn cc-btn-ghost" onClick={downloadCard}>DEATH CARD ↓</button>
-              {mintBtn}
-              <button
-                className="cc-btn"
-                onClick={submitScore}
-                disabled={submitting || !canSubmit}
-                title={canSubmit ? undefined : unscoredMsg}
-              >
-                {submitting ? "…" : "SUBMIT SCORE"}
-                {!canSubmit && <span className="sr-only">{unscoredMsg}</span>}
-              </button>
-              <button className="cc-btn" onClick={startRun}>RETRY</button>
-            </div>
-            {mintNote}
-            <p className="cc-grad-next">world 2: the climb continues · gains ×2</p>
-            {reachedPeak && (
-              <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
-                {vaultBusy ? "…" : "OPEN WICK VAULT"}
-              </button>
-            )}
-            {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
-            {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
-            {rank !== null && laneNote && <p className="cc-rank cc-rank-note" role="status">{laneNote}</p>}
-          </div>
-        </div>
-      )}
-
-      {phase === "dead" && result && (
-        <div className="cc-overlay">
-          <div className="cc-panel cc-panel-death" ref={deathPanelRef} tabIndex={-1} role="dialog" aria-label="Run ended — results and actions">
-            <h2 className="cc-liquidated" role="alert">LIQUIDATED</h2>
-            {result.graduated && (
-              <p className="cc-rival cc-rival-grad">
-                graduated{result.world2 ? " · world 2 reached" : ""}
-              </p>
-            )}
-            <div className="cc-death-score">
-              <span className="cc-death-num">{result.score.toLocaleString()}</span>
-              <span className="cc-death-sub">
-                {result.candlesPassed} candles · best streak x{result.bestStreak} · PB {best.toLocaleString()}
-              </span>
-            </div>
-            {rivalGap > 0 && top && (
-              <p className="cc-rival">
-                TOP TODAY: <b>{top.name}</b> · {top.score.toLocaleString()} — you were <b>{rivalGap.toLocaleString()}</b> pts behind
-              </p>
-            )}
-            {rivalGap === 0 && myLane.length > 0 && <p className="cc-rival cc-rival-lead">YOU LEAD THE DAILY CHART. FLEX IT.</p>}
-            {verdict && <p className="cc-vs-verdict" role="status">{verdict}</p>}
-            {duelCode && (
-              <p className="cc-duel-live" role="status">
-                DUEL LIVE · <b>{duelCode}</b> · {duelCopied ? "INVITATION COPIED ✓" : "SHARE THE CODE"}
-              </p>
-            )}
-            {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
-            {rank !== null && laneNote && <p className="cc-rank cc-rank-note" role="status">{laneNote}</p>}
-            <div className="cc-death-actions">
-              <input
-                className="cc-input"
-                placeholder="YOUR NAME"
-                maxLength={14}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <input
-                className="cc-input cc-input-rival"
-                placeholder="RIVAL @HANDLE (OPTIONAL)"
-                maxLength={16}
-                value={rival}
-                onChange={(e) => setRival(e.target.value)}
-                aria-label="Rival X handle — stamped on the death card as a challenge"
-              />
-              <button
-                className="cc-btn"
-                onClick={submitScore}
-                disabled={submitting || !canSubmit}
-                title={canSubmit ? undefined : unscoredMsg}
-              >
-                {submitting ? "…" : "SUBMIT SCORE"}
-                {!canSubmit && <span className="sr-only">{unscoredMsg}</span>}
-              </button>
-              <button className="cc-btn cc-btn-ghost" onClick={downloadCard}>DEATH CARD ↓</button>
-              {mintBtn}
-              {canSubmit && data?.seed.source !== "vibe-launch" && !duelCode && (
+        {phase === "graduated" && result && (
+          <div className="cc-overlay">
+            <div className="cc-panel cc-panel-death">
+              {/* ART V4: token-era celebration scene — flame crown + wax confetti.
+                  Pure CSS, aria-hidden: the canvas behind the panel carries the
+                  summit beacon; this strip is the panel's own celebration. */}
+              <div className="cc-grad-scene" aria-hidden="true">
+                <i className="cc-gcf gc1" /><i className="cc-gcf gc2" /><i className="cc-gcf gc3" />
+                <i className="cc-gcf gc4" /><i className="cc-gcf gc5" /><i className="cc-gcf gc6" />
+                <span className="cc-grad-flame" />
+              </div>
+              <h2 className="cc-grad-headline">GRADUATED</h2>
+              <p className="cc-grad-flavor">curve summit reached · summit class</p>
+              <div className="cc-death-score">
+                <span className="cc-death-num">{result.score.toLocaleString()}</span>
+                <span className="cc-death-sub">
+                  {result.candlesPassed} candles · best streak x{result.bestStreak} · PB {best.toLocaleString()}
+                </span>
+              </div>
+              {verdict && <p className="cc-vs-verdict" role="status">{verdict}</p>}
+              <div className="cc-death-actions">
+                <button className="cc-btn cc-btn-start" onClick={enterWorld2}>WORLD 2 →</button>
+                <button className="cc-btn cc-btn-ghost" onClick={downloadCard}>DEATH CARD ↓</button>
+                {mintBtn}
                 <button
                   className="cc-btn"
-                  onClick={createDuel}
-                  disabled={duelBusy}
-                  title="create an async duel — a rival opens the code and races your exact run"
+                  onClick={submitScore}
+                  disabled={submitting || !canSubmit}
+                  title={canSubmit ? undefined : unscoredMsg}
                 >
-                  {duelBusy ? "…" : "DUEL →"}
+                  {submitting ? "…" : "SUBMIT SCORE"}
+                  {!canSubmit && <span className="sr-only">{unscoredMsg}</span>}
+                </button>
+                <button className="cc-btn" onClick={startRun}>RETRY</button>
+              </div>
+              {mintNote}
+              <p className="cc-grad-next">world 2: the climb continues · gains ×2</p>
+              {reachedPeak && (
+                <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
+                  {vaultBusy ? "…" : "OPEN WICK VAULT"}
                 </button>
               )}
-              <button className="cc-btn cc-btn-start" onClick={startRun}>RETRY</button>
-              {/* Visual QA 2026-10-14: symmetric HOME exit on the results
-                  panel — RETRY loops the same terrain; HOME leaves cleanly. */}
-              <a className="cc-btn cc-btn-ghost cc-btn-home" href="/" aria-label="Back to home page">
-                <HomeGlyph size={13} />HOME
-              </a>
+              {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
+              {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
+              {rank !== null && laneNote && <p className="cc-rank cc-rank-note" role="status">{laneNote}</p>}
             </div>
-            {mintNote}
-            {archive && practiceNote && <p className="cc-vault-note" role="status">{practiceNote}</p>}
-            {reachedPeak && (
-              <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
-                {vaultBusy ? "…" : "OPEN WICK VAULT"}
-              </button>
-            )}
-            {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
-            {officialBoard.length > 0 && (
-              <div className="cc-board cc-board-official">
-                <div className="cc-board-title">🏆 OFFICIAL · {data?.seed.symbol}</div>
-                <div className="cc-board-sub">
-                  wallet-verified · best run per wallet{officialSeason ? ` · season ${officialSeason}` : ""}
-                </div>
-                {officialBoard.slice(0, 10).map((e, i) => (
-                  <div key={`off-${e.ts ?? i}-${e.wallet ?? e.name}`} className="cc-board-row">
-                    <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
-                    <span className="cc-board-name">
-                      {e.name}
-                      {e.wallet ? <i className="cc-board-wallet">{e.wallet}</i> : null}
-                    </span>
-                    <span className="cc-board-score">{e.score.toLocaleString()}</span>
-                    <button className="cc-report-btn" onClick={() => reportScore(e)} title="Report suspicious score" aria-label={`Report ${e.name}'s score`}>🚩</button>
-                  </div>
-                ))}
-              </div>
-            )}
-            {board.length > 0 && (
-              <div className="cc-board">
-                <div className="cc-board-title">{officialBoard.length > 0 ? "CASUAL" : "GUEST"} · {data?.seed.symbol}</div>
-                <div className="cc-board-sub">typed names · unofficial · play stays free &amp; walletless</div>
-                {board.slice(0, 10).map((e, i) => (
-                  <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
-                    <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
-                    <span className="cc-board-name">{e.name}</span>
-                    <span className="cc-board-score">{e.score.toLocaleString()}</span>
-                    <button className="cc-report-btn" onClick={() => reportScore(e)} title="Report suspicious score" aria-label={`Report ${e.name}'s score`}>🚩</button>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
-        </div>
-      )}
+        )}
+
+        {phase === "dead" && result && (
+          <div className="cc-overlay">
+            <div className="cc-panel cc-panel-death" ref={deathPanelRef} tabIndex={-1} role="dialog" aria-label="Run ended — results and actions">
+              <h2 className="cc-liquidated" role="alert">LIQUIDATED</h2>
+              {result.graduated && (
+                <p className="cc-rival cc-rival-grad">
+                  graduated{result.world2 ? " · world 2 reached" : ""}
+                </p>
+              )}
+              <div className="cc-death-score">
+                <span className="cc-death-num">{result.score.toLocaleString()}</span>
+                <span className="cc-death-sub">
+                  {result.candlesPassed} candles · best streak x{result.bestStreak} · PB {best.toLocaleString()}
+                </span>
+              </div>
+              {rivalGap > 0 && top && (
+                <p className="cc-rival">
+                  TOP TODAY: <b>{top.name}</b> · {top.score.toLocaleString()} — you were <b>{rivalGap.toLocaleString()}</b> pts behind
+                </p>
+              )}
+              {rivalGap === 0 && myLane.length > 0 && <p className="cc-rival cc-rival-lead">YOU LEAD THE DAILY CHART. FLEX IT.</p>}
+              {verdict && <p className="cc-vs-verdict" role="status">{verdict}</p>}
+              {duelCode && (
+                <p className="cc-duel-live" role="status">
+                  DUEL LIVE · <b>{duelCode}</b> · {duelCopied ? "INVITATION COPIED ✓" : "SHARE THE CODE"}
+                </p>
+              )}
+              {rank !== null && <p className="cc-rank">{submittedBoard === "official" ? "OFFICIAL RANK" : "GUEST RANK"} #{rank} TODAY</p>}
+              {rank !== null && laneNote && <p className="cc-rank cc-rank-note" role="status">{laneNote}</p>}
+              <div className="cc-death-actions">
+                <input
+                  className="cc-input"
+                  placeholder="YOUR NAME"
+                  maxLength={14}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <input
+                  className="cc-input cc-input-rival"
+                  placeholder="RIVAL @HANDLE (OPTIONAL)"
+                  maxLength={16}
+                  value={rival}
+                  onChange={(e) => setRival(e.target.value)}
+                  aria-label="Rival X handle — stamped on the death card as a challenge"
+                />
+                <button
+                  className="cc-btn"
+                  onClick={submitScore}
+                  disabled={submitting || !canSubmit}
+                  title={canSubmit ? undefined : unscoredMsg}
+                >
+                  {submitting ? "…" : "SUBMIT SCORE"}
+                  {!canSubmit && <span className="sr-only">{unscoredMsg}</span>}
+                </button>
+                <button className="cc-btn cc-btn-ghost" onClick={downloadCard}>DEATH CARD ↓</button>
+                {mintBtn}
+                {canSubmit && data?.seed.source !== "vibe-launch" && !duelCode && (
+                  <button
+                    className="cc-btn"
+                    onClick={createDuel}
+                    disabled={duelBusy}
+                    title="create an async duel — a rival opens the code and races your exact run"
+                  >
+                    {duelBusy ? "…" : "DUEL →"}
+                  </button>
+                )}
+                <button className="cc-btn cc-btn-start" onClick={startRun}>RETRY</button>
+              </div>
+              {mintNote}
+              {archive && practiceNote && <p className="cc-vault-note" role="status">{practiceNote}</p>}
+              {reachedPeak && (
+                <button className="cc-btn" onClick={openVault} disabled={vaultBusy} title="peak wick reached — holder vault: +1 weight + a trail for today">
+                  {vaultBusy ? "…" : "OPEN WICK VAULT"}
+                </button>
+              )}
+              {vaultMsg && <p className="cc-vault-note" role="status">{vaultMsg}</p>}
+              {officialBoard.length > 0 && (
+                <div className="cc-board cc-board-official">
+                  <div className="cc-board-title">🏆 OFFICIAL · {data?.seed.symbol}</div>
+                  <div className="cc-board-sub">
+                    wallet-verified · best run per wallet{officialSeason ? ` · season ${officialSeason}` : ""}
+                  </div>
+                  {officialBoard.slice(0, 10).map((e, i) => (
+                    <div key={`off-${e.ts ?? i}-${e.wallet ?? e.name}`} className="cc-board-row">
+                      <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
+                      <span className="cc-board-name">
+                        {e.name}
+                        {e.wallet ? <i className="cc-board-wallet">{e.wallet}</i> : null}
+                      </span>
+                      <span className="cc-board-score">{e.score.toLocaleString()}</span>
+                      <button className="cc-report-btn" onClick={() => reportScore(e)} title="Report suspicious score" aria-label={`Report ${e.name}'s score`}>🚩</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {board.length > 0 && (
+                <div className="cc-board">
+                  <div className="cc-board-title">{officialBoard.length > 0 ? "CASUAL" : "GUEST"} · {data?.seed.symbol}</div>
+                  <div className="cc-board-sub">typed names · unofficial · play stays free &amp; walletless</div>
+                  {board.slice(0, 10).map((e, i) => (
+                    <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
+                      <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
+                      <span className="cc-board-name">{e.name}</span>
+                      <span className="cc-board-score">{e.score.toLocaleString()}</span>
+                      <button className="cc-report-btn" onClick={() => reportScore(e)} title="Report suspicious score" aria-label={`Report ${e.name}'s score`}>🚩</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
       {archOpen && <ArchiveBrowser onClose={() => setArchOpen(false)} />}
 
       <footer className="cc-footer">
         <WalletChip />
         <span aria-hidden>·</span>
-        <a href="/" className="cc-foot-home" aria-label="Candle Climber home"><HomeGlyph size={11} />home</a>
+        <a href="/">home</a>
         <span aria-hidden>·</span>
         <a href="https://testnet.vibevibe.fun/" target="_blank" rel="noopener noreferrer">vibe/vibe testnet</a>
         <span aria-hidden>·</span>
@@ -2187,25 +2159,18 @@ export default function GameCanvas() {
         <span>no real funds</span>
       </footer>
 
-      {/* Sweep 4 (2026-10-14, D8): the Settings/Achievements triggers used to
-          render as an UNSTYLED flow bar at the top of the page — visually
-          buried under the game canvas (z10) and unclickable (hit-testing
-          resolved to the canvas), leaving Settings unreachable in the whole
-          play UI. They now share one corner-tools group with the sound chip:
-          bottom-right, above the canvas, pointer-events restored. */}
-      <div className="cc-corner-tools">
-        <div className="cc-chip cc-settings-trigger">
-          <SettingsPanel triggerVariant="ghost" triggerSize="sm" />
-          <AchievementsPanel triggerVariant="ghost" triggerSize="sm" newCount={newAchievements.length} />
-        </div>
-        <button
-          className="cc-chip cc-mute"
-          onClick={toggleMute}
-          aria-label={muted ? "Turn sound on" : "Mute sound"}
-          aria-pressed={!muted}
-        >
-          {muted ? "MUTED" : "SOUND ON"}
-        </button>
+      <button
+        className="cc-chip cc-mute"
+        onClick={toggleMute}
+        aria-label={muted ? "Turn sound on" : "Mute sound"}
+        aria-pressed={!muted}
+      >
+        {muted ? "MUTED" : "SOUND ON"}
+      </button>
+
+      <div className="cc-chip cc-settings-trigger">
+        <SettingsPanel triggerVariant="ghost" triggerSize="sm" />
+        <AchievementsPanel triggerVariant="ghost" triggerSize="sm" newCount={newAchievements.length} />
       </div>
     </div>
   );

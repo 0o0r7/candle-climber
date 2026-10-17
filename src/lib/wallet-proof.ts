@@ -16,7 +16,7 @@
 // server runtime alike.
 import { recoverPublicKey } from "@noble/secp256k1";
 import { keccak_256 } from "@noble/hashes/sha3.js";
-import { buildProofMessage, buildMintProofMessage, buildWalletLinkProofMessage, type ProofFields, type WalletLinkFields } from "@/lib/proof-message";
+import { buildProofMessage, buildMintProofMessage, buildWalletLinkProofMessage, buildForgeProofMessage, buildCitySaveProofMessage, type ProofFields, type WalletLinkFields, type ForgeProofFields, type CitySaveProofFields } from "@/lib/proof-message";
 import { isValidAddress } from "@/lib/wallet";
 
 /** Clock-skew + replay window for the client timestamp inside the message. */
@@ -158,4 +158,36 @@ export function verifyMintProof(
   now: number = Date.now(),
 ): ProofVerdict {
   return verifyPersonalSignProof(wallet, signature, buildMintProofMessage(fields, Number(clientTs)), clientTs, now);
+}
+
+/**
+ * Verify a Signal Forge official-board ownership proof (Phase 1) — purpose-
+ * separated from the classic board/mint proofs (its own canonical template),
+ * so a Candle Climber signature can never be replayed into the Forge board.
+ * Same clamps, same freshness window, same recovery.
+ */
+export function verifyForgeProof(
+  wallet: string,
+  signature: unknown,
+  fields: ForgeProofFields,
+  clientTs: unknown,
+  now: number = Date.now(),
+): ProofVerdict {
+  return verifyPersonalSignProof(wallet, signature, buildForgeProofMessage(fields, Number(clientTs)), clientTs, now);
+}
+
+/**
+ * Verify a Chain City server-save ownership proof (Phase 2) — purpose-separated
+ * from the classic board / mint / Forge proofs (its own canonical template), so
+ * no existing signature can be replayed into the city-save route. Same clamps,
+ * same freshness window, same recovery.
+ */
+export function verifyCitySaveProof(
+  wallet: string,
+  signature: unknown,
+  fields: CitySaveProofFields,
+  clientTs: unknown,
+  now: number = Date.now(),
+): ProofVerdict {
+  return verifyPersonalSignProof(wallet, signature, buildCitySaveProofMessage(fields, Number(clientTs)), clientTs, now);
 }

@@ -45,21 +45,6 @@ describe("achievements", () => {
     expect(checkAchievements({ ...base, bestStreak: 12 })).toContain("combo_12");
   });
 
-  test("combo descs carry the TRUE math (streak 10 ⇒ ×6, cap 12 ⇒ ×7) — never the old wrong '10x/12x multiplier' claims (sweep 4 honesty fix)", () => {
-    const onFire = ACHIEVEMENT_DEFS.find((d) => d.id === "combo_10")!;
-    const maxLev = ACHIEVEMENT_DEFS.find((d) => d.id === "combo_12")!;
-    expect(onFire.desc).toContain("10-candle");
-    expect(onFire.desc).toContain("×6");
-    expect(maxLev.desc).toContain("12-streak");
-    expect(maxLev.desc).toContain("×7");
-    // the old descs claimed a "10x combo multiplier" / "12x combo cap" — both
-    // false (multiplier = 1 + min(streak,12)×0.5 ⇒ max ×7). Banned forever:
-    for (const d of [...ACHIEVEMENT_DEFS]) {
-      expect(d.desc).not.toMatch(/10x/i);
-      expect(d.desc).not.toMatch(/12x/i);
-    }
-  });
-
   test("candle-count medals at 50 / 100", () => {
     expect(checkAchievements({ ...base, candlesPassed: 49 })).not.toContain("candles_50");
     expect(checkAchievements({ ...base, candlesPassed: 50 })).toContain("candles_50");

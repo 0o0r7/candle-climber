@@ -20,7 +20,6 @@
 //        partner chart is free for ALL players (provider-side gate; the
 //        player never needs a wallet or a holding).
 import { NextResponse } from "next/server";
-import { rateLimited, clientIp } from "@/lib/http-limiter"; // G5: shared namespaced limiter (129-a #7)
 import { utcDateStr } from "@/game/cc/rng";
 import { getLaunchpadLevel, getPartnerLevel, partnerFeedReady } from "@/lib/launchpad-indexer";
 import { getPartnerRegistry } from "@/lib/partner-registry";
@@ -29,12 +28,6 @@ import { signRunToken } from "@/lib/run-token";
 import type { CandleData, SeedInfo } from "@/game/cc/types";
 
 export async function GET(req: Request) {
-  // G5 (129-a #7): GET throttle — this lane proxies upstreams / heavy compute;
-  // an unthrottled public relay is a free compute loop for a scripted client.
-  if (rateLimited("launchpad-get", clientIp(req), 30)) {
-    return NextResponse.json({ error: "slow down" }, { status: 429 });
-  }
-
   const { searchParams } = new URL(req.url);
   const today = utcDateStr();
   const requestedDate = searchParams.get("date");
@@ -83,7 +76,7 @@ export async function GET(req: Request) {
         { status: 503, headers: { "Cache-Control": "no-store" } },
       );
     }
-    const seed: SeedInfo = { date, symbol: entry.symbol, interval: "1w", source: "vibe-launch" }; // G5: concrete tf — matches the signed token + the board it lands on
+    const seed: SeedInfo = { date, symbol: entry.symbol, interval: "derived", source: "vibe-launch" };
     const data: CandleData = { seed, candles: level.candles };
     // Derived-but-real on-chain terrain is scoreable per the vibe-launch
     // precedent; the token pins (symbol, date, candles) exactly as launchpad.
@@ -124,7 +117,7 @@ export async function GET(req: Request) {
     const seed: SeedInfo = {
       date,
       symbol: level.symbol,
-      interval: "1w", // G5 (129-c #7): concrete tf — token signs "1w"; a "derived" seed made the client sign proofs against its selector state and fail every official proof
+      interval: "derived",
       source,
     };
 

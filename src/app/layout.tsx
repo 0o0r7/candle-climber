@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
-import { headers } from "next/headers"; // G5: nonce read — opts routes into dynamic rendering so Next can stamp the CSP nonce onto its script tags (static HTML cannot carry per-request nonces)
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import PrivyAuthGate from "@/components/cc/PrivyAuthGate";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono-cc",
@@ -61,18 +59,11 @@ export const viewport: Viewport = {
   userScalable: true,
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // G5 strict-CSP: reading the middleware-injected nonce here is the documented
-  // Next.js pattern — it (a) propagates the nonce to every framework script tag
-  // and (b) forces dynamic rendering (a per-request nonce can never live in
-  // build-time static HTML; with 'strict-dynamic', static script tags would be
-  // blocked and the page would ship as a dead SSR shell — caught live in Sweep 5).
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
-  void nonce; // the read itself does the work — Next stamps the nonce from the request CSP
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -89,7 +80,7 @@ export default async function RootLayout({
       <body
         className={`${jetbrainsMono.variable} antialiased bg-background text-foreground`}
       >
-        <PrivyAuthGate>{children}</PrivyAuthGate>
+        {children}
         <Toaster position="top-center" richColors closeButton />
       </body>
     </html>

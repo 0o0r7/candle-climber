@@ -2,8 +2,9 @@
 
 > Written by task 30-a (workstream W3). The ecosystem knowledge base requires that
 > **every feed a product consumes is documented** — URL, interval, cost/licensing,
-> determinism rule and failure mode (per the game design doc's data sections).
-> This page is that registry. When a feed is
+> determinism rule and failure mode (KB §9 req 3, carried into this repo's
+> ecosystem docs: `docs/ECOSYSTEM_BAR.md`, "reconstruct the expectation factors"
+> per CC-PLAN §1–2 / GAME_DESIGN §8–9). This page is that registry. When a feed is
 > added, moved or re-keyed, update this file in the same commit.
 
 ## The determinism doctrine (applies to every feed)

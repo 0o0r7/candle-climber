@@ -11,8 +11,7 @@
 import { NextResponse } from "next/server";
 import { getScoreReports, type ScoreReport } from "@/lib/score-report-store";
 import { sanitizeName } from "@/lib/board-validation";
-import { rateLimited, clientIp, bodyTooLarge } from "@/lib/http-limiter"; // shared limiter — one implementation repo-wide
-import { opsAuthorized } from "@/lib/ops-auth"; // G5: moderation detail is default-gated (129-a #4)
+import { rateLimited, clientIp } from "@/lib/http-limiter"; // shared limiter — one implementation repo-wide
 
 export const dynamic = "force-dynamic";
 
@@ -23,45 +22,21 @@ function sanitizeReason(raw: unknown): string {
 
 export async function GET(req: Request) {
   // internal review surface — throttled so it cannot be scraped cheaply
-  if (rateLimited("sr-get", clientIp(req), 60)) {
+  if (rateLimited(clientIp(req), 60)) {
     return NextResponse.json({ error: "rate limited" }, { status: 429 });
-  }
-  // G5 (129-a #4): the raw report queue (player names, reporter names, free
-  // text) is default-gated behind OPS_TOKEN. Unauthorized callers get honest
-  // aggregate counts — the moderation detail needs the ops credential.
-  const provided =
-    req.headers.get("x-ops-token") ??
-    new URL(req.url).searchParams.get("key") ??
-    null;
-  const store = getScoreReports();
-  if (!opsAuthorized(provided)) {
-    const recentAll = await store.recent(500);
-    return NextResponse.json(
-      {
-        reports: [],
-        gated: true,
-        totalReportsRecent: recentAll.length,
-        hint: "moderation detail gated — set OPS_TOKEN and pass x-ops-token (or ?key=)",
-      },
-      { headers: { "cache-control": "no-store" } },
-    );
   }
   const { searchParams } = new URL(req.url);
   const limit = Math.max(1, Math.min(100, parseInt(searchParams.get("limit") ?? "50", 10) || 50));
+  const store = getScoreReports();
   const reports = await store.recent(limit);
   return NextResponse.json(
-    { reports, gated: false, store: store.kind },
+    { reports, store: store.kind },
     { headers: { "cache-control": "no-store" } },
   );
 }
 
 export async function POST(req: Request) {
-  // G5 (129-a #11): reject oversized bodies before parsing (self-host has no cap).
-  if (bodyTooLarge(req)) {
-    return NextResponse.json({ error: "payload too large" }, { status: 413 });
-  }
-
-  if (rateLimited("sr-post", clientIp(req), 5)) {
+  if (rateLimited(clientIp(req), 5)) {
     return NextResponse.json({ error: "slow down" }, { status: 429 });
   }
   try {

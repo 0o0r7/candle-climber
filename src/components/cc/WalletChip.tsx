@@ -1,24 +1,268 @@
 "use client";
 
-// 2026-10-16 — WalletChip dispatcher (Privy lane switch).
-// · NEXT_PUBLIC_WALLET_ENABLED absent/off → nothing renders (launch-day
-//   contract, unchanged).
-// · Flag on + NO NEXT_PUBLIC_PRIVY_APP_ID → legacy injected-wallet lane
-//   (WalletChipInjected) — byte-identical to the pre-2026-10-16 behavior.
-// · Flag on + Privy App ID → Privy lane (WalletChipPrivy): email/wallet
-//   sign-in with an embedded EVM wallet (founder ask #3 / Spotlight form:
-//   "third-party like Privy OK") — no injected wallet ever required.
-// Both lanes are code-split (next/dynamic, ssr:false): the Privy SDK chunk is
-// never downloaded on the legacy path, and vice versa. Laws untouched: the
-// chip is display-only in BOTH lanes (docs/ECONOMY-LAWS.md).
+// P4.2 (E2) — WalletChip: connect + cosmetic $WICK balance badge.
+// STRICTLY display-only: this component never writes score, rank, or access.
+// Laws: docs/ECONOMY-LAWS.md · copy rules: WICK-LAUNCH-FORM-PACK §8 (no earnings
+// verbs, no value promises — the badge is an identity sticker, nothing more).
 
-import dynamic from "next/dynamic";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ROBINHOOD_CHAIN_ID,
+  WALLET_ADDRESS_KEY,
+  balanceToTier,
+  ensureRobinhoodChain,
+  formatWick,
+  isValidAddress,
+  type WalletTier,
+} from "@/lib/wallet";
 
-const PrivyChip = dynamic(() => import("./WalletChipPrivy"), { ssr: false });
-const InjectedChip = dynamic(() => import("./WalletChipInjected"), { ssr: false });
+type EthProvider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  // EIP-1193 event surface (optional — not every injected provider has it).
+  on?: (event: string, cb: (args: unknown) => void) => void;
+  removeListener?: (event: string, cb: (args: unknown) => void) => void;
+};
+
+type ChipState = "idle" | "busy" | "wrongnet" | "rpcdown" | "confirm";
+
+// Cross-component broadcast: GameCanvas (official-lane context) and any other
+// listener re-read CC_WALLET_ADDR when the chip connects or disconnects.
+const WALLET_CHANGED_EVENT = "cc-wallet-changed";
 
 export default function WalletChip() {
-  if (process.env.NEXT_PUBLIC_WALLET_ENABLED !== "on") return null;
-  if (process.env.NEXT_PUBLIC_PRIVY_APP_ID) return <PrivyChip />;
-  return <InjectedChip />;
+  // Launch-day default: wallet layer fully INERT unless explicitly enabled
+  // (contract in .env.example — absent flag = no chip, no calls, no UI).
+  // NOTE: the flag check happens AFTER all hooks (Rules of Hooks) — hooks stay
+  // unconditional; only the render output is gated.
+  const enabled = process.env.NEXT_PUBLIC_WALLET_ENABLED === "on";
+  const [addr, setAddr] = useState<string | null>(null);
+  const [wei, setWei] = useState<bigint | null>(null);
+  const [tier, setTier] = useState<WalletTier>("none");
+  const [state, setState] = useState<ChipState>("idle");
+  const [hasProvider, setHasProvider] = useState(false);
+  const [netMsg, setNetMsg] = useState<string | null>(null); // why the network is wrong
+  const queried = useRef<string | null>(null);
+  const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const query = useCallback(async (a: string) => {
+    if (queried.current === a) return; // mount-race guard
+    queried.current = a;
+    setState("busy");
+    try {
+      const r = await fetch("/api/wallet", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ address: a }),
+      });
+      const j = await r.json();
+      if (j?.ok) {
+        const w = BigInt(j.balance ?? "0");
+        setWei(w);
+        setTier(balanceToTier(w));
+        setState("idle");
+      } else {
+        setState("rpcdown");
+      }
+    } catch {
+      setState("rpcdown");
+    }
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    // provider/localStorage reads are async callbacks (react-hooks: no sync
+    // setState in effect body) — mount-time one-shot + chainChanged sub.
+    const eth = (window as unknown as { ethereum?: EthProvider }).ethereum;
+    void (async () => {
+      const saved = localStorage.getItem(WALLET_ADDRESS_KEY);
+      if (alive) setHasProvider(!!eth);
+      if (alive && isValidAddress(saved)) {
+        setAddr(saved);
+        // Boot check is READ-ONLY (eth_chainId): never auto-prompt a switch
+        // popup on page load — the WRONG NETWORK chip click does that.
+        try {
+          const chain = eth
+            ? String(await eth.request({ method: "eth_chainId" })).toLowerCase()
+            : "";
+          if (alive && chain && parseInt(chain, 16) !== ROBINHOOD_CHAIN_ID) {
+            setState("wrongnet");
+            return;
+          }
+        } catch {
+          // fail-open: boot chain check is cosmetic — badge still shows
+        }
+        if (alive) void query(saved);
+      }
+    })();
+    // User switches networks inside the wallet → the chip follows honestly.
+    const onChainChanged = (c: unknown) => {
+      if (!alive || typeof c !== "string") return;
+      const id = parseInt(c, 16);
+      if (!Number.isFinite(id)) return;
+      if (id !== ROBINHOOD_CHAIN_ID) {
+        setNetMsg(null);
+        setState("wrongnet");
+      } else {
+        setState("idle");
+        const a = localStorage.getItem(WALLET_ADDRESS_KEY);
+        if (isValidAddress(a)) {
+          queried.current = null;
+          void query(a);
+        }
+      }
+    };
+    eth?.on?.("chainChanged", onChainChanged);
+    return () => {
+      alive = false;
+      eth?.removeListener?.("chainChanged", onChainChanged);
+      if (confirmTimer.current) clearTimeout(confirmTimer.current);
+    };
+  }, [query]);
+
+  const connect = useCallback(async () => {
+    const eth = (window as unknown as { ethereum?: EthProvider }).ethereum;
+    if (!eth || state === "busy") return;
+    setState("busy");
+    try {
+      const accounts = (await eth.request({ method: "eth_requestAccounts" })) as string[];
+      const a = accounts?.[0];
+      if (!isValidAddress(a)) {
+        setState("idle");
+        return;
+      }
+      // ASK the wallet to switch — and ADD Robinhood testnet when it's unknown
+      // (EIP-3326 switch + EIP-3085 add). A rejection/ failure never blocks
+      // play; it lands the chip in the honest WRONG NETWORK state.
+      const net = await ensureRobinhoodChain(eth);
+      if (!net.ok) {
+        setNetMsg(net.message);
+        setState("wrongnet");
+        return;
+      }
+      localStorage.setItem(WALLET_ADDRESS_KEY, a);
+      queried.current = null;
+      setAddr(a);
+      window.dispatchEvent(new Event(WALLET_CHANGED_EVENT)); // official-lane context follows
+      await query(a);
+    } catch {
+      setState("idle"); // user rejected — stay quiet, play continues
+    }
+  }, [query, state]);
+
+  // Owner request (2026-10-11): the user must be able to disconnect from inside
+  // the game. Two-step confirm on the badge itself (no menus); clears the saved
+  // address, best-effort wallet_revokePermissions (EIP-... MetaMask — revoke the
+  // eth_accounts permission so the site drops out of the wallet's connected
+  // list; unsupported providers just skip it), then broadcasts the change.
+  const doDisconnect = useCallback(async () => {
+    if (confirmTimer.current) clearTimeout(confirmTimer.current);
+    confirmTimer.current = null;
+    localStorage.removeItem(WALLET_ADDRESS_KEY);
+    queried.current = null;
+    setAddr(null);
+    setWei(null);
+    setTier("none");
+    setNetMsg(null);
+    setState("idle");
+    window.dispatchEvent(new Event(WALLET_CHANGED_EVENT));
+    try {
+      const eth = (window as unknown as { ethereum?: EthProvider }).ethereum;
+      await eth?.request({
+        method: "wallet_revokePermissions",
+        params: [{ eth_accounts: {} }],
+      });
+    } catch {
+      // unsupported/rejected — the app-side disconnect already happened
+    }
+  }, []);
+
+  const onBadgeClick = useCallback(() => {
+    if (state === "confirm") {
+      void doDisconnect();
+      return;
+    }
+    setState("confirm");
+    if (confirmTimer.current) clearTimeout(confirmTimer.current);
+    confirmTimer.current = setTimeout(() => setState("idle"), 5000); // safety revert
+  }, [state, doDisconnect]);
+
+  if (!enabled) return null;
+
+  // No injected provider (most testnet visitors): render an honest hint
+  // instead of nothing — delivery fix 2026-10-13 for "wallet invisible on
+  // mobile". Plain mobile browsers have no window.ethereum; the wallet lane
+  // lives inside wallet-embedded browsers (and the WalletConnect phase is a
+  // separate, not-yet-built step). Cosmetic lane: never blocks play or rank.
+  if (!hasProvider && !addr) {
+    return (
+      <span
+        className="cc-chip cc-wallet-chip"
+        title="No wallet detected. Open this page inside a wallet's built-in browser to link a wallet — cosmetic badge only, play and scores never require it."
+      >
+        WALLET · IN-WALLET BROWSER ONLY
+      </span>
+    );
+  }
+
+  if (state === "wrongnet") {
+    const tip = netMsg
+      ? `Robinhood Chain testnet (46630) — ${netMsg}. Click to retry the switch/add request.`
+      : "Switch your wallet to Robinhood Chain testnet (46630) — adds the network to your wallet if missing. Cosmetic badge only, never affects rank.";
+    return (
+      <button
+        type="button"
+        className="cc-chip cc-wallet-chip"
+        onClick={connect}
+        title={tip}
+      >
+        WRONG NETWORK
+      </button>
+    );
+  }
+  if (state === "rpcdown") {
+    return (
+      <span className="cc-chip cc-wallet-chip" title="Balance feed unavailable — badge offline, play and scores unaffected.">
+        $WICK · OFFLINE
+      </span>
+    );
+  }
+  if (!addr || wei === null) {
+    return hasProvider ? (
+      <button
+        type="button"
+        className="cc-chip cc-wallet-chip"
+        onClick={connect}
+        title="Connect to show your $WICK balance badge — display-only, never affects rank (ECONOMY-LAWS)."
+      >
+        {state === "busy" ? "WALLET…" : "CONNECT WALLET"}
+      </button>
+    ) : null;
+  }
+
+  const short = `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+  const label = tier === "whale" ? "WICK WHALE" : tier === "holder" ? "WICK HOLDER" : "NO TIER YET";
+  if (state === "confirm") {
+    return (
+      <button
+        type="button"
+        className="cc-chip cc-wallet-chip cc-wallet-disconnect"
+        onClick={onBadgeClick}
+        title="Click again to disconnect — the badge clears, play continues as guest (ECONOMY-LAWS)."
+      >
+        DISCONNECT?
+      </button>
+    );
+  }
+  const tip =
+    "Display-only $WICK badge · holder value is cosmetic (routes/archive) and never changes rank or access — ECONOMY-LAWS. Click to disconnect.";
+  return (
+    <button
+      type="button"
+      className={`cc-chip cc-wallet-chip cc-tier-${tier}`}
+      onClick={onBadgeClick}
+      title={tip}
+    >
+      {tier !== "none" ? <b>{label}</b> : null} {formatWick(wei)} <i>{short}</i>
+    </button>
+  );
 }

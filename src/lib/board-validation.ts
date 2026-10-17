@@ -89,13 +89,14 @@ export function validateSubmission(
   if (!Number.isFinite(entry.candlesPassed) || entry.candlesPassed < 0 || entry.candlesPassed > MAX_CANDLES) {
     return { ok: false, error: "invalid candles", status: 400 };
   }
-  // anti-cheat: score must be physically reachable from candles passed.
-  // G5 (129-c #1): the previous tok.count-based caps 403-rejected LEGITIMATE
-  // world-2 marathon runs — world 2 extends the terrain indefinitely beyond
-  // the base terrain's closed-candle count, so capping score/candles at
-  // tok.count lied about the skill ceiling. The physical bounds that remain
-  // are the honest ones: candlesPassed ≤ MAX_CANDLES (engine's own ceiling,
-  // above) and score ≤ candlesPassed × MAX_SCORE_PER_CANDLE + 20.
+  // anti-cheat: terrain-imposed physical caps (count comes from the token)
+  if (
+    entry.candlesPassed > tok.count * MAX_SCORE_PER_CANDLE ||
+    entry.score > tok.count * MAX_SCORE_PER_CANDLE + 20
+  ) {
+    return { ok: false, error: "score exceeds physical maximum", status: 403 };
+  }
+  // anti-cheat: score must be physically reachable from candles passed
   if (entry.score > entry.candlesPassed * MAX_SCORE_PER_CANDLE + 20) {
     return { ok: false, error: "score inconsistent with run", status: 400 };
   }

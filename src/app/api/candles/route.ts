@@ -21,6 +21,7 @@ import { selectDailySymbol } from "@/lib/market-selector";
 import { readOfficialQuote } from "@/lib/robinhood-chain";
 import { isArchiveDate, endOfDayMs, clampCandlesTo, binanceKlinesUrl } from "@/game/cc/archive";
 import { signRunToken } from "@/lib/run-token";
+import { signForgeToken } from "@/lib/forge-token";
 import { rateLimited, clientIp } from "@/lib/http-limiter";
 import { parseStooqCsv } from "@/lib/stooq";
 import { parseYahooChart, yahooChartUrl } from "@/lib/yahoo";
@@ -169,7 +170,7 @@ export async function GET(req: Request) {
   // whole integrity chain trusts and fans out to paid/public upstreams — put a
   // generous per-IP ceiling on it (60/min ≈ 60 terrain loads/min from one IP;
   // the game client needs 1). Per-instance, same tradeoff as the write lanes.
-  if (rateLimited("candles", clientIp(req), 60)) {
+  if (rateLimited(clientIp(req), 60)) {
     return NextResponse.json(
       { error: "rate limited — slow down" },
       { status: 429, headers: { "Retry-After": "60" } },
@@ -206,7 +207,7 @@ export async function GET(req: Request) {
           cache.set(key, { ts: Date.now(), candles, source: "vibe-launch" });
         }
         const data: CandleData = {
-          seed: { date, symbol, interval: "1w", source: "vibe-launch" }, // G5: concrete tf — matches the signed token
+          seed: { date, symbol, interval: "derived", source: "vibe-launch" },
           candles,
         };
         const tok = signRunToken(symbol, date, candles.length, JSON.stringify(candles));
@@ -246,8 +247,7 @@ export async function GET(req: Request) {
             seed: { date, symbol: coin.symbol, interval: "1d", source: "coingecko" as const },
             candles,
           };
-          // G5 (129-c #7): the token MUST pin the interval the terrain was served with ("1d") — the old default signed "1w" while seed.interval said "1d", landing 1d terrain on the 1w board (P3.5 "boards never mix timeframes" broken for this source)
-          const tok = signRunToken(coin.symbol, date, candles.length, JSON.stringify(candles), "1d");
+          const tok = signRunToken(coin.symbol, date, candles.length, JSON.stringify(candles));
           if (tok) data.runToken = tok;
           return NextResponse.json(data, { headers: { "Cache-Control": "public, max-age=300" } });
         }
@@ -294,29 +294,7 @@ export async function GET(req: Request) {
   // is a PAST terrain, so comparing it against the current on-chain price would
   // be meaningless. Stocks only, and a null quote simply changes nothing (the
   // existing feed chain still decides, and synthetic stays explicitly synthetic).
-  // G5 (129-c #8): the anchor must be STABLE within its UTC day — a fresh live
-  // quote per request let two warm instances serve DIFFERENT terrains (and
-  // different valid tokens) for the same (symbol,date) board, breaking the
-  // "closed-candle terrain never changes within its UTC day" determinism
-  // promise. Day-keyed cache: the day's first SUCCESSFUL read wins for this
-  // instance. Documented residual: cross-instance first-read-wins is per
-  // instance (same accepted tradeoff class as the per-instance rate limiter);
-  // submission integrity is unaffected either way — the token fingerprint pins
-  // every POST to the exact terrain it was issued for.
-  type OfficialQuote = Awaited<ReturnType<typeof readOfficialQuote>>;
-  const anchorCache = (globalThis as { __ccAnchorCache?: Map<string, { day: string; q: OfficialQuote }> }).__ccAnchorCache
-    ?? ((globalThis as { __ccAnchorCache?: Map<string, { day: string; q: OfficialQuote }> }).__ccAnchorCache = new Map());
-  let official: OfficialQuote = null;
-  if (isStock && !isArchive) {
-    const ak = `${symbol}|${date}`;
-    const hit = anchorCache.get(ak);
-    if (hit && hit.day === date) {
-      official = hit.q;
-    } else {
-      official = await readOfficialQuote(symbol);
-      if (official) anchorCache.set(ak, { day: date, q: official }); // failures are not cached — a flaky RPC read retries
-    }
-  }
+  const official = isStock && !isArchive ? await readOfficialQuote(symbol) : null;
 
   // P3.5 timeframe selector: ?interval= is whitelist-checked; the classic
   // weekly level stays the default. ARCHIVE stays daily-only in V1 (the
@@ -404,6 +382,11 @@ export async function GET(req: Request) {
   if (source !== "synthetic") {
     const tok = signRunToken(symbol, date, candles.length, JSON.stringify(candles), interval);
     if (tok) data.runToken = tok;
+    // Phase 1: Signal Forge arena token — same terrain, DOMAIN-SEPARATED HMAC
+    // (a cc token can never score on the Forge board). Attached through an
+    // intersection type so the cc CandleData contract stays untouched.
+    const forgeTok = signForgeToken(symbol, date, candles.length, JSON.stringify(candles));
+    if (forgeTok) (data as CandleData & { forgeRunToken?: string }).forgeRunToken = forgeTok;
   }
   return NextResponse.json(data, {
     headers: { "Cache-Control": "public, max-age=300" },
