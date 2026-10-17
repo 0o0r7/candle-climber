@@ -16,6 +16,9 @@ next-env.d.ts
 # env & secrets — NEVER commit
 .env*
 !.env.example
+# .env.production carries ONLY a NEXT_PUBLIC_* (public-by-design) build default —
+# see the file header; every true secret stays untracked (rules above + below)
+!.env.production
 .gh_token
 .mongo_public_key
 .mongo_private_key
