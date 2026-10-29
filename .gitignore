@@ -26,6 +26,11 @@ next-env.d.ts
 .gh_user
 .dvtoken
 .vercel_token
+# 2026-10-29: an environment auto-snapshot once committed these to local
+# history (caught before push) — ignore them so it can never happen again.
+.framer_keys.json
+.framer_token
+.venv-b44/
 
 # internal workspace (private research, tooling, archives — not part of the public game repo)
 /research/

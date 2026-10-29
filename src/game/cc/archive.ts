@@ -171,7 +171,10 @@ export interface ArchiveLinkParams {
 
 /** Build a relative deep link to an archive level. Whitelist-checked:
  *  unknown symbols or non-archive dates yield plain "/" instead of a
- *  tampered URL. `today` is injected (UTC YYYY-MM-DD) for purity. */
+ *  tampered URL. `today` is injected (UTC YYYY-MM-DD) for purity.
+ *  P0 fix (2026-10-29): links target /play — the ONLY route that parses
+ *  symbol/date params (GameCanvas init effect). Legacy "/" links are
+ *  forwarded by middleware, but every newly minted link is born correct. */
 export function archiveHref(p: ArchiveLinkParams, today: string): string {
   if (!WATCHLIST.includes(p.symbol) || !isArchiveDate(p.date, today)) {
     return "/";
@@ -179,7 +182,7 @@ export function archiveHref(p: ArchiveLinkParams, today: string): string {
   const q = new URLSearchParams({ symbol: p.symbol, date: p.date });
   if (p.renderer === "v2") q.set("renderer", "v2"); // whitelisted single value
   const qs = q.toString();
-  return `/?${qs}`;
+  return `/play?${qs}`;
 }
 
 // ---- Wire helpers shared by /api/candles (kept pure for W5) ----

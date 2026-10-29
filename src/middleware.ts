@@ -8,6 +8,12 @@
 // (styles only — no script exposure; the unused chart is not imported).
 // canvas/game rendering needs nothing beyond 'self'.
 import { NextResponse, type NextRequest } from "next/server";
+// P0 (2026-10-29) deep-link fix: legacy links minted before today target
+// "/?duel=…&ref=…" etc. while the game parses those params only on /play.
+// New links are minted at /play (see src/game/cc/{archive,duel,share}.ts);
+// this forward heals links ALREADY shared in the wild. 307 (temporary,
+// never browser-cached) keeps the behavior reversible.
+import { shouldForwardToPlay } from "@/lib/deep-link-forward";
 
 const SENTRY_INGEST = "https://o4512112704028672.ingest.us.sentry.io";
 
@@ -26,6 +32,13 @@ const PRIVY_FRAMES = PRIVY_APP_ID
 const PRIVY_IMG = PRIVY_APP_ID ? " https://api.privy.io https://auth.privy.io https://explorer-api.walletconnect.com" : "";
 
 export function middleware(req: NextRequest) {
+  const url = req.nextUrl;
+  // P0 legacy deep-link healing: "/" + any game param → /play (same query).
+  // Conservative: only the 8 params the game actually parses trigger this;
+  // utm-only or bare "/" landings keep serving the marketing page.
+  if (shouldForwardToPlay(url.pathname, [...url.searchParams.keys()])) {
+    return NextResponse.redirect(new URL("/play" + url.search, url), 307);
+  }
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const isDev = process.env.NODE_ENV !== "production";
   const csp = [

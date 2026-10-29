@@ -147,10 +147,13 @@ describe("W5 archive recent dailies (pure rotation replay)", () => {
 });
 
 describe("W5 archive deep links (whitelist-checked)", () => {
-  test("builds /?symbol=&date= and carries renderer=v2", () => {
-    expect(archiveHref({ symbol: "BTCUSDT", date: "2020-03-12" }, TODAY)).toBe("/?symbol=BTCUSDT&date=2020-03-12");
+  test("builds /play?symbol=&date= and carries renderer=v2", () => {
+    // P0 2026-10-29: links must target /play (the only route that parses
+    // symbol/date) — minting against "/" left archive rows dead on the
+    // landing page.
+    expect(archiveHref({ symbol: "BTCUSDT", date: "2020-03-12" }, TODAY)).toBe("/play?symbol=BTCUSDT&date=2020-03-12");
     expect(archiveHref({ symbol: "BTCUSDT", date: "2020-03-12", renderer: "v2" }, TODAY)).toBe(
-      "/?symbol=BTCUSDT&date=2020-03-12&renderer=v2",
+      "/play?symbol=BTCUSDT&date=2020-03-12&renderer=v2",
     );
   });
 

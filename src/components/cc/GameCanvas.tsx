@@ -41,6 +41,10 @@ import {
   duelVerdict, parseTally, tallyLabel,
   type DuelChallenge, type DuelTally,
 } from "@/game/cc/duel";
+// P0 (2026-10-29): share/ref link builders extracted to a pure module —
+// shareUrl() mints /play?ref=… links, shareRef() joins with "&" so a duel
+// link + ref parse as TWO params, not one malformed blob (see share.ts).
+import { shareRef, shareUrl } from "@/game/cc/share";
 import type { CandleData, RunResult } from "@/game/cc/types";
 import { TUTORIAL_KEY } from "@/lib/tutorial-key";
 import Tutorial from "@/components/cc/Tutorial";
@@ -135,15 +139,9 @@ const RUNS_KEY = "cc_runs_v1";
 const TF_KEY = "cc_tf_v1"; // P3.5: remembered timeframe ("1w" classic default)
 const DUEL_TALLY_KEY = "cc_duel_v1"; // P7.3: local duel W-L-D tally (no server identity exists)
 const REF_KEY = "cc_ref_v1"; // E5.5: referral attribution — last ?ref= landing param on this device
-// E5.5: every traveling text carries a measurable link. The ref is the sharer's
-// sanitized name ("cc" fallback) — Gate G5's "referral traffic measurable in
-// board metadata" runs through exactly this loop: share link → ?ref= landing →
-// REF_KEY → POST body ref → board row → /ops rollup.
-const GAME_URL = "https://candle-climber.vercel.app";
-const shareRef = (raw: string): string => {
-  const m = (raw.toLowerCase().match(/[a-z0-9_-]+/g) ?? []).join("").slice(0, 24);
-  return `?ref=${m || "cc"}`;
-};
+// E5.5: every traveling text carries a measurable link (shareUrl/shareRef
+// from @/game/cc/share). Loop: share link → /play?ref= landing → REF_KEY →
+// POST body ref → board row → /ops rollup.
 const UNSCORED_MSG = "offline terrain — scoring disabled";
 const ARCHIVE_MSG = "practice — archive terrain is unscored";
 
@@ -375,10 +373,11 @@ export default function GameCanvas() {
     if (settings.muted) setMuted(true);
     setVolume(settings.volume);
     // optional deep links (whitelist-checked; the server still pins the terrain
-    // and issues the run token): /?symbol=ETHUSDT opens that chart,
-    // /?source=launch plays the vibe/vibe launch-of-the-day level,
-    // /?date=<past UTC date> plays the archive (H1), and /?interval=1h|4h|1d
-    // pins the timeframe (P3.5) — famous history as terrain.
+    // and issues the run token): /play?symbol=ETHUSDT opens that chart,
+    // /play?source=launch plays the vibe/vibe launch-of-the-day level,
+    // /play?date=<past UTC date> plays the archive (H1), and /play?interval=1h|4h|1d
+    // pins the timeframe (P3.5) — famous history as terrain. (P0 2026-10-29:
+    // links are minted at /play; legacy "/" deep links are forwarded by middleware.)
     const params = new URLSearchParams(window.location.search);
     setV2(params.get("renderer") !== "v1"); // default v2; only explicit v1 downgrades (promoted 2026-10-10)
     wreckDBRef.current = loadWreckDB(); // H3: this device's death map
@@ -1494,8 +1493,8 @@ export default function GameCanvas() {
     // P3.1: the mockery loop — share text tags the rival so their audience sees it.
     // E5.5: the text also carries a measurable game link (sharer's name as ref).
     const shareText = challenge
-      ? `${challenge} you're up — beat ${result.score} on today's ${data.seed.symbol} chart — ${GAME_URL}${shareRef(name)}`
-      : `Candle Climber — ${GAME_URL}${shareRef(name)}`;
+      ? `${challenge} you're up — beat ${result.score} on today's ${data.seed.symbol} chart — ${shareUrl(name)}`
+      : `Candle Climber — ${shareUrl(name)}`;
     if (navigator.share && navigator.canShare?.({ files: [new File([blob], "card.png", { type: "image/png" })] })) {
       try {
         await navigator.share({ files: [new File([blob], "card.png", { type: "image/png" })], title: shareText });
@@ -1535,7 +1534,7 @@ export default function GameCanvas() {
   // E5.5: the copied text lands on a ?ref= link so episode-driven visits count
   const copyReport = () => {
     if (!report) return;
-    const text = `CANDLE CLIMBER — DAILY REPORT ${report.date}\n${report.narrative.join("\n")}\n${GAME_URL}${shareRef(name)}`;
+    const text = `CANDLE CLIMBER — DAILY REPORT ${report.date}\n${report.narrative.join("\n")}\n${shareUrl(name)}`;
     navigator.clipboard?.writeText(text).then(() => {
       setReportCopied(true);
       setTimeout(() => setReportCopied(false), 1600);

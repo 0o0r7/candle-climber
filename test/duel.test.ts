@@ -166,9 +166,11 @@ describe("P7.3 challenge replay projection + codes", () => {
     });
   });
 
-  test("duelUrl builds the ?duel= deep link, tolerates trailing slashes", () => {
-    expect(duelUrl("https://candle-climber.vercel.app", "ABC234")).toBe("https://candle-climber.vercel.app/?duel=ABC234");
-    expect(duelUrl("https://x.example/", "ABC234")).toBe("https://x.example/?duel=ABC234");
+  test("duelUrl builds the /play?duel= deep link, tolerates trailing slashes", () => {
+    // P0 2026-10-29: links must target /play (the only route that parses
+    // ?duel=) — minting against "/" left invites dead on the landing page.
+    expect(duelUrl("https://candle-climber.vercel.app", "ABC234")).toBe("https://candle-climber.vercel.app/play?duel=ABC234");
+    expect(duelUrl("https://x.example/", "ABC234")).toBe("https://x.example/play?duel=ABC234");
   });
 
   test("code alphabet is unambiguous (no 0/O/1/I/L) and the regex pins the shape", () => {

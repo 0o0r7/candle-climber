@@ -216,9 +216,11 @@ export function challengeToGhost(ch: DuelChallenge): GhostEntry {
   };
 }
 
-/** Shareable deep link for a challenge (origin injected for purity). */
+/** Shareable deep link for a challenge (origin injected for purity).
+ *  P0 fix (2026-10-29): targets /play — the ONLY route that parses ?duel=
+ *  (GameCanvas init effect). Callers append shareRef() with "&" joining. */
 export function duelUrl(origin: string, code: string): string {
-  return `${origin.replace(/\/+$/, "")}/?duel=${encodeURIComponent(code)}`;
+  return `${origin.replace(/\/+$/, "")}/play?duel=${encodeURIComponent(code)}`;
 }
 
 /** True when `date` is not older than the duel TTL (store prunes the rest). */
