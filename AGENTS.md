@@ -69,6 +69,30 @@ A dev-server response contains `turbopack` / `next-dev` markers and unhashed sou
 modules; the log line `Compiling / ... GET / 200 (compile: 3.8s)` confirms live source
 rather than a prebuilt bundle.
 
+## `/chart` — the day page (added 2026-10-31, reference study)
+
+- `/chart` `307`s to `/chart/<UTC today>`; `/chart/[date]` validates through
+  `src/lib/day-chart.ts` — future dates and anything before 2017-01-01 `404`.
+- The page deliberately does **not** compute the day's ticker or mutation server-side:
+  `/api/candles` picks the symbol at request time from live 24h tickers
+  (`selectDailySymbol`), so the pure rotation predicted ETHUSDT on 2026-10-31 while the
+  live level served BTCUSDT. `ChartDay` names the level from the response instead. Do not
+  "simplify" that back into `cryptoRotation`.
+- The crowd block ("the field") is guest-lane only and labelled unverified; an
+  unreachable store renders "unreachable", never "no climbs yet".
+- `getBoard()` memoises on `globalThis`, not in module scope: Next dev compiles pages and
+  route handlers into separate module graphs, and a module-scoped memory store made
+  `/chart` and `/leaderboard` read an empty board while `/api/field` reported real climbs
+  (observed 2026-10-31). Do not move it back.
+
+```bash
+curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" http://localhost:3000/chart   # 307 → /chart/<today>
+curl -s http://localhost:3000/api/field | head -c 160                                  # {"count":0,...} on a fresh store
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/chart/2099-01-01        # 404 (no future terrain)
+curl -s -o /dev/null -w "%{http_code} %{content_type}\n" \
+  http://localhost:3000/chart/$(date -u +%F)/opengraph-image                           # 200 image/png
+```
+
 ## Marketing assets
 
 The X trailer kit in `docs/assets/x-launch` (the three 15s trailer cuts produced 2026-10-11 (NEVER COMMITTED — binary-lossy branch rescue; only x-01…x-07 exist in-repo. Restore from backup before relying on them)) is built by

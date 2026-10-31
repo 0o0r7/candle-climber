@@ -2187,6 +2187,8 @@ export default function GameCanvas() {
         <span aria-hidden>·</span>
         <a href="/leaderboard">leaderboard</a>
         <span aria-hidden>·</span>
+        <a href="/chart">today&apos;s chart</a>
+        <span aria-hidden>·</span>
         <a href="/privacy">privacy</a>
         <span aria-hidden>·</span>
         <a href="/terms">terms</a>

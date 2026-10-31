@@ -2655,3 +2655,107 @@ a.cc-btn { text-decoration: none; display: inline-flex; align-items: center; jus
   font-family: var(--cc-mono); font-size: 10px; letter-spacing: 0.08em; text-decoration: none;
 }
 .cc-board-more:hover { text-decoration: underline; }
+
+/* ===== /chart/[date] — "THE CHART IS A PLACE" (reference-study P1) =====
+   One public page per UTC day: the level's identity, the terrain as a poster,
+   and where the crowd stopped. Reuses the .cc-page shell used by /leaderboard. */
+.cc-chart-page { max-width: 760px; }
+.cc-chart-title {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px;
+  font-family: var(--cc-display); font-size: clamp(30px, 7vw, 44px); font-weight: 800;
+  color: #fff; margin: 0 0 6px; letter-spacing: -0.01em; line-height: 1.05;
+}
+.cc-chart-title span {
+  font-family: var(--cc-mono); font-size: 12.5px; font-weight: 500;
+  color: var(--cc-faint); letter-spacing: 0.06em;
+}
+.cc-chart-mutation {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px;
+  padding: 12px 14px; margin: 0 0 18px; border-radius: 6px;
+  border: 1px solid var(--cc-hairline); border-left: 3px solid var(--cc-lime);
+  background: var(--cc-card);
+}
+.cc-chart-mutation b {
+  font-family: var(--cc-mono); font-size: 11.5px; letter-spacing: 0.12em; color: var(--cc-lime);
+}
+.cc-chart-mutation span { font-size: 12.5px; color: #b9bec7; }
+.cc-chart-live { margin: 0 0 8px; }
+.cc-chart-poster {
+  display: block; width: 100%; background: #0c0e10;
+  border: 1px solid var(--cc-hairline); border-radius: 10px;
+}
+.cc-chart-loading, .cc-chart-error {
+  padding: 26px 16px; border: 1px dashed var(--cc-hairline); border-radius: 10px;
+  font-family: var(--cc-mono); font-size: 12px; color: var(--cc-faint); text-align: center;
+}
+.cc-chart-error { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.cc-chart-error b { color: #fff; font-family: var(--cc-ui); font-size: 13px; }
+.cc-chart-meta {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 14px;
+  font-family: var(--cc-mono); font-size: 10.5px; letter-spacing: 0.06em;
+}
+.cc-chart-badge { padding: 4px 9px; border-radius: 999px; border: 1px solid var(--cc-hairline); color: #b9bec7; }
+.cc-chart-badge-live { color: var(--cc-up); border-color: rgba(91, 208, 138, 0.35); }
+.cc-chart-badge-onchain { color: var(--cc-purple); border-color: rgba(106, 99, 200, 0.5); }
+.cc-chart-badge-synthetic { color: var(--cc-down); border-color: rgba(224, 120, 86, 0.4); }
+.cc-chart-fact { color: var(--cc-faint); }
+.cc-chart-fact.up { color: var(--cc-up); }
+.cc-chart-fact.down { color: var(--cc-down); }
+.cc-chart-share { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 6px; }
+.cc-chart-btn {
+  font-family: var(--cc-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  padding: 11px 16px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--cc-lime); background: var(--cc-lime); color: var(--cc-ink);
+}
+.cc-chart-btn-ghost { background: transparent; color: #d7dbe2; border-color: var(--cc-hairline); }
+.cc-chart-btn:hover { filter: brightness(1.06); }
+.cc-page-btn.cc-chart-btn-ghost { background: transparent; color: #d7dbe2 !important; border: 1px solid var(--cc-hairline); }
+.cc-chart-sub { color: #b9bec7; }
+.cc-chart-empty { color: #d7dbe2; }
+.cc-chart-stats {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 4px 0 16px;
+}
+.cc-chart-stat { background: var(--cc-card); border: 1px solid var(--cc-hairline); border-radius: 8px; padding: 12px 12px 10px; }
+.cc-chart-stat b { display: block; font-family: var(--cc-mono); font-size: 20px; color: #fff; }
+.cc-chart-stat span {
+  display: block; margin-top: 4px; font-size: 9.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--cc-faint);
+}
+.cc-chart-wall { color: var(--cc-lime) !important; font-size: 13px; }
+.cc-chart-bands { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 18px; }
+.cc-chart-band {
+  display: grid; grid-template-columns: 58px 1fr 34px; align-items: center; gap: 10px;
+  font-family: var(--cc-mono); font-size: 10.5px; color: var(--cc-faint);
+}
+.cc-chart-band-track { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.05); overflow: hidden; }
+.cc-chart-band-fill {
+  display: block; height: 100%; min-width: 2px; border-radius: 4px;
+  background: linear-gradient(90deg, var(--cc-up), var(--cc-lime));
+}
+.cc-chart-band-count { text-align: right; color: #d7dbe2; }
+.cc-chart-top { margin: 0 0 6px; }
+@media (max-width: 640px) {
+  .cc-chart-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cc-chart-band { grid-template-columns: 52px 1fr 28px; }
+}
+
+/* /chart — the day is the page title; the ticker is named by the client once
+   the feed answers (see src/lib/day-chart.ts). */
+.cc-chart-title {
+  font-family: var(--cc-mono); font-size: clamp(32px, 8.5vw, 54px); font-weight: 700;
+  letter-spacing: -0.02em; color: #fff; margin: 0 0 6px; line-height: 1.02;
+}
+.cc-chart-ident { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 12px; }
+.cc-chart-symbol {
+  font-family: var(--cc-display); font-size: 23px; font-weight: 800;
+  color: var(--cc-lime); letter-spacing: 0.01em;
+}
+.cc-chart-manual {
+  display: flex; flex-direction: column; gap: 6px; margin: 10px 0 0;
+  font-family: var(--cc-mono); font-size: 10.5px; color: var(--cc-faint);
+}
+.cc-chart-manual input {
+  width: 100%; padding: 9px 10px; border-radius: 6px;
+  border: 1px solid var(--cc-hairline); background: #0c0e10; color: #d7dbe2;
+  font-family: var(--cc-mono); font-size: 11.5px;
+}

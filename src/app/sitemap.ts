@@ -8,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: `${BASE}/`, priority: 1.0 },
     { url: `${BASE}/play`, priority: 0.9 },
+    { url: `${BASE}/chart`, priority: 0.8 },
     { url: `${BASE}/leaderboard`, priority: 0.7 },
     { url: `${BASE}/partners`, priority: 0.8 },
     { url: `${BASE}/airdrop`, priority: 0.5 },

@@ -19,6 +19,7 @@
 | Retired layers and why they stay retired | [`RETIRED-FEATURES.md`](RETIRED-FEATURES.md) |
 | Input/UX research behind the engine feel | [`PLATFORMER-UX-RESEARCH.md`](PLATFORMER-UX-RESEARCH.md) |
 | Review gates for every PR | [`PR-CHECKLIST.md`](PR-CHECKLIST.md) |
+| What an external reference game taught us, what we proposed, what shipped | [`reference-study/01-observations.md`](reference-study/01-observations.md) · [`02-proposals.md`](reference-study/02-proposals.md) · [`03-delivery.md`](reference-study/03-delivery.md) |
 | Persian glossary for chat | [`GLOSSARY-FA.md`](GLOSSARY-FA.md) |
 
 ### Language policy
