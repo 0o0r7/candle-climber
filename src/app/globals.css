@@ -491,6 +491,16 @@ button.cc-wallet-chip { cursor: pointer; }
   color: var(--cc-faint);
   letter-spacing: 0.06em;
 }
+.cc-death-cause {
+  margin: 8px 0 0;
+  font-family: var(--cc-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: #C9CDD2;
+  letter-spacing: 0.04em;
+  text-align: center;
+  max-width: 34ch;
+}
 .cc-rank {
   font-family: var(--cc-mono);
   color: var(--cc-lime);

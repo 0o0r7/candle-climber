@@ -122,7 +122,7 @@ export async function makeDeathCard(o: CardOpts): Promise<Blob | null> {
 
   // stats row
   const stats: [string, string][] = [
-    ["CANDLES", String(o.result.candlesPassed)],
+    ["CANDLES", String(o.result.climbed)],
     ["BEST STREAK", "x" + String(o.result.bestStreak)],
     ["PERSONAL BEST", String(Math.max(o.best, o.result.score))],
   ];

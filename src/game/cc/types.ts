@@ -62,6 +62,10 @@ export interface Platform {
   state: 'solid' | 'crumbling' | 'gone';
   crumbleT: number; // seconds since crumble started
   passed: boolean; // camera already passed it
+  /** REWARD HONESTY (2026-10-31): set once, the first time the climber
+   *  actually LANDS on this candle. Only an earned candle pays score —
+   *  camera distance never does. */
+  earned?: boolean;
   /** W4 graduation arc: the FINAL platform of the daily level is the summit —
    *  landing on it (or passing its x) graduates the run. Purely derived from
    *  the seed-derived platform list, so it stays deterministic. */
@@ -78,6 +82,8 @@ export type DeathCause = 'fell' | 'crumbled' | 'wicked';
 export interface RunResult {
   score: number;
   candlesPassed: number;
+  /** Candles the climber actually landed on (the paid ones). Honest progress. */
+  climbed: number;
   bestStreak: number;
   /** Absent while the run is still live (e.g. the GRADUATED snapshot). */
   cause?: DeathCause;

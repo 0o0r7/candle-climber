@@ -813,6 +813,7 @@ export default function GameCanvas() {
           setResult({
             score: Math.floor(eng.score),
             candlesPassed: eng.candlesPassed,
+            climbed: eng.climbed,
             bestStreak: eng.bestStreak,
             candleIndex: eng.candlesPassed,
             graduated: true,
@@ -955,6 +956,7 @@ export default function GameCanvas() {
         {
           score: Math.floor(prevEng.score),
           candlesPassed: prevEng.candlesPassed,
+          climbed: prevEng.climbed,
           bestStreak: prevEng.bestStreak,
           candleIndex: prevEng.candlesPassed,
           graduated: true,
@@ -2009,7 +2011,7 @@ export default function GameCanvas() {
             <div className="cc-death-score">
               <span className="cc-death-num">{result.score.toLocaleString()}</span>
               <span className="cc-death-sub">
-                {result.candlesPassed} candles · best streak x{result.bestStreak} · PB {best.toLocaleString()}
+                {result.climbed} candle{result.climbed === 1 ? "" : "s"} climbed · best streak x{result.bestStreak} · PB {best.toLocaleString()}
               </span>
             </div>
             {verdict && <p className="cc-vs-verdict" role="status">{verdict}</p>}
@@ -2046,6 +2048,21 @@ export default function GameCanvas() {
         <div className="cc-overlay">
           <div className="cc-panel cc-panel-death" ref={deathPanelRef} tabIndex={-1} role="dialog" aria-label="Run ended — results and actions">
             <h2 className="cc-liquidated" role="alert">LIQUIDATED</h2>
+            {/* Honest death feedback: name the cause, then say how close the run
+                came to the climber's own best — so the next attempt is a plan,
+                not a shrug. */}
+            <p className="cc-death-cause">
+              {result.cause === "crumbled"
+                ? "a red candle crumbled under you"
+                : result.cause === "wicked"
+                  ? "a wick caught you"
+                  : "you missed the next candle"}
+              {/* Near-miss framing only when it IS a near miss — "665 pts short"
+                  on a 15-pt run is a put-down, not a nudge. */}
+              {best > result.score && best - result.score <= best * 0.25
+                ? ` — ${(best - result.score).toLocaleString()} pts short of your best`
+                : ""}
+            </p>
             {result.graduated && (
               <p className="cc-rival cc-rival-grad">
                 graduated{result.world2 ? " · world 2 reached" : ""}
@@ -2054,7 +2071,7 @@ export default function GameCanvas() {
             <div className="cc-death-score">
               <span className="cc-death-num">{result.score.toLocaleString()}</span>
               <span className="cc-death-sub">
-                {result.candlesPassed} candles · best streak x{result.bestStreak} · PB {best.toLocaleString()}
+                {result.climbed} candle{result.climbed === 1 ? "" : "s"} climbed · best streak x{result.bestStreak} · PB {best.toLocaleString()}
               </span>
             </div>
             {rivalGap > 0 && top && (

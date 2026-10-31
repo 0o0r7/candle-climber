@@ -1,6 +1,6 @@
 // Candle Climber engine — fixed-timestep physics, auto-scroll runner over candle platforms
 import type { Platform, Particle, RunResult, DeathCause } from "./types";
-import { CANDLE_W, PLATFORM_W, WORLD2_CHUNK, genWorld2Chunk } from "./level";
+import { CANDLE_W, PLATFORM_W, WORLD2_CHUNK, genWorld2Chunk, LAUNCH_PAD } from "./level";
 import { BASE_MODS, type MutationMods } from "./mutations";
 import { BASE_GAIN, WORLD2_GAIN, COMBO_CAP, COMBO_STEP, RUSH_GAIN } from "@/lib/scoring";
 import { hashString, mulberry32 } from "./rng";
@@ -83,7 +83,7 @@ export class Engine {
   lastGroundY: number;
   time = 0;
   // run stats
-  score = 0; candlesPassed = 0; streak = 0; bestStreak = 0;
+  score = 0; candlesPassed = 0; climbed = 0; streak = 0; bestStreak = 0;
   lastLandUp: boolean | null = null;
   dead = false; deathCause: DeathCause = 'fell'; deathT = 0;
   shake = 0;
@@ -144,6 +144,28 @@ export class Engine {
     }
   }
 
+  /** Pay a candle — the ONLY place score/streak move. Fired from a landing,
+   *  once per candle (types.Platform.earned). Standing still therefore earns
+   *  nothing, and every point on the board is a jump the climber landed. */
+  private award(p: Platform) {
+    this.climbed++;
+    if (p.up) { this.streak++; this.bestStreak = Math.max(this.bestStreak, this.streak); }
+    else this.streak = 0;
+    const mult = 1 + Math.min(this.streak, COMBO_CAP) * COMBO_STEP;
+    // P3.6: rush premium composes AFTER the mode/combo multipliers,
+    // rounded last — score stays float; the floor happens once, at death.
+    const gain = (this.world2 ? WORLD2_GAIN : BASE_GAIN) * mult * (this.rush ? RUSH_GAIN : 1);
+    this.score += gain;
+    this.spawnFloat(
+      p.x + p.w / 2,
+      p.y - 26,
+      this.streak > 1 ? `+${gain}  x${mult.toFixed(1)}` : `+${gain}`,
+      p.up ? "#CCFF00" : "#5E636B",
+    );
+    if (this.streak === 5 || this.streak === 10) this.cb.onSfx?.("milestone");
+    this.cb.onScore(Math.floor(this.score), this.streak);
+  }
+
   private die(cause: DeathCause) {
     if (this.dead) return;
     this.dead = true;
@@ -154,6 +176,7 @@ export class Engine {
     this.cb.onDeath({
       score: Math.floor(this.score),
       candlesPassed: this.candlesPassed,
+      climbed: this.climbed,
       bestStreak: this.bestStreak,
       cause,
       candleIndex: this.candlesPassed,
@@ -241,24 +264,10 @@ export class Engine {
       if (!p.passed && p.x + p.w < focus) {
         p.passed = true;
         if (p.summit) this.graduate();
-        if (p.w > 0) {
-          this.candlesPassed = p.i + 1;
-          if (p.up) { this.streak++; this.bestStreak = Math.max(this.bestStreak, this.streak); }
-          else this.streak = 0;
-          const mult = 1 + Math.min(this.streak, COMBO_CAP) * COMBO_STEP;
-          // P3.6: rush premium composes AFTER the mode/combo multipliers,
-          // rounded last — score stays float; the floor happens once, at death.
-          const gain = (this.world2 ? WORLD2_GAIN : BASE_GAIN) * mult * (this.rush ? RUSH_GAIN : 1);
-          this.score += gain;
-          this.spawnFloat(
-            p.x + p.w / 2,
-            p.y - 26,
-            this.streak > 1 ? `+${gain}  x${mult.toFixed(1)}` : `+${gain}`,
-            p.up ? "#CCFF00" : "#5E636B",
-          );
-          if (this.streak === 5 || this.streak === 10) this.cb.onSfx?.("milestone");
-          this.cb.onScore(Math.floor(this.score), this.streak);
-        }
+        // REWARD HONESTY (2026-10-31): passing a candle with the camera no
+        // longer pays — only landing on it does (award()). candlesPassed stays
+        // world progress (rendering, ghosts, duels), never earnings.
+        if (p.w > 0) this.candlesPassed = p.i + 1;
       }
     }
 
@@ -278,6 +287,10 @@ export class Engine {
           this.groundPlat = p;
           this.lastGroundY = p.y;
           if (p.summit) this.graduate();
+          // The launch pad is a runway, not progress: it pays nothing, and a
+          // candle pays only on the first real landing (measured before this
+          // change: a zero-input run still banked 90 pts for standing still).
+          if (!p.earned && p.w > 0 && p.i >= LAUNCH_PAD) { p.earned = true; this.award(p); }
           if (p.crumble && p.state === "solid") { p.state = "crumbling"; p.crumbleT = 0; this.cb.onSfx?.("crumble"); }
           break;
         }

@@ -106,6 +106,21 @@ subtree that is not gitignored — see `.gitignore`.
 review. The three 15s cuts `x-08`…`x-10` were produced 2026-10-11 but were NEVER COMMITTED (binary-lossy branch rescue) — `public/media/` does not exist; only x-01…x-07 are in-repo. Restore from backup before relying on them (see docs/assets/x-launch/README.md note)
 `/media/<file>` on the dev server. Re-copy them after a rebuild (see the kit README).
 
+## Scoring contract — only landings pay (2026-10-31)
+
+- `Engine.award()` (fired from a landing, once per candle via `Platform.earned`)
+  is the ONLY place `score`/`streak` move. Camera passage pays nothing, and the
+  launch pad (`i < LAUNCH_PAD`) pays nothing. Before this, a zero-input run
+  banked ~90 pts on the daily level; measured again after the change: **0 pts**.
+- `candlesPassed` is world progress (rendering, ghosts, duels) — never spend it
+  as the earnings number. `RunResult.climbed` is the honest count shown on the
+  death card and the share card.
+- Regression guard: `test/reward-honesty.test.ts`. `test/skilljump.test.ts`'s
+  gain-composition tests drop the climber onto a candle (`landOn`) instead of
+  letting the camera pass it; the gain math itself is unchanged.
+- Death card now names the cause (`crumbled`/`wicked`/`fell`) and shows a
+  near-miss vs PB only when the gap is ≤25% of the PB.
+
 ## Checks (from CI)
 
 ```bash

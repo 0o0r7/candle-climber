@@ -9,7 +9,7 @@
 //  4. Determinism under rush on/off (same inputs ⇒ identical engine states).
 //  5. Anti-cheat coupling: MAX_SCORE_PER_CANDLE covers the rushed world-2 max.
 import { describe, test, expect } from "bun:test";
-import { Engine, VIEW_W, VIEW_H } from "@/game/cc/engine";
+import { Engine, VIEW_W, VIEW_H, PLAYER_H } from "@/game/cc/engine";
 import { PLATFORM_W } from "./../src/game/cc/level";
 import type { Platform } from "@/game/cc/types";
 import {
@@ -34,6 +34,21 @@ function flatPlats(n: number): Platform[] {
 
 function makeEngine(plats: Platform[]): Engine {
   return new Engine(plats, { onDeath: () => {}, onScore: () => {} }, undefined, SEED);
+}
+
+/** REWARD HONESTY (2026-10-31): score now moves ONLY on a landing, so the
+ *  gain-composition tests drop the climber onto a real (post-pad) candle
+ *  instead of letting the camera pass it. Math under test is unchanged. */
+function landOn(e: Engine, idx: number, maxSteps = 400) {
+  const p = e.plats[idx];
+  e.camX = p.x + p.w / 2 - VIEW_W * 0.3;
+  e.py = p.y - PLAYER_H - 6; // feet 6px above the candle
+  e.vy = 200;
+  for (let s = 0; s < maxSteps; s++) {
+    e.step(DT);
+    if (e.climbed > 0) return;
+  }
+  throw new Error("never landed on candle " + idx);
 }
 
 /** Step until exactly `n` candles have passed (bounded loop = no hangs). */
@@ -77,11 +92,12 @@ describe("P3.6 RUSH — speed + gain composition (contract §6.1)", () => {
 
   test("gain: first green candle pays 10×1.5 plain and 18.75 rushed (premium AFTER mult)", () => {
     const a = makeEngine(flatPlats(400));
-    stepTo(a, 1);
+    landOn(a, 8); // earned candle — only a landing pays now
+    expect(a.climbed).toBe(1);
     expect(a.score).toBeCloseTo(BASE_GAIN * 1.5, 9); // streak 1 → ×1.5
     const b = makeEngine(flatPlats(400));
     b.pressRush();
-    stepTo(b, 1);
+    landOn(b, 8);
     expect(b.score).toBeCloseTo(BASE_GAIN * 1.5 * RUSH_GAIN, 9); // 18.75, exact float
     expect(b.score).toBeCloseTo(a.score * RUSH_GAIN, 9);
   });
@@ -89,12 +105,12 @@ describe("P3.6 RUSH — speed + gain composition (contract §6.1)", () => {
   test("gain premium applies in world 2 (parity, contract §6.3)", () => {
     const a = makeEngine(flatPlats(400));
     a.enterWorld2();
-    stepTo(a, 1);
+    landOn(a, 8);
     expect(a.score).toBeCloseTo(WORLD2_GAIN * 1.5, 9);
     const b = makeEngine(flatPlats(400));
     b.enterWorld2();
     b.pressRush();
-    stepTo(b, 1);
+    landOn(b, 8);
     expect(b.score).toBeCloseTo(WORLD2_GAIN * 1.5 * RUSH_GAIN, 9); // 37.5
   });
 });
