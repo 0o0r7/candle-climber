@@ -12,7 +12,7 @@
 //   L5 foreground ambient tick particles + vignette
 import { Engine, VIEW_W, VIEW_H } from "./engine";
 import { CANDLE_W, PLATFORM_W } from "./level";
-import { COLORS, roundRect, drawSummit, drawHints, drawFloats, drawParticles } from "./render";
+import { COLORS, roundRect, drawSummit, drawHints, drawTerrainStart, drawFloats, drawParticles } from "./render";
 import { buildTerrainV2, type TerrainV2, type SlabDecor } from "./terrain-v2";
 import { NEUTRAL_WEATHER, type Weather } from "./weather";
 import { drawBiomeSky, drawBiomeParticles, drawBiomeVignette } from "./biome-render";
@@ -1117,6 +1117,7 @@ export function renderV2(
 
   drawVaultV2(ctx, e, peakIdx, st);
 
+  drawTerrainStart(ctx, e);
   drawHints(ctx, e);
   drawParticles(ctx, e.particles, e.camX, e.camY);
   drawFloats(ctx, e.floats, e.camX, e.camY);

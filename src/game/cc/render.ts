@@ -1,6 +1,6 @@
 // Canvas renderer — locked vibe/vibe design language
 import { Engine, VIEW_W, VIEW_H, type FloatText } from "./engine";
-import { CANDLE_W } from "./level";
+import { CANDLE_W, LAUNCH_PAD } from "./level";
 import { drawCandleRain } from "./rain";
 import { drawRival } from "./rival/rival-render";
 import { drawGhost } from "./ghost-render";
@@ -46,6 +46,64 @@ export function drawSummit(ctx: CanvasRenderingContext2D, x: number, y: number, 
   ctx.fillStyle = COLORS.gold;
   ctx.fillText("SUMMIT", px, y - 76);
   ctx.textAlign = "left";
+}
+
+// Terrain start — the pad→chart seam (owner note 2026-11-02): beginners died
+// around candle 8 because nothing marked the exact moment the flat safe runway
+// ends and the chart terrain begins. One lime gate sits on the first real
+// candle: a dashed rule + "CHART STARTS — JUMP NOW" badge, fading out once the
+// climber is a couple of candles past it. Render-only: no engine/score change.
+export function drawTerrainStart(ctx: CanvasRenderingContext2D, e: Engine) {
+  const seam = e.plats[LAUNCH_PAD];
+  const pad = e.plats[LAUNCH_PAD - 1];
+  if (!seam || !pad) return;
+  const passedBy = e.px - seam.x; // world px past the seam
+  if (passedBy > 340) return;
+  const x = seam.x - e.camX;
+  if (x < -80 || x > VIEW_W + 80) return;
+  const y = pad.y - e.camY;
+  const alpha = passedBy > 260 ? Math.max(0, 1 - (passedBy - 260) / 80) : 1;
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  // the runway itself: a thin lime edge along the flat launch pad, so the safe
+  // stretch and the seam read as one line instead of six flat candles
+  const padStart = e.plats[0];
+  if (padStart) {
+    const sx = Math.max(-8, padStart.x - e.camX);
+    ctx.strokeStyle = "rgba(204,255,0,0.55)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(sx, y + 3);
+    ctx.lineTo(x, y + 3);
+    ctx.stroke();
+  }
+  // dashed rule pinned to the world seam (never drifts with the camera)
+  ctx.strokeStyle = COLORS.lime;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([7, 7]);
+  ctx.beginPath();
+  ctx.moveTo(x, y + 4);
+  ctx.lineTo(x, y - 118);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  // label badge — clamped inside the frame so it stays readable at the edge
+  const label = "CHART STARTS — JUMP NOW";
+  ctx.font = "700 11px 'JetBrains Mono', monospace";
+  const tw = ctx.measureText(label).width + 20;
+  const lx = Math.min(VIEW_W - tw / 2 - 8, Math.max(tw / 2 + 8, x));
+  const ly = y - 144;
+  ctx.fillStyle = "rgba(22,25,28,0.94)";
+  ctx.strokeStyle = COLORS.lime;
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, lx - tw / 2, ly, tw, 23, 6);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = COLORS.lime;
+  ctx.textAlign = "center";
+  ctx.fillText(label, lx, ly + 16);
+  ctx.textAlign = "left";
+  ctx.restore();
 }
 
 export function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, camX: number, camY: number) {
@@ -246,6 +304,7 @@ export function render(ctx: CanvasRenderingContext2D, e: Engine, seedStr = "", m
   const i1 = Math.min(e.plats.length - 1, Math.ceil((e.camX + VIEW_W) / CANDLE_W) + 2);
   for (let i = i0; i <= i1; i++) drawPlatform(ctx, e.plats[i], e.camX, e.camY);
 
+  drawTerrainStart(ctx, e);
   drawHints(ctx, e);
   drawParticles(ctx, e.particles, e.camX, e.camY);
   drawFloats(ctx, e.floats, e.camX, e.camY);
