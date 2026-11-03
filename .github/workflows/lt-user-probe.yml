@@ -1,0 +1,22 @@
+# TEMP PROBE (branch probe/lt-account, never merged): which LT account do CI creds belong to?
+# Identifies the account email/plan behind LT_USERNAME via a few candidate endpoints,
+# so the student-pack entitlement can be verified. Delete this branch after reading.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -u scripts/lt_user_probe.py
+        env:
+          LT_USERNAME: ${{ secrets.LT_USERNAME }}
+          LT_ACCESS_KEY: ${{ secrets.LT_ACCESS_KEY }}
