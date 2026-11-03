@@ -70,6 +70,18 @@ def clip(obj, n=1500):
 
 
 def diag_static(tok, report):
+    print("\n=== 0. ACCOUNT IDENTITY (which account do the CI creds belong to?) ===")
+    report["identity"] = {}
+    for label, url in (
+        ("user", "https://api.lambdatest.com/api/v1/user"),
+        ("user_alt", "https://api.lambdatest.com/automation/api/v1/user"),
+        ("user_settings", "https://api.lambdatest.com/api/v1/user/settings"),
+        ("org", "https://api.lambdatest.com/api/v1/organization"),
+    ):
+        code, body = get(tok, url)
+        report["identity"][label] = {"http": code, "body": body if code == 200 else None}
+        print(f"  {label} HTTP {code}: {clip(body, 700)}")
+
     print("\n=== 1. PLAN / QUOTA (tolerant) ===")
     report["plan"] = {}
     for label, url in (("plan_detail", PLAN_API),
