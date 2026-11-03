@@ -121,6 +121,15 @@ DEFAULT_MATRIX = [
         # touch). Label must NOT start with "win11" so run_session takes the
         # mobile path (mobile_rush_button instead of pause_toggle).
         "label": "android13-emulated-chrome-win11host",
+        # The grid IGNORES goog:chromeOptions.mobileEmulation (observed
+        # 2026-11-03: session booted as plain desktop Chrome, w=188 same
+        # as desktop legs), so run_session also forces the mobile surface
+        # via CDP before first navigation — see run_session().
+        # NOTE: mobile_emulation is a SCRIPT flag, sibling of "caps", not a
+        # WebDriver capability (first push accidentally nested it inside
+        # caps and the CDP block never ran — evidence: no "mobile emulation
+        # ACTIVE" line, w=188 again).
+        "mobile_emulation": True,
         "caps": {
             "platformName": "Windows 11",
             "browserName": "Chrome",
@@ -132,11 +141,6 @@ DEFAULT_MATRIX = [
                     "userAgent": MOBILE_UA,
                 },
             },
-            # The grid IGNORES goog:chromeOptions.mobileEmulation (observed
-            # 2026-11-03: session booted as plain desktop Chrome, w=188 same
-            # as desktop legs), so run_session also forces the mobile surface
-            # via CDP before first navigation — see run_session().
-            "mobile_emulation": True,
         },
     },
 ]
