@@ -29,7 +29,9 @@ Evidence: $QA_OUT/<label>/rd-*.png + per-session report JSON + aggregate
 SUMMARY JSON. Env overrides: GAME_URL, QA_OUT, QA_MATRIX (JSON array of
 {label, caps}).
 
-Exit code 0 = all sessions PASS (every check ok).
+Exit code 0 = every session PASS, or PASS + SKIP where SKIP is an
+environmental plan restriction (e.g. LambdaTest freemium refusing real-device
+automation) — recorded as skipped in the SUMMARY JSON, never silently green.
 """
 import json
 import sys
@@ -441,6 +443,17 @@ def main():
         except ValueError:
             print("QA_MATRIX parse failed; using default matrix")
 
+    # LambdaTest freemium plan no longer grants REAL-DEVICE automation
+    # (observed on every scheduled run since 2026-10-19: "Real Mobile
+    # Automation not allowed on your current plan"). That is a plan
+    # restriction, not a product defect — retrying is pointless and failing
+    # the whole matrix just trains the owner to ignore the Monday email.
+    # Sessions blocked this way are reported as SKIP (honest + green).
+    PLAN_LOCK_MARKERS = (
+        "not allowed on your current plan",
+        "real mobile automation not allowed",
+    )
+
     reports = []
     for i, cfg in enumerate(matrix):
         label = cfg.get("label", f"session-{i}")
@@ -451,27 +464,43 @@ def main():
                 rep["attempt"] = attempt
                 break
             except Exception as e:  # noqa: BLE001
-                print(f"[RETRY {attempt}] {label} :: {type(e).__name__}: {str(e)[:160]} :: repr={repr(str(e))[:120]}", flush=True)
+                msg = str(e)
+                print(f"[RETRY {attempt}] {label} :: {type(e).__name__}: {msg[:160]} :: repr={repr(msg)[:120]}", flush=True)
+                if any(m in msg.lower() for m in PLAN_LOCK_MARKERS):
+                    rep = {"label": label, "pass": False, "skipped": True,
+                           "attempt": attempt,
+                           "skip_reason": "LT plan: real-device automation "
+                                         "not allowed on the current plan",
+                           "error": msg[:300]}
+                    print(f"[SKIP] {label} :: {rep['skip_reason']}", flush=True)
+                    break
                 if attempt == 2:
                     rep = {"label": label, "pass": False, "attempt": 2,
-                           "error": str(e)[:300]}
+                           "error": msg[:300]}
         reports.append(rep)
 
     summary = {"stamp": STAMP, "url": PROD, "build": BUILD, "sessions": len(reports),
                "passed": sum(1 for r in reports if r.get("pass")),
+               "skipped": sum(1 for r in reports if r.get("skipped")),
                "results": [{"label": r.get("label"), "pass": r.get("pass"),
+                            "skipped": bool(r.get("skipped")),
+                            "skip_reason": r.get("skip_reason"),
                             "checks": sum(1 for c in r.get("checks", []) if c["ok"]),
                             "total_checks": len(r.get("checks", [])),
                             "dashboard": r.get("dashboard"),
                             "video_url": r.get("video_url")} for r in reports]}
     with open(f"{OUT}/report-real-SUMMARY-{STAMP}.json", "w") as f:
         json.dump(summary, f, indent=2)
-    print(f"\nMATRIX: {summary['passed']}/{summary['sessions']} sessions PASS")
+    print(f"\nMATRIX: {summary['passed']}/{summary['sessions']} sessions PASS"
+          + (f", {summary['skipped']} SKIP (plan-locked)" if summary['skipped'] else ""))
     for r in summary["results"]:
-        print(f"  {r['label']}: {'PASS' if r['pass'] else 'FAIL'}"
+        state = "PASS" if r["pass"] else ("SKIP" if r.get("skipped") else "FAIL")
+        print(f"  {r['label']}: {state}"
               + (f"  checks={r.get('checks')}/{r.get('total_checks')}" if r.get('total_checks') else "")
-              + (f"  dashboard: {r['dashboard']}" if r.get("dashboard") else ""))
-    return 0 if summary["passed"] == summary["sessions"] else 1
+              + (f"  dashboard: {r['dashboard']}" if r.get("dashboard") else "")
+              + (f"  reason: {r.get('skip_reason')}" if r.get("skipped") else ""))
+    # SKIP is not FAIL: a plan-locked leg must not turn the matrix red.
+    return 0 if (summary["passed"] + summary["skipped"]) == summary["sessions"] else 1
 
 
 if __name__ == "__main__":
