@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """G5 — LambdaTest REAL-DEVICE matrix QA for candle-climber.vercel.app (prelaunch).
 
-Runs a freemium-safe device/browser matrix (3 sequential sessions) on the LT grid.
+Runs a freemium-safe device/browser matrix (4 sequential sessions) on the LT grid.
 Each session walks the REAL player path against PRODUCTION and asserts the full
 product surface — not just boot-and-die:
 
@@ -106,6 +106,29 @@ DEFAULT_MATRIX = [
             "LT:Options": {
                 "deviceName": "Pixel 7", "platformVersion": "13",
                 "isRealMobile": True, "w3c": True,
+            },
+        },
+    },
+    {
+        # Mobile coverage on the freemium entitlement (2026-11-03): LT refuses
+        # REAL-device automation on this plan (see PLAN_LOCK_MARKERS in main),
+        # but desktop Chrome automation is allowed — so run the SAME mobile
+        # surface via Chrome mobileEmulation (Pixel 7 metrics + mobile UA +
+        # touch). Label must NOT start with "win11" so run_session takes the
+        # mobile path (mobile_rush_button instead of pause_toggle).
+        "label": "android13-emulated-chrome-win11host",
+        "caps": {
+            "platformName": "Windows 11",
+            "browserName": "Chrome",
+            "browserVersion": "latest",
+            "LT:Options": {"resolution": "1440x900", "w3c": True},
+            "goog:chromeOptions": {
+                "mobileEmulation": {
+                    "deviceMetrics": {"width": 412, "height": 915, "pixelRatio": 2.625},
+                    "userAgent": "Mozilla/5.0 (Linux; Android 13; Pixel 7) "
+                                 "AppleWebKit/537.36 (KHTML, like Gecko) "
+                                 "Chrome/126.0.0.0 Mobile Safari/537.36",
+                },
             },
         },
     },
