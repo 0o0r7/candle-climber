@@ -47,6 +47,7 @@ next-env.d.ts
 !/scripts/gamma_import.py
 !/scripts/gamma_index.py
 !/scripts/gamma_urls/
+!/scripts/import_owner_pack.py
 /archive/
 /.zscripts/
 /examples/
