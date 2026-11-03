@@ -43,3 +43,42 @@ jobs:
           name: e2e-artifacts
           path: e2e-artifacts/
           retention-days: 14
+
+  # DEVICE MATRIX (Playwright, free GH runners) — 2026-11-03: replaces the
+  # mobile coverage LambdaTest's plan refuses to automate (real-device leg
+  # reports SKIP since 2026-10-19; the grid also ignores chromeOptions
+  # mobileEmulation and does not forward CDP — all three probed 2026-11-03).
+  # 8 profiles (desktop + 3 iPhone + 3 iPad + Pixel 7) walk the REAL player
+  # path against settled PRODUCTION: wizard gate, mode tabs, dialogs,
+  # mobile_rush_button (coarse-pointer UI), natural death card, Sentry, console.
+  device-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # skip push runs: the matrix must test the SETTLED prod build (see the
+    # push/Vercel-race note above); nightly cron + manual dispatch only.
+    if: github.event_name != 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install deps
+        run: bun install --frozen-lockfile
+
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Run device matrix (prod, 8 profiles)
+        run: bun scripts/realdevice_matrix.ts
+        env:
+          GAME_URL: https://candle-climber.vercel.app/play
+
+      - name: Upload artifacts (screenshots + per-profile reports)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: device-matrix-artifacts
+          path: qa/realdevice/
+          retention-days: 14
