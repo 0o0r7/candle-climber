@@ -79,6 +79,10 @@ def load_creds():
 # flakiest (runs #7-#11 always died on it FIRST) and a husked real-device
 # session may hold the freemium concurrency slot, cascading into every later
 # target. Cheap desktop signal first; real device last, isolated.
+# Mobile UA shared by the emulated-mobile leg (caps + CDP override).
+MOBILE_UA = ("Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 "
+             "(KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36")
+
 DEFAULT_MATRIX = [
     {
         "label": "win11-chrome-1440x900",
@@ -125,11 +129,14 @@ DEFAULT_MATRIX = [
             "goog:chromeOptions": {
                 "mobileEmulation": {
                     "deviceMetrics": {"width": 412, "height": 915, "pixelRatio": 2.625},
-                    "userAgent": "Mozilla/5.0 (Linux; Android 13; Pixel 7) "
-                                 "AppleWebKit/537.36 (KHTML, like Gecko) "
-                                 "Chrome/126.0.0.0 Mobile Safari/537.36",
+                    "userAgent": MOBILE_UA,
                 },
             },
+            # The grid IGNORES goog:chromeOptions.mobileEmulation (observed
+            # 2026-11-03: session booted as plain desktop Chrome, w=188 same
+            # as desktop legs), so run_session also forces the mobile surface
+            # via CDP before first navigation — see run_session().
+            "mobile_emulation": True,
         },
     },
 ]
@@ -215,6 +222,30 @@ def run_session(cfg, lt_user, lt_key):
     sid = d.session_id
     report["session_id"] = sid
     print(f"[{label}] session: {sid}")
+
+    if cfg.get("mobile_emulation"):
+        # Force the mobile surface via CDP BEFORE first navigation: the game
+        # pins coarsePointer once on mount from matchMedia("(pointer: coarse)").
+        try:
+            d.execute_cdp_cmd("Emulation.setUserAgentOverride",
+                              {"userAgent": MOBILE_UA})
+            d.execute_cdp_cmd("Emulation.setDeviceMetricsOverride",
+                              {"width": 412, "height": 915,
+                               "deviceScaleFactor": 2.625, "mobile": True})
+            d.execute_cdp_cmd("Emulation.setTouchEmulationEnabled",
+                              {"enabled": True, "maxTouchPoints": 5})
+            d.execute_cdp_cmd("Emulation.setEmitTouchEventsForMouse",
+                              {"enabled": True, "configuration": "mobile"})
+            coarse = d.execute_script(
+                "return window.matchMedia('(pointer: coarse)').matches;")
+        except Exception as e:  # noqa: BLE001
+            raise RuntimeError(
+                "CDP_MOBILE_EMULATION_UNAVAILABLE: " + str(e)[:200])
+        if not coarse:
+            raise RuntimeError(
+                "CDP_MOBILE_EMULATION_UNAVAILABLE: pointer:coarse did not "
+                "match after override (grid does not forward CDP)")
+        print(f"[{label}] mobile emulation ACTIVE (coarse pointer confirmed)")
     try:
         print(f"[{label}] phase:get", flush=True)
         d.get(PROD)
@@ -476,6 +507,9 @@ def main():
         "not allowed on your current plan",
         "real mobile automation not allowed",
     )
+    # Environmental SKIPs (honest, non-red): plan-locked real devices, or a
+    # grid that refuses to forward CDP for the mobile-emulation leg.
+    SKIP_MARKERS = PLAN_LOCK_MARKERS + ("cdp_mobile_emulation_unavailable",)
 
     reports = []
     for i, cfg in enumerate(matrix):
@@ -489,11 +523,12 @@ def main():
             except Exception as e:  # noqa: BLE001
                 msg = str(e)
                 print(f"[RETRY {attempt}] {label} :: {type(e).__name__}: {msg[:160]} :: repr={repr(msg)[:120]}", flush=True)
-                if any(m in msg.lower() for m in PLAN_LOCK_MARKERS):
+                if any(m in msg.lower() for m in SKIP_MARKERS):
                     rep = {"label": label, "pass": False, "skipped": True,
                            "attempt": attempt,
-                           "skip_reason": "LT plan: real-device automation "
-                                         "not allowed on the current plan",
+                           "skip_reason": "environmental limitation: "
+                                         + next(m for m in SKIP_MARKERS
+                                                if m in msg.lower()),
                            "error": msg[:300]}
                     print(f"[SKIP] {label} :: {rep['skip_reason']}", flush=True)
                     break
