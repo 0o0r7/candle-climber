@@ -44,6 +44,9 @@ next-env.d.ts
 !/scripts/lt_dashboard_view.py
 !/scripts/realdevice_matrix.ts
 !/scripts/trailer/
+!/scripts/gamma_import.py
+!/scripts/gamma_index.py
+!/scripts/gamma_urls/
 /archive/
 /.zscripts/
 /examples/
