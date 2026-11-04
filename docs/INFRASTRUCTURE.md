@@ -212,3 +212,20 @@ Owner created the Sentry account + admin token (`sntryu_…`); I did the rest en
 | `ACCESS_KEYS` | — (generated) | Comma-separated tester keys; empty = gate fails OPEN | `.env.local` + Vercel |
 | `ACCESS_KEY_SECRET` | — (generated) | HMAC secret for signed tester cookie | `.env.local` + Vercel |
 | `VERCEL_ENV` / `NEXT_PUBLIC_VERCEL_ENV` | Vercel platform | Runtime environment detection | auto — no action |
+
+## 6. Framer.com — knowledge base & connection model (added 2026-11-04)
+
+Framer is parked infrastructure for this project (relaunch attempt v1 SHELVED by owner
+decision 2026-10-14, zero deployments ever). A full deep-dive knowledge base now lives
+in **`docs/FRAMER-INFRASTRUCTURE.md`** (verified 2026-11-04): developer-ecosystem map
+(Plugins beta / Code Components / Fetch / Server API beta / Framer MCP preview /
+legacy External Agents CLI), the Server API (`framer-api` npm SDK, per-project API
+key from Site Settings → General, WebSocket `wss://api.framer.com/channel/headless-plugin`,
+free during beta), Framer MCP (`https://mcp.framer.com/mcp`, OAuth, launched 2026-10-22,
+works with EXISTING projects, free during preview), access/roles/plans model
+(passwordless magic-link login; account sharing prohibited), version-history/audit
+mechanics, export limitations (no self-host HTML export), and the ranked
+access-restoration plan for resuming the parked project (per-project API key →
+MCP → dedicated editor account). Env var reserved for the key: `FRAMER_API_KEY`
+(0600 git-ignored `.env` only — same policy as §5).
+
