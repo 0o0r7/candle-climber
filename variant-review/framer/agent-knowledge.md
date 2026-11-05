@@ -91,3 +91,20 @@ This sandbox file remains the fuller internal version (IDs, session details).
 - LOOPBACK (github.com/0o0r7/loopback-game): 4×4 signal-routing puzzle. V0 tokenless; $PATCH = [UNVERIFIED — NEEDS OWNER INPUT]. Docs: ECOSYSTEM-STUDY/GAME-CONCEPT/ALTERNATIVE-CASE/TEAM.md.
 - "CandleClimber" (github.com/eduardobrandao08/CandleClimber, dev "le-brando"/Eduardo Brandão): an UNRELATED Reddit/Devvit clone analyzed earlier in the topic for a Base44 clean-room build. NOT part of $WICK/Candle Climber ecosystem.
 - BTRIO (Builder Trio Index): separate live project; intro message to Justine (@Jinz02) finalized earlier.
+
+## I. Flip session record (2026-11-05, owner-delegated decision)
+Owner delegated "make Showcase the homepage" to the agent. Result: DEFERRED to the
+Next.js port — Framer hard-blocks every path-based route on this plan:
+- `SET <WebPageNode> path` on the HOME page → "Cannot apply `path` to `home pages`".
+- Taking "/" with another page while home is there → "A page with this path already exists" (no auto-transfer).
+- `addRedirects` → "Current plan does not include redirects" (paid feature).
+- DSL `DEL` on a WebPageNode → unsupported ("Remove or replace the page contents instead").
+- SDK `setAttributes({ draft })` WORKS (only publish-exclusion lever); unpublishing the
+  home page is refused until another page becomes home ("The home page must remain published").
+- SDK lesson: node refs go STALE after canvas writes (`Cannot clone an unknown node`,
+  `Can not set attributes on unknown node`) — always `framer.getNode(id)` fresh per op.
+- `WebPageNode.clone({ path })` WORKS → the net win: full home clone published live as
+  **/demo** (preserves the automated-pilot demo; visual QA passed at 1200px, zero page errors).
+Scripts: scripts/framer-lab/framer-flip{,-resume,-v3,-v4,-v5}.mjs, framer-state-check.mjs,
+framer-visual-qa.mjs. Final live state: `/` old home · `/demo` home clone · `/showcase`
+new design · `/relaunch` 404. The "true flip" = Next.js port (repo docs/FRAMER-VARIANT.md §1a).

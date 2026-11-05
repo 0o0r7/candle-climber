@@ -9,14 +9,40 @@ Provenance: the variant was built by a Framer agent session (owner-approved crea
 delegation) after a product/design research pass (`candle-climber-product-design-brief`)
 and a visual-DNA pass over the restored owner pack (49 stills: mascot, branding, posters).
 
-## 1. Current state (publish `9bf2301b5`, 2026-11-05)
+## 1. Current state (publish 2026-11-05 ~11:12 UTC, after the homepage-flip attempt)
 
-- Live pages: `/` (original dark home, unchanged) and `/showcase` (new variant, light
-  paper/ink editorial design). `/relaunch` (an earlier abandoned variant attempt) was
-  removed from the canvas and is now **404 on production**.
-- Working tree (canvas) == published state. No unpublished changes pending as of this doc.
+- Live pages: `/` (original dark home, unchanged), `/showcase` (new variant, light
+  paper/ink editorial design) and `/demo` (full canvas clone of the original home,
+  published as the preserved "how it plays" demo page). `/relaunch` (an earlier
+  abandoned variant attempt) was removed from the canvas and is **404 on production**.
+- Working tree (canvas) == published state after the flip-attempt session.
 - `/showcase` was checked live: all 9 game CTAs point to `https://candle-climber.vercel.app/play`,
   internal anchors work (`#trailer`, `#daily`, `#modes`, `#how-it-plays`, `#compete`, `#wick`).
+
+### 1a. Homepage-flip attempt — outcome and platform constraints (2026-11-05)
+
+Owner delegated the technical decision ("make Showcase the homepage") to the agent.
+Four approaches were executed; all path-based routes are **hard-blocked by Framer**:
+
+1. `WebPageNode.clone({ path })` + `remove()` of the original — `clone()` works, but
+   SDK node references go stale after canvas writes (`Cannot clone an unknown node`);
+   page `remove()` is unreachable through this API surface. Re-fetch fresh refs per op.
+2. Agent DSL `SET <page> path="..."` on the home page — rejected: *"Cannot apply `path`
+   to `home pages`."* The home page's path is immutable.
+3. Taking `/` with the showcase page while home sits there — rejected: *"A page with
+   this path already exists."* No automatic home transfer.
+4. `framer.addRedirects({ from: "/", to: "/showcase" })` — rejected: *"Current plan
+   does not include redirects."* Redirects are a paid-plan feature.
+
+Also learned: `DEL` on a `WebPageNode` is unsupported via DSL (*"WebPageNode deletion
+is not supported. Remove or replace the page contents instead."*); draft-toggling via
+SDK `setAttributes({ draft })` works and is the only publish-exclusion lever. Unpublishing
+the home page is refused until a different page becomes home.
+
+**Decision recorded:** the flip is deferred to the Next.js port (repo phase 2), where
+`/` is a plain route with full control and zero Framer credits. The `/demo` clone is the
+net win of the attempt: the original home (incl. the automated-pilot demo) stays available
+at a stable URL while `/showcase` remains the design of record.
 
 ## 2. Page structure
 
