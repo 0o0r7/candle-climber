@@ -4,6 +4,10 @@ Compiled: 2026-11-05 · Sources: agent-history.md (Framer agent transcript, 768 
 candle-climber-visual-dna-review.md, candle-climber-product-design-brief (2).md,
 live API verification via framer-api@5.1.0 (scripts/framer-lab/).
 Purpose: survive context summarization — re-read this file before any Framer/repo work.
+REPO MIRROR: the owner-facing subset lives in the repo as docs/FRAMER-VARIANT.md,
+docs/SHOWCASE-COPY.md, docs/SHOWCASE-CMS-SEED.md (drop-in package at
+/home/z/my-project/download/repo-docs/, commit instructions in its README-COMMIT.md).
+This sandbox file remains the fuller internal version (IDs, session details).
 
 ## A. Project identity
 - Candle Climber — browser precision-platformer, "The chart is the level."
