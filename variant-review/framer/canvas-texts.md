@@ -1,0 +1,1777 @@
+# Framer canvas text dump — Candle Climber (read-only recon)
+
+## Page /showcase (UcmYss1RX) — walked 1489 nodes in 30007ms
+
+- text nodes: 327
+- named frames: 1065
+- component instances: 96
+
+### Texts (in BFS order)
+
+- BROWSER PLATFORMER · FREE TO PLAY · NO WALLET
+- The chart is the level.
+- Every candle is a ledge. Green ones hold. Coral ones crumble a beat after you land. Read the route, time the jump and reach the top of today’s chart.
+- 0.26s
+- ×7
+- +25%
+- 00:00
+- WEATHER ZONES ON THE WAY UP
+- Holdings never affect score, physics or rank. Skill is the only edge.
+- BROWSER PLATFORMER · FREE TO PLAY · NO WALLET
+- The chart is the level.
+- Every candle is a ledge. Green ones hold. Coral ones crumble a beat after you land. Read the route, time the jump and reach the top of today’s chart.
+- 0.26s
+- ×7
+- +25%
+- 00:00
+- WEATHER ZONES ON THE WAY UP
+- Holdings never affect score, physics or rank. Skill is the only edge.
+- BROWSER PLATFORMER · FREE TO PLAY · NO WALLET
+- The chart is the level.
+- Every candle is a ledge. Green ones hold. Coral ones crumble a beat after you land. Read the route, time the jump and reach the top of today’s chart.
+- 0.26s
+- ×7
+- +25%
+- 00:00
+- WEATHER ZONES ON THE WAY UP
+- Holdings never affect score, physics or rank. Skill is the only edge.
+- until a coral candle gives way
+- maximum combo multiplier
+- score while you Rush
+- UTC · new chart, worldwide
+- 01 · HOW A CHART BECOMES A LEVEL
+- Every candle is a promise. Some keep it.
+- Candle Climber turns market candlestick data into climbing terrain. You never trade a thing — you read the shapes the market drew, and climb them.
+- 02 · TRAILER
+- Three cuts. Fifteen seconds each.
+- The leap, the crumble and the storm — short cuts of the climb. They loop silently here; open the big one to watch with sound.
+- 03 · THE DAILY CHART
+- One chart. Everyone. Every day.
+- At 00:00 UTC a new deterministic chart drops — the same candles, gaps and traps for every player on Earth. The only variable left is you.
+- NEXT CHART DROPS AT
+- 00:00
+- UTC · IDENTICAL FOR EVERY PLAYER
+- DAILY MUTATION
+- Each chart wakes up in one of six moods.
+- 04 · MODES
+- Pick a market. Climb its shape.
+- Three modes, three kinds of terrain. Every chart is labeled real, derived or synthetic, so you always know what you’re standing on.
+- SUMMIT · GRADUATION
+- Reach the top and you Graduate.
+- Clear a chart’s summit to unlock World 2 — where every point counts double.
+- 05 · LIQUIDATED
+- Fall off the chart? You’re Liquidated.
+- Every run ends with a Death Card — a 1080 × 1350 snapshot of your chart, score, streak and the candle that betrayed you. Post it, beat it, or keep it as a testnet collectible.
+- EXAMPLE CARD · HISTORICAL RUN
+- 06 · COMPETE
+- Race ghosts. Duel friends. Out-climb the bot.
+- Everyone climbs the same daily chart, so every run is comparable. Bring a rival — or let one find you.
+- Play instantly.
+- No wallet, no sign-up. Jump in and your run lands on the guest board.
+- Make it count.
+- Connect a wallet to bind your runs to one official identity for seasons.
+- 07 · $WICK · TESTNET
+- Here’s the honest part.
+- Candle Climber has a testnet token and testnet collectibles. You should hear exactly what they are — and what they aren’t — from us.
+- YOUR MOVE
+- Your first ledge is green.
+- No download. No wallet. Just today’s chart and one good jump.
+- until a coral candle gives way
+- maximum combo multiplier
+- score while you Rush
+- UTC · new chart, worldwide
+- 01 · HOW A CHART BECOMES A LEVEL
+- Every candle is a promise. Some keep it.
+- Candle Climber turns market candlestick data into climbing terrain. You never trade a thing — you read the shapes the market drew, and climb them.
+- 02 · TRAILER
+- Three cuts. Fifteen seconds each.
+- The leap, the crumble and the storm — short cuts of the climb. They loop silently here; open the big one to watch with sound.
+- 03 · THE DAILY CHART
+- One chart. Everyone. Every day.
+- At 00:00 UTC a new deterministic chart drops — the same candles, gaps and traps for every player on Earth. The only variable left is you.
+- NEXT CHART DROPS AT
+- 00:00
+- UTC · IDENTICAL FOR EVERY PLAYER
+- DAILY MUTATION
+- Each chart wakes up in one of six moods.
+- 04 · MODES
+- Pick a market. Climb its shape.
+- Three modes, three kinds of terrain. Every chart is labeled real, derived or synthetic, so you always know what you’re standing on.
+- SUMMIT · GRADUATION
+- Reach the top and you Graduate.
+- Clear a chart’s summit to unlock World 2 — where every point counts double.
+- 05 · LIQUIDATED
+- Fall off the chart? You’re Liquidated.
+- Every run ends with a Death Card — a 1080 × 1350 snapshot of your chart, score, streak and the candle that betrayed you. Post it, beat it, or keep it as a testnet collectible.
+- EXAMPLE CARD · HISTORICAL RUN
+- 06 · COMPETE
+- Race ghosts. Duel friends. Out-climb the bot.
+- Everyone climbs the same daily chart, so every run is comparable. Bring a rival — or let one find you.
+- Play instantly.
+- No wallet, no sign-up. Jump in and your run lands on the guest board.
+- Make it count.
+- Connect a wallet to bind your runs to one official identity for seasons.
+- 07 · $WICK · TESTNET
+- Here’s the honest part.
+- Candle Climber has a testnet token and testnet collectibles. You should hear exactly what they are — and what they aren’t — from us.
+- YOUR MOVE
+- Your first ledge is green.
+- No download. No wallet. Just today’s chart and one good jump.
+- until a coral candle gives way
+- maximum combo multiplier
+- score while you Rush
+- UTC · new chart, worldwide
+- 01 · HOW A CHART BECOMES A LEVEL
+- Every candle is a promise. Some keep it.
+- Candle Climber turns market candlestick data into climbing terrain. You never trade a thing — you read the shapes the market drew, and climb them.
+- 02 · TRAILER
+- Three cuts. Fifteen seconds each.
+- The leap, the crumble and the storm — short cuts of the climb. They loop silently here; open the big one to watch with sound.
+- 03 · THE DAILY CHART
+- One chart. Everyone. Every day.
+- At 00:00 UTC a new deterministic chart drops — the same candles, gaps and traps for every player on Earth. The only variable left is you.
+- NEXT CHART DROPS AT
+- 00:00
+- UTC · IDENTICAL FOR EVERY PLAYER
+- DAILY MUTATION
+- Each chart wakes up in one of six moods.
+- 04 · MODES
+- Pick a market. Climb its shape.
+- Three modes, three kinds of terrain. Every chart is labeled real, derived or synthetic, so you always know what you’re standing on.
+- SUMMIT · GRADUATION
+- Reach the top and you Graduate.
+- Clear a chart’s summit to unlock World 2 — where every point counts double.
+- 05 · LIQUIDATED
+- Fall off the chart? You’re Liquidated.
+- Every run ends with a Death Card — a 1080 × 1350 snapshot of your chart, score, streak and the candle that betrayed you. Post it, beat it, or keep it as a testnet collectible.
+- EXAMPLE CARD · HISTORICAL RUN
+- 06 · COMPETE
+- Race ghosts. Duel friends. Out-climb the bot.
+- Everyone climbs the same daily chart, so every run is comparable. Bring a rival — or let one find you.
+- Play instantly.
+- No wallet, no sign-up. Jump in and your run lands on the guest board.
+- Make it count.
+- Connect a wallet to bind your runs to one official identity for seasons.
+- 07 · $WICK · TESTNET
+- Here’s the honest part.
+- Candle Climber has a testnet token and testnet collectibles. You should hear exactly what they are — and what they aren’t — from us.
+- YOUR MOVE
+- Your first ledge is green.
+- No download. No wallet. Just today’s chart and one good jump.
+- Green holds
+- Up-candles are solid ground. Land, breathe, line up the next jump.
+- Coral crumbles
+- Down-candles give way about a quarter-second after you land. Don’t stand still.
+- Tap to jump. Hold to soar.
+- Tap or press Space to hop. Hold for a higher arc when the next ledge sits out of reach.
+- Shift to Rush
+- Speed the climb up for +25% score. Chain clean landings to stack combos up to ×7.
+- LEAP · 0:15
+- Missed a day? Rehearse past charts in Archive practice.
+- Around-the-clock markets make for spiky, restless terrain.
+- Session-based charts with their own rhythm of climbs and drops.
+- Fresh-launch charts with almost no history to lean on.
+- Ghosts
+- Chase the line of a strong run, replayed right beside you.
+- Duels
+- Send a friend the same chart and settle it head to head.
+- Rival bot
+- A bot climbs with you, so there’s always someone to beat.
+- Archive practice
+- Rehearse past daily charts at your own pace.
+- GUEST BOARD
+- OFFICIAL BOARD
+- Testnet only.
+- $WICK and Death Cards live on a test network. They have no monetary value.
+- Weights, not promises.
+- Season participation is tracked as airdrop weights. Nothing is promised, and nothing here is financial advice.
+- Skill is the only edge.
+- Holding $WICK never changes your score, your physics or your rank. Free players climb the same chart.
+- Green holds
+- Up-candles are solid ground. Land, breathe, line up the next jump.
+- Coral crumbles
+- Down-candles give way about a quarter-second after you land. Don’t stand still.
+- Tap to jump. Hold to soar.
+- Tap or press Space to hop. Hold for a higher arc when the next ledge sits out of reach.
+- Shift to Rush
+- Speed the climb up for +25% score. Chain clean landings to stack combos up to ×7.
+- LEAP · 0:15
+- Missed a day? Rehearse past charts in Archive practice.
+- Around-the-clock markets make for spiky, restless terrain.
+- Session-based charts with their own rhythm of climbs and drops.
+- Fresh-launch charts with almost no history to lean on.
+- Ghosts
+- Chase the line of a strong run, replayed right beside you.
+- Duels
+- Send a friend the same chart and settle it head to head.
+- Rival bot
+- A bot climbs with you, so there’s always someone to beat.
+- Archive practice
+- Rehearse past daily charts at your own pace.
+- GUEST BOARD
+- OFFICIAL BOARD
+- Testnet only.
+- $WICK and Death Cards live on a test network. They have no monetary value.
+- Weights, not promises.
+- Season participation is tracked as airdrop weights. Nothing is promised, and nothing here is financial advice.
+- Skill is the only edge.
+- Holding $WICK never changes your score, your physics or your rank. Free players climb the same chart.
+- Green holds
+- Up-candles are solid ground. Land, breathe, line up the next jump.
+- Coral crumbles
+- Down-candles give way about a quarter-second after you land. Don’t stand still.
+- Tap to jump. Hold to soar.
+- Tap or press Space to hop. Hold for a higher arc when the next ledge sits out of reach.
+- Shift to Rush
+- Speed the climb up for +25% score. Chain clean landings to stack combos up to ×7.
+- LEAP · 0:15
+- Missed a day? Rehearse past charts in Archive practice.
+- Around-the-clock markets make for spiky, restless terrain.
+- Session-based charts with their own rhythm of climbs and drops.
+- Fresh-launch charts with almost no history to lean on.
+- Ghosts
+- Chase the line of a strong run, replayed right beside you.
+- Duels
+- Send a friend the same chart and settle it head to head.
+- Rival bot
+- A bot climbs with you, so there’s always someone to beat.
+- Archive practice
+- Rehearse past daily charts at your own pace.
+- GUEST BOARD
+- OFFICIAL BOARD
+- Testnet only.
+- $WICK and Death Cards live on a test network. They have no monetary value.
+- Weights, not promises.
+- Season participation is tracked as airdrop weights. Nothing is promised, and nothing here is financial advice.
+- Skill is the only edge.
+- Holding $WICK never changes your score, your physics or your rank. Free players climb the same chart.
+- LAND
+- 0.26 SEC
+- TAP · SPACE
+- SHIFT
+- CRUMBLE · 0:15
+- STORM · 0:15
+- Clean
+- Low Liquidity
+- Whale Hour
+- High Volume
+- Paper Hands
+- Rain
+- ZONE 01
+- Temperate
+- ZONE 02
+- Desert
+- ZONE 03
+- Storm
+- ZONE 04
+- Tundra
+- Crypto
+- 01
+- Stocks
+- 02
+- Launchpad
+- 03
+- A share-ready card after every run
+- Optional testnet mint — no monetary value
+- Retry the same chart until it gives
+- LAND
+- 0.26 SEC
+- TAP · SPACE
+- SHIFT
+- CRUMBLE · 0:15
+- STORM · 0:15
+- Clean
+- Low Liquidity
+- Whale Hour
+- High Volume
+- Paper Hands
+- Rain
+- ZONE 01
+- Temperate
+- ZONE 02
+- Desert
+- ZONE 03
+- Storm
+- ZONE 04
+- Tundra
+- Crypto
+- 01
+- Stocks
+- 02
+- Launchpad
+- 03
+- A share-ready card after every run
+- Optional testnet mint — no monetary value
+- Retry the same chart until it gives
+- LAND
+- 0.26 SEC
+- TAP · SPACE
+- SHIFT
+- CRUMBLE · 0:15
+- STORM · 0:15
+- Clean
+- Low Liquidity
+- Whale Hour
+- High Volume
+- Paper Hands
+- Rain
+- ZONE 01
+- Temperate
+- ZONE 02
+- Desert
+- ZONE 03
+- Storm
+- ZONE 04
+- Tundra
+- Crypto
+- 01
+- Stocks
+- 02
+- Launchpad
+- 03
+- A share-ready card after every run
+- Optional testnet mint — no monetary value
+- Retry the same chart until it gives
+- ×7
+- ×7
+- ×7
+
+### Frame names
+
+- Desktop
+- Tablet
+- Phone
+- Content
+- Content
+- Content
+- Hero
+- Stats Strip
+- How It Plays
+- Trailer
+- Daily Chart
+- Modes
+- Liquidated
+- Compete
+- $WICK
+- Play
+- Hero
+- Stats Strip
+- How It Plays
+- Trailer
+- Daily Chart
+- Modes
+- Liquidated
+- Compete
+- $WICK
+- Play
+- Hero
+- Stats Strip
+- How It Plays
+- Trailer
+- Daily Chart
+- Modes
+- Liquidated
+- Compete
+- $WICK
+- Play
+- Container
+- Stats
+- Container
+- Container
+- Container
+- Container
+- Chaos Backdrop
+- Container
+- Container
+- Container
+- Container
+- Container
+- Stats
+- Container
+- Container
+- Container
+- Container
+- Chaos Backdrop
+- Container
+- Container
+- Container
+- Container
+- Container
+- Stats
+- Container
+- Container
+- Container
+- Container
+- Chaos Backdrop
+- Container
+- Container
+- Container
+- Container
+- Hero Copy
+- Stat
+- Stat
+- Stat
+- Stat
+- Header
+- Rules
+- Header
+- Reel
+- Header
+- Daily Cards
+- Zones
+- Header
+- Mode Cards
+- Graduation
+- Liquidation
+- Header
+- Features
+- Boards
+- Fair Play Note
+- Header
+- Facts
+- Closing
+- Hero Copy
+- Stat
+- Stat
+- Stat
+- Stat
+- Header
+- Rules
+- Header
+- Reel
+- Header
+- Daily Cards
+- Zones
+- Header
+- Mode Cards
+- Graduation
+- Liquidation
+- Header
+- Features
+- Boards
+- Fair Play Note
+- Header
+- Facts
+- Closing
+- Hero Copy
+- Stat
+- Stat
+- Stat
+- Stat
+- Header
+- Rules
+- Header
+- Reel
+- Header
+- Daily Cards
+- Zones
+- Header
+- Mode Cards
+- Graduation
+- Liquidation
+- Header
+- Features
+- Boards
+- Fair Play Note
+- Header
+- Facts
+- Closing
+- Actions
+- Caption
+- Caption
+- Caption
+- Caption
+- Title
+- Intro
+- Green holds
+- Coral crumbles
+- Tap to jump. Hold to soar.
+- Shift to Rush
+- Title
+- Intro
+- Leap
+- Side Cuts
+- Title
+- Intro
+- Next Drop
+- Mutations
+- Zone List
+- Title
+- Intro
+- Crypto
+- Stocks
+- Launchpad
+- Copy
+- Victory Art
+- Copy
+- Card Art
+- Title
+- Intro
+- Ghosts
+- Duels
+- Rival bot
+- Archive practice
+- GUEST BOARD
+- OFFICIAL BOARD
+- Title
+- Intro
+- Testnet only.
+- Weights, not promises.
+- Skill is the only edge.
+- Copy
+- Duo Art
+- Actions
+- Caption
+- Caption
+- Caption
+- Caption
+- Title
+- Intro
+- Green holds
+- Coral crumbles
+- Tap to jump. Hold to soar.
+- Shift to Rush
+- Title
+- Intro
+- Leap
+- Side Cuts
+- Title
+- Intro
+- Next Drop
+- Mutations
+- Zone List
+- Title
+- Intro
+- Crypto
+- Stocks
+- Launchpad
+- Copy
+- Victory Art
+- Copy
+- Card Art
+- Title
+- Intro
+- Ghosts
+- Duels
+- Rival bot
+- Archive practice
+- GUEST BOARD
+- OFFICIAL BOARD
+- Title
+- Intro
+- Testnet only.
+- Weights, not promises.
+- Skill is the only edge.
+- Copy
+- Duo Art
+- Actions
+- Caption
+- Caption
+- Caption
+- Caption
+- Title
+- Intro
+- Green holds
+- Coral crumbles
+- Tap to jump. Hold to soar.
+- Shift to Rush
+- Title
+- Intro
+- Leap
+- Side Cuts
+- Title
+- Intro
+- Next Drop
+- Mutations
+- Zone List
+- Title
+- Intro
+- Crypto
+- Stocks
+- Launchpad
+- Copy
+- Victory Art
+- Copy
+- Card Art
+- Title
+- Intro
+- Ghosts
+- Duels
+- Rival bot
+- Archive practice
+- GUEST BOARD
+- OFFICIAL BOARD
+- Title
+- Intro
+- Testnet only.
+- Weights, not promises.
+- Skill is the only edge.
+- Copy
+- Duo Art
+- Tick
+- Tick
+- Tick
+- Tick
+- Game Well
+- Text
+- Game Well
+- Text
+- Game Well
+- Text
+- Game Well
+- Text
+- Caption
+- Crumble
+- Storm
+- Divider
+- Archive Note
+- Mutation List
+- Temperate
+- Desert
+- Storm
+- Tundra
+- Game Well
+- Text
+- Game Well
+- Text
+- Game Well
+- Text
+- Facts
+- Actions
+- Example Death Card
+- Icon Badge
+- Text
+- Icon Badge
+- Text
+- Icon Badge
+- Text
+- Icon Badge
+- Text
+- Label Row
+- Label Row
+- Testnet Accent
+- Body
+- Testnet Accent
+- Body
+- Testnet Accent
+- Body
+- Actions
+- Tick
+- Tick
+- Tick
+- Tick
+- Game Well
+- Text
+- Game Well
+- Text
+- Game Well
+- Text
+- Game Well
+- Text
+- Caption
+- Crumble
+- Storm
+- Divider
+- Archive Note
+- Mutation List
+- Temperate
+- Desert
+- Storm
+- Tundra
+- Game Well
+- Text
+- Game Well
+- Text
+- Game Well
+- Text
+- Facts
+- Actions
+- Example Death Card
+- Icon Badge
+- Text
+- Icon Badge
+- Text
+- Icon Badge
+- Text
+- Icon Badge
+- Text
+- Label Row
+- Label Row
+- Testnet Accent
+- Body
+- Testnet Accent
+- Body
+- Testnet Accent
+- Body
+- Actions
+- Tick
+- Tick
+- Tick
+- Tick
+- Game Well
+- Text
+- Game Well
+- Text
+- Game Well
+- Text
+- Game Well
+- Text
+- Caption
+- Crumble
+- Storm
+- Divider
+- Archive Note
+- Mutation List
+- Temperate
+- Desert
+- Storm
+- Tundra
+- Game Well
+- Text
+- Game Well
+- Text
+- Game Well
+- Text
+- Facts
+- Actions
+- Example Death Card
+- Icon Badge
+- Text
+- Icon Badge
+- Text
+- Icon Badge
+- Text
+- Icon Badge
+- Text
+- Label Row
+- Label Row
+- Testnet Accent
+- Body
+- Testnet Accent
+- Body
+- Testnet Accent
+- Body
+- Actions
+- Key Hint
+- Candles
+- Key Hint
+- Candles
+- Key Hint
+- Jump Arc
+- Key Hint
+- Rush
+- Tick
+- Caption
+- Caption
+- Clean
+- Low Liquidity
+- Whale Hour
+- High Volume
+- Paper Hands
+- Rain
+- Text
+- Text
+- Text
+- Text
+- Silhouette
+- Title Row
+- Silhouette
+- Title Row
+- Silhouette
+- Title Row
+- Fact
+- Fact
+- Fact
+- Key Hint
+- Candles
+- Key Hint
+- Candles
+- Key Hint
+- Jump Arc
+- Key Hint
+- Rush
+- Tick
+- Caption
+- Caption
+- Clean
+- Low Liquidity
+- Whale Hour
+- High Volume
+- Paper Hands
+- Rain
+- Text
+- Text
+- Text
+- Text
+- Silhouette
+- Title Row
+- Silhouette
+- Title Row
+- Silhouette
+- Title Row
+- Fact
+- Fact
+- Fact
+- Key Hint
+- Candles
+- Key Hint
+- Candles
+- Key Hint
+- Jump Arc
+- Key Hint
+- Rush
+- Tick
+- Caption
+- Caption
+- Clean
+- Low Liquidity
+- Whale Hour
+- High Volume
+- Paper Hands
+- Rain
+- Text
+- Text
+- Text
+- Text
+- Silhouette
+- Title Row
+- Silhouette
+- Title Row
+- Silhouette
+- Title Row
+- Fact
+- Fact
+- Fact
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Blockbot
+- Speed Lines
+- Up Candle
+- Combo
+- Tick
+- Tick
+- Up Candle
+- Down Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Down Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Blockbot
+- Speed Lines
+- Up Candle
+- Combo
+- Tick
+- Tick
+- Up Candle
+- Down Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Down Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Arc Dot
+- Blockbot
+- Speed Lines
+- Up Candle
+- Combo
+- Tick
+- Tick
+- Up Candle
+- Down Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Down Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Up Candle
+- Down Candle
+- Down Candle
+- Up Candle
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Offset
+- Blockbot
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Debris
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Visor
+- Line
+- Line
+- Line
+- Blockbot
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Offset
+- Blockbot
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Debris
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Visor
+- Line
+- Line
+- Line
+- Blockbot
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Offset
+- Blockbot
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Debris
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Visor
+- Line
+- Line
+- Line
+- Blockbot
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Wick
+- Body
+- Wick
+- Offset
+- Visor
+- Fragment
+- Fragment
+- Fragment
+- Visor
+- Visor
+- Fragment
+- Fragment
+- Fragment
+- Visor
+- Visor
+- Fragment
+- Fragment
+- Fragment
+- Visor
+
+### Component instances
+
+- Component
+- Component
+- Component
+- CC Button
+- CC Button
+- Video
+- CC Button
+- CC Button
+- Video
+- CC Button
+- CC Button
+- Video
+- Video
+- Video
+- Component
+- Component
+- Component
+- Component
+- Component
+- CC Button
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- CC Button
+- CC Button
+- Video
+- Video
+- Component
+- Component
+- Component
+- Component
+- Component
+- CC Button
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- CC Button
+- CC Button
+- Video
+- Video
+- Component
+- Component
+- Component
+- Component
+- Component
+- CC Button
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- CC Button
+- CC Button
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+- Component
+
+## Page / (augiA20Il) — walked 250 nodes in 7473ms
+
+- text nodes: 112
+- named frames: 118
+- component instances: 19
+
+### Texts (in BFS order)
+
+- CANDLE CLIMBER
+- PLAY NOW
+- LIVE ON ROBINHOOD CHAIN · VIBE BUILDERS
+- THE CHART IS THE LEVEL.
+- Run up a live chart. Green candles hold. Red candles crumble. Fall off the bottom and you’re liquidated.
+- candle-climber.vercel.app/play · free · walletless · no signup
+- No earn promises. No price talk. Play the game.
+- CANDLE CLIMBER
+- PLAY NOW
+- LIVE ON ROBINHOOD CHAIN · VIBE BUILDERS
+- THE CHART IS THE LEVEL.
+- Run up a live chart. Green candles hold. Red candles crumble. Fall off the bottom and you’re liquidated.
+- candle-climber.vercel.app/play · free · walletless · no signup
+- No earn promises. No price talk. Play the game.
+- HOW IT WORKS
+- GREEN HOLDS. RED CRUMBLES.
+- THE DAILY RITUAL
+- ONE CHART. ONE DAY. THE WHOLE PLANET.
+- Every day, one real symbol’s chart becomes the level — identical for every player worldwide. One deterministic daily seed. No rerolls. No excuses.
+- THE DEATH LOOP
+- EVERY DEATH IS CONTENT.
+- Every run ends in an auto-generated Death Card — score, symbol, liquidation cause, rank — sized for one tap to X. The leaderboard is skill-only, so the only thing you can buy is a better line.
+- $WICK
+- CULTURE. COSMETICS. ARCHIVE.
+- $WICK is the game’s token of belonging. The game itself is free and walletless forever — the scoreboard is skill-only and nobody’s wallet can buy a single point of it.
+- Not financial advice. Not a price forecast. No real funds.
+- Built for the vibe builders program on Robinhood Chain testnet. Daily levels use one real symbol’s chart — the game plays the market, it never predicts it.
+- © 2026 CANDLE CLIMBER
+- HOW IT WORKS
+- GREEN HOLDS. RED CRUMBLES.
+- THE DAILY RITUAL
+- ONE CHART. ONE DAY. THE WHOLE PLANET.
+- Every day, one real symbol’s chart becomes the level — identical for every player worldwide. One deterministic daily seed. No rerolls. No excuses.
+- THE DEATH LOOP
+- EVERY DEATH IS CONTENT.
+- Every run ends in an auto-generated Death Card — score, symbol, liquidation cause, rank — sized for one tap to X. The leaderboard is skill-only, so the only thing you can buy is a better line.
+- $WICK
+- CULTURE. COSMETICS. ARCHIVE.
+- $WICK is the game’s token of belonging. The game itself is free and walletless forever — the scoreboard is skill-only and nobody’s wallet can buy a single point of it.
+- Not financial advice. Not a price forecast. No real funds.
+- Built for the vibe builders program on Robinhood Chain testnet. Daily levels use one real symbol’s chart — the game plays the market, it never predicts it.
+- © 2026 CANDLE CLIMBER
+- PLAY NOW
+- HOW IT WORKS
+- GREEN = JUMP PADS
+- Every up-candle is solid ground. Chain them for combo height and keep the climb alive.
+- RED = CRUMBLE
+- Down-candles crack under your feet the moment you land. Don’t linger on the dump.
+- FALL = LIQUIDATED
+- Drop below the chart and the run is over. Every death mints a shareable Death Card.
+- UTC DATE
+- TODAY
+- TERRAIN
+- DETERMINISTIC
+- PLAYERS
+- SAME LEVEL
+- LIQUIDATED
+- Your run ended where it had to end.
+- THE SHAREABLE DEATH LOOP
+- One climb, one card, one post. Every liquidation feeds the next player’s bravado — the loop that made daily runs a ritual.
+- COSMETICS
+- Skins, trails and flex for your blockbot. Style points only — never scoreboard points.
+- ROUTES
+- Holder-only lines and archive paths through past levels. New ways to climb, not new ways to pay.
+- ARCHIVE
+- Replay and study every past daily chart. The market’s history, kept climbable.
+- CANDLE CLIMBER
+- PLAY NOW
+- PLAY NOW
+- HOW IT WORKS
+- GREEN = JUMP PADS
+- Every up-candle is solid ground. Chain them for combo height and keep the climb alive.
+- RED = CRUMBLE
+- Down-candles crack under your feet the moment you land. Don’t linger on the dump.
+- FALL = LIQUIDATED
+- Drop below the chart and the run is over. Every death mints a shareable Death Card.
+- UTC DATE
+- TODAY
+- TERRAIN
+- DETERMINISTIC
+- PLAYERS
+- SAME LEVEL
+- LIQUIDATED
+- Your run ended where it had to end.
+- THE SHAREABLE DEATH LOOP
+- One climb, one card, one post. Every liquidation feeds the next player’s bravado — the loop that made daily runs a ritual.
+- COSMETICS
+- Skins, trails and flex for your blockbot. Style points only — never scoreboard points.
+- ROUTES
+- Holder-only lines and archive paths through past levels. New ways to climb, not new ways to pay.
+- ARCHIVE
+- Replay and study every past daily chart. The market’s history, kept climbable.
+- CANDLE CLIMBER
+- PLAY NOW
+- DEATH CARD
+- TEMPLATE
+- SEE IT ON X
+- DEATH CARD
+- TEMPLATE
+- SEE IT ON X
+- SCORE
+- 000 000
+- CAUSE
+- THE WICK
+- RANK
+- YOUR PROBLEM
+- SCORE
+- 000 000
+- CAUSE
+- THE WICK
+- RANK
+- YOUR PROBLEM
+
+### Frame names
+
+- Desktop
+- Phone
+- Navbar
+- Hero
+- How It Works
+- Daily Ritual
+- Death Card
+- Wick Token
+- Footer
+- Navbar
+- Hero
+- How It Works
+- Daily Ritual
+- Death Card
+- Wick Token
+- Footer
+- Brand
+- Play Button
+- Shade
+- Hero Content
+- How Content
+- Ritual Content
+- Stack
+- Stack
+- Stack
+- Brand
+- Play Button
+- Shade
+- Hero Content
+- How Content
+- Ritual Content
+- Stack
+- Stack
+- Stack
+- Logo
+- CTA Row
+- Stack
+- Rules Grid
+- Stack
+- Seed Card
+- Stack
+- Stack
+- Stack
+- Grid
+- Stack
+- Stack
+- Stack
+- Logo
+- CTA Row
+- Stack
+- Rules Grid
+- Stack
+- Seed Card
+- Stack
+- Stack
+- Stack
+- Stack
+- Stack
+- Stack
+- Stack
+- Play Button
+- How Button
+- Rule Green
+- Rule Red
+- Rule Liquidation
+- Stack
+- Stack
+- Stack
+- Card Mock
+- Stack
+- Stack
+- Stack
+- Stack
+- Stack
+- Play Button
+- X Link
+- Play Button
+- How Button
+- Rule Green
+- Rule Red
+- Rule Liquidation
+- Stack
+- Stack
+- Stack
+- Card Mock
+- Stack
+- Stack
+- Stack
+- Stack
+- Stack
+- Play Button
+- X Link
+- Stack
+- Stack
+- Stack
+- Stack
+- Stack
+- Share Button
+- Stack
+- Stack
+- Stack
+- Image
+- Stack
+- Stack
+- Stack
+- Stack
+- Stack
+- Share Button
+- Stack
+- Stack
+- Stack
+- Image
+- Stack
+- Stack
+- Stack
+- Stack
+- Stack
+- Stack
+
+### Component instances
+
+- 1Password
+- 1Password
+- 1Password
+- 1Password
+- 1Password
+- X
+- X
+- Trending Up
+- Flame
+- Skull
+- Palette
+- Map
+- Archive
+- Trending Up
+- Flame
+- Skull
+- Palette
+- Map
+- Archive
+
+## Code files
+
+### Examples.tsx (? chars)
+
+```tsx
+
+```
+
