@@ -1,0 +1,200 @@
+[
+  {
+    "url": "https://skybound-myc8c9et.manus.game/",
+    "status": 200,
+    "type": "text/html; charset=utf-8",
+    "size": 403104
+  },
+  {
+    "url": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092",
+    "status": 200,
+    "type": "text/javascript;charset=UTF-8",
+    "size": 31853
+  },
+  {
+    "url": "https://files.manuscdn.com/manus-space-dispatcher/spaceEditor-CDmbg89D.js",
+    "status": 200,
+    "type": "application/javascript",
+    "size": 736291
+  },
+  {
+    "url": "https://manus-analytics.com/script.js",
+    "status": 200,
+    "type": "application/javascript; charset=UTF-8",
+    "size": 2618
+  },
+  {
+    "url": "https://skybound-myc8c9et.manus.game/index.js",
+    "status": 200,
+    "type": "text/javascript; charset=utf-8",
+    "size": 279934
+  },
+  {
+    "url": "https://skybound-myc8c9et.manus.game/cdn-cgi/rum?",
+    "status": 204,
+    "type": "text/plain",
+    "size": 0
+  },
+  {
+    "url": "https://skybound-myc8c9et.manus.game/manus-storage/game/sha256/d80623a97237d4b13abc3510259fbfab413e01a8fc6a10c4972d8a728489842d.pck",
+    "status": 307,
+    "type": "",
+    "size": 0
+  },
+  {
+    "url": "https://skybound-myc8c9et.manus.game/manus-storage/game/sha256/fc74679e3b97f76878947fcd4fbe1268cbfa6188182a2e33bbc3f5dc9bfa57d0.wasm",
+    "status": 307,
+    "type": "",
+    "size": 0
+  },
+  {
+    "url": "https://manus-analytics.com/api/send",
+    "status": 200,
+    "type": "application/json",
+    "size": 419
+  },
+  {
+    "url": "https://sr-client-cfg.amplitude.com/config/46ac3f9abb41dd2d17a5785e052bc6d3?config_group=browser",
+    "status": 403,
+    "type": "application/json",
+    "size": 30
+  },
+  {
+    "url": "https://sr-client-cfg.amplitude.com/config?api_key=46ac3f9abb41dd2d17a5785e052bc6d3&config_keys=analyticsSDK.pageActions",
+    "status": 403,
+    "type": "text/plain;charset=iso-8859-1",
+    "size": 15
+  },
+  {
+    "url": "https://api.manus.im/api/user_behavior/batch_create_event_v2",
+    "status": 200,
+    "type": "",
+    "size": 0
+  },
+  {
+    "url": "https://d36hbw14aib5lz.cloudfront.net/310519663458204631/Myc8C9eTyGtGyntVqp5xtU/game/sha256/fc74679e3b97f76878947fcd4fbe1268cbfa6188182a2e33bbc3f5dc9bfa57d0.wasm?Expires=1794182400&Signature=ObO8Q~nOZ7sWrVg6ZsM7yYWVTe2RUk7mybckSWXLAiJQc9rE-G2NgSdN7-siLoxIRthCkxBUD7zcN-J7FRhohixW1wSKCstVe2503farB02WlqO~xFuJj5s--9~z~t9tOlwxhwJTlvgP~x9nACKoLcJasf1bxbIqYJ6E0woR7mp9Lj1Bkc~2xKV-7bRi8sAWBCpmpwar5Qth~E7nuyo-4zU4P88f8d7qdpjb3tdFklBg2VI3hhTSgmXZNjCRo8VtRYuOQzlF3FBAkrVSc7Rh6pY4uLa4W-ReEkCOF-bA240wzs0W5UykUqajNxwzYJXuPI3D3yi1GQRIsxjl0jdL-w__&Key-Pair-Id=K1MP89RTKNH4J",
+    "status": 200,
+    "type": "application/wasm",
+    "size": 0
+  },
+  {
+    "url": "https://d36hbw14aib5lz.cloudfront.net/310519663458204631/Myc8C9eTyGtGyntVqp5xtU/game/sha256/d80623a97237d4b13abc3510259fbfab413e01a8fc6a10c4972d8a728489842d.pck?Expires=1794182400&Signature=VYKeVjz9d6C4EVWCrnC8t4RhJitzzMJvPfpVAAKFfT5K~NiuedBM8NTA0Zksz0j0LSFSPcKYlHgLQ-Sq1S6~DrMKDkBQ~qlRNy4hRR72lxfCwEx0CVFlYVkE9gZt8IwH-knaZCWAt3HtIOi4QxwQ4ei5oQcJVHRsmecT~CuD8Km4xa6JGob0AtmFVHXr8FW39~U9WOyCS1P7hLzW4pxZVMg8YveERsmAd1dqkR2R~FW4g3S9ygk3n65CG~NeP2AUcPaha23z6pAhMCcRaoSmDjgBzeegH6QQ2zq~oWXv~kmiXmoLqlCntL1wypDTCNgh7B1vbqzul1o5QqKXQRL2pw__&Key-Pair-Id=K1MP89RTKNH4J",
+    "status": 200,
+    "type": "application/octet-stream",
+    "size": 0
+  },
+  {
+    "url": "https://sr-client-cfg.amplitude.com/config/46ac3f9abb41dd2d17a5785e052bc6d3?config_group=browser",
+    "status": 403,
+    "type": "application/json",
+    "size": 30
+  },
+  {
+    "url": "https://skybound-myc8c9et.manus.game/manus-storage/game/sha256/f12fe87af78247b75c066c4dc520058d786e256bc625f28996e810a4c7135a67.webp",
+    "status": 307,
+    "type": "",
+    "size": 0
+  },
+  {
+    "url": "https://sr-client-cfg.amplitude.com/config/46ac3f9abb41dd2d17a5785e052bc6d3?config_group=browser",
+    "status": 403,
+    "type": "application/json",
+    "size": 30
+  },
+  {
+    "url": "https://api2.amplitude.com/2/httpapi",
+    "status": 400,
+    "type": "",
+    "size": 0
+  },
+  {
+    "url": "https://d36hbw14aib5lz.cloudfront.net/310519663458204631/Myc8C9eTyGtGyntVqp5xtU/game/sha256/f12fe87af78247b75c066c4dc520058d786e256bc625f28996e810a4c7135a67.webp?Expires=1794182400&Signature=wozKvEOlHhyy2RtKj4VJrqo36AqFJ1J0SYzPeXgEeceXPvFqEK5Z7SjCvCl7hbbl8UZ1F16vAxMUgzNLb2n0l6sxFeqFrHTl30wWrtmYXFjPX4~SzRpYwPGUHsNEaHVAPHVUj-AU1IdIoa6I9pXxRJDjDyOp45uqUQGMxBwHYAsZ~iOs3hega35rKBHzbfNH9gM4HuNQZj5vwAGoHx6Ek-nERoqyMFLBe4gkpFYDMUPHJvV-3Bil0CklocCZWjnzADIkLUB4KYqtj3HxKsbPKAok5H6C~oiZZHlLBrMTRBBQ~2OQeiZxdR~OebLpfHU5NQECtTGYhhxPoFibtNIhZw__&Key-Pair-Id=K1MP89RTKNH4J",
+    "status": 200,
+    "type": "image/webp",
+    "size": 42068
+  },
+  {
+    "url": "https://skybound-myc8c9et.manus.game/manus-storage/game/sha256/937abd8cef428c4b5c623b61d79d8e47beac45430440a40a4be7940dc23eabe2.webp",
+    "status": 307,
+    "type": "",
+    "size": 0
+  },
+  {
+    "url": "https://d36hbw14aib5lz.cloudfront.net/310519663458204631/Myc8C9eTyGtGyntVqp5xtU/game/sha256/937abd8cef428c4b5c623b61d79d8e47beac45430440a40a4be7940dc23eabe2.webp?Expires=1794182400&Signature=JmitoCEtEaBN71sO~hZdBTzXWuhmhJDLNQoa01SsY2yL3mSJlt37Ys9J0zfs60BQMbEtN5sxdviYP0pdT40CHMt1NrIcYy12yKX7As4x1yeC2O~jlXavRffiNZomZXlTD78usOBGPs3YC3I8fGkyPRriHaC5xMdBPzwqnFjKvVgFXG25lHZlY0Hwd8H4aGdTnTbJ3apSYuoeOr1uEFAQ28Tn23dcJ2mXpDlyr7pGDrnomYY127PKgjBTl0yHVqB41PknsQE4vSO7xiE4xH7Q3q1t4jsxStDUR1humTPWvhh3EMjL9rU6ZRacSZusQtYhhvdg3kDoxuYtySiMX9f1Uw__&Key-Pair-Id=K1MP89RTKNH4J",
+    "status": 200,
+    "type": "image/webp",
+    "size": 45654
+  },
+  {
+    "url": "https://skybound-myc8c9et.manus.game/manus-storage/game/sha256/d766637968643ed7ef6605d86b484447c02ea2bbab45af54046de2b011bb1d64.webp",
+    "status": 307,
+    "type": "",
+    "size": 0
+  },
+  {
+    "url": "https://d36hbw14aib5lz.cloudfront.net/310519663458204631/Myc8C9eTyGtGyntVqp5xtU/game/sha256/d766637968643ed7ef6605d86b484447c02ea2bbab45af54046de2b011bb1d64.webp?Expires=1794182400&Signature=cKHMN3xnkaOWSaId2257EU9qC-O7oqZQ-f2BGYoYi4M85WzU8H~weJT3mggAJFfeqfW~HZedjAesbslHpwlyJ1xVYEfb95-PjMIYZqEqueLde1yhH~fS9CTqzNLp-pwVl8QcoyBL75x2IJn2iYVrVNFDmeN7KJWUj9mh5jP6FGJm2jMboO-YzsjIl7JJiEAvtuIaqkjEVEG4Tg~BTRXJWYvefeP5iEN0JCWUNoqfjKzNsC0stNszkd5cKY9Ue-ZhUYdArGOXZi6fhTxNqECGJvgJ4TGTjKz7Ooac0FqvfpSBiJN0ayYD8hYd12sPdPdGWVNnTdv7iQr1FlNwF2-rhA__&Key-Pair-Id=K1MP89RTKNH4J",
+    "status": 200,
+    "type": "image/webp",
+    "size": 59524
+  },
+  {
+    "url": "https://skybound-myc8c9et.manus.game/manus-storage/game/sha256/65bd65327917673e0ae05c4d3870fb8cec22f4b26c6bb156d925334025b623ab.webp",
+    "status": 307,
+    "type": "",
+    "size": 0
+  },
+  {
+    "url": "https://d36hbw14aib5lz.cloudfront.net/310519663458204631/Myc8C9eTyGtGyntVqp5xtU/game/sha256/65bd65327917673e0ae05c4d3870fb8cec22f4b26c6bb156d925334025b623ab.webp?Expires=1794182400&Signature=VGlkDH22qOvPcIcbOwSMhjJyO6vnN8NRdhyM1ETiBbSrqUtVxjzvWauQH7RVZ-eUMiBe2dsWNuydYp5w1rlfwiSBsATPKbU7uN0ZFOGt1DnPny3lbFoD~NDitGVijDF94YgTfRHM7hEv9VMeUswYxlxNoKto-1V2M0MnE-mjr3PDBbuVWyIYTCpVdyCVRNUIhaKfZ4yr~gtEVQiYF7wbVvaBf2asxTPo-r9URrR4BueZa1crm4hBD2V70VZMOFPhQ6IjtLt19rXwAX29wEekngj0DZlPN5hDufJkc8VtwN5QaMqSsLwHybHjS62tbequLUObyHWC288pPzL9ebFZrw__&Key-Pair-Id=K1MP89RTKNH4J",
+    "status": 200,
+    "type": "image/webp",
+    "size": 11534
+  },
+  {
+    "url": "https://skybound-myc8c9et.manus.game/manus-storage/game/sha256/c1bef92acdf34150b35bdaef2fe910e376d522f74d5401074619f8554a1cb69a.webp",
+    "status": 307,
+    "type": "",
+    "size": 0
+  },
+  {
+    "url": "https://d36hbw14aib5lz.cloudfront.net/310519663458204631/Myc8C9eTyGtGyntVqp5xtU/game/sha256/c1bef92acdf34150b35bdaef2fe910e376d522f74d5401074619f8554a1cb69a.webp?Expires=1794182400&Signature=s9sxhVvbgNWnKGrW852xjRmBSKxHcyFOIjqz8XEgLw~tvXTRqKRFE8FcrJGCsTHxcxgzRLsAaMeXNMGIC7N5QYIO-xuzC7loQWSmmXkT6zsrVfN4u7uMvL-rnjssyx2I2nLvJZQa-c9S6rm7r4v3HPcfcIHw6UX~-hEbl4LKnLsfy7gze7uHXMtK053ULT0b5XMKZDpzPuHKDiBoPEIFzixzxKe8xbf781HjN9mrwW5zbRAQx3HU4~UEZNYFT74Gf6zg8104DJood9D9vYqh-pwHKMTilVFnejLMMRlHFp~oQNY1Tj2vI2BJuamwPfsue6Hg6enb1iprWrasPkwbbg__&Key-Pair-Id=K1MP89RTKNH4J",
+    "status": 200,
+    "type": "image/webp",
+    "size": 196474
+  },
+  {
+    "url": "https://skybound-myc8c9et.manus.game/manus-storage/game/sha256/804ebf1517d19d3eb7d28eb5bcfc27964ca0a3d409604a9266efa1138c5b2aec.webp",
+    "status": 307,
+    "type": "",
+    "size": 0
+  },
+  {
+    "url": "https://d36hbw14aib5lz.cloudfront.net/310519663458204631/Myc8C9eTyGtGyntVqp5xtU/game/sha256/804ebf1517d19d3eb7d28eb5bcfc27964ca0a3d409604a9266efa1138c5b2aec.webp?Expires=1794182400&Signature=sMkx~pAQjMtQW4JE59ZiHV5ABAi8oWyD6gq6majmJKwRQn0hYGhs8clymvMoVMg4QAUO6qL~Zf0AR4Z~RZGqmiO-L8-mkc~RFFLuK1l6KPOLoSsXb1gXV-4M8TMEyQKCmYcGqAJpVOPQPzewbRMukCx7j1tPRvSGW4tINfDEIgP40~h70jP29hwUNhZqKaNxnpa8FPDZGkn4muDZPyYdIypQsrX41AGd~TqCuvgPRYkI~Sfl40PFwY37ew3vGAhR0b6gQmQMldbfPGtFmFxDjbEqbUHmTA005mu3U1yn4xPl3QOQFbZYdQDpS2S0cBJg0DEN0NmY0Q-i3qPRk--iqw__&Key-Pair-Id=K1MP89RTKNH4J",
+    "status": 200,
+    "type": "image/webp",
+    "size": 13208
+  },
+  {
+    "url": "https://skybound-myc8c9et.manus.game/manus-storage/game/sha256/4a9cd3ed0c13f874ce87ce161cfdd0716ac416502c947ce2e194deac18625c2e.webp",
+    "status": 307,
+    "type": "",
+    "size": 0
+  },
+  {
+    "url": "https://d36hbw14aib5lz.cloudfront.net/310519663458204631/Myc8C9eTyGtGyntVqp5xtU/game/sha256/4a9cd3ed0c13f874ce87ce161cfdd0716ac416502c947ce2e194deac18625c2e.webp?Expires=1794182400&Signature=R0HExs90XO-Y4eukCLtPGs5ZsJoieEwuX8-YrCD~6DSb6dDJeiWzJkO5HyFxSDf20~8WH03VN0bcsz9Q5i5mooMyEA3qLfkn~pBEVhXST28g5W5LoGRWjNzqeEdF8CG8PbHgR6pg0aSDlSHGOBforUziSE~zUravrgFPBVxQ1tOOO~K55L5owZR7dmKRI7gPfXmeq5V-RgF6SpKVZyhVv-d5W-mFpbJJ3R63hiJU~qja0Jq~qsMC5cgOZQpl6yU3wW8mqffAx10cNAv6Y0zxDmEyV3TEBMAjaPm4wvVL7otFwmrLPy5IYdd4QdE3Xru3j8TJEqIvt65GVgzLugOdBQ__&Key-Pair-Id=K1MP89RTKNH4J",
+    "status": 200,
+    "type": "image/webp",
+    "size": 40488
+  },
+  {
+    "url": "https://skybound-myc8c9et.manus.game/manus-storage/game/sha256/fd51977bb523172a96c373c503e5dcd438f9cb78baae0107aef6349bd691461f.webp",
+    "status": 307,
+    "type": "",
+    "size": 0
+  },
+  {
+    "url": "https://d36hbw14aib5lz.cloudfront.net/310519663458204631/Myc8C9eTyGtGyntVqp5xtU/game/sha256/fd51977bb523172a96c373c503e5dcd438f9cb78baae0107aef6349bd691461f.webp?Expires=1794182400&Signature=qsItUmMiWIryhUU4dBoeR5UZFxvAheV9n1a9VQzor5~C4WxT4bQTnGLyz28V70dTuBdOHxNHPWPFYcUrx-STvd8soE3emrKUXPecamGRKxfRtgeoUHeV4UVkGKR8zLPk9W1bJNgEtb71W8mepCZgZ-gvPHejMGdLYj9eViimSdELrzWEfZ~v5hhoiZJk7b5CFxspxPN9WKzCd2jHbpVfZi~Ke12yKoZZc3Kicv39XWB2qojYigJkf6hqxRsSkLAoEy2v6-C~attWS61BbXbS6uQfUW3uUdkcxhkYUhodMZelGZ~~cYYijL7MDaNLYgIhKsBtwxSrb7pNzUO2EuPIwg__&Key-Pair-Id=K1MP89RTKNH4J",
+    "status": 200,
+    "type": "image/webp",
+    "size": 45376
+  }
+]
