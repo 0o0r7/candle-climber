@@ -20,7 +20,7 @@ jobs:
   audit:
     if: github.ref_name == 'research/studio-sample-catalog-v2'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,23 +40,28 @@ jobs:
         run: node scripts/studio-sample-tech-audit.mjs
         env:
           CONCURRENCY: 2
-          PAGE_TIMEOUT_MS: 45000
-          SETTLE_MS: 3000
+          PAGE_TIMEOUT_MS: 30000
+          GAME_BUDGET_MS: 60000
+          SETTLE_MS: 1200
+          BODY_TIMEOUT_MS: 1500
+          DRAIN_TIMEOUT_MS: 3000
 
-      - name: Commit audit outputs on the research branch
+      - name: Commit latest checkpoint on the research branch
         if: always() && github.ref_name == 'research/studio-sample-catalog-v2'
         run: |
           git config user.name "studio-sample-audit-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add analysis/studio-sample-catalog/technical-audit.json analysis/studio-sample-catalog/technical-summary-fa.md analysis/studio-sample-catalog/screenshots || true
+          for file in analysis/studio-sample-catalog/technical-audit.json analysis/studio-sample-catalog/technical-summary-fa.md; do
+            if [ -f "$file" ]; then git add "$file"; fi
+          done
           if git diff --cached --quiet; then
-            echo "No audit outputs to commit."
+            echo "No checkpoint outputs to commit."
           else
-            git commit -m "Add public sample-game technical audit [skip ci]"
+            git commit -m "Update public sample-game audit checkpoint [skip ci]"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
 
-      - name: Upload audit outputs as a backup artifact
+      - name: Upload screenshots and data as a backup artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
