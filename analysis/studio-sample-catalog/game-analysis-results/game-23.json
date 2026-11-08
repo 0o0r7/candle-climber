@@ -1,0 +1,110 @@
+{
+  "id": "game-23",
+  "title": "Critter Kart",
+  "observation_level": "page_only",
+  "observed_goal": "در قاب load هدف صفحه‌ای مسابقه در یک گرندپری و گزینه‌های Race، Leaderboard و Settings دیده می‌شود؛ اجرای مسابقه یا هدف عملی داخل بازی مشاهده نشد.",
+  "observed_controls": [
+    "متن صفحه و منو: ← → برای انتخاب و Enter برای شروع",
+    "متن صفحه: Esc برای بازگشت",
+    "در قاب‌ها، کنترل مسابقه یا ورودی پذیرفته‌شده برای شروع مسابقه مشاهده نشد"
+  ],
+  "observed_core_loop": "مشاهده نشد/نامشخص؛ همه قاب‌های پس از تعامل همچنان در منوی انتخاب مسابقه‌گر هستند و چرخه رانندگی، دور، برخورد، تقویت، پایان یا نتیجه ثبت نشده است.",
+  "progress_feedback": "مشاهده نشد/نامشخص؛ قاب‌ها فقط انتخاب مسابقه‌گر و چهار شاخص متنی Top speed، Acceleration، Handling و Weight را نشان می‌دهند، نه پیشروی مسابقه، دور یا رتبه زنده.",
+  "decisions_risk_reward": "در صفحه انتخاب، انتخاب بین گزینه‌های مختلف و تفاوت ظاهری/شاخصی آن‌ها دیده می‌شود؛ ریسک، پاداش یا اثر این انتخاب‌ها در اجرای واقعی مشاهده نشد.",
+  "rewards": "مشاهده نشد/نامشخص؛ متن کارت رسمی از boosts و ابزارهای پرتابی نام می‌برد، اما هیچ‌کدام در اجرای بازی یا قاب‌ها تأیید نشده‌اند.",
+  "penalties_failure": "مشاهده نشد/نامشخص؛ برخورد، باخت، جریمه، توقف یا بازنشانی مسابقه در قاب‌ها وجود ندارد.",
+  "outcomes_replay": "مشاهده نشد/نامشخص؛ نتیجه، برد/باخت، زمان، رتبه نهایی یا مسیر بازپخش ثبت نشده است.",
+  "onboarding": "صفحه آغازین دکمه‌های Race، Leaderboard و Settings و راهنمای Enter Select/Esc Back را نشان می‌دهد؛ صفحه انتخاب نیز شش گزینه، راهنمای ← → choose و Enter start و دکمه‌های Back/Start race دارد. شروع موفق مسابقه مشاهده نشد.",
+  "visual_audio_accessibility": "قاب‌ها رابط رنگی و خوانا با دکمه‌های بزرگ، متن سفید با کنتراست تیره و شاخص‌های نواری دارند. صدای فعال یا تنظیمات دسترسی مشاهده نشد. در technical trace هشدار AudioContext ثبت شده، بنابراین وضعیت صدای بازی نامشخص است.",
+  "technical_clues": [
+    "در metadata یک canvas با ابعاد 1280×800 و یک canvas دیگر با ابعاد 220×220 ثبت شده است؛ این فقط سرنخ فنی است و رفتار بازی را اثبات نمی‌کند.",
+    "resource_type_totals شامل 8 script، یک stylesheet، سه font، سه fetch و پنج ping است؛ script_count_scanned و script_bytes_scanned هر دو صفرند، پس منطق داخلی قابل استنتاج نیست.",
+    "هشدار AudioContext می‌گوید شروع صدا پس از user gesture مجاز نشده است؛ این سرنخ فنی است، نه اثبات نبود صدای بازی.",
+    "هشدار fallback نرم‌افزاری WebGL ثبت شده است؛ این درباره محیط رندر است و نشانه‌ای از مکانیک بازی نیست.",
+    "metadata می‌گوید تغییر بصری ممکن است ناشی از انیمیشن یا گذر زمان باشد و پذیرش ورودی را ثابت نمی‌کند؛ stageها نشان می‌دهند تغییر انتخاب از Mochi به Burr و سپس Lolo دیده شده، اما ورودی پذیرفته‌شده اثبات نشده است."
+  ],
+  "transferable_principles": [
+    "پیشروی را با بازخورد قابل مشاهده و قابل تکرار از وضعیت یا نتیجه نشان بده، نه با تغییر قاب منفرد.",
+    "ورودی‌های اصلی را پیش از ورود به چرخه بازی در یک راهنمای کوتاه و روی صفحه آشکار کن.",
+    "انتخاب‌های اولیه می‌توانند تفاوت‌های قابل فهم در شاخص‌ها ایجاد کنند، اما اثر واقعی آن‌ها باید در اجرای قابل مشاهده سنجیده شود.",
+    "ادعاهای کارت معرفی را از شواهد اجرای واقعی جدا نگه دار و برای هر کدام منبع و سطح اطمینان مشخص کن."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber، امتیاز یا رتبه باید فقط بازتاب مهارت و عملکرد قابل مشاهده باشد؛ این قاب‌ها الگویی برای اثبات رتبه مسابقه ارائه نمی‌کنند.",
+    "هیچ مزیت بازی‌محور نباید به خرید یا wallet وابسته شود؛ از شواهد این بازی نیز چنین مزیتی مشاهده نشد.",
+    "از free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ نیازمند کنترل جدید در طراحی پایه پرهیز شود؛ هر کدام فقط به‌عنوان فرضیه‌ای نیازمند آزمون جداگانه مطرح است، نه نتیجه این بررسی.",
+    "راهنمایی ورودی باید صریح و درون‌صفحه‌ای باشد، اما پذیرش ورودی و چرخه کامل باید با قاب‌های تکرارشونده و نتیجه مستقیم آزموده شود."
+  ],
+  "do_not_copy": [
+    "نام‌ها، شخصیت‌ها، art، محیط، سطح، متن، صدا، برند یا assetهای این بازی را بازتولید یا پیشنهاد نکن.",
+    "ادعاهای کارت رسمی درباره تعداد شرکت‌کنندگان، دورها، تقویت‌ها یا ابزارها را به‌عنوان مکانیک تأییدشده کپی نکن.",
+    "تغییر انتخاب در قاب‌های بعدی را به‌تنهایی به‌عنوان اثبات پذیرش ورودی یا اجرای مسابقه کپی نکن."
+  ],
+  "evidence": [
+    {
+      "claim": "قاب load صفحه عنوان را با Race، Leaderboard و Settings نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-23:screenshot:load"
+    },
+    {
+      "claim": "متن صفحه در after_start راهنمای Enter Select و Esc Back و صفحه انتخاب مسابقه‌گر با Enter start را ارائه می‌کند.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-23:page_text:after_start"
+    },
+    {
+      "claim": "در قاب after_start منوی انتخاب و مسابقه‌گر Mochi با شاخص‌های Top speed، Acceleration، Handling و Weight دیده می‌شود.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-23:screenshot:after_start"
+    },
+    {
+      "claim": "در قاب after_key_burst گزینه انتخاب‌شده به Burr تغییر کرده است، اما این تغییر به‌تنهایی پذیرش ورودی را ثابت نمی‌کند.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-23:screenshot:after_key_burst"
+    },
+    {
+      "claim": "در قاب after_combined_input گزینه انتخاب‌شده Lolo است و دکمه Start race هنوز در صفحه دیده می‌شود؛ مسابقه فعال یا نتیجه دیده نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-23:screenshot:after_combined_input"
+    },
+    {
+      "claim": "قاب late همچنان همان منوی انتخاب و دکمه Start race را نشان می‌دهد؛ چرخه کامل بازی یا نتیجه مشاهده نشد.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-23:screenshot:late"
+    },
+    {
+      "claim": "کارت رسمی از شش critter، سه lap، boosts، pepper jets، honey traps و پنج rival در Sugarloop Valley ادعا می‌کند؛ این ادعا با اجرای بازی در قاب‌ها play-test نشده است.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-23:official_card:load"
+    },
+    {
+      "claim": "metadata ثبت می‌کند که تغییر screenshot ممکن است animation یا گذر زمان باشد و اثبات فهم ورودی نیست.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst",
+      "certainty": "candidate_only",
+      "source_reference": "game-23:technical_trace:after_key_burst"
+    },
+    {
+      "claim": "هشدار AudioContext و fallback نرم‌افزاری WebGL در console ثبت شده‌اند؛ آن‌ها سرنخ فنی محیط هستند، نه شواهد مکانیک.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-23:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "فقط از evidence.json و پنج قاب همین بازی استفاده شد؛ وب‌گردی، اجرای مستقل بازی و کنترل پنهان انجام نشد. start_action برابر none است. هیچ قاب فعالِ مسابقه، چرخه تکراری، دور، رتبه، برد/باخت یا نتیجه مستقیم وجود ندارد. تغییر بین قاب‌ها ممکن است از انیمیشن یا گذر زمان باشد. نبودن عناصر بازی در قاب آغازین به‌معنای نبودن آن‌ها در کل بازی نیست."
+}

@@ -1,0 +1,106 @@
+{
+  "id": "game-33",
+  "title": "Lantern Wayfarer",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "متن صفحه هدف را حمل آخرین شعله از میان تاریکی بیان می‌کند؛ کارت رسمی نیز عبور از جنگل مه‌آلود و رسیدن از مسیرهای پنهان‌شونده با نور فانوس را ادعا می‌کند، اما این ادعای کارت با اجرای کامل آزموده نشده است.",
+  "observed_controls": [
+    "در metadata کلیدهای Enter، Space، ArrowUp، w و ArrowRight و ترکیب نگه‌داشتن ArrowRight + Space برای ۹۰۰ میلی‌ثانیه آزموده شده‌اند، اما پذیرفته‌شدن هیچ‌یک از ورودی‌ها از روی قاب‌ها ثابت نیست.",
+    "کنترل‌های قطعی و قابل‌اتکا: مشاهده نشد/نامشخص"
+  ],
+  "observed_core_loop": "در قاب after_combined_input صحنهٔ فعال، شخصیت در سمت چپ، سکوهای زمینی و سکوهای مرتفع روشن‌شده، و در قاب late همان صحنه با زمان متفاوت دیده می‌شود؛ این فقط نشانهٔ مستقیم از بازی فعال است. چرخهٔ تکراری حرکت، پرش، فرود، خطر و نتیجه در قاب‌ها کامل و واضح نیست؛ مشاهده نشد/نامشخص.",
+  "progress_feedback": "صفحهٔ بارگذاری متن هدف و درصد ۰٪، ۷٪ و ۹۹٪ را در مراحل load، after_start و after_key_burst نشان می‌دهد؛ تغییر قاب می‌تواند ناشی از انیمیشن یا گذشت زمان باشد و اثر ورودی را ثابت نمی‌کند. در بازی فعال، زمان ۰:۰۱٫۰۷ و ۰:۰۳٫۲۰ و دو نوار HUD دیده می‌شود، اما معنای دقیق نوارها مشاهده نشد/نامشخص.",
+  "decisions_risk_reward": "قاب فعال سکوهای با ارتفاع متفاوت، نواحی تاریک/روشن‌شده و تیغ‌های پایین سمت راست را نشان می‌دهد؛ بنابراین وجود موانع و نیاز احتمالی به زمان‌بندی فضایی مستقیم است، اما تصمیم‌های واقعی بازیکن و رابطهٔ ریسک/پاداش مشاهده نشد/نامشخص.",
+  "rewards": "در HUD بالای چپ سه نشان کوچک و یک نوار همراه نماد شعله دیده می‌شود؛ نوع، مقداردهی و نقش پاداش این عناصر مشاهده نشد/نامشخص. کارت رسمی حمل شعله را ادعا می‌کند، نه پاداش تأییدشده در اجرای کامل.",
+  "penalties_failure": "شکل‌های شبیه تیغ در پایین سمت راست قاب‌های فعال دیده می‌شوند، اما برخورد، آسیب، شکست، بازنشانی یا جریمه مستقیماً ثبت نشده است؛ مشاهده نشد/نامشخص.",
+  "outcomes_replay": "هیچ قاب نتیجه، برد، باخت، پایان مرحله یا بازپخش کامل نشان نمی‌دهد؛ مشاهده نشد/نامشخص.",
+  "onboarding": "صفحه با عنوان، جملهٔ هدف و درصد بارگذاری آغاز می‌شود و سپس قاب after_combined_input عنوان بخش و یک جملهٔ توضیحی کوتاه نشان می‌دهد؛ دستورالعمل کنترل یا آموزش تعاملی مشاهده نشد/نامشخص.",
+  "visual_audio_accessibility": "قاب‌ها محیطی دوبعدی تاریک با نورهای موضعی، سکوهای قابل‌دیدن در نور و HUD خوانا در گوشهٔ بالا نشان می‌دهند. صدا، زیرنویس، تنظیمات دسترس‌پذیری، کنتراست قابل‌تنظیم و گزینه‌های ورودی مشاهده نشد/نامشخص.",
+  "technical_clues": [
+    "گزارش فنی کنسول Godot Engine v4.7.2.stable.official و اجرای WebGL 2.0/OpenGL ES 3.0 با Emscripten 4.0.20 را ثبت کرده است؛ این سرنخ فنی است و منطق بازی را ثابت نمی‌کند.",
+    "در metadata یک canvas با ابعاد ۱۲۸۰×۸۰۰ ثبت شده و شمارندهٔ منابع شامل یک document، سه script، هفت fetch و دو ping است؛ محتوای script اسکن نشده و هیچ engine marker یا tuning constant candidate ثبت نشده است.",
+    "هشدار نرم‌افزار WebGL و یک خطای بارگذاری منبع با وضعیت ۴۰۳ ثبت شده‌اند؛ اثر آن‌ها بر بازی مشاهده نشد/نامشخص."
+  ],
+  "transferable_principles": [
+    "هدف را در یک جملهٔ کوتاه و قابل‌مشاهده ارائه کن، سپس بازخورد پیشرفت را با شاخصی مستقل از ادعای موفقیت ورودی نشان بده.",
+    "دید محدود باید با نور یا آشکارسازی تدریجی اطلاعات همراه شود، اما باید با آزمون مستقیم خوانایی و کنترل‌پذیری اعتبارسنجی شود.",
+    "موانع را طوری جای‌گذاری کن که ریسک زمان‌بندی و مسیر از قاب قابل‌فهم باشد، بدون نتیجه‌گیری دربارهٔ تنبیه تا زمانی که برخورد و پیامد ثبت نشده است.",
+    "بین متن معرفی، تغییر زمانی قاب و اجرای واقعی ورودی مرز روشن نگه دار؛ تغییر تصویر به‌تنهایی معیار پذیرش کنترل نیست."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber می‌توان از هدف کوتاه، بازخورد پیشرفت و آشکارسازی محدود محیط به‌صورت انتزاعی الهام گرفت؛ این انتقال نباید asset یا هویت بصری این بازی را بازتولید کند.",
+    "امتیاز/رتبه در Candle Climber باید فقط مهارت را اندازه بگیرد و نباید به خرید یا wallet مزیت بدهد.",
+    "free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ محتاج کنترل جدید نباید به‌عنوان راه‌حل قطعی منتقل شود؛ هرکدام فقط فرضیه‌ای نیازمند آزمون جداگانه است."
+  ],
+  "do_not_copy": [
+    "نام‌ها، شخصیت، art، level، متن، صدا، برند یا assetهای این بازی را بازتولید یا پیشنهاد نکن.",
+    "از تبدیل ادعای کارت رسمی یا تغییر قاب‌های بارگذاری به ادعای کنترل پذیرفته‌شده، چرخهٔ کامل یا برد/باخت خودداری کن.",
+    "نبودن عنصر در قاب آغازین را نبودن آن در کل بازی تلقی نکن."
+  ],
+  "evidence": [
+    {
+      "claim": "صفحهٔ آغازین هدف حمل آخرین شعله از میان تاریکی و مقدار ۰٪ را نمایش می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-33:screenshot:load"
+    },
+    {
+      "claim": "صفحهٔ after_start همان متن هدف را با مقدار ۷٪ نمایش می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-33:screenshot:after_start"
+    },
+    {
+      "claim": "صفحهٔ after_key_burst مقدار ۹۹٪ را نمایش می‌دهد، اما این تغییر به‌تنهایی پذیرش کلیدها را ثابت نمی‌کند.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-33:screenshot:after_key_burst"
+    },
+    {
+      "claim": "متن مرحلهٔ ثبت‌شده برای load، after_start و after_key_burst به‌ترتیب هدف و ۰٪، ۶٪ و ۹۹٪ را گزارش می‌کند.",
+      "source_type": "page_text",
+      "stage": "load; after_start; after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-33:page_text:load; after_start; after_key_burst"
+    },
+    {
+      "claim": "کارت رسمی عبور از جنگل مه‌آلود با دویدن، wall-jump، dash و آشکارشدن سکوهای پنهان در نور فانوس را ادعا می‌کند؛ اجرای کامل این موارد آزموده نشده است.",
+      "source_type": "official_card",
+      "stage": "gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-33:official_card:gallery_description"
+    },
+    {
+      "claim": "قاب after_combined_input صحنهٔ فعال با عنوان بخش، شخصیت، سکوها، ناحیه‌های نور و HUD زمان/نوار را نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-33:screenshot:after_combined_input"
+    },
+    {
+      "claim": "قاب late همان صحنهٔ فعال را با زمان متفاوت و تیغ‌های پایین سمت راست نشان می‌دهد؛ چرخه یا پیامد برخورد از آن نتیجه نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-33:screenshot:late"
+    },
+    {
+      "claim": "کنترل‌های Enter، Space، ArrowUp، w، ArrowRight و نگه‌داشتن ArrowRight + Space برای ۹۰۰ میلی‌ثانیه فقط به‌عنوان ورودی‌های آزموده‌شده ثبت شده‌اند، نه ورودی‌های پذیرفته‌شده.",
+      "source_type": "technical_trace",
+      "stage": "capture.controls_attempted",
+      "certainty": "candidate_only",
+      "source_reference": "game-33:technical_trace:capture.controls_attempted"
+    },
+    {
+      "claim": "ثبت فنی Godot، WebGL/OpenGL ES، Emscripten، canvas ۱۲۸۰×۸۰۰، و هشدار software WebGL را گزارش می‌کند؛ منطق بازی از آن‌ها قابل‌استنتاج قطعی نیست.",
+      "source_type": "technical_trace",
+      "stage": "capture.console_messages; capture.canvas_inventory; capture.engine_markers",
+      "certainty": "direct",
+      "source_reference": "game-33:technical_trace:capture.console_messages; capture.canvas_inventory; capture.engine_markers"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "فقط evidence.json و پنج قاب current همین بازی بررسی شد؛ وب‌گردی، اجرای مجدد و اسکن script انجام نشد. تغییر تصویری میان قاب‌ها ممکن است ناشی از انیمیشن یا گذشت زمان باشد. قاب‌های فعال نشانهٔ مستقیم از بازی هستند، اما چرخهٔ تکراری، پذیرش ورودی، برخورد، شکست، برد و replay ثبت نشده‌اند. source_gallery_url در metadata خالی است، بنابراین برای ادعای کارت رسمی source_url دقیقاً به‌صورت رشتهٔ خالی نگه داشته شد."
+}

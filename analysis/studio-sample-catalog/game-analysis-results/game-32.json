@@ -1,0 +1,106 @@
+{
+  "id": "game-32",
+  "title": "Starveil Barrage",
+  "observation_level": "page_only",
+  "observed_goal": "در صفحهٔ منوی اصلی، متن صفحه می‌گوید: Thread the nebula. Breach the gate. Chain every graze. این هدفِ بیان‌شدهٔ صفحه است و با اجرای بازی آزموده نشده؛ هدف عملیِ بازی در قاب‌ها مشاهده نشد/نامشخص.",
+  "observed_controls": [
+    "در منوی اصلی، متن قاب‌های after_combined_input و late عبارت ENTER / Z Select را نشان می‌دهد؛ این دستور/متن صفحه است، نه اثبات پذیرش ورودی.",
+    "در متادیتا ورودی‌های Enter، Space، ArrowUp، w و ArrowRight آزموده شده‌اند، اما پذیرفته‌شدن هیچ‌یک از آن‌ها از قاب‌ها ثابت نیست."
+  ],
+  "observed_core_loop": "چرخهٔ بازی مشاهده نشد/نامشخص؛ قاب‌های مفید فقط بارگذاری و سپس منوی اصلی را نشان می‌دهند و قابِ بازی فعال، تکرار، شلیک، نزدیک‌گذری، گریز، آسیب یا نتیجه وجود ندارد.",
+  "progress_feedback": "در قاب‌های load، after_start و after_key_burst نوار بارگذاری به‌ترتیب 0٪، 3٪ و 90٪ دیده می‌شود؛ این پیشرفت بارگذاری است، نه بازخورد پیشرفت بازی. در after_combined_input متن صفحه Starting game… در متادیتا ثبت شده، اما قاب دیداری منوی اصلی را نشان می‌دهد. بازخورد داخل بازی مشاهده نشد/نامشخص.",
+  "decisions_risk_reward": "تصمیم‌ها و ریسک/پاداشِ قابل مشاهده در اجرای بازی مشاهده نشد/نامشخص. ادعای کارت دربارهٔ زنجیره‌کردن near missها و انفجار پاک‌کنندهٔ صفحه، فقط ادعای رسمیِ آزمون‌نشده است.",
+  "rewards": "پاداش اجرایی مشاهده نشد/نامشخص. در منوی اصلی قاب‌ها بخش LOCAL BEST با مقدار خط تیره دیده می‌شود؛ امتیاز ثبت‌شده‌ای در قاب‌ها دیده نمی‌شود.",
+  "penalties_failure": "جریمه، شکست، آسیب، از دست‌دادن جان یا پایان بازی مشاهده نشد/نامشخص.",
+  "outcomes_replay": "نتیجهٔ برد/باخت یا پایان دور مشاهده نشد/نامشخص؛ امکان بازپخش نیز مشاهده نشد/نامشخص. تفاوت زمانی بین قاب‌ها فقط تغییر وضعیت ثبت‌شده از بارگذاری به منو است و پذیرش ورودی را ثابت نمی‌کند.",
+  "onboarding": "صفحهٔ منوی اصلی گزینه‌های LAUNCH، TRAINING، SETTINGS و CREDITS & LICENSES و نیز انتخاب زبان EN / 中文 را نشان می‌دهد؛ راهنمای مرحله‌ای یا آموزشِ اجراشده مشاهده نشد/نامشخص.",
+  "visual_audio_accessibility": "قاب‌ها یک منوی پرکنتراست با متن انگلیسی/چینی، دکمه‌های بزرگ و گزینهٔ زبان EN / 中文 نشان می‌دهند. صدا مشاهده نشد/نامشخص؛ تنظیمات دسترسی و خوانایی در اجرا مشاهده نشد/نامشخص.",
+  "technical_clues": [
+    "متادیتا موتور Godot Engine v4.7.2.stable.official و ساخت Emscripten 4.0.20، تک‌نخی و WebGL 2.0 را در console ثبت کرده است؛ این سرنخ فنی است و دربارهٔ مکانیک بازی نتیجه‌گیری نمی‌کند.",
+    "یک خطای HTTP با وضعیت 403 در console ثبت شده، اما علت و اثر آن بر تجربه در قاب‌ها مشاهده نشد/نامشخص.",
+    "متادیتا canvas با اندازهٔ 1280×800 و نبود تصویر قابل مشاهدهٔ جداگانه را ثبت کرده است؛ این فقط توصیف فنی محیط ثبت است."
+  ],
+  "transferable_principles": [
+    "هدف و ورودی را با بازخورد دیداریِ قابل آزمون از ادعای بازاریابی جدا کن.",
+    "پیشرفت بارگذاری یا تغییر قاب را به‌تنهایی به‌عنوان پذیرش ورودی یا پیشرفت بازی تفسیر نکن.",
+    "برای یک اکشن تک‌ورودی، نتیجهٔ موفق/ناموفق باید در قاب‌های قابل مشاهده و تکرارشونده ثبت شود.",
+    "بازخورد وضعیت و دسترسی باید در خود صفحهٔ تعامل روشن باشد، بدون اتکا به حدس دربارهٔ لایهٔ فنی."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber، score/rank باید فقط بازتاب مهارت و نتیجهٔ اجرای بازی باشد، نه خرید یا wallet و نه مزیت پرداختی.",
+    "هر الگوی انتقالی باید با چرخهٔ قابل مشاهده آزموده شود؛ این نمونه چرخهٔ بازی ارائه نمی‌کند، پس فقط فرضیه است و نباید مکانیک آن را کپی کرد.",
+    "free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ نیازمند کنترل جدید را به‌عنوان راه‌حل قطعی اضافه نکن؛ در صورت بررسی، صرفاً فرضیهٔ نیازمند آزمون مستقل باشد."
+  ],
+  "do_not_copy": [
+    "نام، شخصیت، art، level، متن، صدا، برند یا asset این بازی را بازتولید یا پیشنهاد نکن.",
+    "ادعای bullet-hell، near miss، burst یا guardian را به‌عنوان مکانیک تأییدشده کپی نکن؛ این‌ها در قاب‌ها اجرا نشده‌اند.",
+    "تغییر 0٪/3٪/90٪ بارگذاری و جابه‌جایی به منو را به‌عنوان اثبات کنترل یا چرخهٔ بازی استفاده نکن."
+  ],
+  "evidence": [
+    {
+      "claim": "قاب load صفحهٔ بارگذاری Starveil Barrage را با 0٪ و نوار بارگذاری نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-32:screenshot:load"
+    },
+    {
+      "claim": "قاب after_start همان صفحهٔ بارگذاری را با 3٪ نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-32:screenshot:after_start"
+    },
+    {
+      "claim": "قاب after_key_burst همان صفحهٔ بارگذاری را با 90٪ نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-32:screenshot:after_key_burst"
+    },
+    {
+      "claim": "قاب after_combined_input منوی اصلی را با گزینه‌های LAUNCH، TRAINING، SETTINGS و CREDITS & LICENSES، انتخاب زبان EN / 中文، و LOCAL BEST با خط تیره نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-32:screenshot:after_combined_input"
+    },
+    {
+      "claim": "قاب late نیز منوی اصلی را نشان می‌دهد و متن ENTER / Z Select در پایین صفحه دیده می‌شود.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-32:screenshot:late"
+    },
+    {
+      "claim": "متن صفحه در متادیتا عبارت Starting game… را برای stage after_combined_input ثبت کرده است، اما این متن به‌تنهایی بازی فعال یا پذیرش ورودی را ثابت نمی‌کند.",
+      "source_type": "page_text",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-32:page_text:after_combined_input"
+    },
+    {
+      "claim": "کارت رسمی بازی ادعا می‌کند: Thread the nebula, breach the gate, chain every graze؛ و آن را یک vertical bullet-hell با near miss، screen-clearing burst و three-phase guardian warship توصیف می‌کند.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-32:official_card:load"
+    },
+    {
+      "claim": "متادیتا Godot Engine v4.7.2، Emscripten 4.0.20، تک‌نخی و WebGL 2.0 را در console ثبت کرده است.",
+      "source_type": "technical_trace",
+      "stage": "late",
+      "certainty": "candidate_only",
+      "source_reference": "game-32:technical_trace:late"
+    },
+    {
+      "claim": "متادیتا تصریح می‌کند که تغییر تصویر ممکن است ناشی از animation یا گذر زمان باشد و اثبات فهم ورودی نیست.",
+      "source_type": "technical_trace",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-32:technical_trace:late"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "فقط evidence.json و پنج قاب ورودی همین بازی بررسی شد؛ وب‌گردی، اجرای دوباره، بررسی کد یا کنترل پنهان انجام نشد. قاب‌ها چرخهٔ بازی، نتیجه، شکست، امتیاز، صدا، پاسخ کنترل یا پذیرش ورودی را نشان نمی‌دهند. نبودن عنصر در قاب آغازین به‌معنای نبودن آن در کل بازی نیست. stageهای load، after_start، after_key_burst، after_combined_input و late و source_url از متادیتا گرفته شده‌اند."
+}

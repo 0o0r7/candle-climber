@@ -1,0 +1,101 @@
+{
+  "id": "game-08",
+  "title": "Space Worm 2D",
+  "observation_level": "page_only",
+  "observed_goal": "در صفحه‌ی منو، هدف به‌صورت متنی «Grow across the cosmos. Devour worlds. Outlast every rival.» بیان شده است؛ اجرای بازی فعال و رسیدن به این هدف مشاهده نشد.",
+  "observed_controls": [
+    "متن پایین صفحه‌ی منو: Arrows برای حرکت تمرکز، Tab برای حرکت تمرکز و Enter برای انتخاب.",
+    "در تنظیمات، گزینه‌ی Touch controls با مقدار Automatic دیده می‌شود؛ نوع کنترل لمسیِ فعال یا رفتار آن مشاهده نشد."
+  ],
+  "observed_core_loop": "چرخه‌ی بازی مشاهده نشد/نامشخص؛ قاب‌های load، after_start و after_key_burst همچنان منوی انتخاب حالت را نشان می‌دهند و قاب‌های after_combined_input و late صفحه‌ی Settings را نشان می‌دهند.",
+  "progress_feedback": "در منوی آغازین شمارنده‌ی 0 و Best peak 0 دیده می‌شود؛ تغییر آن، پیشرفت داخل بازی یا بازخورد حین بازی مشاهده نشد.",
+  "decisions_risk_reward": "صفحه‌ی منو سه حالت با توصیف‌های متفاوت و یک انتخاب Rival skill را نمایش می‌دهد، اما تصمیم‌گیری، ریسک، پاداش یا پیامد آن‌ها در اجرای بازی آزموده نشد.",
+  "rewards": "کارت رسمی از رشد، devour کردن و دنبال‌کردن طولانی‌ترین run می‌گوید؛ پاداش واقعی، امتیازگیری یا دریافت منابع در قاب‌ها مشاهده نشد.",
+  "penalties_failure": "کارت رسمی عبارت «One life» و «Outlast every rival» را دارد، اما شکست، برخورد، حذف یا جریمه‌ی اجرایی مشاهده نشد.",
+  "outcomes_replay": "برد، باخت، نتیجه‌ی دور، پایان run و امکان replay مشاهده نشد/نامشخص است.",
+  "onboarding": "منوی آغازین حالت‌های Free-for-All، Team Clash و Sandbox، انتخاب Rival skill، دکمه‌ی PLAY و دکمه‌ی How to Play را نشان می‌دهد؛ هیچ راهنمای تعاملی یا شروع موفق بازی مشاهده نشد.",
+  "visual_audio_accessibility": "قاب‌ها رابط فضایی پرکنتراست با دکمه‌های بزرگ، رنگ‌های متمایز و پس‌زمینه‌ی متحرک/تزئینی نشان می‌دهند. در Settings، Music volume روی 70%، Sound effects volume روی 80%، کلید Mute all audio خاموش، Reduced motion خاموش، Screen shake روشن، Show worm names روشن و Hazard alerts روی Full دیده می‌شود. فعال‌بودن یا اثر واقعی صدا و دسترسی در بازی مشاهده نشد.",
+  "technical_clues": [
+    "متادیتا یک canvas با ابعاد 1280×800 و صفحه‌ی بارگذاری‌شده با وضعیت capture=partial ثبت کرده است؛ این سرنخ فنی است و رفتار بازی را اثبات نمی‌کند.",
+    "لاگ فنی Godot Engine v4.7.2 و Emscripten 4.0.20 با WebGL 2.0 را گزارش می‌کند؛ candidate_only برای استنباط موتور/بستر.",
+    "در متادیتا visible_images خالی، script_bytes_scanned برابر 0 و engine_markers و tuning_constant_candidates خالی هستند؛ بنابراین منطق پنهان یا ثابت‌های تنظیمی از این ورودی‌ها قابل تأیید نیست.",
+    "هشدار متادیتا تصریح می‌کند تغییر تصویر می‌تواند ناشی از انیمیشن یا گذر زمان باشد و پذیرش ورودی را ثابت نمی‌کند؛ دو قاب متفاوت به‌تنهایی مدرک ورودی پذیرفته‌شده نیستند."
+  ],
+  "transferable_principles": [
+    "پیش از نسبت‌دادن موفقیت به ورودی، باید تغییر وضعیت، چرخه‌ی قابل تکرار و نتیجه‌ی مستقیم در قاب‌ها دیده شود.",
+    "منوی آغازین باید هدف، مسیر شروع و تنظیمات اصلی را با سلسله‌مراتب دیداری روشن ارائه کند.",
+    "بازخورد پیشرفت باید از شمارنده یا وضعیت ثابت منو فراتر رود و در طول اجرای واقعی قابل مشاهده باشد.",
+    "تنظیمات دسترسی مانند کاهش حرکت، لرزش صفحه، هشدار خطر و کنترل صدا باید مستقل و قابل تشخیص باشند."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber، score/rank باید فقط بازتاب مهارت و عملکرد بازی باشد، نه خرید یا wallet و هیچ مزیت پرداختی ایجاد نکند.",
+    "می‌توان اصلِ ارائه‌ی هدف و بازخورد وضعیت در منوی آغازین را به‌صورت انتزاعی بررسی کرد، اما این ورودی‌ها loop یا توازن Space Worm را برای Candle Climber تأیید نمی‌کنند.",
+    "از free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ نیازمند کنترل جدید پرهیز شود؛ هرکدام فقط باید به‌عنوان فرضیه‌ی نیازمند آزمون جداگانه مطرح شود، نه نتیجه‌ی این بررسی."
+  ],
+  "do_not_copy": [
+    "نام‌ها، شخصیت‌ها، art، متن، صدا، برند یا assetهای اختصاصی این بازی را بازتولید نکنید.",
+    "از ادعای کارت رسمی درباره‌ی چرخه، رقابت، رشد یا پاداش به‌عنوان رفتار تأییدشده‌ی اجرا استفاده نکنید.",
+    "تفاوت قاب‌ها را به‌عنوان اثبات فهمیدن یا پذیرفته‌شدن ورودی‌ها گزارش نکنید.",
+    "نبودن عنصر در قاب آغازین را دلیل نبودن آن در کل بازی ندانید."
+  ],
+  "evidence": [
+    {
+      "claim": "منوی آغازین سه حالت Free-for-All، Team Clash و Sandbox، انتخاب Rival skill، PLAY و How to Play را نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-08:screenshot:load"
+    },
+    {
+      "claim": "قاب after_start همچنان منوی انتخاب حالت را نشان می‌دهد؛ ورود به بازی فعال یا چرخه‌ی gameplay مشاهده نشد.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-08:screenshot:after_start"
+    },
+    {
+      "claim": "قاب after_key_burst نیز منو را نشان می‌دهد؛ تغییرات بصری احتمالی پذیرش ورودی را ثابت نمی‌کند.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-08:screenshot:after_key_burst"
+    },
+    {
+      "claim": "صفحه‌ی Settings گزینه‌های صدا، Reduced motion، Screen shake، Show worm names، Hazard alerts و Touch controls را نمایش می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-08:screenshot:after_combined_input"
+    },
+    {
+      "claim": "قاب late نیز Settings را نشان می‌دهد؛ نتیجه‌ی بازی یا پایان run مشاهده نشد.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-08:screenshot:late"
+    },
+    {
+      "claim": "کارت رسمی رشد در فضا، devour کردن، outlast کردن rival، یک زندگی و دنبال‌کردن طولانی‌ترین run را ادعا می‌کند؛ این ادعا با playtest تأیید نشده است.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-08:official_card:load"
+    },
+    {
+      "claim": "متن پایین منو Arrows / Tab to move focus / Enter to select را نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-08:screenshot:load"
+    },
+    {
+      "claim": "متادیتا موتور Godot، بستر WebGL 2.0/Emscripten، یک canvas 1280×800 و خطاها/هشدارهای بارگذاری را ثبت کرده است؛ این‌ها سرنخ فنی‌اند، نه اثبات منطق بازی.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-08:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "capture در متادیتا partial است؛ stage_textها خالی‌اند، after_combined_input و late timeout داشته‌اند، و قاب‌های fallback برای این دو stage از اجرای دیگری آمده‌اند. هیچ قابِ اجرای فعالِ روشن، چرخه‌ی تکراری، برخورد، امتیازگیری، برد یا باخت وجود ندارد. controls_attempted فقط فهرست تلاش‌هاست و پذیرش آن‌ها را ثابت نمی‌کند. وب‌گردی یا اجرای اضافی انجام نشد."
+}

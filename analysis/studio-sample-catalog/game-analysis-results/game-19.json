@@ -1,0 +1,81 @@
+{
+  "id": "game-19",
+  "title": "Super Defense",
+  "observation_level": "page_only",
+  "observed_goal": "در screenshot منوی صفحه، متن صفحه هدف را دفاع از یک campus و نگه‌داشتن power core در برابر droneها توصیف می‌کند؛ این هدف به اجرای بازی فعال یا چرخه قابل مشاهده تبدیل نشده است. کارت رسمی نیز ساخت تیمی از student heroها و بقا در waveهای افزایشی را ادعا می‌کند، اما playtest نشده است.",
+  "observed_controls": [
+    "در screenshot دکمه‌های Start your shift، Local high scores، Settings، How to play و Open Source Licenses و یک گزینه Hard Mode/Normal دیده می‌شود.",
+    "کلیدهای Enter، Space، ArrowUp، w، ArrowRight و نگه‌داشتن ArrowRight + Space برای 900ms در capture امتحان شده‌اند، اما پذیرش آن‌ها یا اثر بازی‌محورشان مشاهده نشد.",
+    "کنترل مؤثر برای بازی فعال مشاهده نشد/نامشخص است."
+  ],
+  "observed_core_loop": "چرخه اصلی مشاهده نشد/نامشخص است؛ هیچ قابِ دارای بازی فعال، wave، استقرار، حمله، دفاع، پیشرفت یا تکرار چرخه‌ای ثبت نشده است.",
+  "progress_feedback": "بازخورد پیشرفت در بازی مشاهده نشد/نامشخص است. متن منو فقط به حالت Hard Mode با late drones +50% HP و faster, bigger waves اشاره می‌کند؛ این متن صفحه است، نه نتیجه اجرای بازی.",
+  "decisions_risk_reward": "تصمیم‌ها، ریسک/پاداش و اثر انتخاب Hard Mode در اجرای بازی مشاهده نشد/نامشخص است. وجود گزینه‌ها در منو به‌تنهایی رفتار بازی را اثبات نمی‌کند.",
+  "rewards": "پاداش، امتیازدهی، high score یا منابع در اجرای بازی مشاهده نشد/نامشخص است؛ فقط دکمه Local high scores در منو دیده می‌شود.",
+  "penalties_failure": "شکست، آسیب، از دست‌رفتن منبع یا جریمه مشاهده نشد/نامشخص است. هیچ نتیجه مستقیم برد/باخت ثبت نشده است.",
+  "outcomes_replay": "نتیجه، برد، باخت، پایان wave یا امکان replay مشاهده نشد/نامشخص است.",
+  "onboarding": "صفحه با عنوان، توضیح متنی، انتخاب Normal/Hard Mode و دکمه Start your shift یک منوی شروع ارائه می‌کند؛ ورود موفق به بازی و آموزش تعاملی مشاهده نشد/نامشخص است.",
+  "visual_audio_accessibility": "در screenshot یک منوی خوانا با پنل تیره، دکمه‌های متنی، تصویر پس‌زمینه رنگی و گزینه‌های Settings و How to play دیده می‌شود. صدا در screenshot قابل مشاهده نیست. جزئیات دسترس‌پذیری، کنتراست واقعی، keyboard focus و تنظیمات قابل استفاده مشاهده نشد/نامشخص است.",
+  "technical_clues": [
+    "Technical trace نشان می‌دهد صفحه با Godot Engine v4.7.2.stable.official و WebGL 2.0/Compatibility بارگذاری شده است؛ این سرنخ فنی هویت موتور است و درباره منطق بازی یا کنترل‌ها اثباتی نیست.",
+    "Technical trace از streaming تعداد 36 sheet و آماده‌شدن موسیقی‌های bgm_tension.ogg و bgm_boss.ogg خبر می‌دهد؛ وجود resource/asset یا آماده‌شدن آن‌ها، پخش صدا یا رسیدن به boss را ثابت نمی‌کند.",
+    "در metadata مقدار interaction_visual_change_signal برابر false است و همه پنج screenshot همان sha256 را دارند؛ تغییر ورودی پذیرفته‌شده یا اجرای بازی از این capture پشتیبانی نمی‌شود.",
+    "هشدارهای fallback نرم‌افزاری WebGL و خطاهای 403/400 و remote-config در trace دیده می‌شوند؛ اثر آن‌ها بر تجربه بازی مشاهده نشد/نامشخص است."
+  ],
+  "transferable_principles": [
+    "پیش از استنتاج چرخه بازی، باید قاب‌هایی با وضعیت فعال، تغییر قابل انتساب به ورودی و نتیجه تکرارشونده ثبت شود.",
+    "سطح دشواری باید با بازخورد قابل مشاهده و پیامد روشن همراه باشد، نه صرفاً یک گزینه در منوی شروع.",
+    "رابط شروع باید هدف و اقدام بعدی را کوتاه و قابل فهم نشان دهد، در حالی که ادعاهای کارت از شواهد اجرای واقعی جدا نگه داشته می‌شوند.",
+    "ردیابی فنیِ موتور و بارگذاری منابع فقط سرنخ معماری است و جایگزین مشاهده تعامل، پیشرفت یا outcome نیست."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber فقط اصل کلیِ جداسازی منوی onboarding از چرخه بازی قابل انتقال است؛ این capture هیچ الگوی حرکتی یا timing قابل اقتباس را تأیید نمی‌کند.",
+    "هر score/rank در Candle Climber باید فقط بازتاب مهارت باشد و هیچ خرید یا wallet نباید مزیت ایجاد کند.",
+    "free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ محتاج کنترل جدید نباید پیشنهاد شود؛ هرکدام صرفاً فرضیه‌ای نیازمند آزمون جداگانه است، نه نتیجه این بازی."
+  ],
+  "do_not_copy": [
+    "نام، شخصیت‌ها، تصویرسازی، art direction، متن، صدا، برند یا assetهای این بازی را بازتولید یا پیشنهاد نکن.",
+    "ادعای کارت درباره heroها، comboها، waveها یا bossها را به‌عنوان مکانیک تأییدشده منتقل نکن.",
+    "از یکسان‌بودن قاب‌ها یا تغییر احتمالی زمان‌محور برای نتیجه‌گیری درباره پذیرفته‌شدن ورودی استفاده نکن.",
+    "ساختار یا محتوای اختصاصی صفحه را به‌عنوان الگوی مستقیم Candle Climber کپی نکن."
+  ],
+  "evidence": [
+    {
+      "claim": "در هر پنج stage یک منوی یکسان با عنوان Super Defense، متن هدف، گزینه Hard Mode/Normal و دکمه‌های شروع و منو دیده می‌شود؛ بازی فعال یا تغییر وضعیت قابل مشاهده نیست.",
+      "source_type": "screenshot",
+      "stage": "load; after_start; after_key_burst; after_combined_input; late",
+      "certainty": "direct",
+      "source_reference": "game-19:screenshot:load; after_start; after_key_burst; after_combined_input; late"
+    },
+    {
+      "claim": "متن صفحه می‌گوید droneهای آموزشی آزاد شده‌اند و باید heroها مستقر شوند، walkwayها نگه داشته شوند و power core فعال بماند؛ این متن هدف صفحه است و اجرای آن مشاهده نشده است.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-19:screenshot:load"
+    },
+    {
+      "claim": "کارت رسمی ساخت تیمی از student heroها، استفاده از elemental powers، chain کردن comboها و بقا در waveهای افزایشی و bossهای screen-filling را ادعا می‌کند؛ این ادعا با بازی تأیید نشده است.",
+      "source_type": "official_card",
+      "stage": "metadata gallery description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-19:official_card:metadata gallery description"
+    },
+    {
+      "claim": "متادیتا می‌گوید interaction_visual_change_signal=false، همه قاب‌ها hash یکسان دارند و caveat صراحتاً می‌گوید تغییر screenshot اثبات فهم ورودی نیست.",
+      "source_type": "technical_trace",
+      "stage": "capture metadata",
+      "certainty": "direct",
+      "source_reference": "game-19:technical_trace:capture metadata"
+    },
+    {
+      "claim": "trace اجرای Godot Engine v4.7.2، WebGL 2.0، streaming ورق‌های تصویری و آماده‌شدن دو فایل موسیقی را گزارش می‌کند؛ این‌ها سرنخ فنی‌اند و چرخه یا outcome را ثابت نمی‌کنند.",
+      "source_type": "technical_trace",
+      "stage": "capture console trace",
+      "certainty": "candidate_only",
+      "source_reference": "game-19:technical_trace:capture console trace"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "فقط فایل metadata-and-capture-evidence و پنج قاب ورودی همین بازی بررسی شد؛ وب‌گردی یا اجرای مجدد انجام نشد. همه قاب‌ها از نظر hash یکسان‌اند و منو در آن‌ها باقی مانده است. stage_text خالی است، ورودی‌ها صرفاً تلاش شده‌اند، و هیچ شاهد مستقیمی از بازی فعال، چرخه، نتیجه، صدا، score یا failure وجود ندارد. نبودن عناصر بازی در قاب آغازین به‌تنهایی نبودن آن‌ها در کل بازی را ثابت نمی‌کند."
+}

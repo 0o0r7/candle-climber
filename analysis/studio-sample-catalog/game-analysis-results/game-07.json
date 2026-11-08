@@ -1,0 +1,114 @@
+{
+  "id": "game-07",
+  "title": "Caveman vs Wild",
+  "observation_level": "page_only",
+  "observed_goal": "در صفحه/متن صفحه، هدف تعقیب موجودات، ساخت‌وپرداخت و روشن‌کردن علامت نهایی بیان شده است؛ اجرای این هدف در بازی مشاهده نشد.",
+  "observed_controls": [
+    "مشاهده نشد/نامشخص؛ فقط در فراداده تلاش برای Enter، Space، ArrowUp، w و ArrowRight ثبت شده است و پذیرش آن‌ها اثبات نشده است."
+  ],
+  "observed_core_loop": "مشاهده نشد/نامشخص؛ قاب‌ها از بارگذاری به منوی اصلی می‌رسند و چرخهٔ تکراریِ بازی فعال، تعقیب، درگیری، پاداش یا بازگشت به انتخاب بعدی دیده نمی‌شود.",
+  "progress_feedback": "در قاب بارگذاری نوار پیشرفت و پیام «Cooling the obsidian…» دیده می‌شود و در قاب بعدی پیام «Waking the creatures…»؛ این‌ها بازخورد بارگذاری‌اند، نه بازخورد پیشرفت بازی. در منو نیز عبارت ذخیره‌شدن پیشرفت در مرورگر آمده است، اما مقدار یا تغییر پیشرفت مشاهده نشد.",
+  "decisions_risk_reward": "مشاهده نشد/نامشخص؛ هیچ انتخاب اجرایی، ریسک، پاداش، دشمن فعال یا نتیجهٔ تصمیم در قاب‌ها دیده نمی‌شود. وجود گزینهٔ «New expedition» در منو صرفاً یک گزینهٔ صفحه است.",
+  "rewards": "مشاهده نشد/نامشخص؛ ادعای صفحه دربارهٔ ساخت تجهیزات و مسیر رسیدن به علامت نهایی stated است، اما پاداشی در اجرای بازی ثبت نشده است.",
+  "penalties_failure": "مشاهده نشد/نامشخص؛ باخت، آسیب، هزینهٔ شکست، بازنشانی یا مجازات در قاب‌ها وجود ندارد.",
+  "outcomes_replay": "مشاهده نشد/نامشخص؛ نتیجهٔ برد/باخت یا چرخهٔ تکرارپذیر مشاهده نشد. متن صفحه فقط بازی تک‌نفره و ذخیرهٔ پیشرفت در مرورگر را بیان می‌کند.",
+  "onboarding": "بارگذاری با دو پیام مرحله‌ای دیده شد و سپس منویی با گزینه‌های «New expedition»، «Enemy lab»، «Controls» و «Settings» نمایش داده شد. راهنمای کنترل یا شروع موفقِ یک مرحلهٔ بازی مشاهده نشد.",
+  "visual_audio_accessibility": "قاب‌ها تصویری تمام‌صفحه با نوار بارگذاری و منوی روی تصویر پس‌زمینه را نشان می‌دهند؛ خوانایی متن‌های اصلی در قاب‌ها مستقیم قابل مشاهده است. صدای بازی مشاهده نشد. یک هشدار فنی می‌گوید AudioContext بدون کنش کاربر مجاز به شروع نبوده است؛ دسترس‌پذیری کامل نامشخص است.",
+  "technical_clues": [
+    "candidate_only: تغییر قاب از بارگذاری به منوی اصلی با گذشت زمان/انیمیشن سازگار است و به‌تنهایی پذیرش ورودی‌های آزمایشی را ثابت نمی‌کند.",
+    "candidate_only: موجودی canvas، نشانگر موتور و ثابت‌های تنظیمی در فراداده خالی گزارش شده‌اند؛ بنابراین نوع موتور یا منطق داخلی قابل استنتاج نیست.",
+    "candidate_only: هشدار AudioContext و fallback نرم‌افزاری WebGL ثبت شده‌اند؛ این‌ها سرنخ محیط اجرا هستند، نه اثبات رفتار بازی.",
+    "candidate_only: چند خطای بارگذاری منابع با وضعیت‌های 403، 400 و خطای remote config ثبت شده‌اند؛ اثر آن‌ها بر بازی مشاهده نشد."
+  ],
+  "transferable_principles": [
+    "آموزش را به بازخوردهای مرحله‌ای و قابل‌فهم تقسیم کن، اما پیشرفت واقعی را فقط با تغییر وضعیت قابل مشاهده بسنج.",
+    "هدف و گزینه‌های آغاز را قبل از ورود به تعامل اصلی روشن کن و مسیر شروع را از منوی تنظیمات جدا نگه دار.",
+    "برای ارزیابی ورودی، به تغییر تصویری اکتفا نکن؛ پذیرش ورودی باید با پاسخ مستقیم و تکرارپذیر تأیید شود.",
+    "بازخورد پیشرفت، شکست و پاداش را در خود چرخهٔ بازی قابل مشاهده کن تا ادعای طراحی از اجرای واقعی جدا بماند."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber، score/rank باید فقط بازتاب مهارت و اجرای بازی باشد، نه خرید یا wallet و نه مزیت پرداختی.",
+    "از این نمونه فقط اصلِ جداسازی مرحلهٔ onboarding از چرخهٔ اصلی قابل استفاده است؛ هیچ کنترل یا چرخهٔ آن برای Candle Climber تأیید نشده است.",
+    "free brake، تغییر جهت افقی و مسیر شاخه‌ایِ نیازمند کنترل جدید نباید وارد طراحی شوند؛ اگر چنین گزینه‌ای مطرح شد، صرفاً فرضیهٔ نیازمند آزمون جداگانه است.",
+    "هر ادعای پاداش یا پیشرفت در Candle Climber باید با بازخورد مستقیم و قابل‌آزمون پشتیبانی شود، نه صرفاً متن صفحه یا کارت رسمی."
+  ],
+  "do_not_copy": [
+    "ظاهر، نام‌گذاری، شخصیت‌ها، محیط‌ها، متن‌ها، صداها و assetهای این نمونه را بازتولید نکن.",
+    "ادعای کارت رسمی دربارهٔ چرخهٔ شکار/ساخت را به‌عنوان رفتار تأییدشده یا الگوی قطعی اجرا کپی نکن.",
+    "تغییر دو یا چند قاب و پیشروی بارگذاری را به‌عنوان اثبات کنترل پذیرفته‌شده یا gameplay loop تکرار نکن."
+  ],
+  "evidence": [
+    {
+      "claim": "در screenshot مرحلهٔ بارگذاری، نوار پیشرفت و پیام «Cooling the obsidian…» مستقیماً دیده می‌شود.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-07:screenshot:load"
+    },
+    {
+      "claim": "متن ثبت‌شدهٔ مرحلهٔ load پیام «Raising the volcano…» را گزارش می‌کند؛ این متن با نوشتهٔ قابل‌خواندن در screenshot یکی فرض نشده است.",
+      "source_type": "page_text",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-07:page_text:load"
+    },
+    {
+      "claim": "در مرحلهٔ بعدی هنوز صفحهٔ بارگذاری است و پیام «Waking the creatures…» دیده می‌شود؛ بازی فعال یا کنترل‌پذیر مشاهده نشده است.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-07:screenshot:after_start"
+    },
+    {
+      "claim": "قاب‌های fallback منوی اصلی را با گزینه‌های New expedition، Enemy lab، Controls و Settings نشان می‌دهند.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-07:screenshot:after_key_burst"
+    },
+    {
+      "claim": "قاب ورودی ترکیبی همچنان منوی اصلی را نشان می‌دهد و پاسخ مستقیم به ورودی‌ها قابل تشخیص نیست.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-07:screenshot:after_combined_input"
+    },
+    {
+      "claim": "قاب late نیز منوی اصلی را نشان می‌دهد؛ نتیجه، برد یا باخت مشاهده نشده است.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-07:screenshot:late"
+    },
+    {
+      "claim": "کارت/متن رسمی هدف تعقیب موجودات، ساخت‌وپرداخت و روشن‌کردن علامت را ادعا می‌کند؛ این ادعا با اجرای کامل playtest تأیید نشده است.",
+      "source_type": "official_card",
+      "stage": "gallery_card",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-07:official_card:gallery_card"
+    },
+    {
+      "claim": "متن صفحه می‌گوید بازی تک‌نفره است و پیشرفت در مرورگر ذخیره می‌شود.",
+      "source_type": "page_text",
+      "stage": "late",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-07:page_text:late"
+    },
+    {
+      "claim": "هشدار AudioContext، fallback نرم‌افزاری WebGL و خطاهای شبکه در trace ثبت شده‌اند؛ اثرشان بر تجربهٔ بازی قطعی نیست.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-07:technical_trace:load"
+    },
+    {
+      "claim": "فراداده می‌گوید تغییر screenshot می‌تواند ناشی از انیمیشن یا گذشت زمان باشد و اثبات فهم ورودی نیست.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst",
+      "certainty": "candidate_only",
+      "source_reference": "game-07:technical_trace:after_key_burst"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "این تحلیل فقط بر evidence.json و پنج قاب ورودی همین بازی تکیه دارد. دو قاب نخست از ثبت جاری و سه قاب بعدی از fallback-1 هستند؛ سه مرحلهٔ پس از شروع در اجرای جاری timeout شده‌اند. هیچ اجرای کامل، چرخهٔ بازی، نتیجه، کنترل پذیرفته‌شده، صدا یا دادهٔ داخلی مشاهده نشد. نبودن عنصر در قاب آغازین نبودن آن در کل بازی را ثابت نمی‌کند."
+}

@@ -1,0 +1,101 @@
+{
+  "id": "game-28",
+  "title": "Faraway",
+  "observation_level": "page_only",
+  "observed_goal": "در صفحه آغاز، هدف به‌صورت دستور/متن «Climb the hill» نمایش داده می‌شود؛ اجرای این هدف در بازی مشاهده نشد.",
+  "observed_controls": [
+    "مشاهده نشد/نامشخص"
+  ],
+  "observed_core_loop": "مشاهده نشد/نامشخص؛ قاب‌ها فقط منوی آغاز را نشان می‌دهند و چرخه تکراری بازی، حرکت، تعامل یا جمع‌آوری در آن‌ها دیده نمی‌شود.",
+  "progress_feedback": "مشاهده نشد/نامشخص؛ هیچ شاخص پیشرفت، شمارنده یا بازخورد نتیجه‌ای در قاب‌های ثبت‌شده دیده نمی‌شود.",
+  "decisions_risk_reward": "مشاهده نشد/نامشخص؛ هیچ تصمیم قابل‌بازی یا مبادله ریسک/پاداش در قاب‌های منو قابل مشاهده نیست.",
+  "rewards": "مشاهده نشد/نامشخص؛ متن کارت رسمی از جست‌وجوی ۱۰ ستاره یاد می‌کند، اما این ادعا با اجرای بازی در قاب‌ها تأیید نشده است.",
+  "penalties_failure": "مشاهده نشد/نامشخص؛ شکست، آسیب، هزینه یا بازنشانی بازی دیده نشد.",
+  "outcomes_replay": "مشاهده نشد/نامشخص؛ برد، باخت، پایان یا چرخه بازپخش مشاهده نشده است.",
+  "onboarding": "صفحه آغاز عنوان بازی، توضیح روایی، فیلد نام با مقدار نمایشی «Traveller»، دکمه «Climb the hill» و گزینه «Settings» را نشان می‌دهد. این فقط شواهد صفحه/منو است و روشن نمی‌کند پس از شروع چه آموزشی ارائه می‌شود.",
+  "visual_audio_accessibility": "از نظر بصری، قاب‌ها یک منوی روی صحنه سه‌بعدی روشن با کنتراست متن سفید روی زمینه آبی/ابری نشان می‌دهند؛ تنظیمات یا گزینه‌های دسترس‌پذیری مشاهده نشد/نامشخص است. درباره صوت، فقط هشدار فنیِ مجازنبودن شروع AudioContext ثبت شده و پخش واقعی صدا مشاهده نشد.",
+  "technical_clues": [
+    "ترتیب ثبت نشان می‌دهد ورودی آزمایشی «hold ArrowRight + Space for 900ms» تلاش شده، اما خود شواهد تصریح می‌کنند این توالی بازی‌محور نبوده و پذیرش ورودی اثبات نشده است.",
+    "در داده فنی، canvas_inventory خالی، visible_images خالی، engine_markers خالی و script_bytes_scanned برابر صفر است؛ این‌ها سرنخ‌های محدود ثبت هستند، نه اثبات معماری یا منطق بازی.",
+    "هشدار AudioContext می‌گوید شروع صوت پس از یک user gesture لازم بوده است؛ این سرنخ فنی درباره وضعیت مرورگر است و وجود یا نقش صوت در حلقه بازی را ثابت نمی‌کند.",
+    "هشدارهای WebGL به fallback نرم‌افزاری اشاره دارند و چند درخواست healthz با ERR_CONNECTION_REFUSED ثبت شده‌اند؛ علت آن‌ها برای عملکرد بازی نامشخص است."
+  ],
+  "transferable_principles": [
+    "هدف اولیه را در یک عبارت کوتاه و قابل مشاهده ارائه کن، اما آن را با آزمون تعامل واقعی از متن تبلیغاتی جدا نگه دار.",
+    "در شروع تجربه، یک اقدام اصلی و یک مسیر تنظیمات را از هم متمایز کن تا نقطه ورود روشن باشد.",
+    "بازخورد پیشرفت و نتیجه را فقط پس از مشاهده چرخه واقعی طراحی و ارزیابی کن؛ تفاوت قاب‌ها به‌تنهایی مدرک تعامل نیست.",
+    "برای تجربه‌های اکتشافی، خوانایی لایه رابط روی پس‌زمینه متحرک/تصویری را با آزمون دسترس‌پذیری مستقل بررسی کن."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber، هر score یا rank باید فقط بازتاب مهارت و عملکرد بازی باشد، نه خرید یا wallet و نه مزیت مالی.",
+    "پیشنهاد قابل‌انتقال فقط در حد هدف‌گذاری روشن و بازخورد قابل‌خواندن است؛ شواهد این بازی برای اقتباس از کنترل یا حلقه کامل کافی نیست.",
+    "از free brake، تغییر جهت افقی و مسیر شاخه‌ایِ محتاج کنترل جدید پرهیز شود؛ هرکدام فقط می‌تواند فرضیه‌ای نیازمند آزمون جداگانه باشد، نه نتیجه این بررسی.",
+    "هیچ شخصیت، art، level، متن، صدا، برند یا asset این بازی نباید بازتولید یا پیشنهاد شود."
+  ],
+  "do_not_copy": [
+    "هیچ asset، شخصیت، art، محیط، متن، صدا یا برند مشخص این بازی را کپی نکن.",
+    "ادعای جست‌وجوی ۱۰ ستاره یا هر قابلیت کارت رسمی را بدون اجرای مستقیم و نتیجه قابل مشاهده به‌عنوان ویژگی تأییدشده استفاده نکن.",
+    "تغییر ظاهری بین قاب‌ها را به‌عنوان پذیرش ArrowRight، Space یا ورودی ترکیبی تفسیر نکن.",
+    "نبودن HUD، کنترل یا عنصر بازی در قاب آغازین را دلیل نبودن آن در کل بازی ندان."
+  ],
+  "evidence": [
+    {
+      "claim": "صفحه آغاز عنوان Faraway، متن روایی، فیلد نام، دکمه Climb the hill و Settings را نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-28:screenshot:load"
+    },
+    {
+      "claim": "قاب after_start همچنان منوی آغاز را نشان می‌دهد و بازی فعال یا چرخه حرکت در آن مشاهده نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-28:screenshot:after_start"
+    },
+    {
+      "claim": "قاب after_key_burst منوی آغاز را نشان می‌دهد؛ تغییرات ظاهری احتمالی به‌تنهایی پذیرش کلیدها را ثابت نمی‌کند.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-28:screenshot:after_key_burst"
+    },
+    {
+      "claim": "قاب after_combined_input هنوز منوی آغاز را نشان می‌دهد و نتیجه یا اجرای بازی در آن دیده نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-28:screenshot:after_combined_input"
+    },
+    {
+      "claim": "کارت رسمی تجربه را کاوش سه‌بعدی بر فراز ابرها و جست‌وجوی ۱۰ ستاره توصیف می‌کند؛ این ادعا playtest نشده است.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-28:official_card:load"
+    },
+    {
+      "claim": "متن صفحه در بارگذاری عبارت «Unfurling the sea of clouds…» را ثبت کرده است.",
+      "source_type": "page_text",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-28:page_text:load"
+    },
+    {
+      "claim": "توپولوژی ثبت‌شده برای ورودی فقط تلاش hold ArrowRight + Space for 900ms را گزارش می‌کند و پذیرش آن را تأیید نمی‌کند.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst",
+      "certainty": "candidate_only",
+      "source_reference": "game-28:technical_trace:after_key_burst"
+    },
+    {
+      "claim": "هشدار AudioContext و fallback نرم‌افزاری WebGL در کنسول ثبت شده‌اند؛ این‌ها سرنخ فنی‌اند، نه شواهد حلقه بازی.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-28:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "ثبت صفحه با وضعیت loaded اما capture_status برابر budget_timeout انجام شده است؛ تمام completed_stages خالی‌اند، start_action برابر none است، interaction_visual_change_signal تهی است و قاب‌های fallback فقط منوی آغاز را نشان می‌دهند. بنابراین کنترل‌ها، حلقه بازی، پیشرفت، پاداش، شکست و outcome قابل تأیید نیستند. تغییرات جزئی بین قاب‌ها ممکن است انیمیشن یا گذر زمان باشد. نبودن عنصر در قاب آغازین، نبودن آن در کل بازی را ثابت نمی‌کند."
+}

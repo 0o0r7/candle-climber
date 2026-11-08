@@ -1,0 +1,88 @@
+{
+  "id": "game-02",
+  "title": "Space Worm 3D",
+  "observation_level": "page_only",
+  "observed_goal": "در صفحه/متن منو، هدف به‌صورت «Grow. Boost. Devour the cosmos.» بیان شده است؛ هدف عملیِ بازی فعال، چرخهٔ بازی، یا شرط برد در قاب‌ها مشاهده نشد.",
+  "observed_controls": [
+    "متن صفحه می‌گوید: Mouse to steer.",
+    "متن صفحه می‌گوید: Hold click or Space to boost.",
+    "در ثبت تعامل، Enter و نگه‌داشتن ArrowRight + Space برای ۹۰۰ میلی‌ثانیه آزموده شده‌اند؛ پذیرش این ورودی‌ها در قاب‌ها تأیید نشد."
+  ],
+  "observed_core_loop": "مشاهده نشد/نامشخص؛ هر پنج قاب هنوز منوی اصلی را نشان می‌دهند و چرخهٔ حرکت، جمع‌آوری، رشد، برخورد یا پایان بازی کامل و مستقیم دیده نمی‌شود.",
+  "progress_feedback": "در قاب‌ها نام بازیکن و شمارندهٔ ۰ دیده می‌شود و پس‌زمینهٔ متحرک/اجسام صحنه در stageهای مختلف جابه‌جا شده‌اند؛ این تغییرات به‌تنهایی بازخورد پیشرفت یا نتیجهٔ ورودی نیستند.",
+  "decisions_risk_reward": "مشاهده نشد/نامشخص؛ هیچ تصمیم‌گیری در بازی فعال، ریسک قابل‌اجرا، یا پاداش حاصل از انتخاب در قاب‌ها ثبت نشده است.",
+  "rewards": "متن کارت رسمی از رشد با stardust، بلعیدن اجرام آسمانی برای قدرت‌های دائمی و boost سخن می‌گوید، اما این ادعاها با اجرای بازی در این ثبت تأیید نشده‌اند؛ پاداش مشاهده‌شدهٔ مستقیم وجود ندارد.",
+  "penalties_failure": "مشاهده نشد/نامشخص؛ مرگ، شکست، برخورد، جریمه یا هزینهٔ شکست در قاب‌ها دیده نمی‌شود.",
+  "outcomes_replay": "مشاهده نشد/نامشخص؛ نه برد/باخت یا نتیجهٔ مسابقه دیده شده و نه چرخه‌ای که قابلیت تکرار آن را نشان دهد.",
+  "onboarding": "صفحهٔ اصلی گزینه‌های Free-for-all، Team Battle، Skins، Records، How to play و Settings را نمایش می‌دهد و راهنمای متنی Mouse to steer / Hold click or Space to boost دارد؛ ورود موفق به بازی و آموزش تعاملی مشاهده نشد.",
+  "visual_audio_accessibility": "قاب‌ها یک منوی تمام‌صفحهٔ سه‌بعدی با پس‌زمینهٔ کیهانی تیره، ذرات، اجرام و کرم‌های رنگی نشان می‌دهند؛ متن‌های بزرگ و دکمه‌های مجزا قابل‌مشاهده‌اند. صدای بازی ارزیابی نشد؛ metadata هشدار AudioContext را ثبت کرده است. وضعیت دسترسی‌پذیری فراتر از این مشاهده نشد/نامشخص است.",
+  "technical_clues": [
+    "metadata سه canvas با ابعاد اصلی ۱۲۸۰×۸۰۰ و یک canvas پنهان/بدون ابعاد CSS را ثبت کرده است؛ این فقط سرنخ فنی است و رفتار بازی را اثبات نمی‌کند.",
+    "تصاویر stardust، magnet، shield و boost در منابع صفحه ثبت شده‌اند؛ حضور resource یا visibility منبع، نمایش یا کاربرد آن در چرخهٔ بازی را ثابت نمی‌کند.",
+    "metadata اسکریپت/engine marker یا tuning constant قابل‌استفاده ارائه نمی‌کند؛ script_count_scanned و script_bytes_scanned برابر صفر است.",
+    "هشدارهای AudioContext، fallback نرم‌افزاری WebGL و خطاهای HTTP 403/400 ثبت شده‌اند؛ این‌ها سرنخ محیط اجرا هستند، نه دلیل رفتار طراحی‌شدهٔ بازی."
+  ],
+  "transferable_principles": [
+    "هدف و کنترل‌های ادعاشده را پیش از شروع در یک لایهٔ کوتاه و قابل‌خواندن نمایش بده، اما پذیرش کنترل را با بازخورد مستقیم در خود بازی بسنج.",
+    "اگر بازی بر حرکت پیوسته تکیه دارد، پیشرفت باید با نشانهٔ واضح و قابل‌انتساب به عمل بازیکن بازخورد داده شود.",
+    "رقابت را می‌توان به انتخاب‌های مهارتی با ریسک روشن و بازخورد سریع متصل کرد؛ این اصل در این ثبت آزموده نشده و فقط اصل انتزاعی است.",
+    "تغییرات انیمیشن یا دوربین را از بازخورد ناشی از ورودی جدا و قابل‌تشخیص طراحی کن."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber، score/rank باید فقط مهارت را بازتاب دهد و نباید با خرید یا wallet مزیت ایجاد کند.",
+    "راهنمایی کنترل باید ساده و قابل‌مشاهده باشد و هر تغییر کنترل، فقط پس از آزمون مستقیم و بازخورد قابل‌انتساب پذیرفته شود.",
+    "از free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ محتاج کنترل جدید استفاده نشود؛ در صورت بررسی، هرکدام صرفاً فرضیهٔ نیازمند آزمون جداگانه است.",
+    "الگوی قابل‌انتقال فقط تفکیک منوی شروع، توضیح کنترل و بازخورد مهارتی است؛ هیچ مکانیک فضایی یا دارایی این بازی نباید بازتولید شود."
+  ],
+  "do_not_copy": [
+    "نام، شخصیت، art direction، متن، صدا، برند یا assetهای این بازی را کپی یا پیشنهاد نکن.",
+    "ادعاهای کارت رسمی دربارهٔ رشد، قدرت دائمی، hazards، rival worms، free-for-all یا 6v6 را به‌عنوان مکانیک تأییدشده بازتولید نکن.",
+    "از تبدیل جابه‌جایی بین قاب‌ها به ادعای پذیرش ورودی، پیشرفت، برد یا اجرای gameplay خودداری کن."
+  ],
+  "evidence": [
+    {
+      "claim": "هر پنج قاب در stageهای load، after_start، after_key_burst، after_combined_input و late منوی اصلی با گزینه‌های Free-for-all و Team Battle را نشان می‌دهند؛ صفحهٔ بازی فعال یا نتیجهٔ مسابقه در هیچ قاب دیده نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "load; after_start; after_key_burst; after_combined_input; late",
+      "certainty": "direct",
+      "source_reference": "game-02:screenshot:load; after_start; after_key_burst; after_combined_input; late"
+    },
+    {
+      "claim": "صفحه کنترل را به‌صورت Mouse to steer و Hold click or Space to boost نمایش می‌دهد.",
+      "source_type": "page_text",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-02:page_text:load"
+    },
+    {
+      "claim": "هدف و امکانات ادعاشده شامل رشد، boost، devour، stardust، قدرت‌های دائمی، hazards، rival worms و حالت‌های free-for-all یا 6v6 team battle است؛ این‌ها در اجرای ثبت‌شده play-test نشده‌اند.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-02:official_card:load"
+    },
+    {
+      "claim": "تغییر بصری بین قاب‌ها ممکن است از animation یا گذشت زمان باشد و اثبات نمی‌کند ورودی فهمیده یا پذیرفته شده است؛ metadata نیز همین caveat را صریحاً ثبت کرده است.",
+      "source_type": "technical_trace",
+      "stage": "after_start; after_key_burst; after_combined_input; late",
+      "certainty": "candidate_only",
+      "source_reference": "game-02:technical_trace:after_start; after_key_burst; after_combined_input; late"
+    },
+    {
+      "claim": "کنترل‌های Enter و ArrowRight + Space برای ۹۰۰ میلی‌ثانیه آزموده شدند، اما به‌دلیل باقی‌ماندن قاب‌ها در منو، پذیرش ورودی تأیید نشد؛ metadata همچنین می‌گوید توالی عمومی وقتی input متنی/select متمرکز بود کنار گذاشته شد.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst; after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-02:technical_trace:after_key_burst; after_combined_input"
+    },
+    {
+      "claim": "منابع تصویری stardust، magnet، shield و boost ثبت شده‌اند، اما این فقط سرنخ فنی resource است و استفادهٔ درون‌بازی از آن‌ها مشاهده نشده است.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-02:technical_trace:load"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "تحلیل فقط بر evidence.json و پنج قاب ورودی همین بازی متکی است؛ وب‌گردی یا اجرای مجدد انجام نشد. همهٔ قاب‌ها منوی اصلی را نشان می‌دهند. تغییر دو یا چند قاب، با توجه به animation پس‌زمینه و caveat ثبت‌شده، اثبات ورودی پذیرفته‌شده نیست. نبودن عنصر در قاب آغازین نیز نبودن آن در کل بازی را ثابت نمی‌کند."
+}

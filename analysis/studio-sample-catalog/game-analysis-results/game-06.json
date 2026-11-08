@@ -1,0 +1,101 @@
+{
+  "id": "game-06",
+  "title": "Super Dungeon",
+  "observation_level": "page_only",
+  "observed_goal": "در screenshot منوی آغازین، هدف صریحی برای شروع گشت‌زنی/ورود به بخش بعدی دیده می‌شود؛ اجرای بازی، هدف عملیاتی و نتیجهٔ آن مشاهده نشد.",
+  "observed_controls": [
+    "در متن صفحه آمده است که تجربه با keyboard + mouse مناسب‌تر است و gamepad و touch نیز پشتیبانی می‌شوند؛ پذیرش یا کارکرد این ورودی‌ها در بازی تأیید نشد.",
+    "دکمه‌های START PATROL، HOW TO PLAY و SETTINGS در منوی آغازین دیده می‌شوند؛ فعال‌شدن یا نتیجهٔ انتخاب آن‌ها مشاهده نشد."
+  ],
+  "observed_core_loop": "مشاهده نشد/نامشخص؛ قاب‌ها چرخهٔ تکراری بازی، کنترل شخصیت، تعامل، مبارزه یا نتیجه را نشان نمی‌دهند.",
+  "progress_feedback": "در دو قاب fallback متن بارگذاری «OPENING THE HALL OF ORIGINS...» و نوار پیشرفت دیده می‌شود؛ این فقط بازخورد بارگذاری است و پیشرفت بازی محسوب نمی‌شود. بازخورد امتیاز، مرحله یا پیشروی در بازی مشاهده نشد/نامشخص است.",
+  "decisions_risk_reward": "مشاهده نشد/نامشخص؛ هیچ تصمیم قابل‌بازی، ریسک، پاداش یا trade-off در قاب‌ها ثبت نشده است.",
+  "rewards": "مشاهده نشد/نامشخص؛ ادعای کارت دربارهٔ نجات هم‌کلاسی‌ها و زنجیره‌کردن قدرت‌ها فقط ادعای رسمیِ playtested‌نشده است.",
+  "penalties_failure": "مشاهده نشد/نامشخص؛ شکست، آسیب، هزینه یا مجازات در اجرای ثبت‌شده دیده نمی‌شود.",
+  "outcomes_replay": "مشاهده نشد/نامشخص؛ برد، باخت، پایان چرخه یا دلیل بازپخش مشاهده نشده است.",
+  "onboarding": "منوی آغازین عنوان بازی، توضیح موقعیت، گزینه‌های START PATROL/HOW TO PLAY/SETTINGS و متن پشتیبانی ورودی‌ها را نشان می‌دهد. صفحهٔ HOW TO PLAY یا onboarding تعاملی و ورود موفق به بازی مشاهده نشد.",
+  "visual_audio_accessibility": "از نظر بصری، یک منوی سه‌بعدی با کنتراست متن روی پس‌زمینه، دکمه‌های متنی و نوار بارگذاری دیده می‌شود. متن صفحه پشتیبانی gamepad و touch را بیان می‌کند. وضعیت واقعی صدا، تنظیمات دسترسی و عملکرد این روش‌های ورودی مشاهده نشد/نامشخص است؛ کنسول هشدار داده AudioContext پس از user gesture مجاز می‌شود.",
+  "technical_clues": [
+    "metadata می‌گوید یک canvas با ابعاد 1280×800 موجود بوده و canvasهای دیگر CSS width/height صفر داشته‌اند؛ این سرنخ فنی است و رفتار بازی را اثبات نمی‌کند.",
+    "کنسول هشدار AudioContext را ثبت کرده که بدون user gesture آغاز نشده است؛ این سرنخ فنی دربارهٔ شروع صداست، نه شاهد اجرای بازی.",
+    "کنسول چند هشدار fallback به software WebGL و یک خطای بارگذاری resource با پاسخ 403 ثبت کرده است؛ علت اثر آن بر بازی مشاهده نشد/نامشخص است.",
+    "هیچ engine marker یا tuning constant candidate و هیچ script byte اسکن‌شده‌ای در metadata ثبت نشده است."
+  ],
+  "transferable_principles": [
+    "یک منوی آغازین روشن با هدف کوتاه و گزینهٔ شروع/راهنما/تنظیمات می‌تواند ورود کاربر را ساختاربندی کند.",
+    "بازخورد بصریِ صریح برای وضعیت بارگذاری باید از بازخورد پیشرفتِ خودِ بازی جدا نگه داشته شود.",
+    "پشتیبانی چند روش ورودی فقط زمانی ارزش طراحی دارد که در اجرای واقعی قابل‌استفاده و قابل‌تأیید باشد.",
+    "ادعاهای کارت یا متن معرفی باید از شواهد اجرای واقعی جدا گزارش شوند تا تغییر قاب یا بارگذاری به‌اشتباه چرخهٔ بازی تلقی نشود."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber، score/rank باید فقط بازتاب مهارت و عملکرد بازی باشد، نه خرید یا wallet.",
+    "هیچ مزیت گیم‌پلی نباید از خرید یا wallet بیاید.",
+    "از free brake، تغییر جهت افقی و مسیر شاخه‌ایِ محتاج کنترل جدید پرهیز شود؛ اگر هرکدام مطرح شوند، فقط به‌عنوان فرضیهٔ نیازمند آزمون مستقیم بررسی شوند.",
+    "از این ورودی‌ها فقط می‌توان اصلِ جداسازی بازخورد بارگذاری از پیشرفت و جداسازی ادعا از اجرای تأییدشده را منتقل کرد؛ مکانیک اختصاصی Candle Climber از این بازی استخراج نمی‌شود."
+  ],
+  "do_not_copy": [
+    "هویت بصری، متن‌ها، نام‌ها، محیط، شخصیت‌ها و دارایی‌های دیده‌شده یا ادعاشده بازتولید نشوند.",
+    "از نتیجه‌گیری دربارهٔ کنترل، چرخه، پاداش یا شکست بر اساس تغییر دو قاب یا صفحهٔ بارگذاری خودداری شود.",
+    "ادعاهای رسمیِ playtested‌نشده به‌عنوان رفتار تأییدشدهٔ محصول منتقل نشوند."
+  ],
+  "evidence": [
+    {
+      "claim": "در قاب load منوی آغازین با گزینه‌های START PATROL، HOW TO PLAY و SETTINGS، توضیح موقعیت و عبارت پشتیبانی keyboard + mouse/gamepad/touch دیده می‌شود.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-06:screenshot:load"
+    },
+    {
+      "claim": "در قاب late همان منوی آغازین دیده می‌شود و ورود به بازی یا چرخهٔ فعال مشاهده نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-06:screenshot:late"
+    },
+    {
+      "claim": "قاب after_key_burst صفحهٔ بارگذاری با متن OPENING THE HALL OF ORIGINS... و نوار پیشرفت را نشان می‌دهد؛ این قاب نتیجهٔ ورودی یا بازی فعال را اثبات نمی‌کند.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-06:screenshot:after_key_burst"
+    },
+    {
+      "claim": "قاب after_combined_input نیز همان صفحهٔ بارگذاری با متن OPENING THE HALL OF ORIGINS... را نشان می‌دهد؛ تغییر قاب به‌تنهایی پذیرش ورودی را ثابت نمی‌کند.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-06:screenshot:after_combined_input"
+    },
+    {
+      "claim": "متن صفحه می‌گوید پس از curfew چیزی زیر مدرسه بیدار شده و صفحه برای keyboard + mouse مناسب‌تر است و gamepad و touch را پشتیبانی می‌کند؛ این متن، اجرای واقعی را تأیید نمی‌کند.",
+      "source_type": "page_text",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-06:page_text:load"
+    },
+    {
+      "claim": "کارت رسمی، شکستن curfew، فرود زیر مدرسه، زنجیره‌کردن قدرت‌ها، نجات هم‌کلاسی‌ها و مقابله با دو boss را توصیف می‌کند؛ هیچ‌کدام در اجرای ثبت‌شده playtested نشده‌اند.",
+      "source_type": "official_card",
+      "stage": "gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-06:official_card:gallery_description"
+    },
+    {
+      "claim": "metadata وضعیت capture را partial، start_action را none و interaction_visual_change_signal را null ثبت می‌کند؛ screenshotهای fallback از منشأ fallback-1 هستند و تفاوت قاب‌ها ممکن است ناشی از زمان/انیمیشن باشد.",
+      "source_type": "technical_trace",
+      "stage": "capture",
+      "certainty": "candidate_only",
+      "source_reference": "game-06:technical_trace:capture"
+    },
+    {
+      "claim": "metadata هشدار AudioContext، fallback نرم‌افزاری WebGL و یک resource با پاسخ 403 را ثبت می‌کند؛ اثر آن‌ها بر تجربه مشاهده نشد/نامشخص است.",
+      "source_type": "technical_trace",
+      "stage": "console",
+      "certainty": "candidate_only",
+      "source_reference": "game-06:technical_trace:console"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "فقط فایل‌های ورودی همین بازی استفاده شد و وب‌گردی یا اجرای مجدد انجام نشد. screenshot after_start timeout شده، توالی عمومی صفحه‌کلید وقتی text/select input فوکوس داشته رد شده، و after_key_burst و after_combined_input نیز timeout شده‌اند. metadata می‌گوید controls_attempted خالی و start_action برابر none است. دو قاب fallback از منشأ fallback-1 هستند. هیچ شاهد مستقیم از بازی فعال، چرخهٔ کامل، نتیجه، برد یا باخت وجود ندارد؛ نبودن عناصر در قاب آغازین نیز نبودن آن‌ها در کل بازی را ثابت نمی‌کند."
+}

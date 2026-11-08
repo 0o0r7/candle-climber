@@ -1,0 +1,112 @@
+{
+  "id": "game-38",
+  "title": "Nebula Squadron",
+  "observation_level": "page_only",
+  "observed_goal": "در قاب load، هدف صفحه به‌صورت دستور/متن مشخصی برای راه‌اندازی کشتی و ورود به تجربه نمایش داده می‌شود؛ در قاب‌های پس از آن، پنل «THE FIRST GARDEN» می‌گوید سه موج کوتاه، سه guardian و یک final bloom وجود دارد. این‌ها متن صفحه‌اند و چرخه فعال بازی یا تحقق هدف در قاب‌ها مشاهده نشد/نامشخص است.",
+  "observed_controls": [
+    "صفحه دستور «ENTER / TAP TO LAUNCH» را نمایش می‌دهد؛ پذیرفته‌شدن این ورودی در اجرای ثبت‌شده تأیید نشد.",
+    "صفحه دستور «WASD / arrows to move» را نمایش می‌دهد؛ حرکت واقعی مشاهده نشد/نامشخص است.",
+    "صفحه دستور «Petals fire automatically» را نمایش می‌دهد؛ شلیک خودکار در بازی فعال مشاهده نشد/نامشخص است.",
+    "نوار پایین صفحه متن «SHIFT precision»، «SPACE time slow»، «E use item» و «ESC pause» را نشان می‌دهد؛ کارکرد عملی این کلیدها مشاهده نشد/نامشخص است.",
+    "در metadata ورودی‌های Enter، Space، ArrowUp، w، ArrowRight و نگه‌داشتن ArrowRight + Space ثبت شده‌اند؛ تغییر قاب به‌تنهایی اثبات پذیرش آن‌ها نیست."
+  ],
+  "observed_core_loop": "مشاهده نشد/نامشخص؛ قاب‌ها منوی آغاز/پنل دستور را نشان می‌دهند و چرخه تکراری حرکت، شلیک، موج یا بازگشت به وضعیت بعدی ثبت نشده است.",
+  "progress_feedback": "در صفحه آماده‌سازی، HUD متناظرِ HUD شامل HULL، PETALS، ARCHIVE SCORE، TIDE CHART 1/3، WAVE 1/3 و TIME SLOW CHARGE 035% دیده می‌شود؛ این عناصر در screenshot مستقیم دیده می‌شوند، اما تغییر پیشرفت در اجرای بازی مشاهده نشد/نامشخص است.",
+  "decisions_risk_reward": "مشاهده نشد/نامشخص؛ کارت رسمی از پرهیز، slow time و power-up صحبت می‌کند، اما تصمیم‌گیری، ریسک/پاداش یا اثر آن‌ها در بازی فعال playtest نشده است.",
+  "rewards": "در قاب load عبارت LOCAL BEST 000000 دیده می‌شود و در HUD عبارت ARCHIVE SCORE 000000 و شمارنده PETALS 1/4 دیده می‌شود؛ پاداش، افزایش امتیاز یا دریافت آیتم در اجرای ثبت‌شده مشاهده نشد/نامشخص است.",
+  "penalties_failure": "مشاهده نشد/نامشخص؛ مقدار HULL در HUD دیده می‌شود، اما آسیب، شکست، از دست‌دادن جان یا جریمه عملی ثبت نشده است.",
+  "outcomes_replay": "مشاهده نشد/نامشخص؛ نه برد/باخت مستقیم، نه نتیجه نهایی، نه چرخه replay یا بازگشت به منو در قاب‌ها دیده نمی‌شود.",
+  "onboarding": "صفحه onboarding نسبتاً روشن است: پنل «THE FIRST GARDEN» هدف متنیِ سه موج/سه guardian/final bloom را بیان می‌کند، دکمه «ENTER / TAP TO LAUNCH» را نشان می‌دهد و راهنمای WASD/arrows و auto-fire را ارائه می‌کند. با این حال، عبور واقعی از این پنل مشاهده نشد.",
+  "visual_audio_accessibility": "در قاب load کنترل‌های EN، FX FULL و MUSIC ON دیده می‌شود؛ قاب‌های بازی نیز دکمه‌های FX FULL، MUSIC ON و PAUSE را نشان می‌دهند. خوانایی متن و وجود کنترل‌های صوتی مستقیماً دیده می‌شود؛ گزینه‌های بیشتر دسترسی، وضعیت واقعی صدا و اثر تعامل‌ها مشاهده نشد/نامشخص است.",
+  "technical_clues": [
+    "metadata یک canvas با ابعاد 1280x800 و CSS برابر ثبت کرده است؛ این سرنخ فنی است و درباره طراحی بازی به‌تنهایی نتیجه قطعی نمی‌دهد.",
+    "console logها Godot Engine v4.7.2، WebGL 2.0/OpenGL ES 3.0 و build با Emscripten 4.0.20 را گزارش می‌کنند؛ این‌ها سرنخ فنی مستقیم از محیط اجرا هستند، نه اثبات مکانیک.",
+    "metadata می‌گوید interaction_visual_change_signal برابر true است، اما caveat صریحاً هشدار می‌دهد تغییر قاب می‌تواند animation یا گذر زمان باشد و پذیرش ورودی را ثابت نمی‌کند.",
+    "هیچ engine marker یا tuning constant candidate ثبت نشده و script_bytes_scanned برابر 0 است؛ بنابراین از این بخش نتیجه مکانیکی استخراج نشد."
+  ],
+  "transferable_principles": [
+    "آموزش آغازین را به یک هدف کوتاه، کنترل‌های حداقلی و بازخورد قابل‌خواندن تقسیم کن.",
+    "پیشرفت را با شاخص‌های وضعیت و شمارنده‌های ساده نمایش بده، اما تغییر آن‌ها را فقط با اجرای معتبر ارزیابی کن.",
+    "گزینه‌های صوتی و توقف را در دسترس و جدا از مسیر اصلی تعامل قرار بده.",
+    "برای ارزیابی تعامل، تغییر بصری را از پذیرش واقعی ورودی و رسیدن به نتیجه متمایز کن."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber، هر score/rank باید فقط بازتاب مهارت باشد؛ این بازی مدرکی درباره اقتصاد یا رتبه‌بندی ارائه نمی‌کند.",
+    "مزیت قابل‌خرید یا متکی به wallet نباید وارد مسیر رقابتی شود.",
+    "free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ نیازمند کنترل جدید را فقط به‌عنوان فرضیه نیازمند آزمون در نظر بگیر، نه الگوی تأییدشده.",
+    "از الگوی کلیِ آموزش کوتاه و HUD روشن می‌توان برای onboarding استفاده کرد، بدون انتقال هویت بصری یا محتوای خاص این بازی."
+  ],
+  "do_not_copy": [
+    "نام‌گذاری، متن داستانی، چیدمان بصری، شخصیت‌ها، art، levelها، صداها یا assetهای اختصاصی را بازتولید نکن.",
+    "ادعای کارت رسمی درباره چرخه کامل را به‌عنوان مشاهده اجرای بازی نقل نکن.",
+    "از تغییر دو قاب یا تفاوت زمانی به‌عنوان اثبات ورودی پذیرفته‌شده استفاده نکن.",
+    "نبودن یک عنصر در قاب آغازین را دلیل نبودن آن در کل بازی تلقی نکن."
+  ],
+  "evidence": [
+    {
+      "claim": "صفحه اصلی عنوان، دکمه راه‌اندازی، توضیح کوتاه و کنترل‌های EN/FX/MUSIC را نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-38:screenshot:load"
+    },
+    {
+      "claim": "پنل آغاز متن «THE FIRST GARDEN»، «ENTER / TAP TO LAUNCH»، «WASD / arrows to move» و «Petals fire automatically» را نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-38:screenshot:after_start"
+    },
+    {
+      "claim": "قاب پس از burst کلید همچنان همان پنل آغاز را نشان می‌دهد؛ پذیرش کلیدها از این ثبات یا تغییرات جزئی اثبات نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-38:screenshot:after_key_burst"
+    },
+    {
+      "claim": "قاب پس از ورودی ترکیبی چرخه فعال، حرکت، شلیک یا نتیجه را نشان نمی‌دهد و همان پنل آغاز باقی است.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-38:screenshot:after_combined_input"
+    },
+    {
+      "claim": "در قاب late نیز پنل آغاز پابرجاست؛ outcome یا replay مشاهده نشد/نامشخص است.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-38:screenshot:late"
+    },
+    {
+      "claim": "کارت رسمی ادعا می‌کند بازیکن یک pearl-powered ship را هدایت می‌کند، از bullet storm دوری می‌کند، زمان را آهسته می‌کند، power-up می‌گیرد و با guardianها روبه‌رو می‌شود؛ این ادعاها playtest نشده‌اند.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-38:official_card:load"
+    },
+    {
+      "claim": "متن صفحه/HUD شاخص‌های HULL، PETALS، ARCHIVE SCORE، TIDE CHART 1/3، WAVE 1/3 و TIME SLOW CHARGE 035% را نشان می‌دهد.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-38:page_text:after_start"
+    },
+    {
+      "claim": "ردپای فنی Godot Engine v4.7.2، WebGL 2.0/OpenGL ES 3.0 و Emscripten 4.0.20 ثبت شده است.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-38:technical_trace:load"
+    },
+    {
+      "claim": "metadata تصریح می‌کند visual change ممکن است animation یا elapsed time باشد و اثبات پذیرش ورودی نیست.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-38:technical_trace:after_combined_input"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "فقط فایل‌های ورودی همین بازی بررسی شدند. تمام قاب‌ها در وضعیت منوی آغاز/پنل دستور باقی مانده‌اند؛ اجرای فعال، چرخه کامل، نتیجه، مرگ/برد، تغییر امتیاز یا پذیرش واقعی کلیدها مشاهده نشد/نامشخص است. متن کارت رسمی و متن صفحه از مشاهده مستقیم مکانیک جدا نگه داشته شده‌اند."
+}

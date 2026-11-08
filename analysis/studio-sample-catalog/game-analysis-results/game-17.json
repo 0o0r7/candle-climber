@@ -1,0 +1,107 @@
+{
+  "id": "game-17",
+  "title": "TerraForge",
+  "observation_level": "page_only",
+  "observed_goal": "در قاب‌ها هدف اجرایی بازی مشاهده نشد/نامشخص است. متن صفحه می‌گوید: «Shape the wild. Survive the night.»؛ این فقط متن صفحه است و چرخه بازی تأیید نشده است.",
+  "observed_controls": [
+    "در قاب‌ها کنترل فعال یا فهرست کلیدها مشاهده نشد/نامشخص.",
+    "Space، ArrowUp، w، ArrowRight و نگه‌داشتن ArrowRight + Space برای ۹۰۰ میلی‌ثانیه در متادیتا به‌عنوان ورودی‌های تلاش‌شده ثبت شده‌اند؛ پذیرفته‌شدن آن‌ها توسط بازی مشاهده نشد/نامشخص است."
+  ],
+  "observed_core_loop": "چرخه اصلی بازی مشاهده نشد/نامشخص؛ هیچ قاب فعال از بازی، تعامل با جهان، تکرار عمل یا نتیجه ثبت نشده است.",
+  "progress_feedback": "بازخورد پیشرفت در قاب‌ها مشاهده نشد/نامشخص. متن صفحه فقط گزینه‌های New World، Settings و Controls و توضیح انتخاب seed، mode و difficulty را نشان می‌دهد.",
+  "decisions_risk_reward": "تصمیم‌های ریسک/پاداش در اجرای بازی مشاهده نشد/نامشخص. گزینه‌های منوی New World و انتخاب seed، mode و difficulty در متن/قاب دیده می‌شوند، اما اثر یا trade-off آن‌ها آزموده نشده است.",
+  "rewards": "پاداش، منابع، امتیاز یا ارتقای اجرایی مشاهده نشد/نامشخص. ادعای رسمی درباره gather، craft و build صرفاً ادعای کارت است و با اجرای بازی تأیید نشده است.",
+  "penalties_failure": "جریمه، شکست، مرگ یا هزینه خطا مشاهده نشد/نامشخص. عبارت «Survive the night» و ادعای survive the night از متن/کارت هستند، نه نتیجه مستقیم بازی.",
+  "outcomes_replay": "برد، باخت، پایان، نتیجه قابل اندازه‌گیری یا چرخه بازپخش مشاهده نشد/نامشخص. ثبت capture_status برابر budget_timeout و completed_stages خالی است.",
+  "onboarding": "صفحه آغازین یک منوی قابل مشاهده با New World، Settings و Controls دارد؛ New World عبارت «Pick a seed, mode and difficulty» را نشان می‌دهد و صفحه می‌گوید بازی تک‌نفره است و جهان به‌طور خودکار در مرورگر ذخیره می‌شود. ورود موفق به بازی یا آموزش تعاملی مشاهده نشد/نامشخص.",
+  "visual_audio_accessibility": "قاب‌ها یک منوی تمام‌صفحه با تصویر طبیعت، عنوان بازی و دکمه‌های متنی را نشان می‌دهند؛ تفاوت دیداری معناداری بین مراحل مشاهده نشد. صدا، زیرنویس، تنظیمات دسترس‌پذیری و خوانایی تعاملی مشاهده نشد/نامشخص.",
+  "technical_clues": [
+    "متادیتا ۹ script، یک stylesheet، یک XHR و ۸۲ fetch را ثبت کرده است؛ این فقط سرنخ فنیِ بارگذاری است و معماری یا منطق بازی را اثبات نمی‌کند.",
+    "دو هشدار درباره fallback نرم‌افزاری WebGL ثبت شده است؛ این سرنخ احتمالی محیط رندر است، نه شاهد قابلیت بازی.",
+    "خطاهای HTTP با وضعیت‌های 403، 400 و خطای دریافت remote config ثبت شده‌اند؛ اثر آن‌ها بر تجربه بازی مشاهده نشد/نامشخص.",
+    "canvas_inventory، engine_markers و tuning_constant_candidates خالی‌اند؛ بنابراین موتور یا پارامترهای تنظیمی از این داده‌ها قابل نتیجه‌گیری نیستند."
+  ],
+  "transferable_principles": [
+    "پیش از استنتاج درباره چرخه، باید قاب فعالِ بازی و تکرار یک عمل با بازخورد قابل مشاهده ثبت شود.",
+    "منوی آغازین بهتر است هدف و گزینه‌های اولیه را به‌صورت روشن و قابل تفکیک از اجرای واقعی ارائه کند.",
+    "بازخورد پیشرفت باید در خود اجرای بازی قابل مشاهده و قابل نسبت‌دادن به عمل بازیکن باشد.",
+    "تغییر زمانی یا انیمیشنی بین دو قاب به‌تنهایی اثبات پذیرش ورودی یا اثر آن نیست."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber فقط می‌توان اصلِ نیاز به بازخورد مستقیم و قابل نسبت‌دادن به ورودی را منتقل کرد؛ این بازی هیچ الگوی کنترل یا چرخه قابل اقتباس را تأیید نکرد.",
+    "score/rank باید فقط بازتاب مهارت باشد و نباید به خرید یا wallet مزیت بدهد.",
+    "free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ نیازمند کنترل جدید نباید فرض گرفته یا بازتولید شود؛ هرکدام صرفاً فرضیه‌ای نیازمند آزمون جداگانه است."
+  ],
+  "do_not_copy": [
+    "نام، شخصیت، تصویرسازی، محیط، مرحله، متن، صدا، برند یا assetهای این بازی را بازتولید نکن.",
+    "ادعاهای کارت رسمی درباره gathering، crafting، building، hunting یا fire arrows را بدون اجرای تأییدشده به‌عنوان مکانیک قطعی کپی نکن.",
+    "از ظاهر منوی اصلی یا ترکیب تصویری آن به‌عنوان الگوی مستقیم استفاده نکن."
+  ],
+  "evidence": [
+    {
+      "claim": "قاب load منوی اصلی را با عنوان TerraForge، گزینه‌های New World، Settings و Controls نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-17:screenshot:load"
+    },
+    {
+      "claim": "قاب after_start از نظر محتوای قابل مشاهده همان منوی اصلی است و اجرای فعال بازی در آن دیده نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-17:screenshot:after_start"
+    },
+    {
+      "claim": "قاب after_key_burst منوی اصلی را نشان می‌دهد؛ اثر پذیرفته‌شده ورودی‌های کلیدی در آن مشاهده نشد.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-17:screenshot:after_key_burst"
+    },
+    {
+      "claim": "قاب after_combined_input منوی اصلی را نشان می‌دهد؛ تغییر قاب به‌تنهایی اثبات پذیرش ورودی ترکیبی نیست.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-17:screenshot:after_combined_input"
+    },
+    {
+      "claim": "قاب late همچنان منوی اصلی را نشان می‌دهد و نتیجه، شکست یا برد مشاهده نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-17:screenshot:late"
+    },
+    {
+      "claim": "متن صفحه عبارت «Shape the wild. Survive the night.» و انتخاب seed، mode و difficulty را ارائه می‌کند.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-17:page_text:after_start"
+    },
+    {
+      "claim": "متن صفحه بازی را single-player معرفی می‌کند و ذخیره خودکار جهان در مرورگر را بیان می‌کند.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-17:page_text:after_start"
+    },
+    {
+      "claim": "کارت رسمی ادعا می‌کند جهان بقا شامل gather، craft، build، hunt، fire arrows و survive the night است؛ این ادعا با اجرای بازی play-test نشده است.",
+      "source_type": "official_card",
+      "stage": "gallery_card",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-17:official_card:gallery_card"
+    },
+    {
+      "claim": "وجود resourceهای متعدد، WebGL software fallback و خطاهای 403/400 و remote-config فقط سرنخ فنی احتمالی است و قابلیت بازی را اثبات نمی‌کند.",
+      "source_type": "technical_trace",
+      "stage": "capture_trace",
+      "certainty": "candidate_only",
+      "source_reference": "game-17:technical_trace:capture_trace"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "تمام قاب‌های fallback-1 از نظر محتوای دیداری یکسان به نظر می‌رسند و capture اصلی با budget_timeout متوقف شده است؛ completed_stages خالی است، start_action برابر none است و canvas یا تصویر قابل مشاهده از بازی فعال ثبت نشده. بنابراین این گزارش فقط درباره صفحه/منو و ادعاهای صریح متادیتا است. نبودن عنصر در قاب آغازین، نبودن آن در کل بازی را اثبات نمی‌کند؛ همچنین تغییر احتمالی زمانی بین قاب‌ها را نمی‌توان به ورودی نسبت داد."
+}

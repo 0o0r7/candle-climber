@@ -1,0 +1,79 @@
+{
+  "id": "game-21",
+  "title": "Lion City: After Hours",
+  "observation_level": "page_only",
+  "observed_goal": "در صفحه/متن منو، هدف اعلام‌شده یک شب با شش قرارداد است؛ اجرای آن در قاب‌ها مشاهده نشد/نامشخص.",
+  "observed_controls": [
+    "در متن صفحه و قاب‌ها Enter برای Select و Esc برای Back دیده می‌شود.",
+    "کنترل‌های اختصاصی رانندگی، حرکت، انتخاب خودرو یا تعامل در بازی فعال مشاهده نشد/نامشخص؛ metadata نیز controls_attempted را خالی ثبت کرده است."
+  ],
+  "observed_core_loop": "چرخهٔ بازی فعال، رانندگی، قرارداد، تعقیب یا تحویل در قاب‌ها مشاهده نشد/نامشخص.",
+  "progress_feedback": "در منوی اصلی شمارندهٔ 0/6 contracts و $250 banked دیده می‌شود؛ تغییر آن در قاب‌ها مشاهده نشد/نامشخص.",
+  "decisions_risk_reward": "تصمیم‌ها و ریسک/پاداشِ قابل‌اجرا مشاهده نشد/نامشخص. متن کارت رسمی از drift پرریسک، cash و افزایش police heat ادعا می‌کند، اما این ادعا با اجرای بازی تأیید نشده است.",
+  "rewards": "در منو مقدار اولیهٔ $250 banked دیده می‌شود؛ منبع و سازوکار کسب پاداش در اجرای بازی مشاهده نشد/نامشخص. ادعای رسمی دربارهٔ cash و score هنوز playtest نشده است.",
+  "penalties_failure": "جریمه، شکست، دستگیری یا از دست‌دادن پیشرفت مشاهده نشد/نامشخص.",
+  "outcomes_replay": "برد، باخت، نتیجهٔ قرارداد، پایان چرخه یا شواهد replay مشاهده نشد/نامشخص.",
+  "onboarding": "منوی اصلی با گزینه‌های HIT THE STREETS، RECORDS، CONTROLS و SETTINGS و انتخاب زبانی EN/中文 دیده می‌شود؛ ورود موفق به بازی یا آموزش تعاملی مشاهده نشد/نامشخص.",
+  "visual_audio_accessibility": "قاب‌ها یک منوی شبانهٔ سه‌بعدی با کنتراست نئون و گزینهٔ زبان EN/中文 نشان می‌دهند. صدا در قاب‌ها ارزیابی نمی‌شود؛ AudioContext طبق trace اجازهٔ شروع خودکار نگرفته است. اندازهٔ متن، خوانایی و دسترس‌پذیری کامل مشاهده نشد/نامشخص.",
+  "technical_clues": [
+    "صفحه با HTTP 200 و page_status=loaded ثبت شده و چند canvas با ابعاد ثبت‌شده دارد؛ این فقط سرنخ فنی است و فعال‌بودن بازی را ثابت نمی‌کند.",
+    "کنسول هشدار fallback نرم‌افزاری WebGL و خطاهای 404، 403، 400 و شکست دریافت remote config را ثبت کرده است؛ اثر آن بر بازی مشاهده نشد/نامشخص.",
+    "AudioContext به‌علت نبود user gesture مجاز به شروع نشده است؛ این سرنخ فنی است و به‌تنهایی نبود صدای بازی را ثابت نمی‌کند."
+  ],
+  "transferable_principles": [
+    "هدف چندمرحله‌ای را با شمارندهٔ ساده و قابل‌خواندن در همان صفحهٔ آغازین بازتاب بده.",
+    "ریسک و پاداش را فقط پس از مشاهدهٔ چرخهٔ واقعی و با بازخورد قابل‌فهم طراحی و آزمون کن.",
+    "ورودی‌های اصلی و وضعیت فعال‌بودن بازی را قبل از اتکا به تغییر قاب، به‌صورت صریح و قابل‌دسترسی نمایش بده.",
+    "در صورت خطای بارگذاری یا شروع رسانه، حالت جایگزین و پیام روشن فراهم کن و آن را جدا از منطق بازی ارزیابی کن."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber، score/rank باید فقط بازتاب مهارت و عملکرد باشد، نه خرید یا wallet و نه مزیت اقتصادی.",
+    "هر الگوی ریسک/پاداش فقط به‌صورت فرضیهٔ نیازمند آزمون از این شواهد قابل انتقال است؛ اجرای آن باید با بازخورد روشن و بدون حدس دربارهٔ کنترل‌ها بررسی شود.",
+    "free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ محتاج کنترل جدید را پیشنهاد نمی‌کنم؛ در صورت بررسی، صرفاً فرضیهٔ نیازمند آزمون جداگانه باشد."
+  ],
+  "do_not_copy": [
+    "ادعای رسمی دربارهٔ جهان باز، کلاس‌های وسیله، قراردادها، drift یا police heat را به‌عنوان قابلیت تأییدشده بازتولید نکن.",
+    "نام، شخصیت، art، level، متن، صدا، برند یا assetهای این بازی را بازتولید یا پیشنهاد نکن.",
+    "از تغییر دو قاب برای نتیجه‌گیری دربارهٔ پذیرش ورودی، پیشرفت یا چرخهٔ بازی استفاده نکن.",
+    "نبود عنصر در قاب آغازین را نبود آن در کل بازی تلقی نکن."
+  ],
+  "evidence": [
+    {
+      "claim": "قاب‌های load، after_start، after_key_burst و after_combined_input همگی منوی اصلی را با HIT THE STREETS، RECORDS، CONTROLS، SETTINGS و 0/6 contracts · $250 banked نشان می‌دهند؛ بازی فعال یا نتیجهٔ اجرا دیده نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "load; after_start; after_key_burst; after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-21:screenshot:load; after_start; after_key_burst; after_combined_input"
+    },
+    {
+      "claim": "متن صفحه در stageهای after_start، after_key_burst، after_combined_input و late همان منوی اصلی و راهنمای Enter/Select و Esc/Back را ثبت کرده است.",
+      "source_type": "page_text",
+      "stage": "after_start; after_key_burst; after_combined_input; late",
+      "certainty": "direct",
+      "source_reference": "game-21:page_text:after_start; after_key_burst; after_combined_input; late"
+    },
+    {
+      "claim": "کارت رسمی ادعا می‌کند بازی شامل شهر باز فشرده، 9 کلاس وسیله، drift برای cash، police heat فزاینده و 6 قرارداد پیک است؛ این ادعا با playtest تأیید نشده است.",
+      "source_type": "official_card",
+      "stage": "gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-21:official_card:gallery_description"
+    },
+    {
+      "claim": "metadata می‌گوید controls_attempted خالی، start_action=none و interaction_visual_change_signal=null است؛ تغییر تصویری احتمالی اثبات پذیرش ورودی نیست.",
+      "source_type": "technical_trace",
+      "stage": "capture metadata",
+      "certainty": "direct",
+      "source_reference": "game-21:technical_trace:capture metadata"
+    },
+    {
+      "claim": "trace شامل AudioContext blocked، خطاهای HTTP 404/403/400، شکست remote config و fallback نرم‌افزاری WebGL است.",
+      "source_type": "technical_trace",
+      "stage": "console_messages",
+      "certainty": "direct",
+      "source_reference": "game-21:technical_trace:console_messages"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "فقط فایل‌های ورودی همین بازی بررسی شد و وب‌گردی انجام نشد. capture_status=partial است؛ screenshotهای load، after_start و late از fallback-1 و دو قاب میانی از current هستند. چند screenshot timeout شده، توالی عمومی keyboard به‌دلیل focus روی text/select input کنار گذاشته شده، و هیچ قابِ بازی فعال، چرخهٔ کامل، نتیجه یا ورودی پذیرفته‌شده وجود ندارد. متادیتا نبودن تغییر بصری را ثبت کرده اما هر تغییر قاب، در صورت وجود، می‌تواند از animation یا زمان سپری‌شده باشد."
+}

@@ -1,0 +1,104 @@
+{
+  "id": "game-36",
+  "title": "Mushies - Merge Puzzle",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "در قاب‌های بازی فعال، هدف فعلی به‌صورت «GOAL 1» با نام Floppy Bunny و مورد بعدی با نام Strawberry Slime در قاب after_start، و سپس Mochi Chick در قاب‌های بعدی نمایش داده می‌شود. ادغام یا تکمیل هدف در قاب‌ها مشاهده نشد/نامشخص است. متن کارت رسمی، بازی را حول drop و merge و رسیدن به هدف بعدی توصیف می‌کند، اما این ادعا با اجرای کامل بازی تأیید نشده است.",
+  "observed_controls": [
+    "دکمه/راهنمای «Drop plushie» با کلید Space در قاب‌های فعال دیده می‌شود؛ پذیرفته‌شدن ورودی Space از این قاب‌ها به‌تنهایی اثبات نمی‌شود.",
+    "دکمه/راهنمای Pause با کلید Esc دیده می‌شود؛ استفاده و اثر آن مشاهده نشد/نامشخص است.",
+    "دکمه Collection در صفحه فعال دیده می‌شود؛ باز شدن یا کارکرد آن مشاهده نشد/نامشخص است.",
+    "در metadata ورودی‌های Enter، Space، ArrowUp، w، ArrowRight و نگه‌داشتن ArrowRight + Space ثبت شده‌اند، اما تغییر تصویر می‌تواند ناشی از انیمیشن یا گذر زمان باشد و فهمیده‌شدن ورودی‌ها اثبات نشده است."
+  ],
+  "observed_core_loop": "یک چرخه‌ی کامل و تکرارشونده‌ی drop، فرود/تجمع، merge و نتیجه در قاب‌ها مشاهده نشد. فقط صفحه‌ی بازی فعال، یک شیء در جایگاه رهاسازی و دو وضعیت پس از drop با افزایش شمارنده Drops از 0 به 1 و سپس 2 دیده می‌شود؛ علت دقیق تغییرات و پذیرش ورودی نامشخص است.",
+  "progress_feedback": "رابط کاربری Score، Time، Goal 1، Next و Drops را نمایش می‌دهد. در قاب‌ها Score برابر 0 است، زمان از 3:00 در after_start به 2:57، 2:55 و 2:54 می‌رسد و Drops از 0 به 1 و 2 تغییر می‌کند. امتیازگیری، پیشرفت هدف یا merge مشاهده نشد/نامشخص است.",
+  "decisions_risk_reward": "قرار دادن اشیای رهاشده در فضای عمودی و محل فرود در قاب‌ها دیده می‌شود، اما تصمیم‌گیری بازیکن، خطر، پاداش یا پیامد انتخاب‌ها مستقیماً مشاهده نشد/نامشخص است. تغییر مکان افقی در قاب‌های بعدی را نمی‌توان به ورودی خاص نسبت داد.",
+  "rewards": "در قاب آغازین هدف و مورد بعدی نمایش داده می‌شوند و کارت رسمی از رضایتِ کشف ترکیب‌های جدید و رسیدن به هدف بعدی می‌گوید؛ این ادعا stated است و پاداش واقعی، merge یا unlock در اجرای ثبت‌شده مشاهده نشد/نامشخص است.",
+  "penalties_failure": "باخت، خطا، پرشدن میدان، جریمه یا پایان زمان در قاب‌ها مشاهده نشد/نامشخص است. تایمرِ در حال کاهش دیده می‌شود، اما نتیجه‌ی رسیدن آن به صفر ثبت نشده است.",
+  "outcomes_replay": "برد، باخت، صفحه‌ی نتیجه، replay یا چرخه‌ی بازشروع مشاهده نشد/نامشخص است. قاب load منوی آغاز را نشان می‌دهد و قاب‌های بعدی صفحه‌ی فعال را، اما مسیر کامل پایان تا تکرار ثبت نشده است.",
+  "onboarding": "در منوی آغاز، گزینه‌ی Start collecting، Local multiplayer، Leaderboard، How to play و Settings دیده می‌شود. پس از ورود به بازی، راهنمای Drop plushie/Space و Pause/Esc روی صفحه هست. محتوای How to play، آموزش merge و onboarding کامل مشاهده نشد/نامشخص است.",
+  "visual_audio_accessibility": "قاب‌ها یک رابط تصویری نرم و رنگارنگ با کنتراست متنی، پنل‌های Score/Time/Goal/Next/Drops و راهنمای کلیدی نشان می‌دهند. صوت، تنظیمات دسترسی، خوانایی برای فناوری کمکی و رفتار در اندازه‌های دیگر مشاهده نشد/نامشخص است. دو تصویر قابل مشاهده و canvas با ابعاد 1280×800 در metadata ثبت شده است.",
+  "technical_clues": [
+    "metadata یک canvas با ابعاد 1280×800 و وضعیت loaded/completed را ثبت می‌کند؛ این سرنخ فنی درباره‌ی پیاده‌سازی است، نه اثبات مکانیک بازی.",
+    "کنسول Godot Engine v4.7.2.stable.official و اجرای WebGL 2.0/OpenGL ES 3.0 با Emscripten 4.0.20 را گزارش می‌کند؛ این‌ها سرنخ فنی احتمالی‌اند.",
+    "سه script، دو image، هفت fetch و دو ping در metadata ثبت شده‌اند؛ script scan برابر صفر و engine markers و tuning constant candidates خالی هستند.",
+    "یک خطای resource با HTTP 403 و هشدار fallback نرم‌افزاری WebGL ثبت شده است؛ اثر آن بر بازی در قاب‌ها نامشخص است."
+  ],
+  "transferable_principles": [
+    "یک هدف فعلی، مورد بعدی و شمارنده‌ی اقدام را در یک پنل ثابت نمایش بده تا وضعیت تصمیم‌گیری سریع خوانده شود.",
+    "ورودی اصلی را با یک affordance دیداری و کلید متناظر هم‌زمان ارائه کن، اما پذیرش ورودی و بازخورد نتیجه را جداگانه و صریح نشان بده.",
+    "پیشرفت را با شاخص‌های قابل مشاهده و زمان‌بندی روشن بازخورد بده، بدون اینکه تغییر قاب صرفاً به‌عنوان موفقیت مکانیکی تفسیر شود.",
+    "آموزش را مرحله‌ای نگه دار: ورود، اقدام پایه، مکث و مشاهده‌ی نتیجه؛ ادعاهای مکانیکی باید با اجرای واقعی قابل آزمون باشند."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber می‌توان از پنل ثابتِ هدف، مورد بعدی، امتیاز و زمان به‌صورت انتزاعی الهام گرفت؛ score/rank باید فقط بازتاب مهارت باشد.",
+    "هیچ مزیت گیم‌پلی نباید از خرید یا wallet بیاید؛ هر پیشرفت رقابتی باید به اجرای مهارتی و قابل مشاهده وابسته باشد.",
+    "مسیر پایه بهتر است بدون free brake و بدون تغییر جهت افقی طراحی شود؛ مسیر شاخه‌ای یا کنترل جدید فقط به‌عنوان فرضیه‌ی نیازمند آزمون قابل طرح است، نه نتیجه‌ی این بررسی.",
+    "وجود شمارنده و زمان می‌تواند برای بازخورد مهارت مفید باشد، مشروط به اینکه چرخه‌ی حرکت، برخورد و نتیجه در آزمون جداگانه واقعاً مشاهده و تأیید شود."
+  ],
+  "do_not_copy": [
+    "نام‌ها، شخصیت‌ها، ظاهر، art، level، متن، صدا، برند یا assetهای این بازی را بازتولید یا پیشنهاد نکن.",
+    "ادعای کارت درباره‌ی drop/merge را به‌عنوان مکانیک تأییدشده ارائه نکن؛ قاب‌ها merge یا نتیجه را نشان نمی‌دهند.",
+    "تغییر بین دو قاب را به‌تنهایی دلیل پذیرش ورودی، کنترل افقی یا موفقیت بازی تلقی نکن.",
+    "نبودن عنصر یا مکانیک در قاب آغازین را دلیل نبودن آن در کل بازی ندان."
+  ],
+  "evidence": [
+    {
+      "claim": "قاب load منوی آغاز با گزینه‌ی Start collecting و گزینه‌های Local multiplayer، Leaderboard، How to play و Settings را نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-36:screenshot:load"
+    },
+    {
+      "claim": "قاب after_start صفحه‌ی بازی فعال را با Score=0، Time=3:00، Goal 1، Next، Drops=0، راهنمای Drop plushie/Space و Pause/Esc نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-36:screenshot:after_start"
+    },
+    {
+      "claim": "در قاب after_key_burst زمان 2:57، Drops=1 و شیء دیگری در میدان دیده می‌شود؛ این تغییر، پذیرش ورودی را ثابت نمی‌کند.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-36:screenshot:after_key_burst"
+    },
+    {
+      "claim": "در قاب after_combined_input زمان 2:55، Drops=2 و دو شیء در پایین میدان دیده می‌شوند؛ ارتباط تغییر با ورودی ترکیبی تأیید نشده است.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-36:screenshot:after_combined_input"
+    },
+    {
+      "claim": "قاب late زمان 2:54 و Drops=2 را نشان می‌دهد و نتیجه، merge، برد یا باختی در آن دیده نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-36:screenshot:late"
+    },
+    {
+      "claim": "کارت رسمی بازی را حول dropping and merging objects، کشف ترکیب‌های جدید و رسیدن به هدف بعدی توصیف می‌کند.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-36:official_card:load"
+    },
+    {
+      "claim": "metadata می‌گوید capture تکمیل شده، صفحه loaded و تغییر تصویری پس از تعامل وجود دارد، اما صراحتاً هشدار می‌دهد که تغییر تصویر می‌تواند ناشی از animation یا elapsed time باشد و فهمیده‌شدن ورودی‌ها اثبات نشده است.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-36:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "metadata اجرای Godot Engine، WebGL 2.0/OpenGL ES 3.0، Emscripten 4.0.20 و canvas با ابعاد 1280×800 را ثبت می‌کند.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-36:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "این تحلیل فقط از evidence.json و پنج قاب همین بازی استفاده می‌کند و وب‌گردی یا اجرای مستقل انجام نشده است. متن stage خالی است، start_action برابر none است، اسکریپت‌ها scan نشده‌اند و کارت رسمی playtest نشده است. قاب‌ها بازی فعال و دو drop را نشان می‌دهند، اما چرخه‌ی کامل merge، نتیجه، شکست، replay، صوت، دسترسی‌پذیری و پذیرش قطعی ورودی‌ها مشاهده نشده‌اند."
+}

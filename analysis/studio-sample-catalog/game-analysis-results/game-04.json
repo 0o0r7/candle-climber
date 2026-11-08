@@ -1,0 +1,95 @@
+{
+  "id": "game-04",
+  "title": "The Rogue",
+  "observation_level": "page_only",
+  "observed_goal": "در قاب‌ها فقط صفحهٔ بارگذاری با عنوان بازی و عبارت «KINDLING THE VEIL» دیده می‌شود؛ هدف بازی فعال مشاهده نشد/نامشخص است.",
+  "observed_controls": [
+    "در متادیتا Enter، Space، ArrowUp، w، ArrowRight و نگه‌داشتن ArrowRight + Space برای 900ms آزموده شده‌اند؛ پذیرفته‌شدن هیچ‌یک مشاهده نشد/نامشخص است.",
+    "کلیک مرکز canvas به‌عنوان start_action ثبت شده است، اما شروع بازی فعال از قاب‌ها تأیید نمی‌شود."
+  ],
+  "observed_core_loop": "چرخهٔ بازی مشاهده نشد/نامشخص؛ چهار قاب فقط وضعیت بارگذاری را نشان می‌دهند.",
+  "progress_feedback": "نوار پیشرفت بارگذاری در قاب‌ها دیده می‌شود و بین قاب‌ها جلوتر می‌رود؛ این بازخورد بارگذاری است، نه پیشرفت بازی.",
+  "decisions_risk_reward": "تصمیم‌گیری، ریسک/پاداش و انتخاب‌های درون بازی مشاهده نشد/نامشخص است.",
+  "rewards": "پاداش یا سیستم تقویت مشاهده نشد/نامشخص است.",
+  "penalties_failure": "جریمه، شکست، آسیب یا وضعیت باخت مشاهده نشد/نامشخص است.",
+  "outcomes_replay": "نتیجه، برد/باخت، پایان اجرا و امکان تکرار مشاهده نشد/نامشخص است.",
+  "onboarding": "متن قابل مشاهده در هر چهار stage فقط «THE ROGUE» و «KINDLING THE VEIL» است؛ آموزش، راهنمای کنترل یا معرفی بازی مشاهده نشد/نامشخص است.",
+  "visual_audio_accessibility": "از نظر بصری، صفحهٔ بارگذاری تیره با لوگوی مرکزی و نوار پیشرفت دیده می‌شود. صدا، زیرنویس، تنظیمات دسترس‌پذیری و قابلیت خوانایی کنترل‌ها مشاهده نشد/نامشخص است.",
+  "technical_clues": [
+    "صفحه یک canvas با اندازهٔ 1280×800 دارد؛ این سرنخ فنی به‌تنهایی دربارهٔ مکانیک یا ورودی پذیرفته‌شده چیزی اثبات نمی‌کند.",
+    "وجود 10 script، یک stylesheet، منابع image و WebGL در پیام‌های کنسول ثبت شده است؛ این فقط نشان‌دهندهٔ پیاده‌سازی/بارگذاری فنی احتمالی است، نه اجرای چرخهٔ بازی.",
+    "در کنسول خطاهای 404، 403، 400، خطای remote config و هشدار fallback نرم‌افزاری WebGL ثبت شده‌اند؛ اثر آن‌ها بر تجربهٔ بازی مشاهده نشد/نامشخص است.",
+    "تغییر نوار پیشرفت و تصویر میان قاب‌ها ممکن است حاصل انیمیشن یا گذشت زمان باشد؛ متادیتا صریحاً می‌گوید تغییر بصری اثبات فهم ورودی نیست."
+  ],
+  "transferable_principles": [
+    "وضعیت بارگذاری باید بازخورد دیداری واضح و مستقل از پیشرفت واقعی بازی داشته باشد.",
+    "پذیرش ورودی باید با تغییر مستقیم و قابل‌تفسیر در وضعیت بازی قابل مشاهده باشد، نه صرفاً تفاوت زمانی بین قاب‌ها.",
+    "آموزش کنترل و هدف باید پیش از اتکا به چرخهٔ اصلی، در صفحهٔ قابل مشاهده و قابل آزمون ارائه شود.",
+    "ثبت مرحله، منبع و محدودیت مشاهده برای جداکردن شواهد مستقیم از ادعاهای طراحی ضروری است."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber، score/rank باید فقط بازتاب مهارت و نتیجهٔ بازی باشد؛ این بررسی هیچ مبنایی برای مکانیک امتیازدهی از بازی فعال ارائه نمی‌کند.",
+    "هیچ خرید یا wallet نباید مزیت ایجاد کند؛ این اصل به‌صورت سیاست طراحی قابل انتقال است، نه ویژگی مشاهده‌شده در این بازی.",
+    "از free brake و تغییر جهت افقی پرهیز شود؛ افزودن مسیر شاخه‌ایِ محتاج کنترل جدید فقط باید به‌عنوان فرضیهٔ نیازمند آزمون مطرح شود، نه نتیجهٔ این شواهد.",
+    "هر الگوی کنترل یا چرخهٔ پیشنهادی برای Candle Climber باید با اجرای مستقل و بازخورد مستقیم آزمون شود؛ از این صفحهٔ بارگذاری نمی‌توان مکانیک مشخصی استخراج کرد."
+  ],
+  "do_not_copy": [
+    "هویت بصری، لوگو، نام‌گذاری، متن صفحه، شخصیت‌ها، صداها یا هر asset مشخص را بازتولید نکن.",
+    "از نسبت‌دادن ژانر، ساختار مرحله، قابلیت چندنفره، انتخاب توانایی یا دشمن به اجرای مشاهده‌شده خودداری کن؛ این موارد فقط در ادعای کارت رسمی آمده‌اند و playtest نشده‌اند.",
+    "تغییر نوار پیشرفت را به‌عنوان پاسخ به کلیدها یا کلیک تفسیر نکن.",
+    "از طراحی مکانیک اختصاصی بر پایهٔ قاب‌های بارگذاری یا نام بازی نتیجه‌گیری نکن."
+  ],
+  "evidence": [
+    {
+      "claim": "هر چهار قاب صفحهٔ بارگذاری با عنوان «THE ROGUE»، عبارت «KINDLING THE VEIL» و نوار پیشرفت را نشان می‌دهند؛ صفحهٔ بازی فعال، منو یا نتیجه دیده نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "load; after_start; after_key_burst; after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-04:screenshot:load; after_start; after_key_burst; after_combined_input"
+    },
+    {
+      "claim": "متن مرحله در هر چهار stage یکسان ثبت شده است: «THE ROGUE / KINDLING THE VEIL». ",
+      "source_type": "page_text",
+      "stage": "load; after_start; after_key_burst; after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-04:page_text:load; after_start; after_key_burst; after_combined_input"
+    },
+    {
+      "claim": "کارت رسمی ادعا می‌کند بازی از ساخت چهار طلسم از میان هفت عنصر، اتاق‌های نفرین‌شده، wardens رو به افزایش و حالت‌های solo، co-op و arena تشکیل شده است؛ این ادعا با اجرای بازی در قاب‌ها تأیید نشده است.",
+      "source_type": "official_card",
+      "stage": "gallery_card",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-04:official_card:gallery_card"
+    },
+    {
+      "claim": "کنترل‌های Enter، Space، ArrowUp، w، ArrowRight و نگه‌داشتن ArrowRight + Space برای 900ms آزموده شده‌اند، اما پذیرش آن‌ها مشاهده نشد.",
+      "source_type": "technical_trace",
+      "stage": "after_start; after_key_burst; after_combined_input",
+      "certainty": "candidate_only",
+      "source_reference": "game-04:technical_trace:after_start; after_key_burst; after_combined_input"
+    },
+    {
+      "claim": "تغییر بصری بین قاب‌ها ثبت شده، اما خود متادیتا هشدار می‌دهد که این تغییر ممکن است انیمیشن یا گذشت زمان باشد و اثبات فهم ورودی نیست.",
+      "source_type": "technical_trace",
+      "stage": "load; after_start; after_key_burst; after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-04:technical_trace:load; after_start; after_key_burst; after_combined_input"
+    },
+    {
+      "claim": "canvas با ابعاد 1280×800 و منابع WebGL/اسکریپت ثبت شده‌اند؛ این‌ها سرنخ فنی احتمالی‌اند و چرخهٔ بازی را ثابت نمی‌کنند.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-04:technical_trace:load"
+    },
+    {
+      "claim": "خطاهای 404، 403، 400، خطای remote config و هشدار fallback نرم‌افزاری WebGL ثبت شده‌اند؛ اثر آن‌ها بر بازی مشاهده نشد/نامشخص است.",
+      "source_type": "technical_trace",
+      "stage": "load; after_start; after_key_burst; after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-04:technical_trace:load; after_start; after_key_burst; after_combined_input"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "فقط فایل metadata-and-capture-evidence و چهار قاب ارسالی همین بازی استفاده شد. capture وضعیت partial دارد و قاب late timeout شده است. همهٔ قاب‌ها در صفحهٔ بارگذاری هستند؛ بنابراین بازی فعال، چرخهٔ تکراری، نتیجه، کنترل پذیرفته‌شده، صدا، دسترس‌پذیری و اثر خطاهای فنی مشاهده نشد/نامشخص است. هیچ وب‌گردی یا حدس دربارهٔ بازی و کنترل پنهان انجام نشد."
+}

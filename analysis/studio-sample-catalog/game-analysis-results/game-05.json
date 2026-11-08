@@ -1,0 +1,94 @@
+{
+  "id": "game-05",
+  "title": "Canyon Circuit",
+  "observation_level": "page_only",
+  "observed_goal": "در متن صفحه، هدف کلی به‌صورت مسابقهٔ آرکید در یک درهٔ بیابانی آفتابی بیان شده است؛ هدف اجراییِ بازی مشاهده نشد/نامشخص است.",
+  "observed_controls": [
+    "متن صفحه می‌گوید: Press Enter or A؛ این دستور صفحه است و پذیرش ورودی در بازی تأیید نشده است.",
+    "کنترل‌های بازی مشاهده نشد/نامشخص است."
+  ],
+  "observed_core_loop": "چرخهٔ بازی مشاهده نشد/نامشخص است؛ هیچ مرحلهٔ تکمیل‌شده، canvas inventory یا screenshot ثبت نشده است.",
+  "progress_feedback": "بازخورد پیشرفت مشاهده نشد/نامشخص است؛ فقط متن منوی شروع ثبت شده است.",
+  "decisions_risk_reward": "تصمیم‌ها، ریسک/پاداش و انتخاب‌های حین بازی مشاهده نشد/نامشخص است. عبارت «هر خط تمیز سرعت می‌دهد» فقط ادعای کارت رسمی است و با اجرای بازی تأیید نشده است.",
+  "rewards": "پاداش‌های بازی مشاهده نشد/نامشخص است؛ ادعای «هر خط تمیز earns speed» در کارت رسمی ثبت شده اما playtest نشده است.",
+  "penalties_failure": "جریمه، شکست یا پیامد برخورد مشاهده نشد/نامشخص است.",
+  "outcomes_replay": "نتیجه، برد/باخت، پایان مسابقه و قابلیت بازپخش مشاهده نشد/نامشخص است.",
+  "onboarding": "صفحهٔ شروع متن «Start Engine» و «Press Enter or A» را نشان می‌دهد؛ این onboarding متنیِ صفحه است، نه اثبات ورود موفق به بازی.",
+  "visual_audio_accessibility": "هیچ screenshot یا تصویر قابل ارزیابی ثبت نشده است؛ صدا مشاهده نشد/نامشخص است. یک هشدار فنی می‌گوید AudioContext بدون user gesture اجازهٔ شروع نداشته است، اما این دربارهٔ وضعیت فنی است نه تجربهٔ نهایی صوتی.",
+  "technical_clues": [
+    "هشدار کنسول دربارهٔ fallback به software WebGL ثبت شده است؛ این سرنخ فنی احتمالی است و علت یا اثر آن بر بازی اثبات نشده است.",
+    "هشدار کنسول دربارهٔ مجاز نبودن AudioContext تا پس از user gesture ثبت شده است؛ سرنخ فنی احتمالی است.",
+    "یک خطای 403 برای بارگذاری resource ثبت شده است؛ منبع و اثر آن مشاهده نشد/نامشخص است.",
+    "هیچ engine marker، tuning constant candidate، اسکریپت اسکن‌شده یا failure درخواست ثبت نشده است."
+  ],
+  "transferable_principles": [
+    "هدف و قواعد اصلی را پیش از ورود به تعامل، کوتاه و شفاف در صفحهٔ شروع بیان کن.",
+    "بازخورد مهارت باید از عملکرد قابل مشاهده و قابل تکرار بیاید، نه از برابری خریداری‌شده یا مزیت اقتصادی.",
+    "چرخهٔ بازی باید با بازخورد روشنِ پیشرفت و پیامد قابل فهم برای تصمیم‌های بازیکن همراه باشد.",
+    "ادعاهای طراحی را فقط پس از مشاهدهٔ اجرای واقعی و نتیجهٔ تکرارشونده به‌عنوان واقعیت ثبت کن."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber، هر score/rank باید فقط نمایانگر مهارت باشد؛ این فایل هیچ الگوی اجراییِ تأییدشده‌ای برای امتیازدهی ارائه نمی‌کند.",
+    "هیچ مزیت مبتنی بر خرید یا wallet اضافه نشود.",
+    "از free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ محتاج کنترل جدید پرهیز شود؛ هر استفاده از آن‌ها فقط فرضیهٔ نیازمند آزمون خواهد بود.",
+    "از صفحهٔ شروع می‌توان اصلِ توضیح کوتاهِ هدف و ورودی را برداشت، اما نگاشت کنترل‌ها یا چرخهٔ مسابقه از این شواهد قابل انتقال و تأییدشده نیست."
+  ],
+  "do_not_copy": [
+    "متن، نام، شخصیت، art، level، صدا، برند یا asset مشخصی را بازتولید یا پیشنهاد نکن.",
+    "ادعای drift، boost، jump، wall-ride، برابری خودروها یا افزایش سرعتِ خط تمیز را به‌عنوان قابلیت تأییدشده کپی نکن؛ این‌ها فقط ادعاهای کارت رسمی‌اند.",
+    "تغییر احتمالی screenshot را به‌عنوان پذیرش ورودی یا پیشرفت بازی تفسیر نکن."
+  ],
+  "evidence": [
+    {
+      "claim": "صفحه با عنوان Canyon Circuit بارگذاری شده و متن منوی شروع را نمایش داده است.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-05:page_text:after_start"
+    },
+    {
+      "claim": "متن صفحه شامل «Start Engine» و «Press Enter or A» است؛ این دستور صفحه است، نه اثبات کنترل پذیرفته‌شده.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-05:page_text:after_start"
+    },
+    {
+      "claim": "کارت رسمی مسابقه در درهٔ آفتابی، خودروهای برابر و کسب سرعت از خط تمیز را ادعا می‌کند؛ اجرای بازی برای تأیید آن ثبت نشده است.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-05:official_card:load"
+    },
+    {
+      "claim": "هیچ screenshot، تصویر بازبینی‌شده یا stage با چرخهٔ بازی ثبت نشده است.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-05:screenshot:load"
+    },
+    {
+      "claim": "تغییر screenshot به‌تنهایی اثبات پذیرش ورودی نیست؛ خود metadata این caveat را ثبت کرده است.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-05:technical_trace:after_key_burst"
+    },
+    {
+      "claim": "هشدار fallback به software WebGL و هشدار AudioContext بدون user gesture ثبت شده‌اند.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-05:technical_trace:load"
+    },
+    {
+      "claim": "یک خطای 403 برای بارگذاری resource ثبت شده است.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-05:technical_trace:load"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "فقط evidence.json ورودی استفاده شد. capture_status برابر partial است، همهٔ screenshotها خالی‌اند، completed_stages خالی است، controls_attempted خالی است و start_action برابر none است. زمان‌تمام‌شدن screenshotها و نبودن اجرای فعال، نتیجه‌گیری دربارهٔ کنترل، حلقه، نتیجه، صدا یا قابلیت‌های ادعاشده را ممکن نمی‌کند."
+}

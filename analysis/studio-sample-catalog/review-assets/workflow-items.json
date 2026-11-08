@@ -1,0 +1,953 @@
+[
+  {
+    "id": "game-01",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-02",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-03",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-04",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-05",
+    "review_images": []
+  },
+  {
+    "id": "game-06",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-07",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "late",
+        "source": "fallback-1"
+      }
+    ]
+  },
+  {
+    "id": "game-08",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "late",
+        "source": "fallback-1"
+      }
+    ]
+  },
+  {
+    "id": "game-09",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-10",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "late",
+        "source": "fallback-1"
+      }
+    ]
+  },
+  {
+    "id": "game-11",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "late",
+        "source": "fallback-1"
+      }
+    ]
+  },
+  {
+    "id": "game-12",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-13",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-14",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-15",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "fallback-1"
+      }
+    ]
+  },
+  {
+    "id": "game-16",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-17",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_start",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "late",
+        "source": "fallback-1"
+      }
+    ]
+  },
+  {
+    "id": "game-18",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_start",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "late",
+        "source": "fallback-1"
+      }
+    ]
+  },
+  {
+    "id": "game-19",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-20",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-21",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_start",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "fallback-1"
+      }
+    ]
+  },
+  {
+    "id": "game-22",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-23",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-24",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-25",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-26",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-27",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "late",
+        "source": "fallback-1"
+      }
+    ]
+  },
+  {
+    "id": "game-28",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_start",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "fallback-1"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "fallback-1"
+      }
+    ]
+  },
+  {
+    "id": "game-29",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-30",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-31",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-32",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-33",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-34",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-35",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-36",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-37",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-38",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-39",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  },
+  {
+    "id": "game-40",
+    "review_images": [
+      {
+        "stage": "load",
+        "source": "current"
+      },
+      {
+        "stage": "after_start",
+        "source": "current"
+      },
+      {
+        "stage": "after_key_burst",
+        "source": "current"
+      },
+      {
+        "stage": "after_combined_input",
+        "source": "current"
+      },
+      {
+        "stage": "late",
+        "source": "current"
+      }
+    ]
+  }
+]

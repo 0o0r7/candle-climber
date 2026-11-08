@@ -1,0 +1,110 @@
+{
+  "id": "game-14",
+  "title": "Hero Academy Architect",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "در صفحه راهنما هدف فارغ‌التحصیل‌کردن قهرمانان بیان شده است؛ هر دانش‌آموز با 100 Academics و 100 Power فارغ‌التحصیل می‌شود، و رسیدن به هدف فارغ‌التحصیلی Accreditation می‌دهد. همچنین متن راهنما می‌گوید نباید سه نیمه‌شب در بدهی سپری شود. این هدف در قاب‌های بازی فعال به نتیجه نرسیده است.",
+  "observed_controls": [
+    "متن راهنما: بازکردن Build، انتخاب اتاق و کشیدن یک مستطیل روی چمن.",
+    "متن صفحه آغازین: Drag to build، Wheel to zoom، WASD یا right-drag برای pan، و Space برای pause.",
+    "در metadata ورودی‌های Enter، Space، ArrowUp، w، ArrowRight و نگه‌داشتن ArrowRight + Space برای 900ms تلاش شده‌اند؛ پذیرش این ورودی‌ها مشاهده و تأیید نشد."
+  ],
+  "observed_core_loop": "در قاب فعال، ساخت آکادمی با ابزارهای Build، Paths، Door، Demolish و Grid و مدیریت Students، Staff، Admissions، Schedule، Finances و Missions قابل مشاهده است. متن راهنما چرخه‌ای از ساخت اتاق، استخدام/پذیرش، تنظیم برنامه روزانه، آموزش و رسیدن به فارغ‌التحصیلی را توصیف می‌کند؛ چرخه تکراری کامل یا نتیجه آن در قاب‌ها مشاهده نشد.",
+  "progress_feedback": "قاب فعال شاخص‌های پول، Reputation، Safety، Morale، Students/Beds، Graduates، برق/پارچه، Villain Threat و Academy Rank را نمایش می‌دهد؛ اهداف ساخت اتاق و پاداش‌های +$300 و +$150 نیز دیده می‌شوند. تغییر زمان از 07:04 به 07:15 و تغییر محتوای بخش پایینِ سمت چپ بین دو قاب دیده می‌شود، اما این تغییر به‌تنهایی پیشرفت ناشی از ورودی پذیرفته‌شده را ثابت نمی‌کند.",
+  "decisions_risk_reward": "صفحه انتخاب چالش سه سطح با منابع آغازین، هدف فارغ‌التحصیلی و شدت Misfires/Threat را بیان می‌کند؛ در قاب انتخاب، سطح میانی به‌عنوان تعادل معرفی شده است. راهنما نیز بدهی، misfireهای آموزش، آتش/یخ‌زدگی/جهش، نیازهای اتاق و تهدید زمان‌دار را توضیح می‌دهد. تصمیم‌گیری واقعی کاربر و پیامد انتخاب‌ها در اجرای ثبت‌شده مشاهده نشد.",
+  "rewards": "متن صفحه برای ساخت Classroom و Cafeteria و استخدام Chef پاداش‌های پولی نشان می‌دهد؛ راهنما Accreditation پس از رسیدن به هدف و افزایش Rank با Reputation و فارغ‌التحصیلان را ذکر می‌کند. دریافت هیچ‌یک از این پاداش‌ها یا Accreditation در قاب‌ها مشاهده نشد.",
+  "penalties_failure": "متن راهنما می‌گوید آموزش می‌تواند powers را misfire کند، به دانش‌آموزان و مبلمان آسیب بزند، و دانش‌آموزان با پایین‌بودن تخت، غذا یا fun خارج شوند؛ سه نیمه‌شب بدهی نیز ممنوع است. شکست، باخت یا اعمال مستقیم این جریمه‌ها مشاهده نشد.",
+  "outcomes_replay": "در قاب‌های پایانی هنوز Day 1 و وضعیت Start-up Academy دیده می‌شود و نتیجه برد/باخت، فارغ‌التحصیلی یا پایان سناریو دیده نمی‌شود. امکان replay یا چرخه تکرار مجدد مشاهده نشد/نامشخص است.",
+  "onboarding": "قاب آغازین دکمه‌های New Academy و How to Play دارد. پس از شروع، انتخاب Challenge با توضیح منابع و خطرها دیده می‌شود؛ قاب بعدی راهنمای مفصل اجرای بازی را نمایش می‌دهد. عبور کامل کاربر از onboarding و آموزش تعاملی نامشخص است.",
+  "visual_audio_accessibility": "از نظر بصری، رابط شاخص‌های وضعیت، اهداف، پنل تهدید و نوار ابزار را روی نمای ایزومتریک محوطه نشان می‌دهد و متن‌ها عمدتاً خوانا و رنگ‌بندی‌شده‌اند. صدا مشاهده یا ارزیابی نشد/نامشخص است؛ دسترس‌پذیری، کنتراست، صفحه‌خوان و تنظیمات ورودی نیز مشاهده نشد/نامشخص است.",
+  "technical_clues": [
+    "metadata یک canvas با ابعاد 1280×800 و بدون visible image ثبت کرده است.",
+    "کنسول Godot Engine v4.7.2.stable.official و اجرای WebGL 2.0/OpenGL ES 3.0 با Emscripten 4.0.20 را گزارش می‌کند.",
+    "هشدار fallback نرم‌افزاری WebGL و یک خطای resource با وضعیت 403 ثبت شده‌اند؛ اثر آن‌ها بر بازی در قاب‌ها مشخص نیست.",
+    "تغییر بصری بین قاب‌ها فقط سرنخ احتمالیِ انیمیشن یا گذر زمان است؛ metadata صریحاً آن را اثبات پذیرش ورودی نمی‌داند."
+  ],
+  "transferable_principles": [
+    "هدف بلندمدت را با چند شاخص قابل‌خواندن و اهداف کوتاه‌مدتِ قابل‌مشاهده همراه کن.",
+    "پیش از فعال‌کردن گزینه‌های پیچیده، یک onboarding مرحله‌ای با توضیح رابطه علت‌ومعلولی ارائه کن.",
+    "ریسک‌های سیستمی را به منابع و وضعیت‌های قابل‌ردیابی وصل کن تا پیامد تصمیم‌ها خوانا باشد.",
+    "برای حفظ وضوح، ابزارهای ساخت و مدیریت را در نوارهای ثابت و پنل‌های وضعیت جدا کن."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber می‌توان اصل شاخص‌های روشن و اهداف کوتاه‌مدت را به score/rank منتقل کرد، به شرط آن‌که score/rank فقط مهارت را بسنجد.",
+    "هر پاداش پیشرفت باید بدون خرید یا wallet مزیت ایجاد کند؛ این تحلیل هیچ الگوی خرید را توصیه نمی‌کند.",
+    "مسیر پایه را خطی و مبتنی بر کنترل‌های موجود نگه دار؛ free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ محتاج کنترل جدید را وارد نکن.",
+    "اگر چنین کنترل یا مسیر شاخه‌ای بررسی شود، فقط فرضیه‌ای نیازمند آزمون جداگانه است و از این قاب‌ها نتیجه نمی‌شود."
+  ],
+  "do_not_copy": [
+    "نام‌ها، شخصیت‌ها، art، level، متن، صدا، برند یا assetهای این بازی را بازتولید نکن.",
+    "ادعای کارت رسمی درباره ساخت مدرسه، آموزش و پیروزی خانه‌ها را به‌عنوان اجرای بازی یا نتیجه تأییدشده عرضه نکن.",
+    "تغییر دو قاب را به‌عنوان اثبات پذیرش Enter، Space، WASD یا سایر ورودی‌ها تفسیر نکن.",
+    "نبودن عنصر در قاب آغازین را دلیل نبودن آن در کل بازی ندان."
+  ],
+  "evidence": [
+    {
+      "claim": "کارت رسمی بازی آن را ساخت مدرسه ابرقهرمانی با آموزش متخصصان و پیروزی خانه‌ها توصیف می‌کند.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-14:official_card:load"
+    },
+    {
+      "claim": "قاب load صفحه عنوان را با گزینه‌های New Academy و How to Play نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-14:screenshot:load"
+    },
+    {
+      "claim": "قاب after_start انتخاب سه سطح چالش و تفاوت منابع، هدف و Misfires/Threat را نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-14:screenshot:after_start"
+    },
+    {
+      "claim": "متن راهنما هدف فارغ‌التحصیلی، شرط 100 Academics و 100 Power و محدودیت سه نیمه‌شب بدهی را بیان می‌کند.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-14:screenshot:after_key_burst"
+    },
+    {
+      "claim": "متن راهنما ساخت اتاق با کشیدن مستطیل، مدیریت کارکنان و تنظیم Schedule را توضیح می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-14:screenshot:after_key_burst"
+    },
+    {
+      "claim": "قاب after_combined_input وضعیت فعال Day 1 را با اهداف، شاخص‌های منابع/تهدید و نوار ابزار ساخت و مدیریت نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-14:screenshot:after_combined_input"
+    },
+    {
+      "claim": "قاب late همچنان وضعیت Day 1 و Start-up Academy را نشان می‌دهد و نتیجه مستقیم برد/باخت ندارد.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-14:screenshot:late"
+    },
+    {
+      "claim": "metadata ورودی‌های عمومی را ثبت کرده اما هشدار می‌دهد تغییر بصری می‌تواند ناشی از انیمیشن یا گذر زمان باشد و پذیرش ورودی را ثابت نمی‌کند.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-14:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "metadata اجرای Godot، WebGL/Emscripten، canvas 1280×800، fallback نرم‌افزاری WebGL و خطای resource با وضعیت 403 را ثبت کرده است.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-14:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "فقط evidence.json و پنج قاب ثبت‌شده همین بازی استفاده شد؛ وب‌گردی، اجرای تازه، کنترل پنهان و حدس درباره سازوکارهای دیده‌نشده انجام نشد. قاب‌های active gameplay چرخه کامل، ورودی پذیرفته‌شده، نتیجه، برد/باخت، صدا یا replay را نشان نمی‌دهند. stage_text در metadata برای همه مراحل خالی است؛ بنابراین متن‌های گزارش‌شده از خود screenshotها خوانده شده‌اند. تغییر دو قاب می‌تواند حاصل زمان یا انیمیشن باشد و نبودن عنصر در قاب آغازین، نبود آن در کل بازی را ثابت نمی‌کند."
+}

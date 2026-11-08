@@ -1,0 +1,96 @@
+{
+  "id": "game-11",
+  "title": "Wildclaw: Colossus Hunt",
+  "observation_level": "page_only",
+  "observed_goal": "در قاب منو، هدف به‌صورت «Track it. Climb it. Bring it down.» و انتخاب یک quarry/هدف برای شروع hunt ارائه شده است؛ اجرای شکار، صعود یا زمین‌زدن در قاب‌ها مشاهده نشد.",
+  "observed_controls": [
+    "در متن صفحه/منو: WASD برای حرکت، Mouse برای نگاه، Shift برای Sprint / Brace، Space برای Dodge roll، LMB برای Slash combo، RMB (نگه‌داشتن) برای Charged slash، E برای Grapple / Ride، C برای Lock-on camera، R برای Drink potion، F برای Gather / Resupply و Esc برای Pause.",
+    "این‌ها دستورها/متن رابط هستند؛ هیچ‌کدام در اجرای فعال بازی با نتیجه قابل مشاهده تأیید نشدند.",
+    "در ثبت ورودی‌ها Enter، Space، ArrowUp، w، ArrowRight و نگه‌داشتن ArrowRight + Space برای ۹۰۰ میلی‌ثانیه تلاش شد، اما پذیرش بازی‌گونه این ورودی‌ها مشاهده نشد/نامشخص است."
+  ],
+  "observed_core_loop": "مشاهده نشد/نامشخص؛ قاب‌های current در وضعیت loading باقی مانده‌اند و قاب‌های fallback منوی انتخاب هدف را نشان می‌دهند، نه چرخه شکار، درگیری، صعود، حمله و نتیجه.",
+  "progress_feedback": "در loading درصدهای ۱۲٪، ۲۶٪ و ۳۲٪ در screenshot دیده می‌شود و متن صفحه نیز به‌ترتیب ۹٪، ۲۶٪ و ۳۲٪ ثبت شده است؛ تغییر درصد می‌تواند صرفاً گذر زمان/بارگذاری باشد و پیشرفت بازی یا پذیرش ورودی را ثابت نمی‌کند. در منو، وضعیت اهداف «Not yet hunted» است.",
+  "decisions_risk_reward": "منوی صفحه سه quarry با threat متفاوت و وضعیت Not yet hunted نشان می‌دهد انتخاب هدف احتمالاً تصمیمی با تفاوت تهدید است؛ ریسک/پاداش واقعی و پیامد انتخاب در اجرای بازی مشاهده نشد/نامشخص است.",
+  "rewards": "مشاهده نشد/نامشخص؛ هیچ پاداش، امتیاز، رتبه، غنیمت یا نتیجه شکار در قاب‌ها دیده نمی‌شود.",
+  "penalties_failure": "مشاهده نشد/نامشخص؛ هیچ شکست، آسیب، مرگ، هزینه یا مجازات مستقیم در قاب‌ها دیده نمی‌شود.",
+  "outcomes_replay": "مشاهده نشد/نامشخص؛ هیچ برد، باخت، پایان شکار، بازگشت به منو یا چرخه تکرارشونده ثبت نشده است.",
+  "onboarding": "صفحه loading یک tip درباره dodge timing و یک tip درباره نگه‌داشتن heavy attack نشان می‌دهد. منوی fallback فهرست کنترل‌ها و توضیح capture شدن mouse پس از Begin Hunt را نمایش می‌دهد؛ آموزش تعاملی یا تأیید فهم کنترل‌ها مشاهده نشد/نامشخص است.",
+  "visual_audio_accessibility": "Screenshotها رابط منوی خوانا با پس‌زمینه سه‌بعدی محیط و موجود بزرگ، کارت‌های انتخاب هدف، دکمه Begin Hunt و پنل کنترل‌ها را نشان می‌دهند. صدا مشاهده نشد/نامشخص است؛ وضعیت دسترس‌پذیری، زیرنویس، تنظیمات کنتراست یا remapping در این شواهد مشاهده نشد/نامشخص است.",
+  "technical_clues": [
+    "metadata یک صفحه ۲۰۰ و سه canvas با اندازه ۱۲۸۰×۸۰۰ ثبت می‌کند؛ این فقط سرنخ فنی از ساختار صفحه است، نه اثبات اجرای کامل بازی.",
+    "resource totals شامل ۵ script، ۴۷ image، ۴۰ fetch و یک xhr است؛ script_count_scanned برابر ۰ و engine_markers و tuning_constant_candidates خالی‌اند، بنابراین درباره موتور یا منطق بازی نتیجه‌گیری نمی‌شود.",
+    "هشدار کنسول مربوط به fallback نرم‌افزاری WebGL و چند خطای ۴۰۳/۴۰۰ و خطای remote config ثبت شده است؛ اثر آن‌ها بر بازی مشاهده نشد/نامشخص است.",
+    "تغییر قاب‌های loading و حرکت/تغییر حالت موجود در دو قاب fallback فقط تغییر تصویر یا گذر زمان را نشان می‌دهد؛ طبق metadata، تغییر بصری به‌تنهایی اثبات نمی‌کند ورودی فهمیده یا پذیرفته شده است."
+  ],
+  "transferable_principles": [
+    "هدف و وضعیت انتخاب را پیش از شروع تعامل، کوتاه و قابل مشاهده ارائه کن.",
+    "کنترل‌ها و بازخورد مورد انتظار را در همان نقطه‌ای که کاربر آماده شروع است، صریح و کم‌ابهام نشان بده.",
+    "تصمیم‌های سطح تهدید را از نتیجه‌های واقعی جدا نگه دار و پیامد انتخاب را با بازخورد مستقیم قابل فهم کن.",
+    "برای ادعای موفقیت تعاملی، به تغییر زمانی یا تصویری اکتفا نکن؛ چرخه و نتیجه قابل تکرار لازم است."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber، هر score/rank باید فقط بازتاب مهارت و عملکرد باشد، نه خرید یا wallet و نه مزیت پرداختی.",
+    "اگر از ایده هدف/تهدید استفاده شود، آن را به تصمیم خوانا و مهارت‌محور تبدیل کن و مزیت اقتصادی یا دارایی قابل خرید ایجاد نکن.",
+    "الگوی کنترل باید بدون free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ نیازمند کنترل جدید باقی بماند؛ هرکدام از این موارد فقط فرضیه‌ای نیازمند آزمون جداگانه است، نه نتیجه این بازی.",
+    "از این شواهد فقط می‌توان شفافیت onboarding و تفکیک وضعیت انتخاب از اجرای واقعی را منتقل کرد؛ چرخه شکار یا کنترل‌های آن قابل انتقال به‌عنوان واقعیت تأییدشده نیست."
+  ],
+  "do_not_copy": [
+    "نام‌ها، شخصیت‌ها، موجودات، art، محیط، level، متن، صدا، برند یا assetهای این بازی را بازتولید یا پیشنهاد نکن.",
+    "ادعای رسمی کارت درباره تعقیب، صعود، گلاپل و ضربه به نقاط حیاتی را به‌عنوان اجرای مشاهده‌شده گزارش نکن.",
+    "از تغییر درصد loading یا تفاوت دو قاب برای اثبات پذیرش ورودی، وجود چرخه یا نتیجه استفاده نکن.",
+    "نبود عنصر در قاب آغازین را دلیل نبودن آن در کل بازی ندان."
+  ],
+  "evidence": [
+    {
+      "claim": "قاب‌های load، after_start و after_key_burst صفحه loading با عنوان بازی، tip و درصد بارگذاری را نشان می‌دهند؛ هیچ gameplay فعال در آن‌ها دیده نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "load; after_start; after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-11:screenshot:load; after_start; after_key_burst"
+    },
+    {
+      "claim": "متن ثبت‌شده صفحه در مراحل loading شامل tip درباره Flow Evade و شارژ heavy attack/True Slash است.",
+      "source_type": "page_text",
+      "stage": "load; after_start; after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-11:page_text:load; after_start; after_key_burst"
+    },
+    {
+      "claim": "قاب after_combined_input منوی انتخاب quarry، سه وضعیت Not yet hunted، Begin Hunt، Field Guide، Settings، Enemy Library و پنل کنترل‌ها را نشان می‌دهد.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-11:screenshot:after_combined_input"
+    },
+    {
+      "claim": "قاب late همان منوی انتخاب و پنل کنترل‌ها را نشان می‌دهد؛ تغییر جای موجود در پس‌زمینه، بدون چرخه یا نتیجه، اثبات اجرای ورودی نیست.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-11:screenshot:late"
+    },
+    {
+      "claim": "صفحه می‌گوید با Begin Hunt ماوس برای camera control capture می‌شود و Esc آن را آزاد می‌کند و فهرست کنترل‌های WASD/Mouse/Shift/Space/LMB/RMB/E/C/R/F/Esc را ارائه می‌دهد.",
+      "source_type": "page_text",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-11:page_text:late"
+    },
+    {
+      "claim": "کارت رسمی بازی، تعقیب موجودات عظیم، جاخالی از حمله، grapple aboard و ضربه به نقاط حیاتی را ادعا می‌کند؛ این ادعا با اجرای بازی در قاب‌ها playtest نشده است.",
+      "source_type": "official_card",
+      "stage": "gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-11:official_card:gallery_description"
+    },
+    {
+      "claim": "metadata خطاهای ۴۰۳/۴۰۰، خطای remote config، هشدار fallback نرم‌افزاری WebGL، سه canvas و نبود engine markers را ثبت کرده است؛ اثر بازی‌محور این سرنخ‌ها نامشخص است.",
+      "source_type": "technical_trace",
+      "stage": "capture",
+      "certainty": "candidate_only",
+      "source_reference": "game-11:technical_trace:capture"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "ثبت capture جزئی است. مراحل current فقط loading را نشان می‌دهند؛ after_combined_input و late از fallback-1 هستند و metadata می‌گوید screenshotهای آن مراحل timeout شده‌اند. اجرای شکار، کنترل دوربین، حمله، grapple، dodge، آسیب، پاداش، شکست، برد/باخت و replay مشاهده نشد/نامشخص است. تغییر دو قاب به‌تنهایی پذیرش ورودی را ثابت نمی‌کند و نبود عنصر در قاب آغازین نبود آن در کل بازی را ثابت نمی‌کند."
+}

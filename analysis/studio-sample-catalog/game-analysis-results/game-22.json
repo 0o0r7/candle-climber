@@ -1,0 +1,121 @@
+{
+  "id": "game-22",
+  "title": "Frostline Zero",
+  "observation_level": "page_only",
+  "observed_goal": "متن صفحه هدف را فرار از بهمن و رسیدن به خط پایان توصیف می‌کند؛ در screenshotها فقط منوی اصلی و صحنه پس‌زمینه دیده می‌شود و هدف در اجرای فعال بازی مشاهده نشد.",
+  "observed_controls": [
+    "متن صفحه: AD / کلیدهای چپ و راست برای هدایت",
+    "متن صفحه: Space / W / کلید بالا برای پرش، با امکان نگه‌داشتن برای ارتفاع بیشتر",
+    "متن صفحه: Shift برای air slam و تقویت روی سقوط‌های بزرگ",
+    "متن صفحه: S / کلید پایین برای ترمز",
+    "متن صفحه: R برای شروع دوباره و Esc برای مکث",
+    "متن صفحه: WASD و کلیدهای جهت‌دار برای حالت دونفره؛ تخصیص دقیق بازیکنان در صفحه ذکر شده است"
+  ],
+  "observed_core_loop": "مشاهده نشد/نامشخص؛ هیچ قاب، چرخه تکراری، شروع run، برخورد، پرش کامل یا بازگشت به وضعیت قابل تکرار ثبت نشده است.",
+  "progress_feedback": "در صفحه عبارت‌های Personal best، Stage 1، No finish yet، 0 clears و 0 deaths دیده می‌شود؛ پیشرفت حین بازی، فاصله تا پایان یا بازخورد نتیجه مشاهده نشد.",
+  "decisions_risk_reward": "متن صفحه از خطر برخورد و نابودی پس از یک hit می‌گوید و کنترل‌های هدایت، پرش، ترمز و air slam را فهرست می‌کند؛ انتخاب‌گری و trade-off در اجرای فعال بازی مشاهده نشد/نامشخص است.",
+  "rewards": "متن صفحه به finish، personal best و clears اشاره دارد؛ پاداش واقعی، امتیازدهی یا بازشدن محتوا مشاهده نشد/نامشخص است.",
+  "penalties_failure": "متن صفحه ادعا می‌کند یک hit باعث پایان می‌شود و کارت رسمی از outrun کردن بهمن می‌گوید؛ شکست یا صفحه نتیجه در قاب‌ها مشاهده نشد.",
+  "outcomes_replay": "گزینه Restart run در متن صفحه وجود دارد، اما اجرای آن، برد، باخت، پایان run یا چرخه replay مشاهده نشد/نامشخص است.",
+  "onboarding": "منوی اصلی دستورهای متنی کنترل و گزینه Start Run را نمایش می‌دهد؛ ورود به بازی فعال و آموزش تعاملی مشاهده نشد.",
+  "visual_audio_accessibility": "در screenshotها منوی خوانا با کنتراست بالا، برچسب‌های متنی کنترل و پس‌زمینه سه‌بعدی/برفی دیده می‌شود. صدا مشاهده نشد/نامشخص است؛ فقط خطای فنی AudioContext ثبت شده است. تنظیمات دسترس‌پذیری مشاهده نشد/نامشخص است.",
+  "technical_clues": [
+    "canvas با ابعاد 1280×800 در metadata ثبت شده است؛ این فقط سرنخ فنی است و رفتار بازی را ثابت نمی‌کند.",
+    "metadata وجود 8 script، یک stylesheet، سه font، یک image و چند fetch/ping را ثبت می‌کند؛ script bytes و engine markers اسکن نشده‌اند، پس درباره پیاده‌سازی نتیجه‌گیری نمی‌شود.",
+    "هشدار کنسول می‌گوید AudioContext پس از user gesture مجاز به شروع نبوده است؛ این سرنخ فنی درباره وضعیت صداست، نه اثبات وجود یا نبود صدای بازی.",
+    "هشدار fallback نرم‌افزاری WebGL و یک خطای 403 ثبت شده است؛ اثر آن بر تجربه بازی از ورودی‌ها مشخص نیست.",
+    "تغییر قاب‌ها می‌تواند ناشی از animation یا گذشت زمان باشد؛ metadata صراحتاً می‌گوید پذیرش ورودی اثبات نشده است."
+  ],
+  "transferable_principles": [
+    "اهداف، کنترل‌ها و بازخورد را پیش از ورود به چرخه اصلی روشن و قابل مشاهده ارائه کن.",
+    "ریسک باید با بازخورد فوری و قابل تشخیص همراه باشد، اما از قاب‌های صرفاً منویی درباره تعادل آن نتیجه‌گیری نکن.",
+    "برای آزمون‌پذیری، چرخه کوتاه و تکرارشونده با شروع، تصمیم، پیامد و امکان تکرار طراحی کن.",
+    "ادعاهای رسمی را از رفتار واقعاً مشاهده‌شده جدا نگه دار و تغییرات زمانی تصویر را به‌تنهایی دلیل پذیرش ورودی ندان."
+  ],
+  "candle_climber_relevance": [
+    "برای Candle Climber فقط اصل کلیِ نمایش روشن کنترل‌ها، خطر و بازخورد را قابل انتقال بدان؛ هیچ asset، نام، متن یا ظاهر این بازی را بازتولید نکن.",
+    "score/rank را فقط به مهارت و عملکرد بازیکن گره بزن، نه خرید یا wallet و نه مزیت پرداختی.",
+    "free brake، تغییر جهت افقی یا مسیر شاخه‌ایِ نیازمند کنترل جدید را وارد نکن؛ اگر چنین گزینه‌ای بررسی می‌شود، صرفاً فرضیه‌ای نیازمند آزمون جداگانه است.",
+    "از این نمونه درباره loop، نتیجه یا احساس کنترل نتیجه قطعی نگیر، چون اجرای فعال و outcome در قاب‌ها مشاهده نشد."
+  ],
+  "do_not_copy": [
+    "نام، شخصیت، سبک بصری، محیط، متن، صدا، برند یا assetهای Frostline Zero را کپی یا پیشنهاد نکن.",
+    "ادعای کارت رسمی درباره مسیر، موانع یا طول run را به‌عنوان قابلیت تأییدشده بازتولید نکن.",
+    "تغییر وضعیت انتخاب منو یا تفاوت قاب‌ها را به‌عنوان ورودی پذیرفته‌شده یا پیشرفت بازی معرفی نکن.",
+    "از طراحی مسیر شاخه‌ایِ محتاج کنترل جدید، free brake یا هر مزیت وابسته به خرید/wallet برای Candle Climber استفاده نکن."
+  ],
+  "evidence": [
+    {
+      "claim": "در همه قاب‌های ارسالی منوی اصلی باقی است و اجرای فعال یا شروع run دیده نمی‌شود؛ در قاب‌ها گزینه Start Run و پنل کنترل‌ها قابل مشاهده‌اند.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-22:screenshot:load"
+    },
+    {
+      "claim": "قاب after_start نیز منوی اصلی را نشان می‌دهد؛ روشن‌شدن/تغییر ظاهری گزینه انتخاب‌شده به‌تنهایی پذیرش Start یا اجرای بازی را اثبات نمی‌کند.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-22:screenshot:after_start"
+    },
+    {
+      "claim": "قاب after_key_burst هنوز منوی اصلی، وضعیت No finish yet و 0 clears · 0 deaths را نشان می‌دهد؛ اجرای کلیدها یا بازی فعال تأیید نشده است.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-22:screenshot:after_key_burst"
+    },
+    {
+      "claim": "قاب after_combined_input صحنه پس‌زمینه و منوی اصلی را نشان می‌دهد و finish یا death مستقیم در آن دیده نمی‌شود.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-22:screenshot:after_combined_input"
+    },
+    {
+      "claim": "قاب late نیز منوی اصلی را نشان می‌دهد و وضعیت No finish yet، 0 clears و 0 deaths تغییر نکرده است.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-22:screenshot:late"
+    },
+    {
+      "claim": "صفحه کنترل‌های هدایت، پرش، air slam، ترمز، شروع دوباره و مکث را با کلیدهای مربوط نمایش می‌دهد.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-22:page_text:after_start"
+    },
+    {
+      "claim": "متن صفحه هدف را رسیدن به finish تحت فشار بهمن و با خطر پایان پس از یک hit بیان می‌کند.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-22:page_text:after_start"
+    },
+    {
+      "claim": "کارت رسمی بازی ادعا می‌کند مسیر دستی 2.3 کیلومتری، شکاف‌ها، ریل‌های نورانی و تعقیب بهمن وجود دارد؛ این ادعا با اجرای کامل بازی در این شواهد playtest نشده است.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-22:official_card:load"
+    },
+    {
+      "claim": "metadata ثبت می‌کند که تعامل بصری می‌تواند ناشی از animation یا گذشت زمان باشد و پذیرش ورودی اثبات نشده است.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "candidate_only",
+      "source_reference": "game-22:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "metadata وجود canvas با ابعاد 1280×800 و هشدارهای AudioContext، fallback نرم‌افزاری WebGL و خطای 403 را ثبت می‌کند؛ این‌ها فقط سرنخ فنی‌اند.",
+      "source_type": "technical_trace",
+      "stage": "late",
+      "certainty": "candidate_only",
+      "source_reference": "game-22:technical_trace:late"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "فقط فایل metadata-and-capture-evidence و پنج قاب همین بازی بررسی شد؛ وب‌گردی، اجرای مجدد بازی و کنترل پنهان انجام نشد. start_action برابر none است، capture وضعیت partial دارد، برخی screenshotها timeout شده‌اند و ورودی ثبت‌شده game-specific playtest نیست. بنابراین چرخه بازی، نتیجه، صدا، دسترس‌پذیری، امتیازدهی، موانع و رفتار واقعی کنترل‌ها مشاهده نشد/نامشخص است. نبود عنصر در قاب آغازین نبود آن در کل بازی را ثابت نمی‌کند."
+}
