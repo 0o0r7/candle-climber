@@ -1,0 +1,51 @@
+name: skybound-forensics (remote hands)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [infra/remote-hands]
+    paths:
+      - '.github/workflows/skybound-forensics.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: skybound-forensics
+  cancel-in-progress: true
+
+jobs:
+  forensics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright (chromium only)
+        run: |
+          npm i --no-save playwright@1.49.0
+          npx playwright install --with-deps chromium
+
+      - name: Run forensics
+        run: node scripts/skybound-forensics.mjs
+        env:
+          GAME_URL: https://skybound-myc8c9et.manus.game/
+
+      - name: Commit results
+        run: |
+          git config user.name "remote-hands-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add analysis/skybound-remote/
+          git commit -m "skybound forensics results [skip ci]" || echo "nothing to commit"
+          git push
+
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skybound-forensics
+          path: analysis/skybound-remote/
