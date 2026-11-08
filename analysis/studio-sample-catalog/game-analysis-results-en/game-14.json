@@ -1,0 +1,110 @@
+{
+  "id": "game-14",
+  "title": "Hero Academy Architect",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "The guide page states that the goal is to graduate heroes; each student graduates with 100 Academics and 100 Power, and reaching the graduation goal grants Accreditation. The guide text also says that three midnights must not be spent in debt. This goal was not reached in the active gameplay frames.",
+  "observed_controls": [
+    "Guide text: open Build, select a room, and drag a rectangle over the grass.",
+    "Start-page text: Drag to build, Wheel to zoom, WASD or right-drag for pan, and Space for pause.",
+    "The metadata attempted the inputs Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight + Space for 900ms; acceptance of these inputs was not observed or confirmed."
+  ],
+  "observed_core_loop": "In the active frame, building the academy with the Build, Paths, Door, Demolish, and Grid tools and managing Students, Staff, Admissions, Schedule, Finances, and Missions are visible. The guide text describes a cycle of building rooms, hiring/admitting, setting the daily schedule, training, and reaching graduation; the complete repeating cycle or its outcome was not observed in the frames.",
+  "progress_feedback": "The active frame displays indicators for money, Reputation, Safety, Morale, Students/Beds, Graduates, electricity/fabric, Villain Threat, and Academy Rank; room-building objectives and +$300 and +$150 rewards are also visible. A time change from 07:04 to 07:15 and a change in the lower-left section content are visible between two frames, but this change alone does not establish progress caused by an accepted input.",
+  "decisions_risk_reward": "The challenge-selection page states three levels with starting resources, a graduation goal, and Misfires/Threat intensity; in the selection frame, the middle level is presented as the balance. The guide also explains debt, training misfires, fire/freezing/surge, room requirements, and a time-limited threat. Actual user decision-making and the consequences of choices were not observed in the recorded run.",
+  "rewards": "The page text shows monetary rewards for building Classroom and Cafeteria and hiring Chef; the guide mentions Accreditation after reaching the goal and increasing Rank with Reputation and graduates. Receipt of any of these rewards or Accreditation was not observed in the frames.",
+  "penalties_failure": "The guide text says that training can misfire powers, damage students and furniture, and that students will leave when beds, food, or fun are insufficient; three midnights in debt are also prohibited. Failure, loss, or direct application of these penalties was not observed.",
+  "outcomes_replay": "The final frames still show Day 1 and the Start-up Academy status, and no win/loss result, graduation, or scenario ending is visible. The possibility of replay or a repeated cycle was not observed; the available evidence is inconclusive.",
+  "onboarding": "The opening frame has New Academy and How to Play buttons. After starting, challenge selection with an explanation of resources and risks is visible; the next frame displays a detailed guide to playing the game. The user’s complete passage through onboarding and interactive training is unclear.",
+  "visual_audio_accessibility": "Visually, the interface shows status indicators, objectives, a threat panel, and a toolbar over an isometric view of the grounds, and the text is generally legible and color-coded. Audio was not assessed; the audio status is unknown; accessibility, contrast, screen reader support, and input settings were also not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The metadata recorded a canvas with dimensions 1280×800 and no visible image.",
+    "The console reports Godot Engine v4.7.2.stable.official and WebGL 2.0/OpenGL ES 3.0 execution with Emscripten 4.0.20.",
+    "A WebGL software fallback warning and a resource error with status 403 were recorded; their effect on the game in the frames is unclear.",
+    "The visual change between frames is only a possible clue of animation or the passage of time; the metadata explicitly does not treat it as proof of input acceptance."
+  ],
+  "transferable_principles": [
+    "Pair the long-term goal with several readable indicators and observable short-term objectives.",
+    "Before enabling complex options, provide staged onboarding explaining cause-and-effect relationships.",
+    "Tie systemic risks to trackable resources and states so that the consequences of decisions are legible.",
+    "To preserve clarity, separate building and management tools into fixed bars and status panels."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, the principle of clear indicators and short-term objectives can be transferred to score/rank, provided that score/rank measures skill only.",
+    "Every progression reward should create an advantage without purchase or wallet; this analysis does not recommend any purchase pattern.",
+    "Keep the basic path linear and based on the available controls; do not introduce free brake, horizontal direction changes, or a branching path requiring a new control.",
+    "If such a control or branching path is examined, it is only a hypothesis requiring a separate test and does not follow from these frames."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game’s names, characters, art, level, text, audio, brand, or assets.",
+    "Do not present the official-card claim about building a school, training, and house victories as gameplay or a confirmed outcome.",
+    "Do not interpret the change between the two frames as proof of acceptance of Enter, Space, WASD, or other inputs.",
+    "Do not treat the absence of an element in the opening frame as evidence that it is absent from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The official game card describes it as a superhero school-building game involving specialist training and house victories.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-14:official_card:load"
+    },
+    {
+      "claim": "The load frame shows the title page with the New Academy and How to Play options.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-14:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame shows selection of three challenge levels and differences in resources, goal, and Misfires/Threat.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-14:screenshot:after_start"
+    },
+    {
+      "claim": "The guide text states the graduation goal, the 100 Academics and 100 Power condition, and the three-midnights-in-debt limitation.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-14:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The guide text explains building rooms by dragging a rectangle, managing staff, and setting the Schedule.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-14:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input active frame shows Day 1 status with objectives, resource/threat indicators, and the building and management toolbar.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-14:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame still shows Day 1 and the Start-up Academy status and has no direct win/loss result.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-14:screenshot:late"
+    },
+    {
+      "claim": "The metadata records general inputs but warns that the visual change may result from animation or the passage of time and does not establish input acceptance.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-14:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "The metadata records Godot execution, WebGL/Emscripten, a 1280×800 canvas, WebGL software fallback, and a resource error with status 403.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-14:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only evidence.json and five recorded frames of this game were used; no web browsing, fresh execution, hidden control, or speculation about unseen mechanisms was performed. The active gameplay frames do not show the complete cycle, accepted input, outcome, win/loss, audio, or replay. stage_text is empty for all stages in the metadata; therefore, the reported text was read from the screenshots themselves. The change between the two frames may result from time or animation, and the absence of an element in the opening frame does not establish its absence from the entire game."
+}

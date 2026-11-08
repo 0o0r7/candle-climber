@@ -1,0 +1,102 @@
+{
+  "id": "game-35",
+  "title": "Neon Alley Brawl",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "In the menu frame, the textual goal is «START BRAWL»; the official card describes the goal as progressing through an alley, fighting enemies, and reaching the boss, but reaching this goal was not observed in the frames.",
+  "observed_controls": [
+    "The guide screen announces movement with WASD or L-Stick; acceptance of this input was not confirmed in the recorded run.",
+    "The guide screen announces light attack with J/LMB, heavy attack/guard break with K/RMB, jump with Space, roll with L/Shift, grab/pick up/drop with I/E, and pause with Esc; successful execution of none of these was directly observed.",
+    "The input metadata records Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight+Space; visual change alone does not establish their acceptance."
+  ],
+  "observed_core_loop": "Direct evidence of active gameplay was seen: the HUD, timer, and level scene are present in the after_key_burst, after_combined_input, and late frames, and the time advances from 0:01 to 0:03 and 0:05. The complete movement/combat/progression/outcome cycle or a clear repetition was not observed.",
+  "progress_feedback": "In the gameplay frames, the timer, zero score, status bar, and x3 counter are visible; score increase, bar change, hit count, or level progression was not observed. The page text also showed only 81% download progress during loading.",
+  "decisions_risk_reward": "The guide text claims the existence of choices involving light/heavy attack, jumping, rolling, and using environmental objects, but no decision, risk, reward, or successful interaction was directly seen in the execution frames.",
+  "rewards": "not observed; the available evidence is inconclusive; the official card claims chaining combos and fighting to the boss, but no reward or executed combo was recorded in the frames.",
+  "penalties_failure": "not observed; the available evidence is inconclusive; no loss, damage, health reduction, or direct penalty is visible in the frames.",
+  "outcomes_replay": "not observed; the available evidence is inconclusive; no win/loss result, level ending, replay screen, or repeating cycle was recorded.",
+  "onboarding": "The load frame shows a start menu with the START BRAWL button and a CONTROLS option. The after_start frame displays a control guide screen and the Enter LET'S GO button. This is screen-based instruction and does not establish successful execution of the commands.",
+  "visual_audio_accessibility": "The frames show a pixel-art visual style, high-contrast neon, and a readable HUD. EN/中文 language selection is visible in the menu. Reliable information about audio, subtitles, accessibility settings, or audio feedback was not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The metadata records a canvas with dimensions 1280×800 and a loaded image with a natural size of 1280×720; this is only a technical clue and does not establish game behavior.",
+    "The technical log reports Godot Engine v4.7.2, Emscripten 4.0.20, WebGL 2.0, and single-threaded execution; these are possible technical clues, not evidence of design or accepted input.",
+    "Three WebGL software fallback warnings and one HTTP 403 error are recorded in the console; their effect on the game experience is not determinable from this evidence.",
+    "The script scan reports 0 scripts and 0 bytes, and no engine marker or tuning constant candidate was recorded; this result is limited to the available capture."
+  ],
+  "transferable_principles": [
+    "Provide instruction before entering the game in a short, readable screen and connect inputs to visible action.",
+    "Progress feedback should be visible within the scene through stable, interpretable indicators.",
+    "For high-risk actions, make the difference between a safe state and danger clear through direct, visible feedback.",
+    "Maintain a clear boundary between what the introduction card claims and what was tested in the actual run."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, every score/rank should reflect only gameplay skill and performance; this evidence provides no basis for connecting it to a purchase or wallet, and the advantage should not come from a purchase/wallet.",
+    "A short tutorial and stable progress indicators may serve as inspiration, but only after direct testing of the Candle Climber gameplay loop.",
+    "Do not make free brake, horizontal direction change, or a branching path requiring new controls a definite recommendation; each is only a hypothesis requiring testing and was not tested in this analysis."
+  ],
+  "do_not_copy": [
+    "Do not reproduce or propose this game's names, characters, art, level, text, sounds, brands, or assets.",
+    "Do not treat the claimed combo, environmental weapon, enemy, or reaching the boss as a confirmed feature of the execution.",
+    "Do not consider change between frames alone to be evidence of input acceptance or successful mechanics.",
+    "Do not take the absence of an enemy, outcome, or other element in the opening frame as evidence that it is absent from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The opening menu with the START BRAWL button, CONTROLS option, and «NO RECORD YET» indicator is visible.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-35:screenshot:load"
+    },
+    {
+      "claim": "The guide screen announces movement, attack, jump, roll, grab/pick up/drop, and pause controls and several mechanical tips; their execution was not observed in this frame.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-35:screenshot:after_start"
+    },
+    {
+      "claim": "The active HUD, 0:01 timer, 0000000 score, status bar, and level 1 title are visible in the frame.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-35:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The execution frame shows the 0:03 timer and an active character/scene; acceptance of the combined input or its mechanical effect has not been established.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-35:screenshot:after_combined_input"
+    },
+    {
+      "claim": "In the late frame, the 0:05 timer and active scene are visible, but the score remains zero and the level outcome is not visible.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-35:screenshot:late"
+    },
+    {
+      "claim": "The official game card claims combo chaining, use of street objects as weapons, and progression to the boss; this claim was not tested through complete execution in the frames.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-35:official_card:load"
+    },
+    {
+      "claim": "The metadata records visual change after interaction, but explicitly warns that the change may be caused by animation or passage of time and does not establish input comprehension.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "candidate_only",
+      "source_reference": "game-35:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "The technical log reports Godot Engine v4.7.2, Emscripten 4.0.20, WebGL 2.0, and single-threaded execution.",
+      "source_type": "technical_trace",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-35:technical_trace:late"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "The analysis uses only evidence.json and five frames from this game; no web browsing or replay was performed. The frames show the sequence from the menu to active gameplay, but no enemy, collision, combo, object use, progression, win/loss, or definite acceptance of any input was recorded in them. stage_text is empty after load, and changes between frames may be solely due to time or animation."
+}

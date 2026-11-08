@@ -1,0 +1,101 @@
+{
+  "id": "game-08",
+  "title": "Space Worm 2D",
+  "observation_level": "page_only",
+  "observed_goal": "On the menu screen, the goal is stated in text as «Grow across the cosmos. Devour worlds. Outlast every rival.»; active gameplay and reaching this goal were not observed.",
+  "observed_controls": [
+    "Text at the bottom of the menu screen: Arrows for moving focus, Tab for moving focus, and Enter for selection.",
+    "In Settings, the Touch controls option is shown with the value Automatic; the type or behavior of the active touch control was not observed."
+  ],
+  "observed_core_loop": "The game loop was not observed; the available evidence is inconclusive; the load, after_start, and after_key_burst frames still show the mode-selection menu, while the after_combined_input and late frames show the Settings page.",
+  "progress_feedback": "The opening menu shows a count of 0 and Best peak 0; no change to these values, in-game progress, or in-game feedback was observed.",
+  "decisions_risk_reward": "The menu screen displays three modes with different descriptions and a Rival skill choice, but their decision-making, risks, rewards, or consequences were not tested during gameplay.",
+  "rewards": "The official card mentions growing, devouring, and pursuing the longest run; no actual reward, scoring, or resource acquisition was observed in the frames.",
+  "penalties_failure": "The official card contains the phrases «One life» and «Outlast every rival», but no gameplay failure, collision, elimination, or penalty was observed.",
+  "outcomes_replay": "Winning, losing, round outcome, run ending, and replay availability were not observed; the available evidence is inconclusive.",
+  "onboarding": "The opening menu shows the Free-for-All, Team Clash, and Sandbox modes, a Rival skill choice, a PLAY button, and a How to Play button; no interactive tutorial or successful game start was observed.",
+  "visual_audio_accessibility": "The frames show a high-contrast space interface with large buttons, distinct colors, and an animated/decorative background. In Settings, Music volume is set to 70%, Sound effects volume to 80%, Mute all audio is off, Reduced motion is off, Screen shake is on, Show worm names is on, and Hazard alerts is set to Full. Actual activation or effect of audio and accessibility features in the game was not observed.",
+  "technical_clues": [
+    "The metadata records a canvas with dimensions 1280×800 and a loaded page with status capture=partial; this is a technical clue and does not prove game behavior.",
+    "The technical log reports Godot Engine v4.7.2 and Emscripten 4.0.20 with WebGL 2.0; candidate_only for engine/platform inference.",
+    "In the metadata, visible_images is empty, script_bytes_scanned equals 0, and engine_markers and tuning_constant_candidates are empty; therefore, hidden logic or tuning constants cannot be verified from these inputs.",
+    "The metadata warning states that image changes may result from animation or the passage of time and do not establish input acceptance; two different frames alone are not evidence of accepted input."
+  ],
+  "transferable_principles": [
+    "Before attributing success to input, a state change, a repeatable loop, and a direct outcome must be visible in the frames.",
+    "The opening menu should present the goal, starting path, and main settings with a clear visual hierarchy.",
+    "Progress feedback should go beyond a counter or static menu state and be observable during actual gameplay.",
+    "Accessibility settings such as reduced motion, screen shake, hazard alerts, and audio controls should be independent and clearly distinguishable."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, score/rank should reflect only gameplay skill and performance, not purchases or wallet activity, and should provide no paid advantage.",
+    "The principle of presenting the goal and status feedback in the opening menu can be examined abstractly, but these inputs do not validate the Space Worm loop or balance for Candle Climber.",
+    "Avoid a free brake, horizontal direction changes, or a branching path requiring new controls; each should be presented only as a hypothesis requiring separate testing, not as a conclusion of this review."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game’s names, characters, art, text, audio, brand, or proprietary assets.",
+    "Do not use the official card’s claims about the loop, competition, growth, or rewards as verified gameplay behavior.",
+    "Do not report differences between frames as proof that inputs were understood or accepted.",
+    "Do not treat the absence of an element in the opening frame as evidence that it is absent from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The opening menu shows the three modes Free-for-All, Team Clash, and Sandbox, the Rival skill choice, PLAY, and How to Play.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-08:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame still shows the mode-selection menu; entry into active gameplay or a gameplay loop was not observed.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-08:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame also shows the menu; possible visual changes do not establish input acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-08:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The Settings page displays audio, Reduced motion, Screen shake, Show worm names, Hazard alerts, and Touch controls options.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-08:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame also shows Settings; no game outcome or run ending was observed.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-08:screenshot:late"
+    },
+    {
+      "claim": "The official card claims growth in space, devouring, outlasting a rival, one life, and pursuing the longest run; this claim was not confirmed by playtest.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-08:official_card:load"
+    },
+    {
+      "claim": "The text at the bottom of the menu shows Arrows / Tab to move focus / Enter to select.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-08:screenshot:load"
+    },
+    {
+      "claim": "The metadata records the Godot engine, the WebGL 2.0/Emscripten platform, a 1280×800 canvas, and loading errors/warnings; these are technical clues, not proof of game logic.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-08:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "capture is partial in the metadata; stage_text fields are empty, after_combined_input and late had timeouts, and the fallback frames for these two stages came from another run. There is no clear frame of active gameplay, repeatable loop, collision, scoring, win, or loss. controls_attempted is only a list of attempts and does not establish their acceptance. No web browsing or additional execution was performed."
+}

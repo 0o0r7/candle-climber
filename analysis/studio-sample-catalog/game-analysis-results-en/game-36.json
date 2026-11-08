@@ -1,0 +1,104 @@
+{
+  "id": "game-36",
+  "title": "Mushies - Merge Puzzle",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "In the active game frames, the current goal is displayed as «GOAL 1» with the name Floppy Bunny and the next item with the name Strawberry Slime in the after_start frame, followed by Mochi Chick in later frames. Merging or completing the goal was not observed in the frames; the available evidence is inconclusive. The official card text describes the game as revolving around drop and merge and reaching the next goal, but this claim was not confirmed through full gameplay.",
+  "observed_controls": [
+    "The «Drop plushie» button/instruction with the Space key is visible in the active frames; acceptance of Space input cannot be established from these frames alone.",
+    "The Pause button/instruction with the Esc key is visible; its use and effect were not observed; the available evidence is inconclusive.",
+    "The Collection button is visible on the active screen; its opening or function was not observed; the available evidence is inconclusive.",
+    "The metadata records the inputs Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight + Space, but the image change may be caused by animation or elapsed time, and input recognition has not been established."
+  ],
+  "observed_core_loop": "A complete and repeatable cycle of drop, falling/accumulation, merge, and outcome was not observed in the frames. Only the active game screen, one object at the drop position, and two post-drop states with the Drops counter increasing from 0 to 1 and then 2 are visible; the exact cause of the changes and input acceptance are unclear.",
+  "progress_feedback": "The UI displays Score, Time, Goal 1, Next, and Drops. In the frames, Score is 0, time goes from 3:00 in after_start to 2:57, 2:55, and 2:54, and Drops changes from 0 to 1 and 2. Scoring, goal progress, or merge was not observed; the available evidence is inconclusive.",
+  "decisions_risk_reward": "Placing dropped objects in the vertical space and landing area is visible in the frames, but player decision-making, risk, reward, or the consequences of choices were not directly observed; the available evidence is inconclusive. The horizontal position change in later frames cannot be attributed to a specific input.",
+  "rewards": "The goal and next item are displayed in the opening frame, and the official card says that discovering new combinations and reaching the next goal is satisfying; this claim is stated, and an actual reward, merge, or unlock was not observed in the recorded gameplay; the available evidence is inconclusive.",
+  "penalties_failure": "Loss, error, field filling, penalty, or time expiration was not observed in the frames; the available evidence is inconclusive. A decreasing timer is visible, but the result of it reaching zero was not recorded.",
+  "outcomes_replay": "Win, loss, result screen, replay, or restart cycle was not observed; the available evidence is inconclusive. The load frame shows the opening menu and later frames show the active screen, but the complete path from ending to repetition was not recorded.",
+  "onboarding": "The opening menu shows Start collecting, Local multiplayer, Leaderboard, How to play, and Settings. After entering the game, the Drop plushie/Space and Pause/Esc instructions appear on screen. The content of How to play, merge instruction, and complete onboarding were not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The frames show a soft, colorful visual interface with text contrast, Score/Time/Goal/Next/Drops panels, and key instructions. Audio, accessibility settings, readability for assistive technology, and behavior at other sizes were not observed; the available evidence is inconclusive. Two visible images and a canvas with dimensions 1280×800 are recorded in the metadata.",
+  "technical_clues": [
+    "The metadata records a canvas with dimensions 1280×800 and loaded/completed status; this is a technical clue about implementation, not proof of game mechanics.",
+    "The console reports Godot Engine v4.7.2.stable.official and WebGL 2.0/OpenGL ES 3.0 execution with Emscripten 4.0.20; these are possible technical clues.",
+    "Three script, two image, seven fetch, and two ping entries are recorded in the metadata; script scan is zero and engine markers and tuning constant candidates are empty.",
+    "A resource error with HTTP 403 and a WebGL software fallback warning were recorded; their effect on the game in the frames is unclear."
+  ],
+  "transferable_principles": [
+    "Display a current goal, next item, and action counter in a fixed panel so the decision state can be read quickly.",
+    "Present the primary input simultaneously with a visual affordance and the corresponding key, but show input acceptance and result feedback separately and explicitly.",
+    "Provide progress feedback with visible indicators and clear timing, without interpreting a frame change solely as mechanical success.",
+    "Keep onboarding staged: entry, basic action, pause, and observing the result; mechanical claims should be testable through actual execution."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, the fixed panel for goal, next item, score, and time can serve as abstract inspiration; score/rank should reflect skill only.",
+    "No gameplay advantage should come from a purchase or wallet; all competitive progress should depend on observable, skill-based execution.",
+    "The basic path should preferably be designed without free brake and without horizontal direction changes; a branching path or new control can only be proposed as a hypothesis requiring testing, not as a conclusion of this review.",
+    "The presence of a counter and timer can be useful for skill feedback, provided that the movement, collision, and outcome cycle is actually observed and confirmed in a separate test."
+  ],
+  "do_not_copy": [
+    "Do not reproduce or propose this game's names, characters, appearance, art, level, text, audio, brand, or assets.",
+    "Do not present the card's claim about drop/merge as a confirmed mechanic; the frames do not show merge or an outcome.",
+    "Do not treat the change between two frames alone as evidence of input acceptance, horizontal control, or game success.",
+    "Do not take the absence of an element or mechanic in the opening frame as evidence of its absence from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The load frame shows the opening menu with the Start collecting option and the Local multiplayer, Leaderboard, How to play, and Settings options.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-36:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame shows the active game screen with Score=0, Time=3:00, Goal 1, Next, Drops=0, the Drop plushie/Space instruction, and Pause/Esc.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-36:screenshot:after_start"
+    },
+    {
+      "claim": "In the after_key_burst frame, time is 2:57, Drops=1, and another object is visible in the field; this change does not establish input acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-36:screenshot:after_key_burst"
+    },
+    {
+      "claim": "In the after_combined_input frame, time is 2:55, Drops=2, and two objects are visible at the bottom of the field; the relationship between the change and the combined input has not been confirmed.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-36:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame shows time 2:54 and Drops=2, with no result, merge, win, or loss visible in it.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-36:screenshot:late"
+    },
+    {
+      "claim": "The official card describes the game around dropping and merging objects, discovering new combinations, and reaching the next goal.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-36:official_card:load"
+    },
+    {
+      "claim": "The metadata says that capture is complete, the page is loaded, and a visual change exists after interaction, but it explicitly warns that the image change may be caused by animation or elapsed time and that input recognition has not been established.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-36:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "The metadata records execution with Godot Engine, WebGL 2.0/OpenGL ES 3.0, Emscripten 4.0.20, and a canvas with dimensions 1280×800.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-36:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "This analysis uses only evidence.json and five frames from this game; no web browsing or independent execution was performed. The stage text is empty, start_action is none, scripts were not scanned, and the official card was not playtested. The frames show active gameplay and two drops, but the complete merge, outcome, failure, replay, audio, accessibility, and definite input-acceptance cycles were not observed."
+}

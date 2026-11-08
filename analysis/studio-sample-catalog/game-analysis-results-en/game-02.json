@@ -1,0 +1,88 @@
+{
+  "id": "game-02",
+  "title": "Space Worm 3D",
+  "observation_level": "page_only",
+  "observed_goal": "In the page/menu text, the goal is stated as “Grow. Boost. Devour the cosmos.”; the practical goal of active play, the game loop, or a win condition was not observed in the frames.",
+  "observed_controls": [
+    "The page text says: Mouse to steer.",
+    "The page text says: Hold click or Space to boost.",
+    "In the interaction capture, Enter and holding ArrowRight + Space for 900 milliseconds were tested; acceptance of these inputs was not confirmed in the frames."
+  ],
+  "observed_core_loop": "not observed; the available evidence is inconclusive; all five frames still show the main menu, and a complete, direct view of the movement, collection, growth, collision, or game-ending loop is not present.",
+  "progress_feedback": "The player name and a counter of 0 are visible in the frames, and the animated background/scene objects have shifted across different stages; these changes alone are not progress feedback or the result of input.",
+  "decisions_risk_reward": "not observed; the available evidence is inconclusive; no decision-making in active play, actionable risk, or reward resulting from a choice was recorded in the frames.",
+  "rewards": "The official card text describes growing with stardust, devouring celestial bodies for permanent powers, and boost, but these claims were not confirmed by running the game in this capture; no directly observed reward exists.",
+  "penalties_failure": "not observed; the available evidence is inconclusive; death, failure, collision, penalty, or cost of failure is not visible in the frames.",
+  "outcomes_replay": "not observed; the available evidence is inconclusive; neither a win/loss or match outcome nor a loop demonstrating replayability was seen.",
+  "onboarding": "The main page displays the options Free-for-all, Team Battle, Skins, Records, How to play, and Settings and has the text guidance Mouse to steer / Hold click or Space to boost; successful entry into the game and interactive instruction were not observed.",
+  "visual_audio_accessibility": "The frames show a full-screen 3D menu with a dark cosmic background, particles, celestial bodies, and colored worms; large text and distinct buttons are visible. Game audio was not evaluated; metadata recorded an AudioContext warning. Accessibility status beyond this was not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "metadata records three canvases with primary dimensions 1280×800 and one hidden/canvas without CSS dimensions; this is only a technical clue and does not prove game behavior.",
+    "Images for stardust, magnet, shield, and boost were recorded among the page resources; the presence of a resource or resource visibility does not establish its display or use in the game loop.",
+    "metadata provides no usable script/engine marker or tuning constant; script_count_scanned and script_bytes_scanned are zero.",
+    "AudioContext warnings, a WebGL software fallback, and HTTP 403/400 errors were recorded; these are clues about the runtime environment, not evidence of designed game behavior."
+  ],
+  "transferable_principles": [
+    "Show the stated goal and controls before starting in a short, readable layer, but assess control acceptance through direct feedback in the game itself.",
+    "If the game relies on continuous movement, progress should be communicated with a clear signal attributable to the player’s action.",
+    "Competition can be connected to skill-based choices with clear risk and rapid feedback; this principle was not tested in this capture and is only an abstract principle.",
+    "Design animation or camera changes so they are distinct from and distinguishable from input-driven feedback."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, score/rank should reflect skill only and should not create an advantage through purchases or wallet.",
+    "Control guidance should be simple and visible, and any control change should be accepted only after direct testing and attributable feedback.",
+    "Do not use free brake, horizontal direction changes, or a branching path requiring new controls; if considered, each is only a hypothesis requiring separate testing.",
+    "The transferable pattern is limited to separating the start menu, control explanation, and skill feedback; no space mechanic or asset from this game should be reproduced."
+  ],
+  "do_not_copy": [
+    "Do not copy or propose this game’s name, character, art direction, text, audio, brand, or assets.",
+    "Do not reproduce the official card’s claims about growth, permanent powers, hazards, rival worms, free-for-all, or 6v6 as confirmed mechanics.",
+    "Do not turn shifts between frames into claims of input acceptance, progress, winning, or gameplay execution."
+  ],
+  "evidence": [
+    {
+      "claim": "All five frames at the load, after_start, after_key_burst, after_combined_input, and late stages show the main menu with the Free-for-all and Team Battle options; an active game screen or match result is not visible in any frame.",
+      "source_type": "screenshot",
+      "stage": "load; after_start; after_key_burst; after_combined_input; late",
+      "certainty": "direct",
+      "source_reference": "game-02:screenshot:load; after_start; after_key_burst; after_combined_input; late"
+    },
+    {
+      "claim": "The page displays the controls as Mouse to steer and Hold click or Space to boost.",
+      "source_type": "page_text",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-02:page_text:load"
+    },
+    {
+      "claim": "The stated goal and features include growth, boost, devour, stardust, permanent powers, hazards, rival worms, and free-for-all or 6v6 team battle modes; these were not play-tested in the recorded run.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-02:official_card:load"
+    },
+    {
+      "claim": "The visual change between frames may result from animation or the passage of time and does not prove that input was understood or accepted; metadata also explicitly records this caveat.",
+      "source_type": "technical_trace",
+      "stage": "after_start; after_key_burst; after_combined_input; late",
+      "certainty": "candidate_only",
+      "source_reference": "game-02:technical_trace:after_start; after_key_burst; after_combined_input; late"
+    },
+    {
+      "claim": "The Enter and ArrowRight + Space controls were tested for 900 milliseconds, but input acceptance was not confirmed because the frames remained in the menu; metadata also states that the general sequence was skipped when a text input/select was focused.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst; after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-02:technical_trace:after_key_burst; after_combined_input"
+    },
+    {
+      "claim": "The stardust, magnet, shield, and boost image resources were recorded, but this is only a technical resource clue and their in-game use was not observed.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-02:technical_trace:load"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "The analysis relies only on evidence.json and the five input frames for this game; no web browsing or rerun was performed. All frames show the main menu. A change across two or more frames, given the background animation and the recorded caveat, is not proof of accepted input. The absence of an element in the initial frame also does not establish its absence from the game as a whole."
+}

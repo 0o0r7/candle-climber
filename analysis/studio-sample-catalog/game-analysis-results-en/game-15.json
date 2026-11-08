@@ -1,0 +1,89 @@
+{
+  "id": "game-15",
+  "title": "Superhero High School (RTS)",
+  "observation_level": "page_only",
+  "observed_goal": "In the opening frame, the menu page presents the narrative/game goal textually as defending the school; the official card also claims the player leads a group of superpowered students, rescues classmates, captures rooms, and stands against the final threat, but none of this was observed during active game execution.",
+  "observed_controls": [
+    "In the opening menu, the visible buttons include Defend the School, How to Play, Story, Hall of Fame, Sound: On, and Open Source Licenses.",
+    "On the story page, Skip and Click or Space to continue are visible as text/interface elements.",
+    "metadata reports attempts using Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight + Space for 900ms; acceptance of these inputs by the game was not confirmed."
+  ],
+  "observed_core_loop": "not observed; the available evidence is inconclusive; the frames show only the opening menu and story pages, and no RTS loop of selection, command, engagement, capture, or repetition was observed.",
+  "progress_feedback": "On the story page, narrative progression is visible through changes in text/image between frames; no progress feedback in active gameplay, waves, status bar, or completed objectives was observed.",
+  "decisions_risk_reward": "not observed; the available evidence is inconclusive; no tactical decision, unit assignment, risk, reward, or trade-off was executed in the captured frames.",
+  "rewards": "not observed; the available evidence is inconclusive; the official card describes rescuing classmates, capturing rooms, and using heroes’ powers, but this claim was not playtested.",
+  "penalties_failure": "not observed; the available evidence is inconclusive; failure, damage, resource loss, or consequences of error are not present in the frames.",
+  "outcomes_replay": "not observed; the available evidence is inconclusive; no win, loss, wave outcome, end screen, or replay cycle was observed.",
+  "onboarding": "The opening menu has How to Play and Story options, and the story page visibly includes a Skip button and the Click or Space to continue instruction; no tutorial for RTS controls or clear entry into the game field was observed.",
+  "visual_audio_accessibility": "The frames show an illustrated story interface with readable text, large buttons, and a Sound: On option. The actual audio state, independent subtitles, accessibility settings, or readability in game execution was not observed.",
+  "technical_clues": [
+    "The technical trace reports Godot Engine v4.7.2.stable.official and WebGL 2.0/ OpenGL ES 3.0; this is a technical clue and does not support conclusions about game design or controls.",
+    "The page has a canvas with dimensions 1280×800, and no separately visible image was recorded in inventory.",
+    "A visual change after interaction was recorded, but metadata explicitly warns that the change could be due to animation or the passage of time and does not establish input acceptance.",
+    "403 errors, a remote config retrieval error, and a WebGL software fallback warning were recorded; these are execution-environment limitations/clues, not evidence of game mechanics."
+  ],
+  "transferable_principles": [
+    "Present the goal and next instruction with short text and visible controls at the same interface level.",
+    "Show progression with discernible visual or textual feedback, without dependence on specific names or assets.",
+    "Before drawing conclusions about mechanics, record and reproduce the action, feedback, and consequence loop across multiple independent states.",
+    "Treat a frame change after input only as a possible signal, not proof of input acceptance."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, the principle of a clear goal and next instruction can be used, but score/rank should reflect skill only.",
+    "No purchase or wallet should create an advantage; this is not observed in this game’s frames and is solely a transferable design constraint.",
+    "Avoid free brake, horizontal direction changes, or branching paths requiring new controls; any possible use of them is only a hypothesis requiring separate testing.",
+    "Before transferring any pattern, its complete loop and consequence must be tested in Candle Climber itself; this sample did not establish a transferable RTS loop."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game’s names, characters, story text, brand, art, or assets.",
+    "Do not copy the card’s claim about eight waves, rescue, capture, flanking, or the final threat as confirmed mechanics.",
+    "Do not draw conclusions about controls based on a change between two frames or a generic input sequence.",
+    "Do not treat the absence of a battlefield or RTS elements in the opening frame as their absence from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The opening menu is visible with the options Defend the School, How to Play, Story, Hall of Fame, Sound: On, and Open Source Licenses.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-15:screenshot:load"
+    },
+    {
+      "claim": "The subsequent frames show the illustrated story page; Skip and Click or Space to continue are visible, not an active game field.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-15:screenshot:after_key_burst"
+    },
+    {
+      "claim": "In the combined frame, a two-page story page and narrative text about the threat are visible; no tactical outcome or RTS loop is visible.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-15:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The official card claims the player leads a group of superpowered students through an eight-wave siege, rescues classmates, captures rooms, counters flanking, and uses powers; this claim was not confirmed by game execution.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-15:official_card:load"
+    },
+    {
+      "claim": "A generic input sequence and visual change were recorded, but metadata itself says the change could be animation or the passage of time and is not proof of input acceptance.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "candidate_only",
+      "source_reference": "game-15:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "Godot Engine, WebGL 2.0, and a canvas with dimensions 1280×800 are recorded in the technical evidence.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-15:technical_trace:load"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "Only the metadata-and-capture-evidence file and five input frames from this game were reviewed. The capture has partial status; after_start and late are from fallback-1, and their screenshots are reported as timed out. No web browsing, rerun of the game, or investigation of hidden controls was performed. Therefore, RTS mechanics, the loop, outcome, rewards, failure, and input acceptance were not observed; the available evidence is inconclusive."
+}

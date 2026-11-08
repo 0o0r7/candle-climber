@@ -1,0 +1,112 @@
+{
+  "id": "game-26",
+  "title": "Mini Golf Isles",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "On the game screen, the directly observed goal is to get the ball to the destination on a mini-golf course; the page text says that for hole 1, the shot must be timed through rotating blades. Hole completion or a win was not observed; the available evidence is inconclusive.",
+  "observed_controls": [
+    "Page text: drag backward from any point to aim and increase power, then release to shoot",
+    "Page text: drag right or use the Q/E keys to rotate the camera; use the mouse wheel to zoom",
+    "On the menu screen: Enter to select and Esc to go back",
+    "Controls actually accepted in the recorded run, except for the recording of one HUD stroke, were not observed; the available evidence is inconclusive; a frame change by itself does not prove input acceptance"
+  ],
+  "observed_core_loop": "The game frames show hole 1, the ball, the path, a rotating obstacle, and the stroke HUD. After the game opening frame, the HUD changed from STROKES 0 to STROKES 1 and Total 1, and the camera also has a different angle in later frames; this is a sign of entering an active state and recording one stroke, but the repeated cycle of aiming, shooting, stopping/result, and the next hole was not fully observed.",
+  "progress_feedback": "The hole 1 HUD, PAR 3, STROKES, and Total are visible on screen; the frame after the combined input shows STROKES 1 and Total 1. A POWER bar with a value of 7% is recorded in the text/HUD, but the shot result, distance to the target, or progress between holes was not observed; the available evidence is inconclusive.",
+  "decisions_risk_reward": "The page text and official card indicate shot accuracy/timing and the cost of each stroke; a rotating obstacle is visible in the screenshot. Route choice, the risk of collision/losing the ball, and the rewards for decisions were not observed; the available evidence is inconclusive in the recorded run.",
+  "rewards": "The official card mentions three holes and counting each stroke; the HUD displays stroke scores. A success reward, star, ranking, or unlock was not observed; the available evidence is inconclusive in the frames.",
+  "penalties_failure": "The official card says every stroke matters and the HUD shows the stroke count; however, a loss, falling/collision penalty, reset, or unsuccessful result was not directly observed; the available evidence is inconclusive.",
+  "outcomes_replay": "The direct hole result, win/loss, end screen, or replay capability was not observed; the available evidence is inconclusive. A pause button and eye icon are visible in the screenshot, but their behavior and purpose were not tested.",
+  "onboarding": "The menu screen shows Tee Off and How to Play options and a textual controls guide. The game also shows drag-to-aim/shoot guidance and orbit/zoom guidance. Complete tutorialing or confirmation of user understanding was not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The screenshots show a colorful 3D environment with visible contrast, a text HUD, and visual control cues. Settings, subtitles, accessibility options, sound behavior, or audio quality were not observed; the available evidence is inconclusive. The technical log warns that AudioContext was not permitted to start without a user gesture.",
+  "technical_clues": [
+    "Metadata records a canvas with dimensions 1280x800, and no visible images are recorded in the resource list; this is only a technical clue, not a description of the game architecture.",
+    "Seven scripts, one stylesheet, three fonts, three fetches, and three pings are counted in metadata; code or mechanics details were not extracted from this.",
+    "The console warning about AudioContext not starting in the absence of a user gesture is a possible clue of gesture-dependent audio interaction.",
+    "A warning about use of software WebGL fallback and one 403 error were recorded; their effect on the game was not observed; the available evidence is inconclusive.",
+    "Metadata specifies that a screenshot change may result from animation or passage of time and is not proof of input acceptance; the general input sequence was also not a game-specific playtest."
+  ],
+  "transferable_principles": [
+    "Convert a movement goal into a shot or definitive action with continuous aiming input and release; power and direction should have immediate, readable feedback.",
+    "Display progress with a simple, persistent counter so the cost of decisions remains clear to the player.",
+    "Timed or moving obstacles can create risk without adding a new control, provided that the obstacle timing and state are readable.",
+    "Provide the tutorial on the same active screen with a short visual instruction, and keep tutorial claims separate from the user’s actual execution result."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, use only the general principle of immediate action feedback and skill/rank counting; score/rank should reflect skill, not a purchase or wallet.",
+    "The cost of a decision can be conveyed with a visible counter or state, without a monetary advantage and without dependence on a purchase/wallet.",
+    "A timed obstacle or opportunity window can be examined as a testable hypothesis; free brake, horizontal direction change, or a branching path requiring a new control should not be assumed to be accepted features.",
+    "Any adaptation of a control or path must first be validated with a Candle Climber-specific test; these frames do not prove the existence of such controls."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game’s name, characters, imagery, text, sound, brand, or assets.",
+    "Do not copy the three holes, specific course, specific obstacle, frame layout, or any specific level/path.",
+    "Do not treat the official card’s claim about the number of holes, jumps, springs, or portals as confirmed execution.",
+    "Do not use the change between two frames as proof of acceptance of Enter, ArrowRight, Space, or any other control, and do not interpret the absence of an element in the opening frame as its absence from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The opening frame shows the game menu with Tee Off, How to Play, Leaderboard, and Settings options and an Enter/Esc guide.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-26:screenshot:load"
+    },
+    {
+      "claim": "The page text provides the game name and hole 1 card, the name Windmill Meadow, PAR 3, the STROKES counter, and aiming/shooting instructions.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-26:page_text:after_start"
+    },
+    {
+      "claim": "The active hole 1 frame shows the ball, path, rotating obstacle, and HUD with STROKES 0.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-26:screenshot:after_start"
+    },
+    {
+      "claim": "The next frame displays the drag back for aim/power and release to shoot instruction; a change in view from the previous frame is visible, but its cause is not certain.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-26:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The official card says there are three floating holes, a small ball, and that every stroke matters, and mentions windmills, springs, and portals; this claim was not playtested through the complete game cycle.",
+      "source_type": "official_card",
+      "stage": "after_start",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-26:official_card:after_start"
+    },
+    {
+      "claim": "In the frame after the combined input, the HUD shows STROKES 1 and Total 1 and a POWER bar at 7%; this is a state observation and by itself does not prove input acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-26:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame still shows hole 1 and Total 1 and displays orbit/zoom guidance; the hole result was not observed.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-26:screenshot:late"
+    },
+    {
+      "claim": "An AudioContext warning about the need for a user gesture to start sound was recorded.",
+      "source_type": "technical_trace",
+      "stage": "late",
+      "certainty": "candidate_only",
+      "source_reference": "game-26:technical_trace:late"
+    },
+    {
+      "claim": "Metadata declares the capture level partial, describes the input sequence as general and non-game-specific, and warns that a frame change does not prove input understanding.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-26:technical_trace:after_combined_input"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "The analysis relies only on evidence.json and five input frames from this game; web browsing, rerun, code review, hidden controls, and the complete game cycle were not performed. load is from fallback-1 and the other four frames are from current; the load screenshot timed out and a general sequence was skipped because the focus was on text/select input. Therefore, the result, win/loss, hole outcome, rewards, penalties, sound, and precise control behavior were not observed; the available evidence is inconclusive."
+}

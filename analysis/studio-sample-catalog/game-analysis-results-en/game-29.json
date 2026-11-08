@@ -1,0 +1,110 @@
+{
+  "id": "game-29",
+  "title": "Helix Drop",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "The page text and the official goal card describe dropping the bouncing ball through the tower gaps all the way down; in the active-game frames, the ball, spiral tiers, and gaps are visible, but reaching the end was not observed.",
+  "observed_controls": [
+    "It introduces the A and D keys for rotation; the page text also gives the left and right arrow keys and Drag for Spin.",
+    "Space is introduced in the page text for Start / retry and Esc for Pause.",
+    "In the active page, the instruction text Hold ◀ ▶ or drag sideways to spin is visible; definite acceptance of any input cannot be established from these frames."
+  ],
+  "observed_core_loop": "In the active frames, a ball is positioned on/between ring-shaped tiers around a central axis, and the tier arrangement changes between frames; frame 04 shows particles and separated pieces and a score of 10. This evidence is a direct indication of active gameplay, but the complete repeated cycle of rotating, falling, passing through a gap, and continuing or failing was not fully observed in the frames.",
+  "progress_feedback": "The active frames show Stage 1/6. The score is 0 in the after_start and after_key_burst frames and is shown as 10 in after_combined_input and late; a vertical bar is also visible on the right side of the active frames. Which input or event exactly caused this change was not observed; the available evidence is inconclusive.",
+  "decisions_risk_reward": "The page text and frames present decision-making about rotating the structure to align a gap with the ball’s path; the frames show continuous layers and a red section. Timing, collision risk, and the optimal choice between paths were not observed; the available evidence is inconclusive in the recorded run; a change between two frames alone does not prove accepted input.",
+  "rewards": "A numeric score of 0 and then 10 is visible in the active-frame HUD. The official card claims Smash through layers and dodge the red, but this claim was not confirmed by complete play or a final outcome in this recording.",
+  "penalties_failure": "There is no direct frame of a loss, halt, definite collision, score decrease, or failure screen; the penalty status and failure condition were not observed; the available evidence is inconclusive. The red section is visible in the frames only as a visual element, and its effect is not established by this evidence.",
+  "outcomes_replay": "The page text introduces Space for Start / retry and Esc for Pause. A final outcome, win, loss, actual retry, or replay capability was not observed; the available evidence is inconclusive in the frames.",
+  "onboarding": "The load frame shows the title, a textual goal explanation, the Daily Tower, Random Practice, Leaderboard, and Settings options, and the input guide. The post-start frame changes to Stage 1/6 and a rotation guide. A step-by-step explanation of obstacles or a separate interactive tutorial was not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The frames show a 3D scene with a central axis, gold/purple ring-shaped tiers, a bright ball, particles, and a dark background; large HUD text and a pause button are also visible. Audio cannot be assessed from the frames; the console records the presence of an AudioContext warning. Contrast, screen reader, full touch controls, and other accessibility conditions were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "A canvas with dimensions 1280×800 is recorded in the metadata; this is only a technical clue about the rendering surface, not proof of game logic.",
+    "Three scripts, one stylesheet, three fonts, and three fetches are recorded in the metadata; script contents were not scanned, and no engine marker or tuning constant candidate was recorded.",
+    "A fallback to software WebGL warning was recorded; this is a technical clue about the rendering environment and does not establish game behavior.",
+    "An AudioContext warning and a 403 error, along with failed/aborted leaderboard requests, are recorded in the metadata; their cause and effect on the game experience were not observed; the available evidence is inconclusive.",
+    "The metadata explicitly states that visual change may be caused by animation or the passage of time and does not prove that inputs were understood."
+  ],
+  "transferable_principles": [
+    "A one-sentence goal and low-density HUD can make the relationship among position, progress, and score quickly understandable.",
+    "Decision-making based on aligning a path with gaps can provide a simple skill-testing core without requiring a lengthy explanation.",
+    "Numeric and stage-based feedback should be distinct from merely decorative cues so that progress remains legible.",
+    "To draw conclusions about controls, a repeatable cycle and a direct outcome must be recorded; a change between two frames alone is insufficient."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, a legible goal and stage-based feedback can serve as inspiration, but score/rank should reflect skill only.",
+    "No purchase- or wallet-based advantage for progression or scoring is recommended.",
+    "Any idea resembling a free brake, horizontal direction change, or branching path requiring a new control should be discarded; if examined, it should be presented only as a hypothesis requiring control and legibility testing, not as a conclusion from this game."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game’s name, character, art style, color scheme, text, sound, brand, or assets.",
+    "Do not copy the card’s claim about a daily tower, breaking layers, or avoiding the red element as confirmed behavior; these were not completed in this playtest recording.",
+    "Avoid inferring accepted controls or scoring logic solely from changes between frames.",
+    "Do not treat the absence of an element in the load frame as its absence from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The load page describes dropping the bouncing ball through gaps and controlling rotation.",
+      "source_type": "page_text",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-29:page_text:load"
+    },
+    {
+      "claim": "The official card describes the goal as Spin the tower and drop the bouncing ball through the gaps, all the way down.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-29:official_card:load"
+    },
+    {
+      "claim": "In the active-game frame Stage 1/6, score 0, the ball, ring-shaped tiers, and a pause button are visible.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-29:screenshot:after_start"
+    },
+    {
+      "claim": "The active guide Hold ◀ ▶ or drag sideways to spin is visible in the stage text.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-29:page_text:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame still shows Stage 1/6 and score 0; input acceptance is not established by this change/lack of change.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-29:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame shows score 10, separated pieces/particles, and a red section at the bottom of the scene.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-29:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame still shows Stage 1/6 and score 10, and the ball/motion effect is visible in the scene; the final outcome is not seen.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-29:screenshot:late"
+    },
+    {
+      "claim": "The visual change may be caused by animation or the passage of time and is not proof that the input was understood.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "candidate_only",
+      "source_reference": "game-29:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "A canvas with dimensions 1280×800 and a software WebGL fallback are recorded in the metadata.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-29:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "This analysis uses only evidence.json and five frames with the stages load, after_start, after_key_burst, after_combined_input, and late; no web browsing, replay, code reading, or hidden-control testing was performed. The recording reached active gameplay, but the complete repeated cycle, win/loss, actual retry, definite effect of each input, audio, and full accessibility were not observed; the available evidence is inconclusive. The official card claim is reported separately from direct observation."
+}

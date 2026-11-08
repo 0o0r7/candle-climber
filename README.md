@@ -198,6 +198,7 @@ Play locally at `http://localhost:3000/play`. Every external integration
 | [DEATHCARD-NFT-TESTNET-NOTE](docs/DEATHCARD-NFT-TESTNET-NOTE.md) | NFT contract, metadata, immutability caveats |
 | [ART-DIRECTION](docs/ART-DIRECTION.md) · [ART_PROMPTS_V2](docs/ART_PROMPTS_V2.md) | visual system and asset pipeline |
 | [PLATFORMER-UX-RESEARCH](docs/PLATFORMER-UX-RESEARCH.md) | input/UX research behind the engine feel |
+| [Studio Sample Catalog Research](analysis/studio-sample-catalog/README-en.md) | English 40-game evidence-limited research, per-game data, and the Candle Climber v2 technical visual review |
 | [RETIRED-FEATURES](docs/RETIRED-FEATURES.md) | decisions ledger — retired layers and why they stay retired |
 | [PR-CHECKLIST](docs/PR-CHECKLIST.md) | review gates |
 

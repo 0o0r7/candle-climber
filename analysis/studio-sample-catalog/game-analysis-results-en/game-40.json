@@ -1,0 +1,98 @@
+{
+  "id": "game-40",
+  "title": "Shadow",
+  "observation_level": "page_only",
+  "observed_goal": "The game's goal is not directly visible in the opening frame; the page only displays options to start a prologue and a challenge. The official card's claim about side-scrolling action progression, enemy encounters, and two story/challenge sections is stated_not_playtested.",
+  "observed_controls": [
+    "Opening-frame text: Move with A/D or the arrow keys.",
+    "Opening-frame text: Jump with K.",
+    "Opening-frame text: Drop with S or the J+K combination.",
+    "Opening-frame text: Aim + Slash with J/X/Click.",
+    "Opening-frame text: Focus with L/Shift.",
+    "Opening-frame text: Replay with R and pause with ESC."
+  ],
+  "observed_core_loop": "No active gameplay, collision, combat, stage movement, or result repetition was observed in the frames. The only transition observed was from the title screen to the narrative screen reading «CONTRACT RECEIVED»; a change between two frames alone does not establish that input was accepted.",
+  "progress_feedback": "In the narrative-screen frames, the 01/06 counter and the prompt to continue with J are visible; this is screen/narrative feedback, not an indicator of game progress. No score, rank, lives, time bar, stage position, or combat progress was observed.",
+  "decisions_risk_reward": "In-game decisions and the risk/reward relationship were not observed; the available evidence is inconclusive. The official card claims dash, slash, reflect bullets, slow motion, and rewind, but none of these were confirmed through testable execution in the frames.",
+  "rewards": "Game rewards were not observed; the available evidence is inconclusive. The contract text and screen choices are visible, but no value, content unlock, or recoverable reward was observed.",
+  "penalties_failure": "No penalty, failure, damage, death, reset, or game error message was not observed; the available evidence is inconclusive. The card's claim about rewind failed encounters is merely an untested official claim.",
+  "outcomes_replay": "No win, loss, stage result, or replay cycle was observed. The opening-frame text mentions the Replay key, but its function in the game was not tested.",
+  "onboarding": "The screen-based onboarding is relatively explicit: the opening frame shows a list of controls, a prologue option, a challenge option, and the phrase to begin the story. After starting, the contract narrative screen with the 01/06 counter and the J prompt to continue is visible. Entry into active gameplay was not observed.",
+  "visual_audio_accessibility": "The frames show a dark interface with light-text contrast, separator lines, and a language option 中文 / [English]; the legibility of some low-contrast text and the image background may be limited. Audio was not observed or evaluated; the available evidence is inconclusive. No accessibility options beyond language was not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The page records a canvas sized 1280×800; this is only a technical clue and does not establish game behavior.",
+    "The trace reports Godot Engine v4.7.2.stable.official and WebGL 2.0/OpenGL ES 3.0 execution with Emscripten 4.0.20; these are candidate_only clues for the execution technology.",
+    "Script and script-byte scanning were not performed, and no engine marker or tuning constant candidate was recorded.",
+    "A WebGL software fallback warning and a 403 response were recorded; their cause or effect on game interaction is unclear from this evidence."
+  ],
+  "transferable_principles": [
+    "Introduce controls before entering the game on a short, readable screen, but also confirm them with in-game feedback.",
+    "Combine staged narration with a clear continuation cue and a limited counter so the user knows where they are in the introduction.",
+    "For action games, progress feedback and the consequence of each choice should be visible in the game frame; a frame change alone is not a success criterion.",
+    "Keep a clear boundary between marketing claims and evidence of actual execution, and record claimed capabilities only after observing the complete loop."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, keep score/rank dependent only on skill and game execution; no transferable scoring mechanism was confirmed from this sample.",
+    "No purchase or wallet should create a gameplay advantage; this constraint should remain independent of the card’s unverified claims.",
+    "Avoid free brake, horizontal direction changes, or branching paths requiring new controls; if such an option is examined, record it only as a hypothesis requiring direct testing.",
+    "The only reusable pattern is a brief introduction of controls and clear staged feedback, not reproduction of this game’s theme, character, narrative, imagery, or assets."
+  ],
+  "do_not_copy": [
+    "Do not reproduce the visual identity, scene composition, character, environment, narrative text, audio, or any specific asset.",
+    "Do not design the card’s claims about abilities or game sections as facts without observing the loop and outcome.",
+    "Do not copy or interpret the image change between two frames as proof of accepted input or game progress."
+  ],
+  "evidence": [
+    {
+      "claim": "The load frame shows the title screen with a list of controls, two start options, and a language selection.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-40:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame shows the narrative screen «CONTRACT RECEIVED» at 01/06, and no active game scene is yet visible.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-40:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame shows the contract identifier and the J prompt to continue; this change alone does not prove that the keys were accepted.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-40:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input and late frames retain the same contract screen and do not show a game loop or direct outcome.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input; late",
+      "certainty": "direct",
+      "source_reference": "game-40:screenshot:after_combined_input; late"
+    },
+    {
+      "claim": "The official game card describes it as side-scrolling action with dash/slash, bullet reflection, slow motion, rewind, and story/challenge sections.",
+      "source_type": "official_card",
+      "stage": "gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-40:official_card:gallery_description"
+    },
+    {
+      "claim": "The metadata records a visual change after interaction, but explicitly warns that it may be caused by animation or the passage of time and is not proof that input was understood.",
+      "source_type": "technical_trace",
+      "stage": "after_start; after_key_burst; after_combined_input; late",
+      "certainty": "direct",
+      "source_reference": "game-40:technical_trace:after_start; after_key_burst; after_combined_input; late"
+    },
+    {
+      "claim": "The technical trace reports Godot/WebGL/Emscripten and a WebGL software fallback; this is only a clue about the runtime environment.",
+      "source_type": "technical_trace",
+      "stage": "capture_runtime",
+      "certainty": "candidate_only",
+      "source_reference": "game-40:technical_trace:capture_runtime"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only evidence.json and the five frames of this game were used; no web browsing or rerun was performed. The frames progressed from the title screen to a narrative screen, but active gameplay, a repeating loop, an outcome, audio, penalties, and the card's claimed capabilities were not observed. The absence of gameplay elements in the opening frame or available frames does not establish their absence from the game as a whole."
+}

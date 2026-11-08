@@ -1,0 +1,86 @@
+{
+  "id": "game-01",
+  "title": "Iron Rift FPS",
+  "observation_level": "page_only",
+  "observed_goal": "No active game goal was observed in the available frame; the available evidence is inconclusive. The loading-page text claims that the game is about killing quickly and stylishly, but game execution was not observed to verify this goal.",
+  "observed_controls": [
+    "not observed; the available evidence is inconclusive; controls_attempted is empty in the metadata and no accepted input has been confirmed."
+  ],
+  "observed_core_loop": "The core game loop was not observed; the available evidence is inconclusive. Only the loading screen was seen, and no repeated movement, engagement, progression, or outcome loop is present in the frames.",
+  "progress_feedback": "The screenshot shows a progress bar with the text BUILDING ARENA and a value of 44%. The metadata stage_text also records 20% for the load frame and READY/100% texts for after_combined_input, but frames from those stages are unavailable; therefore, the only direct feedback is loading progress.",
+  "decisions_risk_reward": "Decisions, risk/reward, and in-game choices were not observed; the available evidence is inconclusive. The official card text discusses game style and upgrades, but these elements were not playtested.",
+  "rewards": "Actual rewards were not observed; the available evidence is inconclusive. The official card refers to style meter and combat augments, but these claims were not confirmed through game execution.",
+  "penalties_failure": "Penalties, failure, vulnerability, or loss conditions were not observed; the available evidence is inconclusive.",
+  "outcomes_replay": "Outcome, win/loss, wave ending, or replayability was not observed; the available evidence is inconclusive. No complete loop or direct outcome was recorded.",
+  "onboarding": "The only observed onboarding is the loading screen titled IRON RIFT ONSLAUGHT with the status BUILDING ARENA. No control instructions or tutorial are visible; the official card text refers to broad content, not confirmed onboarding.",
+  "visual_audio_accessibility": "Visually, the screenshot shows a dark loading screen with a centered title, an orange progress bar, and a very blurred background. Audio was not observed; the available evidence is inconclusive; the metadata records a technical warning that AudioContext without user gesture is not permitted. Accessibility features were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The page was recorded with HTTP 200 and loaded status; this is only a page-loading clue and does not establish that the game loop is active.",
+    "Two canvases with dimensions 1280×800 are recorded in the metadata; this is a possible technical rendering clue, not proof of successful interaction.",
+    "A fallback warning to software WebGL and a GPU stall in ReadPixels were recorded; these are possible technical clues about the rendering/performance path.",
+    "AudioContext without user gesture was not permitted, and several 403 errors, one 400 error, and a remote config error were recorded; their precise effect on the game was not observed; the available evidence is inconclusive."
+  ],
+  "transferable_principles": [
+    "Keep loading or preparation progress distinct from actual execution using simple, recognizable visual feedback.",
+    "For an action game, the basic loop should be evaluated with direct, repeatable evidence of action, system response, and outcome, not advertising copy.",
+    "Any claim about skill, rewards, or upgrades should be observable and testable in the actual interface and execution.",
+    "If interaction depends on user gesture or a specific rendering path, technical errors and readiness status should be reported transparently."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, each score/rank should reflect only skill and performance; this input provided no evidence about the game's scoring model.",
+    "No purchase- or wallet-derived advantage should enter the design; this is a transferable design principle and was not tested in this game.",
+    "free brake, horizontal direction change, or a branch path requiring new control should not be proposed as a result of this review; each could only be a hypothesis requiring separate testing."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game's name, text, visual identity, scene, or assets.",
+    "Do not copy the official card's claims about waves, enemies, weapons, movement, or boss as confirmed features.",
+    "Do not treat a possible frame change or progress value by itself as evidence of input acceptance or game execution.",
+    "Do not infer from the absence of game elements in the opening frame that they are absent from the game as a whole."
+  ],
+  "evidence": [
+    {
+      "claim": "The available frame shows the Iron Rift: Onslaught loading screen with the title and status BUILDING ARENA.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-01:screenshot:load"
+    },
+    {
+      "claim": "The screenshot shows a loading progress bar with a value of 44%.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-01:screenshot:load"
+    },
+    {
+      "claim": "The recorded page text for load includes «Kill fast and stylishly» and references headshots, slide kills, air kills, weapon swaps, and style meter.",
+      "source_type": "page_text",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-01:page_text:load"
+    },
+    {
+      "claim": "The official game card describes it as including eight escalating waves, weapons, aggressive movement, combat augments, Overdrive, a three-phase boss, and deathmatch with five bots; these elements were not confirmed through game execution.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-01:official_card:load"
+    },
+    {
+      "claim": "The metadata records two canvases with dimensions 1280×800 and warnings for software WebGL, GPU stall, and AudioContext without user gesture.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-01:technical_trace:load"
+    },
+    {
+      "claim": "No controls_attempted, start_action, or completed frame was recorded for after_start, after_key_burst, after_combined_input, or late, and a frame change by itself does not prove input acceptance.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-01:technical_trace:load"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "This analysis uses only evidence.json and the load frame. Only the load stage was completed; frames from the other stages are unavailable and several screenshots timed out. No game controls, active execution, complete loop, outcome, audio, or accessibility were confirmed. The 44% value in the screenshot differs from the 20% value in the stage_text metadata and was reported as two separate observations; the reason for the discrepancy was not observed; the available evidence is inconclusive."
+}

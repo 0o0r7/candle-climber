@@ -1,0 +1,103 @@
+{
+  "id": "game-20",
+  "title": "Skybound Academy",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "In the opening frame, the goal text states “Master your unstable flight. Rescue classmates. Reach the rooftop trial.” In the active frames, the stage goal is displayed as “Rise toward the Headmaster’s rooftop trial”; reaching the end or rescuing classmates was not observed in the frames.",
+  "observed_controls": [
+    "The after_start frame’s instruction text: hold A / D or Left / Right to steer.",
+    "The same instruction text: Space to perform Air Jump again upon landing.",
+    "In the opening frame, Space is shown for Launch and H for Help; acceptance of these inputs as game-specific behavior was not independently confirmed in the recorded run beyond the instruction text."
+  ],
+  "observed_core_loop": "There is direct evidence of active gameplay: the character is seen in an environment of floating platforms, with a CLIMB indicator, visual height/progression, Air Jump, and a Hero Power bar. The after_key_burst frame changes to the “Keep climbing” stage instruction and a height of 439 meters, and subsequent frames show health reduction and a safety message. However, a complete repeating loop of steering, successful landing, outcome, and repetition cannot be established from these frames.",
+  "progress_feedback": "The active frames show scores 00094, then 00877 and 00913; the CLIMB indicator changes from 0094 m to 00439 m and then 00475 m; Badge count changes from 00 to 01; class-mission counters show 1/5 and 1/3; Hero Power is at 22%; and Combo x1.5 is shown. These changes were observed; a frame change alone does not prove which input was accepted.",
+  "decisions_risk_reward": "Observable risk consists of a reduction from three starting hearts to two hearts after the after_combined_input frame and then one heart in the late frame, accompanied by the messages “Safety net! Back up you go” and “Last heart! One more hit ends the run”. Badge collection, score, climbing, and Combo appear as visual feedback/rewards; the player’s exact decisions and their definitive relationship to rewards are unclear from this limited recording.",
+  "rewards": "In the game frames, the badge count is seen changing from 00 to 01, collection progress is 1/5, and complete-landing progress is 1/3; Combo x1.5 and an increase in score are also seen. The rewards promised in the official card, such as rescuing classmates or reaching the rooftop trial, do not become direct outcomes in the frames.",
+  "penalties_failure": "A reduction of two hearts in the after_combined_input frame and one remaining heart in the late frame are directly visible; the messages indicate a return with a safety net and the run ending with one more hit. A failure screen or definitive end of the run was not observed.",
+  "outcomes_replay": "No win, loss, reaching the destination, rescue, or end screen was observed. The opening menu shows a Replay tutorial option, but its execution or a replay loop was not recorded in the frames.",
+  "onboarding": "The opening menu shows Launch, Help, and character/outfit selection. In-game, step-by-step guidance 1/4 and then 3/4 is displayed with steering instructions and a climbing objective, and the Skip tutorial · Backspace option is also visible. This recording indicates in-game instruction, not complete proof of user learning or success.",
+  "visual_audio_accessibility": "Visually, the interface prominently shows text/symbol indicators for score, hearts, badges, classmates, height, missions, Air Jump, Hero Power, Pause, and Help; EN and CN languages are visible in the menu. Audio is not observable in the frames, and no information about audio options or other accessibility features was observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "Technical tracing reports Godot Engine v4.7.2.stable.official and WebGL 2.0 / OpenGL ES 3.0 execution with Emscripten 4.0.20 in single-threaded mode; this is a technical clue and does not by itself prove game behavior.",
+    "A canvas with dimensions 1280×800 was recorded, and the visible image had no separate visible image; primary rendering occurs in the canvas.",
+    "Software WebGL fallback warnings, 403/400 errors, and an Amplitude remote config error were recorded; these are infrastructure clues and do not establish the cause of frame changes or input acceptance.",
+    "No engine marker or tuning constant candidate and no request failure or page error were recorded; hidden mechanics cannot be inferred from them."
+  ],
+  "transferable_principles": [
+    "Provide short, step-by-step instruction together with status indicators and a near-term objective, but assess success only through an observable outcome.",
+    "Show progress with several legible feedback signals such as height, score, and counted missions; numerical changes should be assessable as distinct from a mere frame change and tied to an actual outcome.",
+    "Communicate risk through limited status and a clear message about the consequence of being hit so the player understands the relationship between action and danger.",
+    "Keep a clear boundary between the claims of the promotional card and evidence from actual execution; the absence of an element in the opening frame does not prove its absence from the entire experience."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, only the general principle of climbing, score, and constrained-status feedback can be taken as inspiration; score/rank should solely reflect skill.",
+    "Every advantage must be attainable without a purchase or wallet; this game provides no evidence about Candle Climber’s economy.",
+    "The control pattern must not exceed Candle Climber’s permitted controls: do not copy a free brake, horizontal direction change, or branch path requiring a new control; if examined, these are only hypotheses requiring testing.",
+    "Do not transfer this game’s claims about rescue, characters, world, or missions to Candle Climber; consider only abstract, testable structures."
+  ],
+  "do_not_copy": [
+    "Do not reproduce the game name, character names, on-screen text, brands, or visual or artistic assets.",
+    "Do not copy the structure or appearance of the observed school/islands/characters or the distinctive narrative or audio elements.",
+    "Do not present the official card’s claim as a confirmed mechanic or game outcome.",
+    "Do not use changes across two frames to draw a definitive conclusion about input acceptance or the existence of a loop."
+  ],
+  "evidence": [
+    {
+      "claim": "The opening screen states the goal of mastering unstable flight, rescuing classmates, and reaching the rooftop trial.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-20:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame shows an active scene with Zone 1, a CLIMB indicator, three hearts, platforms, Air Jump, Hero Power, and the instruction “Hold A / D or Left / Right to steer”.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-20:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame shows score 00877, height 00439 m, one badge, mission progress 1/5 and 1/3, Combo x1.5, and the message “Keep climbing”.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-20:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame shows health reduced to two, the message “Safety net! Back up you go (2 hearts left)”, and the phrase “-1 HEART”.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-20:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame shows one heart, the message “Last heart! One more hit ends the run”, and no result screen.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-20:screenshot:late"
+    },
+    {
+      "claim": "The official card claims ascent through four areas, steering between platforms, storms, drones, rescue, and air jump up to the rooftop trial; this claim was not playtested through full game execution in this recording.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-20:official_card:load"
+    },
+    {
+      "claim": "Technical tracing records Godot 4.7.2, WebGL 2.0/OpenGL ES 3.0, Emscripten 4.0.20, and single-threaded execution.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-20:technical_trace:load"
+    },
+    {
+      "claim": "Frame changes after a generic input sequence may result from animation or the passage of time and do not prove that the inputs were understood or accepted.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst",
+      "certainty": "candidate_only",
+      "source_reference": "game-20:technical_trace:after_key_burst"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only evidence.json and five frames from this game were reviewed; no web browsing, replay, hidden-control inspection, or code analysis was performed. The stage_text field in metadata is empty. The frames record generic control inputs, so visual changes are insufficient to prove input acceptance. The complete loop, win/loss outcome, audio, and content outside the recorded frames were not observed; the available evidence is inconclusive."
+}

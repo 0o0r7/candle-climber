@@ -1,0 +1,106 @@
+{
+  "id": "game-32",
+  "title": "Starveil Barrage",
+  "observation_level": "page_only",
+  "observed_goal": "On the main menu page, the text says: Thread the nebula. Breach the gate. Chain every graze. This is the page's stated goal and was not tested by running the game; the game's practical goal was not observed in the frames; the available evidence is inconclusive.",
+  "observed_controls": [
+    "On the main menu, the after_combined_input and late frames display the text ENTER / Z Select; this is page instruction/text, not proof of input acceptance.",
+    "The metadata records Enter, Space, ArrowUp, w, and ArrowRight inputs as having been tested, but acceptance of any of them is not established by the frames."
+  ],
+  "observed_core_loop": "The game loop was not observed; the available evidence is inconclusive; the useful frames show only loading and then the main menu, and there is no frame of active gameplay, repetition, shooting, near-miss, grazing, damage, or outcome.",
+  "progress_feedback": "In the load, after_start, and after_key_burst frames, loading bars are seen at 0%, 3%, and 90%, respectively; this is loading progress, not game-progress feedback. In after_combined_input, the page text Starting game… is recorded in the metadata, but the visual frame shows the main menu. In-game feedback was not observed; the available evidence is inconclusive.",
+  "decisions_risk_reward": "Decisions and observable risk/reward in gameplay were not observed; the available evidence is inconclusive. The card's claim about chaining near misses and a screen-clearing burst is only an official, untested claim.",
+  "rewards": "Gameplay rewards were not observed; the available evidence is inconclusive. In the main-menu frames, a LOCAL BEST section with a dash is visible; no recorded score is visible in the frames.",
+  "penalties_failure": "Penalties, failure, damage, loss of life, or game over were not observed; the available evidence is inconclusive.",
+  "outcomes_replay": "A win/loss outcome or end of round was not observed; the available evidence is inconclusive; replayability was also not observed; the available evidence is inconclusive. The temporal difference between the frames is only the recorded state change from loading to the menu and does not establish input acceptance.",
+  "onboarding": "The main-menu page shows the LAUNCH, TRAINING, SETTINGS, and CREDITS & LICENSES options, as well as the EN / 中文 language selection; a step-by-step guide or executed tutorial was not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The frames show a high-contrast menu with English/Chinese text, large buttons, and the EN / 中文 language option. Audio was not observed; the available evidence is inconclusive; accessibility and readability settings during execution were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The metadata records Godot Engine v4.7.2.stable.official, Emscripten 4.0.20, single-threaded operation, and WebGL 2.0 in the console; this is a technical clue and does not support conclusions about game mechanics.",
+    "An HTTP error with status 403 was recorded in the console, but its cause and effect on the experience were not observed in the frames; the available evidence is inconclusive.",
+    "The metadata records a canvas size of 1280×800 and the absence of a separately visible image; this is only a technical description of the capture environment."
+  ],
+  "transferable_principles": [
+    "Separate the goal and input from the marketing claim using testable visual feedback.",
+    "Do not interpret loading progress or a frame change alone as input acceptance or game progress.",
+    "For a single-input action, the successful/unsuccessful result should be recorded in observable and repeatable frames.",
+    "Status feedback and accessibility should be clear on the interaction page itself, without relying on guesses about the technical layer."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, score/rank should reflect only skill and gameplay outcome, not purchase or wallet activity and not a paid advantage.",
+    "Every transferable pattern should be tested against an observable loop; this sample does not provide a game loop, so it is only a hypothesis and its mechanics should not be copied.",
+    "Do not add free brake, horizontal direction change, or a branching path requiring new controls as a definitive solution; if examined, it should only be treated as a hypothesis requiring independent testing."
+  ],
+  "do_not_copy": [
+    "Do not reproduce or suggest this game's name, character, art, level, text, audio, brand, or asset.",
+    "Do not copy the bullet-hell, near miss, burst, or guardian claim as confirmed mechanics; they were not executed in the frames.",
+    "Do not use the 0%/3%/90% loading change and transition to the menu as proof of controls or a game loop."
+  ],
+  "evidence": [
+    {
+      "claim": "The load frame shows the Starveil Barrage loading page with 0% and a loading bar.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-32:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame shows the same loading page at 3%.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-32:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame shows the same loading page at 90%.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-32:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame shows the main menu with the LAUNCH, TRAINING, SETTINGS, and CREDITS & LICENSES options, the EN / 中文 language selection, and LOCAL BEST with a dash.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-32:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame also shows the main menu, and the text ENTER / Z Select is visible at the bottom of the page.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-32:screenshot:late"
+    },
+    {
+      "claim": "The page text in the metadata records the phrase Starting game… for stage after_combined_input, but this text alone does not establish active gameplay or input acceptance.",
+      "source_type": "page_text",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-32:page_text:after_combined_input"
+    },
+    {
+      "claim": "The official game card claims: Thread the nebula, breach the gate, chain every graze; and describes it as a vertical bullet-hell with near miss, screen-clearing burst, and three-phase guardian warship.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-32:official_card:load"
+    },
+    {
+      "claim": "The metadata records Godot Engine v4.7.2, Emscripten 4.0.20, single-threaded operation, and WebGL 2.0 in the console.",
+      "source_type": "technical_trace",
+      "stage": "late",
+      "certainty": "candidate_only",
+      "source_reference": "game-32:technical_trace:late"
+    },
+    {
+      "claim": "The metadata specifies that the image change may be caused by animation or the passage of time and is not proof of input comprehension.",
+      "source_type": "technical_trace",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-32:technical_trace:late"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "Only evidence.json and five input frames for this game were reviewed; no web browsing, rerun, code review, or hidden-control inspection was performed. The frames do not show the game loop, outcome, failure, score, audio, control response, or input acceptance. The absence of an element in the initial frame does not mean it is absent from the entire game. The load, after_start, after_key_burst, after_combined_input, and late stages and source_url were taken from the metadata."
+}

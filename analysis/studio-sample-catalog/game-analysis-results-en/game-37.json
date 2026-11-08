@@ -1,0 +1,103 @@
+{
+  "id": "game-37",
+  "title": "Mage Knight",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "In the menu frame, suggested goals/modes include entering the dungeon, co-op, arena, and versus; in the active gameplay frames, wave 1 of 10 and a boss counter of 0 of 5 are displayed. The final goal, victory, or level completion was not observed.",
+  "observed_controls": [
+    "In the on-page guide text: hold LMB to aim, F for magic, link the basic spell and magic with Link, and Space to dodge.",
+    "In the gameplay-frame HUD: movement with W/A/S/D and pause with Esc are displayed.",
+    "The metadata records attempts with the inputs Space, ArrowUp, w, ArrowRight, and holding ArrowRight + Space for 900 milliseconds; acceptance of these inputs was not independently confirmed."
+  ],
+  "observed_core_loop": "In the active gameplay frames, a character is visible in a movement-oriented arena with enemies/targets, a health bar, wave, boss, time, chain, and ability cards. Across the after_key_burst, after_combined_input, and late frames, the state and positions of elements change and more enemies/indicators are visible, but these changes alone do not establish a repeatable loop, input causality, or a complete outcome.",
+  "progress_feedback": "The gameplay frames show an explicit HUD for level 1, 5 hearts of health, chain 0, mastery grade D, wave 1/10, boss 0/5, time 00:00 to 00:01, and ability bars/cards. No increase in wave, score, level progression, or event completion was observed.",
+  "decisions_risk_reward": "The menu shows several rows of selectable abilities/spells and the possible use of aiming, magic, and dodging on the page. Actual decision-making, risk/reward, resource consumption, or the effects of choices were not observed; the available evidence is inconclusive in the recorded run.",
+  "rewards": "Several selectable abilities/spells are visible in the menu, and relics and ability cards are visible in the HUD; reward acquisition, upgrades, or reward effects were not observed; the available evidence is inconclusive in the recorded run.",
+  "penalties_failure": "Health and boss indicators are visible in the HUD, but damage, failure, loss of a life, a penalty, or a loss screen was not observed; the available evidence is inconclusive.",
+  "outcomes_replay": "An outcome, victory, loss, wave completion, replay, or complete repeat loop was not observed; the available evidence is inconclusive.",
+  "onboarding": "After loading at 0%, the after_start frame shows a readable menu with basic/dash/secondary/ultimate selections and game-mode buttons. A control guide is also present in the HUD. Step-by-step onboarding or confirmation of how the user enters the loop from the menu was not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The frames show a pixel interface with high contrast, text labels, icons, status bars, and HUD elements. Audio, accessibility settings, subtitles, color-blind support, or input remapping was not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The page has a canvas with dimensions 1280×800, and the metadata records four script, thirteen fetch, one xhr, and one image; this is only a technical clue and does not establish the game architecture.",
+    "The page log records Godot Engine v4.7.2.stable.official and execution with WebGL 2.0 / OpenGL ES 3.0 using Emscripten 4.0.20; this technical clue concerns the runtime technology, not game logic.",
+    "Changes between frames after inputs may be caused by animation or the passage of time; the metadata explicitly states that input acceptance was not established and that no tuning constant or engine marker was recorded.",
+    "Several 403 errors and a remote config error were recorded in the console, but no request failure or page error was recorded; their effect on the game experience was not observed; the available evidence is inconclusive."
+  ],
+  "transferable_principles": [
+    "A compact HUD can make health status, stage progress, time, and ready abilities readable at the same time; this should be validated through interaction and outcome testing.",
+    "Separating ability selection from the playfield clarifies the initial choice and allows options to be compared before entering action.",
+    "Displaying ability readiness and the main controls in the same gameplay frame reduces the cost of shifting the user’s attention.",
+    "To establish an action loop, continuous input logging, attributable state change, and consequence must be recorded separately; a change in the image alone is insufficient."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, the principle of a readable HUD and state feedback can be tested only in the abstract; score/rank should solely reflect skill.",
+    "No gameplay advantage should depend on a purchase or wallet.",
+    "free brake and horizontal direction change should not be proposed as definitive solutions; a branching path requiring a new control is likewise only a hypothesis requiring testing.",
+    "The only reliably transferable part of this evidence is the organization of feedback and display of existing controls; mapping mechanics or a functional outcome was not observed; the available evidence is inconclusive."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game’s name, character, art direction, environment, text, sound, brand, or asset.",
+    "Do not use the official card’s claim about magic chain, dodging, or multiplayer modes as confirmed mechanics; their complete execution was not recorded.",
+    "Do not treat changes in enemy or character positions between frames alone as evidence of input acceptance or mechanic success.",
+    "Avoid conclusions about victory, loss, rewards, penalties, or a repeatable loop without an outcome-bearing frame."
+  ],
+  "evidence": [
+    {
+      "claim": "The page proceeds from a loading screen titled Mage Knight at 0% to a selection menu.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-37:screenshot:load"
+    },
+    {
+      "claim": "The menu shows rows for selecting abilities/spells and options to enter the dungeon, co-op, arena, and versus.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-37:screenshot:after_start"
+    },
+    {
+      "claim": "On the active gameplay page, health, level, chain, mastery grade, wave, bosses, time, and ability cards are displayed.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-37:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The HUD text states the controls LMB, F, Link, and Space for dodge, and W/A/S/D for movement and Esc for pause.",
+      "source_type": "page_text",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-37:page_text:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input and late frames show changes in character/enemy positions and time from 00:00 to 00:01, but these changes do not establish input acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input; late",
+      "certainty": "direct",
+      "source_reference": "game-37:screenshot:after_combined_input; late"
+    },
+    {
+      "claim": "The official card claim describes building an arsenal from seven elements, magic chain, timed dodging, arena, co-op, and online duels; this claim was not playtested against the recorded execution.",
+      "source_type": "official_card",
+      "stage": "metadata gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-37:official_card:metadata gallery_description"
+    },
+    {
+      "claim": "The technical log records Godot, WebGL 2.0, and Emscripten, and the metadata shows the absence of a tuning constant and engine marker.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-37:technical_trace:load"
+    },
+    {
+      "claim": "The metadata states that image changes may be animation or the passage of time and that the generic input sequence is not a game-specific playtest.",
+      "source_type": "technical_trace",
+      "stage": "after_start; after_key_burst; after_combined_input; late",
+      "certainty": "direct",
+      "source_reference": "game-37:technical_trace:after_start; after_key_burst; after_combined_input; late"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "This analysis relies only on evidence.json and five local frames of this game; no web browsing or speculation about hidden controls was performed. The official card is reported solely as a claim and is not a complete playtest. The frames provide direct evidence of active gameplay, but do not show a repeatable loop, input causality, outcome, victory, or loss; therefore, the related fields have been kept as “not observed; the available evidence is inconclusive” wherever necessary."
+}

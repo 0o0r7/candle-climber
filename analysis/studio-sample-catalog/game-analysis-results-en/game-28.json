@@ -1,0 +1,101 @@
+{
+  "id": "game-28",
+  "title": "Faraway",
+  "observation_level": "page_only",
+  "observed_goal": "On the start page, the goal is displayed as the instruction/text «Climb the hill»; execution of this goal was not observed in the game.",
+  "observed_controls": [
+    "not observed; the available evidence is inconclusive"
+  ],
+  "observed_core_loop": "not observed; the available evidence is inconclusive; the frames show only the start menu, and no repeating gameplay, movement, interaction, or collection loop is visible in them.",
+  "progress_feedback": "not observed; the available evidence is inconclusive; no progress indicator, counter, or outcome feedback is visible in the captured frames.",
+  "decisions_risk_reward": "not observed; the available evidence is inconclusive; no playable decision or risk/reward trade-off is visible in the menu frames.",
+  "rewards": "not observed; the available evidence is inconclusive; the official card mentions searching for 10 stars, but this claim was not confirmed by gameplay in the frames.",
+  "penalties_failure": "not observed; the available evidence is inconclusive; no failure, damage, cost, or game reset was observed.",
+  "outcomes_replay": "not observed; the available evidence is inconclusive; no win, loss, ending, or replay loop was observed.",
+  "onboarding": "The game start page shows the game title, a narrative description, a name field with the display value «Traveller», a «Climb the hill» button, and a «Settings» option. This is page/menu evidence only and does not clarify what instruction is provided after starting.",
+  "visual_audio_accessibility": "Visually, the frames show a bright menu over a 3D scene, with white text contrasted against a blue/cloudy background; settings or accessibility options were not observed; the available evidence is inconclusive. Regarding audio, only a technical warning that starting AudioContext was not permitted was recorded, and actual audio playback was not observed.",
+  "technical_clues": [
+    "The recording sequence indicates that the test input «hold ArrowRight + Space for 900ms» was attempted, but the evidence itself states that this sequence was not gameplay-oriented and that input acceptance was not established.",
+    "In the technical data, canvas_inventory is empty, visible_images is empty, engine_markers is empty, and script_bytes_scanned equals zero; these are limited recording clues, not proof of the game's architecture or logic.",
+    "The AudioContext warning states that audio must be started after a user gesture; this is a technical clue about browser state and does not establish the existence or role of audio in the game loop.",
+    "The WebGL warnings point to a software fallback, and several healthz requests were recorded with ERR_CONNECTION_REFUSED; their cause in relation to game performance is unclear."
+  ],
+  "transferable_principles": [
+    "Present the initial goal in a short, visible phrase, but keep it distinct from promotional text through a real interaction test.",
+    "At the start of the experience, distinguish one primary action from one settings path so the entry point is clear.",
+    "Design and evaluate progress and outcome feedback only after observing the real loop; differences between frames alone are not evidence of interaction.",
+    "For exploratory experiences, assess the readability of the interface layer over a moving/visual background with an independent accessibility test."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, any score or rank should reflect only game skill and performance, not purchases or wallet activity and not a financial advantage.",
+    "The transferable recommendation is limited to clear goal-setting and readable feedback; this game's evidence is insufficient to adapt its controls or complete loop.",
+    "Avoid free brake, horizontal direction changes, and a branching path requiring new controls; each can only be a hypothesis requiring separate testing, not a conclusion from this review.",
+    "No character, art, level, text, audio, brand, or asset from this game should be reproduced or proposed."
+  ],
+  "do_not_copy": [
+    "Do not copy any specific asset, character, art, environment, text, audio, or brand from this game.",
+    "Do not use the claim of searching for 10 stars or any capability from the official card as a confirmed feature without direct execution and an observable result.",
+    "Do not interpret visual changes between frames as acceptance of ArrowRight, Space, or combined input.",
+    "Do not treat the absence of a HUD, controls, or gameplay element in the opening frame as evidence that it is absent from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The Faraway start page shows the title, narrative text, name field, Climb the hill button, and Settings.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-28:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame still shows the start menu, and no active game or movement loop is observed in it.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-28:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame shows the start menu; possible visual changes alone do not establish key acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-28:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame still shows the start menu, and no result or game execution is visible in it.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-28:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The official card describes the experience as 3D exploration above the clouds and searching for 10 stars; this claim was not playtested.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-28:official_card:load"
+    },
+    {
+      "claim": "The page text recorded the phrase «Unfurling the sea of clouds…» during loading.",
+      "source_type": "page_text",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-28:page_text:load"
+    },
+    {
+      "claim": "The recorded input topology reports only an attempt to hold ArrowRight + Space for 900ms and does not confirm its acceptance.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst",
+      "certainty": "candidate_only",
+      "source_reference": "game-28:technical_trace:after_key_burst"
+    },
+    {
+      "claim": "An AudioContext warning and a WebGL software fallback were recorded in the console; these are technical clues, not evidence of the game loop.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-28:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "The page was recorded with status loaded but capture_status equal to budget_timeout; all completed_stages are empty, start_action equals none, interaction_visual_change_signal is empty, and the fallback frames show only the start menu. Therefore, controls, the game loop, progress, rewards, failure, and outcome cannot be confirmed. Minor changes between frames may be animation or the passage of time. The absence of an element in the start frame does not establish its absence from the entire game."
+}

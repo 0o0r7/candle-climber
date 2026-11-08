@@ -1,0 +1,81 @@
+{
+  "id": "game-19",
+  "title": "Super Defense",
+  "observation_level": "page_only",
+  "observed_goal": "In the page-menu screenshot, the page text describes the goal as defending a campus and keeping the power core safe from drones; this goal was not converted into active gameplay execution or an observable cycle. The official card also claims team-building with student heroes and survival through escalating waves, but it was not playtested.",
+  "observed_controls": [
+    "The screenshot shows buttons labeled Start your shift, Local high scores, Settings, How to play, and Open Source Licenses, plus a Hard Mode/Normal option.",
+    "The Enter, Space, ArrowUp, w, ArrowRight keys and holding ArrowRight + Space for 900ms were tried in the capture, but their acceptance or gameplay effect was not observed.",
+    "No effective control for active gameplay was not observed; the available evidence is inconclusive."
+  ],
+  "observed_core_loop": "The core loop was not observed; the available evidence is inconclusive; no frame showing active gameplay, a wave, deployment, attack, defense, progress, or cycle repetition was recorded.",
+  "progress_feedback": "Progress feedback during gameplay was not observed; the available evidence is inconclusive. The menu text only refers to Hard Mode with late drones +50% HP and faster, bigger waves; this is page text, not the result of gameplay execution.",
+  "decisions_risk_reward": "Decisions, risk/reward, and the effect of selecting Hard Mode during gameplay were not observed; the available evidence is inconclusive. The presence of options in the menu alone does not prove game behavior.",
+  "rewards": "Rewards, scoring, high score, or resources during gameplay were not observed; the available evidence is inconclusive; only the Local high scores button is visible in the menu.",
+  "penalties_failure": "Failure, damage, resource loss, or penalties were not observed; the available evidence is inconclusive. No direct win/loss outcome was recorded.",
+  "outcomes_replay": "An outcome, win, loss, wave ending, or replay capability was not observed; the available evidence is inconclusive.",
+  "onboarding": "The page presents a start menu with a title, textual description, Normal/Hard Mode selection, and a Start your shift button; successful entry into the game and interactive tutorial were not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The screenshot shows a legible menu with a dark panel, text buttons, a colorful background image, and Settings and How to play options. Audio is not observable in a screenshot. Accessibility details, actual contrast, keyboard focus, and usable settings were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The Technical trace indicates that the page was loaded with Godot Engine v4.7.2.stable.official and WebGL 2.0/Compatibility; this technical clue identifies the engine and does not establish game logic or controls.",
+    "The Technical trace reports streaming 36 sheets and the music files bgm_tension.ogg and bgm_boss.ogg becoming ready; the presence or readiness of a resource/asset does not establish that audio played or that a boss was reached.",
+    "The metadata value interaction_visual_change_signal is false and all five screenshots have the same sha256; this capture does not support accepted input or gameplay execution.",
+    "Software WebGL fallback warnings and 403/400 and remote-config errors appear in the trace; their effect on the game experience was not observed; the available evidence is inconclusive."
+  ],
+  "transferable_principles": [
+    "Before inferring a game loop, frames showing active state, an input-attributable change, and a repeatable outcome should be recorded.",
+    "A difficulty level should be accompanied by observable feedback and a clear consequence, not merely an option in the start menu.",
+    "The start interface should present the goal and next action briefly and clearly, while keeping card claims separate from evidence of actual execution.",
+    "Engine tracking and resource loading are only architectural clues and do not replace observation of interaction, progress, or outcome."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, only the general principle of separating onboarding from the game loop is transferable; this capture confirms no movement pattern or timing that can be adapted.",
+    "Any score/rank in Candle Climber should reflect skill only, and no purchase or wallet should create an advantage.",
+    "A free brake, horizontal direction change, or branching path requiring a new control should not be proposed; each is merely a hypothesis requiring separate testing, not a conclusion from this game."
+  ],
+  "do_not_copy": [
+    "Do not reproduce or propose this game’s name, characters, illustrations, art direction, text, audio, brand, or assets.",
+    "Do not transfer the card’s claim about heroes, combos, waves, or bosses as confirmed mechanics.",
+    "Do not use identical frames or a possible time-based change to conclude that input was accepted.",
+    "Do not copy the page’s specific structure or content as a direct Candle Climber template."
+  ],
+  "evidence": [
+    {
+      "claim": "Across all five stages, the same menu is visible with the title Super Defense, goal text, Hard Mode/Normal option, and start and menu buttons; active gameplay or an observable state change is not visible.",
+      "source_type": "screenshot",
+      "stage": "load; after_start; after_key_burst; after_combined_input; late",
+      "certainty": "direct",
+      "source_reference": "game-19:screenshot:load; after_start; after_key_burst; after_combined_input; late"
+    },
+    {
+      "claim": "The page text says that training drones have been released and that heroes should be deployed, walkways should be held, and the power core should remain active; this is page goal text, and its execution was not observed.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-19:screenshot:load"
+    },
+    {
+      "claim": "The official card claims team-building with student heroes, use of elemental powers, chaining combos, and survival through escalating waves and screen-filling bosses; this claim was not confirmed by gameplay.",
+      "source_type": "official_card",
+      "stage": "metadata gallery description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-19:official_card:metadata gallery description"
+    },
+    {
+      "claim": "The metadata states interaction_visual_change_signal=false, all frames have the same hash, and the caveat explicitly says that a screenshot change is not proof of input comprehension.",
+      "source_type": "technical_trace",
+      "stage": "capture metadata",
+      "certainty": "direct",
+      "source_reference": "game-19:technical_trace:capture metadata"
+    },
+    {
+      "claim": "The trace reports execution of Godot Engine v4.7.2, WebGL 2.0, streaming image sheets, and two music files becoming ready; these are technical clues and do not establish a loop or outcome.",
+      "source_type": "technical_trace",
+      "stage": "capture console trace",
+      "certainty": "candidate_only",
+      "source_reference": "game-19:technical_trace:capture console trace"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "Only the metadata-and-capture-evidence file and five input frames from this game were reviewed; no web browsing or rerun was performed. All frames have the same hash and the menu remains in them. stage_text is empty, inputs were merely attempted, and there is no direct evidence of active gameplay, a loop, an outcome, audio, score, or failure. The absence of game elements in the opening frame alone does not establish their absence throughout the game."
+}

@@ -1,0 +1,96 @@
+{
+  "id": "game-27",
+  "title": "Strike Bowl",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "In the opening frame, the page presents the goal as bowling and attempting to score over 5 frames; in active-game frames, the ball is seen on the lane and then near the pins. A win, loss, or game completion was not observed.",
+  "observed_controls": [
+    "The page text introduces Space for Bowl; acceptance of this input was not independently confirmed.",
+    "The page text introduces A/D for movement and Mouse for aiming; the independent result of these inputs cannot be attributed with certainty from the frames.",
+    "The page text introduces holding click or Space for power and horizontal dragging for hook; these are page instructions, not definitively playtested controls."
+  ],
+  "observed_core_loop": "Direct evidence covers only part of the loop: frame 1/5 and Ball 1 are displayed, the ball is seen on the lane, and in later frames it is near the pins/impacting them. A complete throw, score registration, transition to the next ball or frame, and loop repetition were not observed.",
+  "progress_feedback": "The active-game frame shows the indicators FRAME 1/5, Ball 1, Total 0, Best 0, Max possible 150, Lane: no drift, and Guide 100%. No score change or frame progression was observed in the recorded frames; a change in the image alone does not prove input acceptance.",
+  "decisions_risk_reward": "The page claims that aiming, power, and hook can be adjusted, but this recording cannot confirm effective decisions or actual risk/reward. The remaining pin state is visible in the frames, but its relationship to input selection or reward has not been proven.",
+  "rewards": "The page and official card state a 150 maximum and a ranking table; in active gameplay, Total and Best are seen as 0. Successful scoring, a final reward, or rank advancement was not observed.",
+  "penalties_failure": "No loss, error, gutter, penalty, or direct failure message was observed in the frames. The existence or rules of such a consequence are unclear.",
+  "outcomes_replay": "The final outcome, win/loss, end of frame, or possibility of replay was not observed; therefore replay and loop repeatability are unclear.",
+  "onboarding": "The opening page displays a Bowl button and a four-step guide for movement, aiming, power, and hook, and has Leaderboard, Settings, and language options. Successful onboarding or confirmation of all controls was not observed.",
+  "visual_audio_accessibility": "The frames show a three-dimensional bowling environment with multiple lanes, neon colors, pins, a ball, a score HUD, and a pause button. On-screen text for status and controls is present. No reliable direct data about audio or accessibility options was observed; metadata records only an AudioContext warning.",
+  "technical_clues": [
+    "A canvas with dimensions 1280×800 is recorded in the metadata; this is a technical clue and does not establish game behavior.",
+    "The metadata records 8 script, one stylesheet, 6 fetches, and Three.js/ WebGL indicators; no dedicated engine marker or tuning constant was recorded.",
+    "The AudioContext warning says that starting audio was not permitted after a user gesture; this concerns audio activation, not the absence of audio in the game design.",
+    "A WebGL software fallback warning and BufferGeometry/ShadowMap warnings were recorded; they are clues about the runtime environment and do not confirm mechanics.",
+    "A 403 error was recorded in the console, but page_errors and request_failures are empty; its effect on the game is unclear."
+  ],
+  "transferable_principles": [
+    "Present the control tutorial in several short, readable steps before starting, but make acceptance of each input clear through real feedback.",
+    "Keep stage status, score, and remaining capacity stable in the HUD so the player can understand progress.",
+    "Do not separate continuous visual feedback from the mechanical result; a frame change alone should not be the only sign of success.",
+    "Show the action, result, and opportunity to repeat clearly so replay and skill learning can be identified."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, keep score/rank dependent only on skill and gameplay execution, not on purchases or wallet and economic advantage.",
+    "From this sample, only the principle of a clear HUD and staged feedback is transferable; do not infer any specific control or path without direct testing.",
+    "Do not introduce free brake, horizontal direction change, or a branching path requiring new control; if such an option is considered, it is only a hypothesis requiring separate testing."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game's name, text, visual identity, character, asset, or brand.",
+    "Do not copy its exact scene structure or layout and visual effects.",
+    "Do not treat the card's claim about 5 frames, a 150 maximum, or same lane as a confirmed, transferable mechanic.",
+    "Do not present a change across two frames or a generic input sequence as proof of controllability or game success."
+  ],
+  "evidence": [
+    {
+      "claim": "The opening frame shows an introductory page with a Bowl button, a movement/aiming/power/hook guide, and interface options.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-27:screenshot:load"
+    },
+    {
+      "claim": "The page text introduces these same four control categories and displays the phrase 5 frames and a 150 maximum; this text is an instruction/claim, not a successful control test.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-27:page_text:after_start"
+    },
+    {
+      "claim": "The official game card claims 5 frames, 150 max, same lane, and the goal of getting a strike/perfect game; this claim was not confirmed by a complete playtest loop.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-27:official_card:load"
+    },
+    {
+      "claim": "The active-game frame shows FRAME 1/5, Ball 1, Total 0, Best 0, Max possible 150, Lane: no drift, and Guide 100%.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-27:screenshot:after_key_burst"
+    },
+    {
+      "claim": "In the after_combined_input and late frames, the ball and pins are seen in different states near the end of the lane; this visual change alone does not establish input acceptance or a scoring outcome.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-27:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame still shows FRAME 1/5, Ball 1, and Total 0; the end of the loop or an outcome was not observed.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-27:screenshot:late"
+    },
+    {
+      "claim": "The metadata records a canvas with dimensions 1280×800, script/fetch resources, and Three.js/WebGL and AudioContext warnings; these are possible technical clues.",
+      "source_type": "technical_trace",
+      "stage": "after_start",
+      "certainty": "candidate_only",
+      "source_reference": "game-27:technical_trace:after_start"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "The recording covers only part of the game. Three frames, load, after_combined_input, and late, are from fallback-1, while two frames, after_start and after_key_burst, are current; timing and differences in origin may affect comparison. The metadata says that the load, after_combined_input, and late screenshots timed out, start_action was none, the generic inputs Space/ArrowUp/w/ArrowRight and holding ArrowRight+Space were tested, but no input acceptance signal was recorded. No web browsing or inference about hidden controls was performed."
+}

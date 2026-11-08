@@ -1,0 +1,101 @@
+{
+  "id": "game-06",
+  "title": "Super Dungeon",
+  "observation_level": "page_only",
+  "observed_goal": "In the opening-menu screenshot, an explicit goal of starting a patrol/entering the next section is visible; game execution, the operational goal, and its outcome were not observed.",
+  "observed_controls": [
+    "The page text states that the experience is best suited to keyboard + mouse and that gamepad and touch are also supported; acceptance or functionality of these inputs in the game was not confirmed.",
+    "The START PATROL, HOW TO PLAY, and SETTINGS buttons are visible in the opening menu; activation or the result of selecting them was not observed."
+  ],
+  "observed_core_loop": "not observed; the available evidence is inconclusive; the frames do not show a repeating game loop, character control, interaction, combat, or outcome.",
+  "progress_feedback": "In two fallback frames, the loading text “OPENING THE HALL OF ORIGINS...” and a progress bar are visible; this is only loading feedback and does not count as game progress. Score, stage, or in-game progression feedback was not observed; the available evidence is inconclusive.",
+  "decisions_risk_reward": "not observed; the available evidence is inconclusive; no playable decision, risk, reward, or trade-off was recorded in the frames.",
+  "rewards": "not observed; the available evidence is inconclusive; the card’s claim about rescuing classmates and chaining powers is only an official, unplaytested claim.",
+  "penalties_failure": "not observed; the available evidence is inconclusive; failure, damage, cost, or penalty is not visible in the recorded execution.",
+  "outcomes_replay": "not observed; the available evidence is inconclusive; winning, losing, the end of a loop, or a reason to replay was not observed.",
+  "onboarding": "The opening menu shows the game title, a situation description, the START PATROL/HOW TO PLAY/SETTINGS options, and input-support text. The HOW TO PLAY page, interactive onboarding, and successful entry into the game were not observed.",
+  "visual_audio_accessibility": "Visually, a 3D menu with text contrast against the background, text buttons, and a loading bar is visible. The page text states that gamepad and touch are supported. The actual audio status, accessibility settings, and functioning of these input methods were not observed; the available evidence is inconclusive; the console warned that AudioContext is permitted after a user gesture.",
+  "technical_clues": [
+    "metadata says that a canvas with dimensions 1280×800 was present and that the other canvases had CSS width/height of zero; this is a technical clue and does not prove game behavior.",
+    "The console recorded a warning that AudioContext was not started without a user gesture; this is a technical clue about audio startup, not evidence of game execution.",
+    "The console recorded several fallback-to-software-WebGL warnings and a resource-loading error with a 403 response; the effect on the game was not observed; the available evidence is inconclusive.",
+    "No engine marker or tuning constant candidate and no scanned script byte were recorded in metadata."
+  ],
+  "transferable_principles": [
+    "A clear opening menu with a short goal and start/help/settings options can structure user entry.",
+    "Explicit visual feedback for loading status should be kept separate from feedback for the game’s own progress.",
+    "Support for multiple input methods has design value only when it is usable and verifiable in actual execution.",
+    "Card claims or introductory text should be reported separately from evidence of actual execution so that a frame change or loading state is not mistakenly treated as a game loop."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, score/rank should reflect only game skill and performance, not a purchase or wallet.",
+    "No gameplay advantage should come from a purchase or wallet.",
+    "Avoid free brake, horizontal direction changes, and branch paths requiring new controls; if any are raised, examine them only as hypotheses requiring direct testing.",
+    "From these inputs, only the principle of separating loading feedback from progress and separating claims from confirmed execution can be transferred; no Candle Climber-specific mechanic is extracted from this game."
+  ],
+  "do_not_copy": [
+    "Do not reproduce the visual identity, texts, names, setting, characters, or assets seen or claimed.",
+    "Avoid conclusions about controls, the loop, rewards, or failure based on a change between two frames or a loading page.",
+    "Do not present official, unplaytested claims as confirmed product behavior."
+  ],
+  "evidence": [
+    {
+      "claim": "In the load frame, the opening menu with the START PATROL, HOW TO PLAY, and SETTINGS options, a situation description, and the keyboard + mouse/gamepad/touch support wording is visible.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-06:screenshot:load"
+    },
+    {
+      "claim": "In the late frame, the same opening menu is visible, and entry into the game or an active loop is not observed.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-06:screenshot:late"
+    },
+    {
+      "claim": "The after_key_burst frame shows a loading page with the text OPENING THE HALL OF ORIGINS... and a progress bar; this frame does not prove an input outcome or active gameplay.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-06:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame also shows the same loading page with the text OPENING THE HALL OF ORIGINS...; a frame change alone does not establish input acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-06:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The page text says that something woke beneath the school after curfew and that the page is best suited to keyboard + mouse and supports gamepad and touch; this text does not confirm actual execution.",
+      "source_type": "page_text",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-06:page_text:load"
+    },
+    {
+      "claim": "The official card describes breaking curfew, descending beneath the school, chaining powers, rescuing classmates, and confronting two bosses; none of these was playtested in the recorded execution.",
+      "source_type": "official_card",
+      "stage": "gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-06:official_card:gallery_description"
+    },
+    {
+      "claim": "metadata records capture status as partial, start_action as none, and interaction_visual_change_signal as null; the fallback screenshots originate from fallback-1, and differences between frames may be due to timing/animation.",
+      "source_type": "technical_trace",
+      "stage": "capture",
+      "certainty": "candidate_only",
+      "source_reference": "game-06:technical_trace:capture"
+    },
+    {
+      "claim": "metadata records an AudioContext warning, software WebGL fallback, and a resource with a 403 response; their effect on the experience was not observed; the available evidence is inconclusive.",
+      "source_type": "technical_trace",
+      "stage": "console",
+      "certainty": "candidate_only",
+      "source_reference": "game-06:technical_trace:console"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only this game’s input files were used; no web browsing or rerun was performed. The screenshot after_start timed out, the general keyboard sequence was skipped when a text/select input had focus, and after_key_burst and after_combined_input also timed out. metadata says controls_attempted is empty and start_action is none. The two fallback frames originate from fallback-1. There is no direct evidence of active gameplay, a complete loop, an outcome, a win, or a loss; the absence of elements in the opening frame also does not prove their absence from the game as a whole."
+}

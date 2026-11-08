@@ -1,0 +1,104 @@
+{
+  "id": "game-03",
+  "title": "Side Scroller",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "In the active frame, a mission and an area of the level titled Stage 1 are visible; the ultimate goal, progression condition, and complete destination were not fully observed; the available evidence is inconclusive. The official progression card text claims a route through combat and obstacles, but this claim was not confirmed through full gameplay.",
+  "observed_controls": [
+    "In the after_start frame, the guide text shows A/D for movement and Space for jumping.",
+    "In the after_start frame, the guide text shows J for shooting, K for grabbing/grappling, L for grabbing/throwing, E for the item, F for the special ability, and Esc for pausing.",
+    "In the after_start frame, E for use and Q for switching are displayed for the tools at the top of the screen.",
+    "The inputs Space, ArrowUp, w, ArrowRight, and holding ArrowRight+Space are recorded in metadata as attempts; their acceptance is not proven by the frames."
+  ],
+  "observed_core_loop": "There is direct evidence of active gameplay: a character in a 2D scene, an enemy, an obstacle/environmental objects, and a HUD are visible. The change between after_combined_input and late indicates the passage of time or animation, but the repeating cycle of movement, engagement, outcome, and repetition was not clearly observed.",
+  "progress_feedback": "The active frames show a HUD with score zero, record zero, rank D, score multiplier 1.0, status bars, and an ammunition/item counter. In the late frame, the status value changed from 100 to 92; the cause of this change is unspecified and, by itself, does not establish input acceptance or the result of an interaction.",
+  "decisions_risk_reward": "The presence of an enemy, an environmental obstacle, a weapon/tool, and status bars in the active frame suggests the possibility of decision-making in movement or engagement; a specific decision, risk/reward choice, and its consequence were not observed in the frames; the available evidence is inconclusive.",
+  "rewards": "Score and record are displayed in the HUD, and a score multiplier is also visible; receipt of a reward, an upgrade, a collected item, or an increase in score was not observed; the available evidence is inconclusive. The official card text refers to combat and overcoming obstacles, but playtest was not completed.",
+  "penalties_failure": "The late frame displays player status 92, and the character appears to be in a damaged state, but the cause of the damage is not certain from the frame. Failure, death, reset, or a result screen was not observed; the available evidence is inconclusive.",
+  "outcomes_replay": "The initial menu shows the options Start Mission, Field Manual, and Credits, and later frames show the mission scene; replay, winning, losing, or an outcome-driven cycle was not observed; the available evidence is inconclusive.",
+  "onboarding": "The load frame shows guidance text about a key for a specific tool. The after_start frame displays a broader list of controls in the bottom menu bar, and the after_key_burst/after_combined_input frames show limited movement and jump guidance over the scene. No readable recorded text was present in the stage_text metadata.",
+  "visual_audio_accessibility": "The frames show a high-contrast interface with text labels on the HUD and controls; audio status, subtitles, accessibility settings, readability at other sizes, and audio feedback were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The metadata records a canvas with dimensions 1280×800, and no separate viewable images are recorded in the resource inventory; this is only a technical clue and does not support a definitive conclusion about the game's architecture.",
+    "The console trace reports Godot 4.7.2, WebGL 2/OpenGL ES 3.0, and an Emscripten-based build; this is a possible technical clue, not evidence of game logic.",
+    "The metadata says that screenshot loading timed out and that the general input sequence is not a game-specific playtest; therefore, frame changes may be due to time/animation.",
+    "403, 400, and remote config errors were recorded in the console; their effect on game content cannot be determined from the inputs."
+  ],
+  "transferable_principles": [
+    "Display the core controls in the same opening frames, briefly and in a scannable form.",
+    "Provide progress feedback with legible and stable indicators, but connect an indicator change to an understandable event.",
+    "Layer encounters along a linear path with recognizable obstacles so that the player understands what problem movement and action solve.",
+    "For analyzability, design the action, consequence, and repetition cycle so it can be recorded; a single visual change is not sufficient."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, if score or rank is used, tie it only to skill and performance in the game.",
+    "No purchase or wallet should create a gameplay advantage.",
+    "The appropriate pattern is limited, clear inputs with an understandable path; do not introduce free brake, horizontal direction changes, or a branching path requiring new controls, except solely as a hypothesis to be tested separately.",
+    "Progress feedback should come from observable skillful execution, not from an external asset or advantage."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this sample's visual identity, visual layout, characters, enemies, names, texts, or specific assets.",
+    "Avoid definitive conclusions about key acceptance, damage, shooting, grappling, or level traversal based on a change between two frames.",
+    "Do not present the official card's claim as a confirmed, executed capability.",
+    "Do not treat the absence of an element in the load frame as evidence that it is absent from the game as a whole."
+  ],
+  "evidence": [
+    {
+      "claim": "The opening frame shows a loading page with a progress bar and control guidance text.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-03:screenshot:load"
+    },
+    {
+      "claim": "The main menu shows the options to start the mission, the field manual, and credits, and the bottom bar lists several controls.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-03:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame shows an active 2D scene with a character, enemy, environmental objects, HUD, and the Mission Start message.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-03:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame shows the level title, character, enemy, and A/D and Space guidance.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-03:screenshot:after_combined_input"
+    },
+    {
+      "claim": "In the late frame, the score remains zero, rank D and multiplier 1.0 are visible, and the player status value is displayed as 92.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-03:screenshot:late"
+    },
+    {
+      "claim": "The frame changes in this capture, by themselves, do not establish that the inputs were understood or accepted.",
+      "source_type": "technical_trace",
+      "stage": "capture_metadata",
+      "certainty": "candidate_only",
+      "source_reference": "game-03:technical_trace:capture_metadata"
+    },
+    {
+      "claim": "The game's official card describes it as a side-scrolling adventure with combat, obstacles, and capabilities such as grapple, weapon theft, and object throwing; this claim was not playtested.",
+      "source_type": "official_card",
+      "stage": "gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-03:official_card:gallery_description"
+    },
+    {
+      "claim": "The metadata records the Godot engine, WebGL/Emscripten, and network/remote config errors.",
+      "source_type": "technical_trace",
+      "stage": "capture_metadata",
+      "certainty": "direct",
+      "source_reference": "game-03:technical_trace:capture_metadata"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "The page load and capture are partial; the load screenshot timed out, stage_text is empty for all stages, no dedicated controlled execution of the game was performed, the complete cycle or outcome was not recorded, and temporal frame changes may be animation. No web browsing or inference from hidden game elements/controls was performed."
+}

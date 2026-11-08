@@ -1,0 +1,107 @@
+{
+  "id": "game-17",
+  "title": "TerraForge",
+  "observation_level": "page_only",
+  "observed_goal": "No executable game goal was observed in the frames; the available evidence is inconclusive. The page text says: «Shape the wild. Survive the night.»; this is only page text, and the gameplay loop was not confirmed.",
+  "observed_controls": [
+    "No active controls or key list were observed in the frames; the available evidence is inconclusive.",
+    "Space, ArrowUp, w, ArrowRight and holding ArrowRight + Space for 900 milliseconds are recorded in the metadata as attempted inputs; their acceptance by the game was not observed; the available evidence is inconclusive."
+  ],
+  "observed_core_loop": "The core game loop was not observed; the available evidence is inconclusive; no active game frame, interaction with the world, repeated action, or outcome was recorded.",
+  "progress_feedback": "Progress feedback was not observed in the frames; the available evidence is inconclusive. The page text only shows the New World, Settings and Controls options and describes selecting seed, mode and difficulty.",
+  "decisions_risk_reward": "Risk/reward decisions were not observed during game execution; the available evidence is inconclusive. The New World menu options and selection of seed, mode and difficulty appear in the text/frames, but their effect or trade-off was not tested.",
+  "rewards": "No rewards, resources, score, or executable upgrades was not observed; the available evidence is inconclusive. The official claim about gather, craft and build is only a card claim and was not confirmed through game execution.",
+  "penalties_failure": "No penalty, failure, death, or cost of error was not observed; the available evidence is inconclusive. The phrase «Survive the night» and the claim survive the night come from the text/card, not from a direct game outcome.",
+  "outcomes_replay": "No win, loss, ending, measurable outcome, or replay loop was not observed; the available evidence is inconclusive. capture_status is recorded as budget_timeout and completed_stages is empty.",
+  "onboarding": "The opening page has a visible menu with New World, Settings and Controls; New World displays the phrase «Pick a seed, mode and difficulty», and the page says the game is single-player and that the world is automatically saved in the browser. Successful entry into the game or interactive tutorial was not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The frames show a full-screen menu with a nature image, the game title, and text buttons; no meaningful visual difference between stages was observed. Sound, subtitles, accessibility settings, and interactive readability were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The metadata recorded 9 script, one stylesheet, one XHR and 82 fetch; this is only a technical loading clue and does not establish the game's architecture or logic.",
+    "Two warnings about WebGL software fallback were recorded; this is a possible rendering-environment clue, not evidence of game capability.",
+    "HTTP errors with statuses 403, 400 and a remote config fetch error were recorded; their effect on the game experience was not observed; the available evidence is inconclusive.",
+    "canvas_inventory, engine_markers and tuning_constant_candidates are empty; therefore the engine or tuning parameters cannot be inferred from this data."
+  ],
+  "transferable_principles": [
+    "Before inferring a loop, an active game frame and repetition of an action with observable feedback should be recorded.",
+    "The opening menu should present the goal and initial options clearly and distinctly from actual gameplay.",
+    "Progress feedback should be observable within gameplay itself and attributable to the player's action.",
+    "A temporal or animated change between two frames alone does not prove input acceptance or its effect."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, only the principle that direct feedback attributable to input is necessary can be transferred; this game did not confirm any adaptable control pattern or loop.",
+    "score/rank should reflect skill only and must not provide an advantage through a purchase or wallet.",
+    "free brake, horizontal direction change or a branching path requiring new control should not be assumed or reproduced; each is only a hypothesis requiring separate testing."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game's name, character, artwork, environment, stage, text, sound, brand, or assets.",
+    "Do not copy the official card's claims about gathering, crafting, building, hunting or fire arrows as definite mechanics without confirmed execution.",
+    "Do not use the main menu's appearance or its visual composition as a direct model."
+  ],
+  "evidence": [
+    {
+      "claim": "The load frame shows the main menu with the title TerraForge and the New World, Settings and Controls options.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-17:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame has the same visible content as the main menu, and no active gameplay is visible in it.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-17:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame shows the main menu; no accepted effect of the key inputs was observed in it.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-17:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame shows the main menu; a frame change alone is not proof of acceptance of the combined input.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-17:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame still shows the main menu, and no outcome, failure, or win is observed.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-17:screenshot:late"
+    },
+    {
+      "claim": "The page text provides the phrase «Shape the wild. Survive the night.» and the selection of seed, mode and difficulty.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-17:page_text:after_start"
+    },
+    {
+      "claim": "The page describes the game as single-player and states that the world is automatically saved in the browser.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-17:page_text:after_start"
+    },
+    {
+      "claim": "The official card claims that the survival world includes gather, craft, build, hunt, fire arrows and survive the night; this claim was not play-tested through game execution.",
+      "source_type": "official_card",
+      "stage": "gallery_card",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-17:official_card:gallery_card"
+    },
+    {
+      "claim": "The presence of multiple resources, WebGL software fallback and 403/400 and remote-config errors is only a possible technical clue and does not establish game capability.",
+      "source_type": "technical_trace",
+      "stage": "capture_trace",
+      "certainty": "candidate_only",
+      "source_reference": "game-17:technical_trace:capture_trace"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "All fallback-1 frames appear identical in visual content, and the primary capture stopped with budget_timeout; completed_stages is empty, start_action is none, and no canvas or visible image of active gameplay was recorded. Therefore, this report concerns only the page/menu and explicit metadata claims. The absence of an element in the opening frame does not prove its absence from the entire game; likewise, any possible temporal change between frames cannot be attributed to input."
+}

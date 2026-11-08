@@ -1,0 +1,100 @@
+{
+  "id": "game-10",
+  "title": "Frosthold",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "In the screenshot, the tutorial goals of surviving by keeping the fire lit, moving, and approaching resources are visible. The official card text also claims broader goals such as collecting fuel and food, rescuing survivors, expanding the settlement, and building a beacon, but these sections were not fully confirmed in the recorded run.",
+  "observed_controls": [
+    "On-screen text: WASD or the arrow keys, or drag anywhere to walk; «tap to walk» is also visible in the opening text.",
+    "Enter, Space, ArrowUp, w, and ArrowRight were tested in the metadata; exclusive acceptance of these inputs cannot be established from frame changes alone."
+  ],
+  "observed_core_loop": "In the active frames, an incomplete loop of moving to a resource area, consuming/decreasing time or fuel, and advancing the tutorial from «Stretch your legs» to «Chop a pine» is visible. Complete gathering/construction, job assignment, survivor rescue, or a repeating survival loop was not observed; the available evidence is inconclusive.",
+  "progress_feedback": "Direct feedback includes the Tutorial panel, the «Done: Stretch your legs» message, the «Chop a pine» objective, the 0/3 wood counter, locked indicators for upgrades/construction, the survivors found counter at 0/18, Warm/Cold and Health bars, and a blizzard/day-night timer. Resource and timer changes are visible between frames, but the exact cause of each change cannot be established from the frames alone.",
+  "decisions_risk_reward": "The frames show potential decisions such as choosing a route/gate and paying resources for «Clear path»; visible examples include a cost of 10 wood and higher costs for another route. This establishes only the existence of a cost and prerequisite lock; optimization, actual risk, or the final reward was not observed; the available evidence is inconclusive in the recorded run.",
+  "rewards": "Direct reward feedback is limited to completing the «Stretch your legs» tutorial step. Rescue, upgrades, final construction, score, or ranking was not observed; the available evidence is inconclusive. The card’s claims about rescuing 18 survivors and building a beacon are stated_not_playtested.",
+  "penalties_failure": "A Health bar, Warm/Cold status, and a winter cold-danger message are visible in the frames, but death, failure, resource loss, or a definite penalty was not observed; the available evidence is inconclusive.",
+  "outcomes_replay": "A direct outcome/win/loss was not observed; the available evidence is inconclusive. Replay or a repeating loop was also not observed; the available evidence is inconclusive; later frames show only a continuation of the same tutorial state.",
+  "onboarding": "The in-game tutorial is staged and direct: first movement with WASD/arrow keys/drag, then standing beside a tree for automatic chopping. Objectives, resources, prerequisite locks, and temperature/health status are displayed simultaneously on the HUD.",
+  "visual_audio_accessibility": "The frames show a detailed visual interface with panel text, icons, status bars, framed contrast, and a minimap. Music: On and Sound: On controls are visible on the opening screen, but actual audio playback, subtitles, text-size adjustment, a contrast mode, or additional accessibility features were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "technical_trace: The page log reports Godot Engine v4.7.2.stable.official and WebGL 2.0/Emscripten 4.0.20 execution; this is a technical clue and does not draw conclusions about mechanic design.",
+    "technical_trace: WebGL software fallback, 403/400 errors, and an Amplitude remote config error were recorded; their effect on game execution was not observed; the available evidence is inconclusive.",
+    "technical_trace: The recorded canvas is 1280×800; scripts were not scanned, and no engine marker or tuning constant candidate was recorded."
+  ],
+  "transferable_principles": [
+    "Divide the tutorial into small, observable objectives and provide explicit feedback after each objective is completed.",
+    "Display resources, prerequisites, and danger status in a stable, comparable HUD.",
+    "Show the cost of a route or action before selection so decisions are information-based.",
+    "For survival games, present time/resource pressure separately from the final outcome so the player can track the consequence of a decision."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, staged tutorialization, immediate feedback, and clear status display could be used; score/rank should reflect skill only.",
+    "Do not add any purchase, wallet, or paid advantage for progression/score.",
+    "Do not introduce free brake, horizontal direction change, or a branching path requiring new control; each is only a hypothesis requiring separate testing, not a confirmed recommendation from these frames."
+  ],
+  "do_not_copy": [
+    "Do not reproduce the name Frosthold, characters, art, snowy assets, or any proprietary text/audio.",
+    "Do not present the card’s claims about the full game loop as observed or confirmed capabilities.",
+    "Do not infer accepted input, the cause of resource changes, or the existence of a complete loop from differences between two frames.",
+    "Do not treat the absence of an element in the opening frame as evidence that it is absent from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The opening screen displays WASD/arrow-key/drag and tap to walk instructions and states textual goals of keeping the fire lit, gathering, and construction.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-10:screenshot:load"
+    },
+    {
+      "claim": "After starting, the active environment, character, fire, HUD resources, map, 0/18 survivor counter, temperature/health status, and «Stretch your legs» tutorial are visible.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-10:screenshot:after_start"
+    },
+    {
+      "claim": "In the next frame, the scene position and time/fuel have changed, but this change alone does not establish input acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-10:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The tutorial has reached «Chop a pine», the 0/3 wood objective is displayed, and the «Done: Stretch your legs» message is recorded.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-10:screenshot:after_combined_input"
+    },
+    {
+      "claim": "A later frame shows the Iron Furnace upgrade locked and the Workshop locked with the prerequisite of reaching Whispering Pines; no final outcome or win is visible.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-10:screenshot:late"
+    },
+    {
+      "claim": "The official card claims the goals Hold the last ember and rescuing 18 frozen survivors, expanding the settlement, and building a beacon; these claims were not playtested in the recorded run.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-10:official_card:load"
+    },
+    {
+      "claim": "The metadata warns that a generic input sequence and visual change may merely be animation or the passage of time and do not establish input acceptance.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst",
+      "certainty": "candidate_only",
+      "source_reference": "game-10:technical_trace:after_key_burst"
+    },
+    {
+      "claim": "The technical log records Godot/WebGL/Emscripten and network errors without establishing game logic or a tuning constant.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-10:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only the input files for this game were examined, and no web browsing was conducted. stage_text metadata is empty; the two frames after_combined_input and late are from fallback-1, and their current capture had timed out. No screenshot shows an outcome/win/loss or a complete resource-action-outcome loop. Frame changes may be caused by animation or the passage of time and do not confirm the tested inputs."
+}

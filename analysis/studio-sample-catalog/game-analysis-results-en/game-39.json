@@ -1,0 +1,111 @@
+{
+  "id": "game-39",
+  "title": "Card Battler",
+  "observation_level": "page_only",
+  "observed_goal": "The page text and official card claim a strategic card game based on deck building, unit deployment, and spell combinations; in the frames, only the goal of entering the game through the main menu is visible, and the in-battle objective was not observed; the available evidence is inconclusive.",
+  "observed_controls": [
+    "In the late frame, the interface text shows selection with the up/down keys and confirmation with Enter; this is a direct observation of the menu guide, not proof of a successful in-game control test.",
+    "The text buttons START GAME, MULTIPLAYER, LEADERBOARD, and SETTINGS are visible in the menu frames; the function of each was not observed; the available evidence is inconclusive.",
+    "In the metadata, a canvas-center click and several keyboard inputs are recorded, but acceptance of these inputs cannot be established from the image change.",
+    "Effective input for battling, card selection, unit deployment, or spell casting was not observed; the available evidence is inconclusive."
+  ],
+  "observed_core_loop": "The active game loop, turns, card drawing, selection/deployment, combination, conflict resolution, or repetition of these was not observed; the available evidence is inconclusive. The only observable path is from loading to the main menu.",
+  "progress_feedback": "In the load, after_start, and after_key_burst frames, loading percentages of 0%, 4%, and 74% are visible, respectively; this is loading feedback, not game progress. The main menu is visible in the after_combined_input and late frames, and no battle-progress indicator was observed; the available evidence is inconclusive.",
+  "decisions_risk_reward": "Actual player decisions, choice costs, risk/reward, resources, targeting, or timing were not observed; the available evidence is inconclusive. The official card claims tactics and timely combinations, but this was not playtested.",
+  "rewards": "In-game rewards, score, rank, cards, resources, or success messages were not observed; the available evidence is inconclusive. The presence of the LEADERBOARD button in the menu frame alone does not establish the rank value or logic.",
+  "penalties_failure": "Failure, damage, resource loss, end of turn, or error messages in the game were not observed; the available evidence is inconclusive.",
+  "outcomes_replay": "Win, loss, direct outcome, end screen, or replay path was not observed; the available evidence is inconclusive. Differences between frames alone do not prove accepted input or a repeatable loop.",
+  "onboarding": "Loading is visible with the title Trading Card Game Template and a percentage bar. Afterward, the main menu with START GAME is visible; a tutorial, rules explanation, sample hand, or battle guide was not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The frames show an interface with bright contrast on a dark background, large buttons, and a textual control guide in the late frame. The languages EN / 中文 are visible in the late frame. Audio, accessibility settings, text size, adjustable contrast, and alternative-input support were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The metadata records the console with Godot Engine v4.7.2.stable.official; this is a technical clue and does not establish the game mechanics.",
+    "The metadata reports WebGL 2.0 / OpenGL ES 3.0 running on Emscripten 4.0.20 and single-threaded mode; these are runtime specifications, not evidence of a game loop.",
+    "Two WebGL software fallback warnings and one 403 response error were recorded in the console; their effect on the game experience was not observed; the available evidence is inconclusive.",
+    "The metadata says engine markers and tuning constant candidates are empty and the game scripts were not scanned; conclusions about the internal logic are not possible."
+  ],
+  "transferable_principles": [
+    "Staged loading feedback followed by a clear entry point makes the start of the experience understandable; the final mechanics must be tested separately.",
+    "Display menu controls briefly and explicitly so that selection and confirmation require no guesswork.",
+    "Treat strategic decisions as evaluable only when their cost, consequence, and outcome are observable in the complete loop.",
+    "Create a clear visual and semantic distinction between technical-progress feedback, game progress, and the final outcome."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, every score or rank should reflect skill and performance only, not purchases or a wallet, and not a paid advantage.",
+    "The principle of brief guidance and clear feedback can be used for starting and confirming, without reproducing this game's text, appearance, or assets.",
+    "These findings support no conclusion about adding free brake, changing horizontal direction, or introducing a branching path requiring new controls; each is only a hypothesis requiring independent testing.",
+    "The Candle Climber loop should be evaluated using direct evidence of movement, decision, and outcome; a change between two frames or loading progress alone is insufficient."
+  ],
+  "do_not_copy": [
+    "Do not reproduce the names, characters, illustrations, setting, art style, or any specific asset of this sample.",
+    "Do not copy the sample's text, labels, or menu layout verbatim.",
+    "Do not treat claims of deck building, deployment, combination, or any unverified mechanic as an implemented reality.",
+    "Do not turn temporal/image changes between frames into claims of input acceptance, winning, losing, or a game loop."
+  ],
+  "evidence": [
+    {
+      "claim": "The load frame shows a loading page with the title Trading Card Game Template and a value of 0%.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-39:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame shows the same loading page with a value of 4%.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-39:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame shows the same loading page with a value of 74%; this change alone does not establish key acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-39:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame shows the main menu with START GAME and MULTIPLAYER.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-39:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame shows the main menu with START GAME, MULTIPLAYER, LEADERBOARD, SETTINGS, and the SELECT/ENTER guide.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-39:screenshot:late"
+    },
+    {
+      "claim": "The official card describes the experience as a strategic card battler based on deck building, unit deployment, and spell combinations.",
+      "source_type": "official_card",
+      "stage": "gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-39:official_card:gallery_description"
+    },
+    {
+      "claim": "The recorded page text reports the title Trading Card Game Template and loading percentages of 0%, 2%, and 74%.",
+      "source_type": "page_text",
+      "stage": "load, after_start, after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-39:page_text:load, after_start, after_key_burst"
+    },
+    {
+      "claim": "The console reports Godot 4.7.2, WebGL 2.0/OpenGL ES 3.0, and Emscripten 4.0.20.",
+      "source_type": "technical_trace",
+      "stage": "runtime_console",
+      "certainty": "direct",
+      "source_reference": "game-39:technical_trace:runtime_console"
+    },
+    {
+      "claim": "The image change may result from animation or the passage of time and does not establish that the inputs were understood.",
+      "source_type": "technical_trace",
+      "stage": "capture_metadata",
+      "certainty": "candidate_only",
+      "source_reference": "game-39:technical_trace:capture_metadata"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "This analysis uses only evidence.json and the frames of this game; no web browsing or rerun was performed. The frames show up to the main menu and do not confirm any battle loop, outcome, audio, or in-game control behavior. The absence of an element in the opening frame or menu does not establish its absence from the game as a whole. source_gallery_url is empty in the metadata; therefore, source_url was kept empty for the official-card claim."
+}

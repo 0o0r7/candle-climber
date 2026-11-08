@@ -1,0 +1,106 @@
+{
+  "id": "game-33",
+  "title": "Lantern Wayfarer",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "The goal-page text states “carry the last flame through the darkness”; the official card also claims crossing the misty forest and reaching the destination through paths revealed by lantern light, but the card’s claim was not fully tested through execution.",
+  "observed_controls": [
+    "In metadata, Enter, Space, ArrowUp, w, and ArrowRight, along with the ArrowRight + Space hold combination for 900 milliseconds, were tested, but acceptance of any of these inputs is not established from the frames.",
+    "Definitive and reliable controls: not observed; the available evidence is inconclusive"
+  ],
+  "observed_core_loop": "In the after_combined_input frame, the active scene shows the character on the left, ground platforms, and elevated platforms illuminated; the late frame shows the same scene at a different time. This is only direct evidence of active gameplay. The recurring cycle of movement, jumping, landing, danger, and outcome is not complete or clear in the frames; not observed; the available evidence is inconclusive.",
+  "progress_feedback": "The loading screen shows the goal text and 0%, 7%, and 99% at the load, after_start, and after_key_burst stages; the frame change may result from animation or elapsed time and does not establish an input effect. In active gameplay, times 0:01.07 and 0:03.20 and two HUD bars are visible, but the exact meaning of the bars was not observed; the available evidence is inconclusive.",
+  "decisions_risk_reward": "The active frame shows platforms at different heights, dark/illuminated areas, and spikes at the lower right; therefore, the presence of obstacles and a possible need for spatial timing is direct, but actual player decisions and the risk/reward relationship were not observed; the available evidence is inconclusive.",
+  "rewards": "Three small markers and one bar accompanied by a flame icon are visible in the upper-left HUD; the type, quantification, and reward role of these elements were not observed; the available evidence is inconclusive. The official card claims carrying a flame, not a reward confirmed in full execution.",
+  "penalties_failure": "Spike-like shapes are visible at the lower right of the active frames, but collision, damage, failure, reset, or penalty was not directly recorded; not observed; the available evidence is inconclusive.",
+  "outcomes_replay": "No frame shows an outcome, win, loss, level completion, or full replay; not observed; the available evidence is inconclusive.",
+  "onboarding": "The page begins with a title, a goal sentence, and a loading percentage, then the after_combined_input frame shows a section title and a short explanatory sentence; no control instructions or interactive tutorial were observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The frames show a dark two-dimensional environment with localized lighting, platforms visible in the light, and a legible HUD in the upper corner. Audio, subtitles, accessibility settings, adjustable contrast, and input options were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The technical report records Godot Engine v4.7.2.stable.official and WebGL 2.0/OpenGL ES 3.0 execution with Emscripten 4.0.20; this is a technical clue and does not establish game logic.",
+    "Metadata records a canvas with dimensions 1280×800, and the resource counter includes one document, three scripts, seven fetches, and two pings; script content was not scanned, and no engine marker or tuning constant candidate was recorded.",
+    "A software WebGL warning and a resource-loading error with status 403 were recorded; their effect on the game was not observed; the available evidence is inconclusive."
+  ],
+  "transferable_principles": [
+    "Present the goal in one short, visible sentence, then show progress feedback with an indicator independent of any claim of successful input.",
+    "Limited visibility should be accompanied by lighting or gradual information reveal, but it must be validated through direct testing of legibility and controllability.",
+    "Place obstacles so that timing and path risk are understandable from the frame, without concluding anything about penalties until collision and consequence have been recorded.",
+    "Keep a clear boundary between introductory text, temporal frame changes, and actual input execution; an image change alone is not a measure of accepted control."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, the short goal, progress feedback, and abstract environmental reveal can serve as inspiration; this transfer must not reproduce this game’s assets or visual identity.",
+    "The score/rank in Candle Climber should measure skill only and should not provide an advantage through purchases or a wallet.",
+    "free brake, horizontal direction change, or a branching path requiring new controls should not be transferred as a definitive solution; each is only a hypothesis requiring separate testing."
+  ],
+  "do_not_copy": [
+    "Do not reproduce or suggest this game’s names, character, art, level, text, audio, brand, or assets.",
+    "Do not turn the official card’s claim or loading-frame changes into a claim of accepted controls, a complete loop, or a win/loss outcome.",
+    "Do not treat the absence of an element in the opening frame as its absence from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The opening screen displays the goal of carrying the last flame through the darkness and the value 0%.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-33:screenshot:load"
+    },
+    {
+      "claim": "The after_start screen displays the same goal text with the value 7%.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-33:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst screen displays 99%, but this change alone does not establish that the keys were accepted.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-33:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The recorded stage text for load, after_start, and after_key_burst reports the goal and 0%, 6%, and 99%, respectively.",
+      "source_type": "page_text",
+      "stage": "load; after_start; after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-33:page_text:load; after_start; after_key_burst"
+    },
+    {
+      "claim": "The official card claims crossing the misty forest by running, wall-jump, and dash, with hidden platforms revealed by lantern light; full execution of these elements was not tested.",
+      "source_type": "official_card",
+      "stage": "gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-33:official_card:gallery_description"
+    },
+    {
+      "claim": "The after_combined_input frame shows an active scene with a section title, character, platforms, lit areas, and time/bar HUD.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-33:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame shows the same active scene with a different time and spikes at the lower right; no loop or collision consequence follows from it.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-33:screenshot:late"
+    },
+    {
+      "claim": "Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight + Space for 900 milliseconds are recorded only as tested inputs, not accepted inputs.",
+      "source_type": "technical_trace",
+      "stage": "capture.controls_attempted",
+      "certainty": "candidate_only",
+      "source_reference": "game-33:technical_trace:capture.controls_attempted"
+    },
+    {
+      "claim": "The technical record reports Godot, WebGL/OpenGL ES, Emscripten, a 1280×800 canvas, and a software WebGL warning; game logic cannot be conclusively inferred from them.",
+      "source_type": "technical_trace",
+      "stage": "capture.console_messages; capture.canvas_inventory; capture.engine_markers",
+      "certainty": "direct",
+      "source_reference": "game-33:technical_trace:capture.console_messages; capture.canvas_inventory; capture.engine_markers"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only evidence.json and the five current frames of this game were reviewed; no web browsing, rerun, or script scan was performed. Visual changes between frames may result from animation or elapsed time. The active frames are direct evidence of gameplay, but the recurring loop, input acceptance, collision, failure, win, and replay were not recorded. source_gallery_url is empty in metadata, so for the official-card claim source_url was kept exactly as an empty string."
+}

@@ -1,0 +1,94 @@
+{
+  "id": "game-05",
+  "title": "Canyon Circuit",
+  "observation_level": "page_only",
+  "observed_goal": "In the page text, the overall goal is stated as an arcade race in a sunny desert canyon; the game's execution goal was not observed; the available evidence is inconclusive.",
+  "observed_controls": [
+    "The page text says: Press Enter or A; this is a page instruction, and input acceptance in the game was not confirmed.",
+    "Game controls were not observed; the available evidence is inconclusive."
+  ],
+  "observed_core_loop": "The game loop was not observed; the available evidence is inconclusive; no completed stage, canvas inventory, or screenshot was recorded.",
+  "progress_feedback": "Progress feedback was not observed; the available evidence is inconclusive; only the start-menu text was recorded.",
+  "decisions_risk_reward": "Decisions, risk/reward, and in-game choices were not observed; the available evidence is inconclusive. The phrase “Every clean line increases speed” only appears as an official-card claim and was not confirmed through game execution.",
+  "rewards": "Game rewards were not observed; the available evidence is inconclusive; the claim “Every clean line earns speed” was recorded on the official card but was not playtested.",
+  "penalties_failure": "Penalties, failure, or collision consequences were not observed; the available evidence is inconclusive.",
+  "outcomes_replay": "Outcome, win/loss, race completion, and replayability were not observed; the available evidence is inconclusive.",
+  "onboarding": "The start page shows the text “Start Engine” and “Press Enter or A”; this is page-text onboarding, not proof of successful entry into the game.",
+  "visual_audio_accessibility": "No screenshot or evaluable image was recorded; audio was not observed; the available evidence is inconclusive. A technical warning says that AudioContext was not allowed to start without a user gesture, but this concerns technical status, not the final audio experience.",
+  "technical_clues": [
+    "A console warning about fallback to software WebGL was recorded; this is a possible technical clue, and its cause or effect on the game was not established.",
+    "A console warning that AudioContext was not permitted until after a user gesture was recorded; this is a possible technical clue.",
+    "A 403 error while loading a resource was recorded; its source and effect were not observed; the available evidence is inconclusive.",
+    "No engine marker, tuning constant candidate, scanned script, or request failure was recorded."
+  ],
+  "transferable_principles": [
+    "State the main goal and rules briefly and clearly on the start page before interaction begins.",
+    "Skill feedback should come from observable and repeatable performance, not from purchased parity or an economic advantage.",
+    "The game loop should be accompanied by clear progress feedback and an understandable consequence for player decisions.",
+    "Record design claims as facts only after observing actual execution and a repeatable result."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, each score/rank should represent skill only; this file provides no validated gameplay pattern for scoring.",
+    "Do not add any purchase-based or wallet-based advantage.",
+    "Avoid free brake, horizontal direction changes, or a branching route requiring new controls; any use of them would only be a hypothesis requiring testing.",
+    "The start page supports adopting the principle of briefly explaining the goal and input, but the control mapping or race loop is not transferable or validated from this evidence."
+  ],
+  "do_not_copy": [
+    "Do not reproduce or propose any specific text, name, character, art, level, audio, brand, or asset.",
+    "Do not copy the claims of drift, boost, jump, wall-ride, equal cars, or increased speed from a clean line as confirmed capabilities; these are only claims from the official card.",
+    "Do not interpret a possible screenshot change as input acceptance or game progress."
+  ],
+  "evidence": [
+    {
+      "claim": "The page loaded with the title Canyon Circuit and displayed the start-menu text.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-05:page_text:after_start"
+    },
+    {
+      "claim": "The page text includes “Start Engine” and “Press Enter or A”; this is a page instruction, not proof of accepted controls.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-05:page_text:after_start"
+    },
+    {
+      "claim": "The official race card claims a sunny canyon, equal cars, and gaining speed from a clean line; game execution to confirm this was not recorded.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-05:official_card:load"
+    },
+    {
+      "claim": "No screenshot, reviewed image, or stage with a game loop was recorded.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-05:screenshot:load"
+    },
+    {
+      "claim": "A screenshot change alone does not prove input acceptance; the metadata itself records this caveat.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-05:technical_trace:after_key_burst"
+    },
+    {
+      "claim": "Warnings for fallback to software WebGL and AudioContext without a user gesture were recorded.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-05:technical_trace:load"
+    },
+    {
+      "claim": "A 403 error while loading a resource was recorded.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-05:technical_trace:load"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "Only the input evidence.json was used. capture_status is partial, all screenshots are empty, completed_stages is empty, controls_attempted is empty, and start_action is none. Screenshot timeouts and the absence of active execution prevent conclusions about controls, the loop, outcome, audio, or the claimed capabilities."
+}

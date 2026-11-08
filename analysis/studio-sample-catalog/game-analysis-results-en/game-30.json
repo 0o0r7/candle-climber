@@ -1,0 +1,113 @@
+{
+  "id": "game-30",
+  "title": "Nebula Pinball",
+  "observation_level": "page_only",
+  "observed_goal": "The game’s executable objective was not visible in the screenshots. The opening frame shows a main menu with PLAY, HOW TO PLAY, SETTINGS, and Credits options. The official card claims that the objective includes interacting with the table, multiball/gravitational-well/object-swarm events, and completing the N-E-B-U-L-A sequence to activate missions, but this claim was not verified through gameplay.",
+  "observed_controls": [
+    "The on-screen tutorial text for launching states: hold Space or the down arrow and release to launch; a half-pull is mentioned for Skill Shot.",
+    "The on-screen tutorial text for the two flippers states: Z or the left arrow or Left Shift for the left side, and / or the right arrow or Right Shift for the right side.",
+    "The on-screen tutorial text for saving the ball states: C or Q or E to nudge the table.",
+    "The metadata records that Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight together with Space for 900 milliseconds were tested; acceptance of any of these inputs is not established by the frames.",
+    "Only tutorial instructions and the on-screen menu are visible in the frames; no accepted in-game control was observed as active."
+  ],
+  "observed_core_loop": "The complete game loop was not observed. The load frame shows the main menu and part of the table; the after_start, after_key_burst, after_combined_input, and late frames still show the Flight Briefing window, with movement between the Launch, Flippers, and Nudge tutorial pages. No repeating sequence of launching, steering, collision, scoring, losing the ball, and restarting is complete in the frames.",
+  "progress_feedback": "The tutorial frames show a tutorial-stage indicator and changes to the heading/top display; this feedback concerns tutorial progression, not proof of game progress. No score, ball counter, or input-attributable progress was observed during active execution.",
+  "decisions_risk_reward": "The on-screen text claims that nudging the table can save the ball and that excessive use causes TILT, disables the flippers, and loses the ball; this is an on-screen instruction/claim and was not tested in a complete execution. No actual timing or risk/reward choices were observed in active gameplay.",
+  "rewards": "The official card mentions activating missions after completing a sequence and special events; this claim was not playtested. No reward granted to the user as a result of gameplay was visible in the screenshots.",
+  "penalties_failure": "The on-screen tutorial text explicitly mentions TILT, flipper death, and loss of the ball as a result of excessive nudging; the actual result or a loss screen was not observed. No other failure or penalty is verifiable from the frames.",
+  "outcomes_replay": "No win, loss, or end-of-ball outcome was observed; therefore replay, records, rankings, and the restart loop are unclear. The presence of a BEST list in the load frame only indicates the presence of a UI element, not that an outcome was recorded.",
+  "onboarding": "A multi-page Flight Briefing tutorial is visible in the frames and has SKIP and NEXT buttons. The visible pages explain Launch, Flippers, and Nudge concepts. The tutorial does not transition to active gameplay and its completion was not observed in the frames.",
+  "visual_audio_accessibility": "The frames show a bold, high-contrast interface with large headings and separate tutorial buttons; explanatory text is visible in the center of the page. Audio status, accessibility options, subtitles, text-size adjustment, or color modes were not observed; the available evidence is inconclusive. The visual style and art elements are recorded only as observed characteristics and are not proposed for reproduction.",
+  "technical_clues": [
+    "The metadata records a 1280×800 canvas.",
+    "The technical log reports Godot Engine version 4.7.2.stable.official, WebGL 2.0/OpenGL ES 3.0, and a single-threaded Emscripten 4.0.20 configuration; this is an implementation clue, not game behavior.",
+    "The startup log says that the table core was initialized and optional media was staged after the title; this does not establish the game loop or successful loading of all media.",
+    "A WebGL software fallback warning and an HTTP 403 error were recorded in the console; their effect on the game experience is unclear from the frames.",
+    "The metadata records a visual change after interaction but warns that the change could be caused by animation or passage of time and does not establish input acceptance."
+  ],
+  "transferable_principles": [
+    "Begin the staged tutorial with one simple action, then introduce the core controls separately.",
+    "Define a clear cost or limitation for a saving action so that skill-based decision-making emerges.",
+    "Keep status feedback in the game interface continuous and legible, but separate it from unverified claims about outcomes.",
+    "The game loop should be testable through clear evidence of input, decision, feedback, and consequence; a frame change alone is insufficient."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, draw inspiration from gradual introduction of the core controls and clear separation of action and consequence, without transferring the name, narrative, characters, or visual assets.",
+    "Every score/rank in Candle Climber should reflect skill and performance only, not purchase or wallet activity and not a paid advantage.",
+    "Every rescue or error-correction mechanic should be designed with an understandable limitation; free brake must not be introduced.",
+    "Do not add horizontal direction changes or a branching path that requires new controls; if examining this becomes necessary, present it only as a hypothesis requiring independent testing."
+  ],
+  "do_not_copy": [
+    "Do not reproduce or propose the sample’s game name, brand, interface text, letter sequence, tutorial titles, art elements, characters, sounds, or assets.",
+    "Do not treat the official card’s claim about events and missions as verified game behavior or as a definitive design pattern.",
+    "Avoid conclusions about acceptance of Enter, Space, the arrow keys, or input combinations based solely on a change between two frames.",
+    "Do not generalize the absence of an element in the opening frame to its absence from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The load frame shows the main menu, PLAY/HOW TO PLAY/SETTINGS/Credits options, and a table; no active gameplay or outcome is visible.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-30:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame shows the Flight Briefing window with Launch instructions and Space/down-arrow instructions for launching.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-30:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame shows the Flight Briefing window with Flippers instructions and left/right key mappings.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-30:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame shows the Flight Briefing window with Nudge instructions and on-screen text warning of TILT and ball loss.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-30:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame still shows the same Nudge window; the complete game loop or outcome is not visible in the recorded frames.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-30:screenshot:late"
+    },
+    {
+      "claim": "The on-screen tutorial text for Launch, Flippers, and Nudge states control instructions and the consequence of TILT; these instructions are page-only and were not playtested in execution.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-30:page_text:after_start"
+    },
+    {
+      "claim": "The official card claims a space table, multiball/gravitational-well/object-swarm events, and completing a sequence to activate missions; this claim was not verified through gameplay.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-30:official_card:load"
+    },
+    {
+      "claim": "A visual change after interaction was recorded, but the metadata itself considers it possibly caused by animation or passage of time and does not establish input acceptance.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst",
+      "certainty": "candidate_only",
+      "source_reference": "game-30:technical_trace:after_key_burst"
+    },
+    {
+      "claim": "The technical log records Godot/WebGL/Emscripten and a WebGL software fallback warning; these are implementation clues and do not prove game behavior.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-30:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only evidence.json and the five current frames for this game were reviewed; web browsing, rerunning, access to hidden controls, and observation of the active page after the tutorial were not performed. stage_text is empty for all stages, the frames predominantly cover the tutorial, and the metadata itself warns that a visual change does not establish input acceptance. Therefore, the loop, outcome, audio, full accessibility, economy, and post-tutorial behavior were not observed; the available evidence is inconclusive."
+}

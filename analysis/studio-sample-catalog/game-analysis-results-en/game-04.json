@@ -1,0 +1,95 @@
+{
+  "id": "game-04",
+  "title": "The Rogue",
+  "observation_level": "page_only",
+  "observed_goal": "Only a loading screen with the game title and the phrase “KINDLING THE VEIL” is visible in the frames; the active game objective was not observed; the available evidence is inconclusive.",
+  "observed_controls": [
+    "The metadata records tests of Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight + Space for 900ms; acceptance of any of them was not observed; the available evidence is inconclusive.",
+    "A click at the center of the canvas was recorded as start_action, but active game start is not confirmed by the frames."
+  ],
+  "observed_core_loop": "The game loop was not observed; the available evidence is inconclusive; all four frames show only the loading state.",
+  "progress_feedback": "A loading progress bar is visible in the frames and advances between frames; this is loading feedback, not game progress.",
+  "decisions_risk_reward": "Decision-making, risk/reward, and in-game choices were not observed; the available evidence is inconclusive.",
+  "rewards": "No reward or reinforcement system was not observed; the available evidence is inconclusive.",
+  "penalties_failure": "No penalty, failure, damage, or loss state was not observed; the available evidence is inconclusive.",
+  "outcomes_replay": "The outcome, win/loss, end of the run, and replayability were not observed; the available evidence is inconclusive.",
+  "onboarding": "The only visible text at all four stages is “THE ROGUE” and “KINDLING THE VEIL”; no tutorial, control guide, or game introduction was not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "Visually, a dark loading screen with a central logo and progress bar is visible. Audio, subtitles, accessibility settings, and control readability were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The page has a canvas sized 1280×800; this technical clue alone does not establish anything about mechanics or accepted input.",
+    "The console messages record 10 scripts, one stylesheet, image resources, and WebGL; this indicates only possible technical implementation/loading, not execution of the game loop.",
+    "The console records 404, 403, and 400 errors, a remote config error, and a WebGL software fallback warning; their effect on the game experience was not observed; the available evidence is inconclusive.",
+    "Changes in the progress bar and image between frames may result from animation or elapsed time; the metadata explicitly states that visual change does not prove input recognition."
+  ],
+  "transferable_principles": [
+    "The loading state should provide clear visual feedback independent of actual game progress.",
+    "Input acceptance should be observable through a direct, interpretable change in game state, not merely a temporal difference between frames.",
+    "Control and objective instruction should be presented on a visible, testable screen before reliance on the core loop.",
+    "Recording the stage, source, and observation limitations is essential for separating direct evidence from design claims."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, score/rank should reflect only skill and game outcome; this review provides no basis for a scoring mechanic from active gameplay.",
+    "No purchase or wallet should create an advantage; this principle is transferable as a design policy, not an observed feature of this game.",
+    "Avoid free brake and horizontal direction changes; adding a branching path requiring a new control should be presented only as a hypothesis requiring testing, not as a conclusion from this evidence.",
+    "Any proposed control scheme or loop for Candle Climber should be tested through independent execution and direct feedback; no specific mechanic can be derived from this loading screen."
+  ],
+  "do_not_copy": [
+    "Do not reproduce the visual identity, logo, naming, page text, characters, sounds, or any specific asset.",
+    "Do not attribute a genre, level structure, multiplayer capability, ability selection, or enemies to the observed execution; these items appear only in the official card claim and were not playtested.",
+    "Do not interpret the progress-bar change as a response to keys or a click.",
+    "Do not infer a specific mechanic design from the loading frames or the game title."
+  ],
+  "evidence": [
+    {
+      "claim": "All four frames show a loading screen with the title “THE ROGUE,” the phrase “KINDLING THE VEIL,” and a progress bar; no active game screen, menu, or outcome is visible.",
+      "source_type": "screenshot",
+      "stage": "load; after_start; after_key_burst; after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-04:screenshot:load; after_start; after_key_burst; after_combined_input"
+    },
+    {
+      "claim": "The stage text was recorded identically at all four stages: “THE ROGUE / KINDLING THE VEIL”. ",
+      "source_type": "page_text",
+      "stage": "load; after_start; after_key_burst; after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-04:page_text:load; after_start; after_key_burst; after_combined_input"
+    },
+    {
+      "claim": "The official card claims that the game consists of crafting four spells from seven elements, cursed rooms, increasingly numerous wardens, and solo, co-op, and arena modes; this claim was not confirmed by the game execution in the frames.",
+      "source_type": "official_card",
+      "stage": "gallery_card",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-04:official_card:gallery_card"
+    },
+    {
+      "claim": "Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight + Space for 900ms were tested, but their acceptance was not observed.",
+      "source_type": "technical_trace",
+      "stage": "after_start; after_key_burst; after_combined_input",
+      "certainty": "candidate_only",
+      "source_reference": "game-04:technical_trace:after_start; after_key_burst; after_combined_input"
+    },
+    {
+      "claim": "A visual change between frames was recorded, but the metadata itself warns that this change may be animation or elapsed time and does not prove input recognition.",
+      "source_type": "technical_trace",
+      "stage": "load; after_start; after_key_burst; after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-04:technical_trace:load; after_start; after_key_burst; after_combined_input"
+    },
+    {
+      "claim": "A canvas with dimensions 1280×800 and WebGL/script resources were recorded; these are possible technical clues and do not establish the game loop.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-04:technical_trace:load"
+    },
+    {
+      "claim": "404, 403, and 400 errors, a remote config error, and a WebGL software fallback warning were recorded; their effect on the game was not observed; the available evidence is inconclusive.",
+      "source_type": "technical_trace",
+      "stage": "load; after_start; after_key_burst; after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-04:technical_trace:load; after_start; after_key_burst; after_combined_input"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only the metadata-and-capture-evidence file and the four submitted frames for this game were used. The capture has partial status and the late frame timed out. All frames are on the loading screen; therefore active gameplay, a repeatable loop, outcome, accepted controls, audio, accessibility, and the effect of technical errors were not observed; the available evidence is inconclusive. No web browsing or speculation about the game or hidden controls was performed."
+}

@@ -1,0 +1,100 @@
+{
+  "id": "game-31",
+  "title": "Mushroom Garrison",
+  "observation_level": "page_only",
+  "observed_goal": "The official card text claims that the goal is to defend the forest seed reservoir against pests; only the main menu is visible in the recorded frames, and the goal was not observed; the available evidence is inconclusive during active game execution.",
+  "observed_controls": [
+    "In the main-menu frame, the visible options are «Defend», «Settings», and «How to Play»; these are interface elements and do not count as gameplay controls.",
+    "The metadata records attempts using Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight + Space for 900ms; acceptance of these inputs was not observed; the available evidence is inconclusive."
+  ],
+  "observed_core_loop": "The gameplay loop was not observed; the available evidence is inconclusive; no frame showing active execution, deployment, combat, a wave, repetition, progression, or an outcome was recorded.",
+  "progress_feedback": "In the loading frames, the page text shows 0%, 10%, and 98%; this is loading progress only, not game progress. The main menu shows «Stars collected 0 / 9»; its precise meaning and any change during the game were not observed; the available evidence is inconclusive.",
+  "decisions_risk_reward": "Strategic decisions, risk/reward, and the consequences of choices were not observed; the available evidence is inconclusive. The official card claims that upgrades branch, but this claim was not confirmed through game execution.",
+  "rewards": "The official card mentions stars and upgrade branches, and the main menu has a «Stars collected 0 / 9» counter; receiving rewards or upgrade functionality in the game was not observed; the available evidence is inconclusive.",
+  "penalties_failure": "Failure, damage, loss of resources, or penalties were not observed; the available evidence is inconclusive.",
+  "outcomes_replay": "Victory, defeat, stage completion, replay, or a recurring loop was not observed; the available evidence is inconclusive. The change between the two frames is consistent only with a change in loading time or entry into the menu and does not prove input acceptance.",
+  "onboarding": "After loading, the main menu provides a «How to Play» option; the tutorial content was not opened, and in-game guidance was not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The frames show a visual main menu with large buttons and a language-change option labeled «中文». Audio, subtitles, accessibility settings, and readability in gameplay mode were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The metadata records Godot Engine 4.7.2.stable and WebGL 2.0 / OpenGL ES 3.0 execution in the console; this is a technical clue and does not support conclusions about game mechanics.",
+    "The metadata records an Emscripten, single-threaded configuration without GDExtension; this is merely a possible technical clue.",
+    "The resource list includes one document, three scripts, and seven fetches; because the scripts were not scanned, no game mechanics or input behavior is inferred from it.",
+    "WebGL software fallback warnings and one 403 response were recorded; their effect on the game was not observed; the available evidence is inconclusive."
+  ],
+  "transferable_principles": [
+    "Separate the goal and current state with brief, recognizable interface feedback.",
+    "Make the tutorial and settings accessible from the initial menu, but evaluate their effectiveness through a testable loop.",
+    "Label loading progress separately from game progress so that percentages or counters are not misleading.",
+    "Treat any mechanical claim as valid only after observing the loop and a repeatable outcome, not merely a change of frame."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, score/rank should reflect only skill and game outcome, not a purchase or wallet.",
+    "Without active execution of this game, it is only possible to suggest that progress feedback in Candle Climber be clear and separate from loading status; this is an abstract principle, not a copy of the appearance or content.",
+    "Do not introduce free brake, horizontal direction change, or a branching path requiring a new control; each is permitted only as a hypothesis requiring testing."
+  ],
+  "do_not_copy": [
+    "Do not reproduce or propose this game's name, characters, illustrations, text, audio, brand, or assets.",
+    "Do not transfer the official card's claims about defense, enemy types, maps, or upgrades as confirmed Candle Climber mechanics.",
+    "Do not use a change in loading percentage or a difference between two frames as evidence of input acceptance or loop execution."
+  ],
+  "evidence": [
+    {
+      "claim": "At the load stage, a loading page with the game title and 0% progress is visible.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-31:screenshot:load"
+    },
+    {
+      "claim": "At the after_start stage, the same loading page is visible with 10% progress; this change alone does not establish input acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-31:screenshot:after_start"
+    },
+    {
+      "claim": "At the after_key_burst stage, loading progress is 98%, and active game execution is still not observed.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-31:screenshot:after_key_burst"
+    },
+    {
+      "claim": "At the after_combined_input stage, the main menu is visible with Defend, Settings, and How to Play options and a Stars collected 0 / 9 counter.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-31:screenshot:after_combined_input"
+    },
+    {
+      "claim": "At the late stage, the main menu is still visible; the gameplay loop or an outcome was not observed.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-31:screenshot:late"
+    },
+    {
+      "claim": "The official card text claims that the player plants mushroom turrets, defends a seed reservoir, branches upgrades, and confronts fast, armored, flying, and splitting pests across three winding maps.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-31:official_card:load"
+    },
+    {
+      "claim": "Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight + Space were recorded as inputs, but their acceptance was not confirmed.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "candidate_only",
+      "source_reference": "game-31:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "The console records Godot Engine 4.7.2, WebGL 2.0/OpenGL ES 3.0, and an Emscripten-based build.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-31:technical_trace:load"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "The analysis is based only on evidence.json and five recorded frames from this game; no web browsing, repeat game execution, or examination of hidden controls was performed. The frames from load through after_key_burst show only loading, and the after_combined_input and late frames show the main menu. The content of Defend and How to Play, the complete loop, outcome, audio, accepted inputs, and the official card's logic were not observed; the available evidence is inconclusive."
+}

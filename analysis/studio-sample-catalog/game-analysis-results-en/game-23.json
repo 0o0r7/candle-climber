@@ -1,0 +1,110 @@
+{
+  "id": "game-23",
+  "title": "Critter Kart",
+  "observation_level": "page_only",
+  "observed_goal": "In the load frame, a page-level race objective in a Grand Prix and the Race, Leaderboard, and Settings options are visible; race execution or an actionable in-game objective was not observed.",
+  "observed_controls": [
+    "Page and menu text: ← → to choose and Enter to start",
+    "Page text: Esc to go back",
+    "In the frames, no race controls or accepted input for starting the race were observed"
+  ],
+  "observed_core_loop": "not observed; the available evidence is inconclusive; all frames after interaction remain in the racer-selection menu, and no driving, lap, collision, boost, finish, or result loop was recorded.",
+  "progress_feedback": "not observed; the available evidence is inconclusive; the frames show only racer selection and four text indicators—Top speed, Acceleration, Handling, and Weight—not race progress, lap, or live position.",
+  "decisions_risk_reward": "On the selection page, choosing among different options and their apparent/statistical differences is visible; the risk, reward, or effect of these choices in actual execution was not observed.",
+  "rewards": "not observed; the available evidence is inconclusive; the official card text mentions boosts and throwable tools, but none was confirmed in gameplay or the frames.",
+  "penalties_failure": "not observed; the available evidence is inconclusive; no collision, loss, penalty, race stoppage, or race reset appears in the frames.",
+  "outcomes_replay": "not observed; the available evidence is inconclusive; no result, win/loss, time, final position, or replay path was recorded.",
+  "onboarding": "The opening page shows the Race, Leaderboard, and Settings buttons and the Enter Select/Esc Back guide; the selection page also shows six options, the ← → choose and Enter start guide, and the Back/Start race buttons. Successful race start was not observed.",
+  "visual_audio_accessibility": "The frames show a colorful, legible interface with large buttons, white text against dark contrast, and bar indicators. No active audio or accessibility settings were observed. An AudioContext warning was recorded in the technical trace; therefore, the game audio status is unclear.",
+  "technical_clues": [
+    "The metadata records one canvas at 1280×800 and another canvas at 220×220; this is only a technical clue and does not prove game behavior.",
+    "resource_type_totals includes 8 script, one stylesheet, three font, three fetch, and five ping entries; script_count_scanned and script_bytes_scanned are both zero, so internal logic cannot be inferred.",
+    "The AudioContext warning says that audio start was not permitted after a user gesture; this is a technical clue, not proof that the game has no audio.",
+    "A WebGL software fallback warning was recorded; this concerns the rendering environment and is not an indication of game mechanics.",
+    "The metadata says that the visual change may be caused by animation or the passage of time and does not establish input acceptance; the stages show that the selection changed from Mochi to Burr and then Lolo, but accepted input was not proven."
+  ],
+  "transferable_principles": [
+    "Show progress through visible, repeatable feedback about state or result, not through a single-frame change.",
+    "Expose the primary inputs in a short, on-screen guide before entering the game loop.",
+    "Initial choices can create understandable differences in indicators, but their real effect must be assessed in observable execution.",
+    "Keep claims from the introduction card separate from evidence of actual execution, and specify a source and confidence level for each."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, score or rank should reflect only observable skill and performance; these frames do not provide a model for proving race rank.",
+    "No gameplay advantage should depend on a purchase or wallet; no such advantage was observed from this game’s evidence either.",
+    "Avoid free brake, horizontal direction changes, or a branching path requiring new controls in the base design; each should be raised only as a separately testable hypothesis, not as a conclusion of this review.",
+    "Input guidance should be explicit and in-page, but input acceptance and the complete loop must be tested with repeatable frames and a direct result."
+  ],
+  "do_not_copy": [
+    "Do not reproduce or propose this game’s names, characters, art, environment, level, text, audio, brand, or assets.",
+    "Do not copy the official card’s claims about the number of participants, laps, boosts, or tools as confirmed mechanics.",
+    "Do not copy a selection change in subsequent frames alone as proof of input acceptance or race execution."
+  ],
+  "evidence": [
+    {
+      "claim": "The load frame shows the title page with Race, Leaderboard, and Settings.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-23:screenshot:load"
+    },
+    {
+      "claim": "The page text in after_start provides the Enter Select and Esc Back guide and the racer-selection page with Enter start.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-23:page_text:after_start"
+    },
+    {
+      "claim": "The after_start frame shows the selection menu and the racer Mochi with the Top speed, Acceleration, Handling, and Weight indicators.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-23:screenshot:after_start"
+    },
+    {
+      "claim": "In the after_key_burst frame, the selected option has changed to Burr, but this change alone does not establish input acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-23:screenshot:after_key_burst"
+    },
+    {
+      "claim": "In the after_combined_input frame, the selected option is Lolo and the Start race button is still visible on the page; no active race or result is visible.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-23:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame still shows the same selection menu and the Start race button; no complete game loop or result was observed.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-23:screenshot:late"
+    },
+    {
+      "claim": "The official card claims six critters, three laps, boosts, pepper jets, honey traps, and five rivals in Sugarloop Valley; this claim was not play-tested through game execution in the frames.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-23:official_card:load"
+    },
+    {
+      "claim": "The metadata records that the screenshot change may be animation or the passage of time and is not proof of input comprehension.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst",
+      "certainty": "candidate_only",
+      "source_reference": "game-23:technical_trace:after_key_burst"
+    },
+    {
+      "claim": "An AudioContext warning and a WebGL software fallback were recorded in the console; they are technical clues about the environment, not evidence of mechanics.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-23:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only evidence.json and five frames of this game were used; no web browsing, independent game execution, or hidden controls were performed. start_action equals none. No active race frame, repeatable loop, lap, position, win/loss, or direct result exists. Changes between frames may result from animation or the passage of time. The absence of game elements in the opening frame does not mean they are absent from the game as a whole."
+}

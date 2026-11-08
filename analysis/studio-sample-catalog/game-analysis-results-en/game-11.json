@@ -1,0 +1,96 @@
+{
+  "id": "game-11",
+  "title": "Wildclaw: Colossus Hunt",
+  "observation_level": "page_only",
+  "observed_goal": "At the menu frame, the goal is presented as “Track it. Climb it. Bring it down.” along with selecting a quarry/target to begin the hunt; execution of the hunt, climbing, or bringing it down was not observed in the frames.",
+  "observed_controls": [
+    "In the page/menu text: WASD for movement, Mouse for looking, Shift for Sprint / Brace, Space for Dodge roll, LMB for Slash combo, RMB (hold) for Charged slash, E for Grapple / Ride, C for Lock-on camera, R for Drink potion, F for Gather / Resupply, and Esc for Pause.",
+    "These are interface commands/text; none was confirmed with an observable result during active gameplay execution.",
+    "Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight + Space for 900 milliseconds were attempted in the input capture, but game-like acceptance of these inputs was not observed; the available evidence is inconclusive."
+  ],
+  "observed_core_loop": "not observed; the available evidence is inconclusive; the current frames remain in a loading state, while the fallback frames show the target-selection menu rather than a hunt, engagement, climb, attack, and outcome loop.",
+  "progress_feedback": "The screenshot shows loading percentages of 12%, 26%, and 32%, and the page text records 9%, 26%, and 32% respectively; the percentage change may simply reflect the passage of time/loading and does not establish game progress or input acceptance. In the menu, the target status is “Not yet hunted.”",
+  "decisions_risk_reward": "The page menu shows three quarries with different threat levels and the status “Not yet hunted,” so target selection is likely a decision involving different threat levels; actual risk/reward and the consequences of selection were not observed; the available evidence is inconclusive during game execution.",
+  "rewards": "not observed; the available evidence is inconclusive; no reward, score, rank, loot, or hunt outcome is visible in the frames.",
+  "penalties_failure": "not observed; the available evidence is inconclusive; no failure, damage, death, cost, or direct penalty is visible in the frames.",
+  "outcomes_replay": "not observed; the available evidence is inconclusive; no win, loss, hunt ending, return to the menu, or repeating loop was recorded.",
+  "onboarding": "The loading page shows one tip about dodge timing and one tip about holding heavy attack. The fallback menu displays a control list and an explanation that the mouse is captured after Begin Hunt; interactive instruction or confirmation that the controls were understood was not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The screenshots show a legible menu interface with a 3D environmental background and a large creature, target-selection cards, a Begin Hunt button, and a controls panel. Audio was not observed; the available evidence is inconclusive; accessibility status, subtitles, contrast settings, or remapping were not observed; the available evidence is inconclusive in this evidence.",
+  "technical_clues": [
+    "The metadata records one page at 200 and three canvases sized 1280×800; this is only a technical clue about page structure, not proof of complete game execution.",
+    "Resource totals include 5 scripts, 47 images, 40 fetches, and one xhr; script_count_scanned equals 0 and engine_markers and tuning_constant_candidates are empty, so no conclusion is drawn about the engine or game logic.",
+    "A console warning concerning software WebGL fallback, several 403/400 errors, and a remote config error were recorded; their effect on the game was not observed; the available evidence is inconclusive.",
+    "Changes in the loading frames and the creature’s movement/state change in two fallback frames show only an image change or passage of time; according to the metadata, visual change alone does not prove that input was understood or accepted."
+  ],
+  "transferable_principles": [
+    "Present the objective and selection status briefly and visibly before interaction begins.",
+    "Show the controls and expected feedback explicitly and unambiguously at the same point where the user is ready to start.",
+    "Keep threat-level decisions separate from actual outcomes, and make the consequences of selection understandable through direct feedback.",
+    "For a claim of interactive success, do not rely on a temporal or visual change; a repeatable loop and outcome are required."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, every score/rank should reflect skill and performance only, not a purchase or wallet, and not a paid advantage.",
+    "If the target/threat idea is used, turn it into a legible, skill-based decision and do not create an economic advantage or purchasable asset.",
+    "The control scheme should remain without free brake, horizontal direction change, or a branching path requiring new controls; each of these is only a hypothesis requiring separate testing, not a conclusion from this game.",
+    "From this evidence, only onboarding clarity and separation of selection status from actual execution can be transferred; the hunt loop or its controls cannot be transferred as confirmed facts."
+  ],
+  "do_not_copy": [
+    "Do not reproduce or propose this game’s names, characters, creatures, art, environment, level, text, audio, brand, or assets.",
+    "Do not report the official card’s claim about tracking, climbing, grappling, and striking vital points as observed execution.",
+    "Do not use a change in the loading percentage or a difference between two frames to prove input acceptance, the existence of a loop, or an outcome.",
+    "Do not treat the absence of an element in the opening frame as evidence that it is absent from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The load, after_start, and after_key_burst frames show a loading page with the game title, a tip, and a loading percentage; no active gameplay is visible in them.",
+      "source_type": "screenshot",
+      "stage": "load; after_start; after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-11:screenshot:load; after_start; after_key_burst"
+    },
+    {
+      "claim": "The recorded page text during the loading stages includes a tip about Flow Evade and charging heavy attack/True Slash.",
+      "source_type": "page_text",
+      "stage": "load; after_start; after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-11:page_text:load; after_start; after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame shows the quarry-selection menu, three “Not yet hunted” statuses, Begin Hunt, Field Guide, Settings, Enemy Library, and the controls panel.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-11:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame shows the same selection menu and controls panel; the creature’s changed position in the background, without a loop or outcome, does not prove input execution.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-11:screenshot:late"
+    },
+    {
+      "claim": "The page says that Begin Hunt captures the mouse for camera control and Esc releases it, and provides the WASD/Mouse/Shift/Space/LMB/RMB/E/C/R/F/Esc control list.",
+      "source_type": "page_text",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-11:page_text:late"
+    },
+    {
+      "claim": "The official game card claims tracking giant creatures, dodging attacks, grappling aboard, and striking vital points; this claim was not playtested through game execution in the frames.",
+      "source_type": "official_card",
+      "stage": "gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-11:official_card:gallery_description"
+    },
+    {
+      "claim": "The metadata records 403/400 errors, a remote config error, a software WebGL fallback warning, three canvases, and no engine markers; the gameplay effect of these clues is unclear.",
+      "source_type": "technical_trace",
+      "stage": "capture",
+      "certainty": "candidate_only",
+      "source_reference": "game-11:technical_trace:capture"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "The capture record is partial. The current stages show only loading; after_combined_input and late are from fallback-1, and the metadata says screenshots for those stages timed out. Execution of the hunt, camera control, attack, grapple, dodge, damage, reward, failure, win/loss, and replay was not observed; the available evidence is inconclusive. A change between two frames alone does not establish input acceptance, and the absence of an element in the opening frame does not establish its absence from the entire game."
+}

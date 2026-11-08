@@ -1,0 +1,114 @@
+{
+  "id": "game-07",
+  "title": "Caveman vs Wild",
+  "observation_level": "page_only",
+  "observed_goal": "On the page/in the page text, the goal of tracking creatures, crafting and upgrading, and lighting the final marker is stated; execution of this goal was not observed in the game.",
+  "observed_controls": [
+    "not observed; the available evidence is inconclusive; only an attempt to use Enter, Space, ArrowUp, w, and ArrowRight is recorded in the metadata, and their acceptance was not established."
+  ],
+  "observed_core_loop": "not observed; the available evidence is inconclusive; the frames progress from loading to the main menu, and no active, repeatable cycle of gameplay, tracking, engagement, reward, or return to the next selection is visible.",
+  "progress_feedback": "The loading frame shows a progress bar and the message «Cooling the obsidian…», and the next frame shows the message «Waking the creatures…»; these are loading feedback, not gameplay progress feedback. The menu also states that progress is saved in the browser, but no progress value or change was observed.",
+  "decisions_risk_reward": "not observed; the available evidence is inconclusive; no executable choice, risk, reward, active enemy, or decision outcome is visible in the frames. The presence of the «New expedition» option in the menu is merely a page option.",
+  "rewards": "not observed; the available evidence is inconclusive; the page claims equipment crafting and a route to reaching the final marker, but no reward was recorded during game execution.",
+  "penalties_failure": "not observed; the available evidence is inconclusive; no loss, damage, failure cost, reset, or penalty is present in the frames.",
+  "outcomes_replay": "not observed; the available evidence is inconclusive; no win/loss outcome or repeatable cycle was observed. The page text only states that the game is single-player and that progress is saved in the browser.",
+  "onboarding": "Loading was seen with two sequential messages, followed by a menu showing the options «New expedition», «Enemy lab», «Controls», and «Settings». No control guidance or successful start of a game stage was observed.",
+  "visual_audio_accessibility": "The frames show full-screen visuals with a loading bar and an overlaid menu on a background image; the legibility of the main text in the frames is directly observable. Game audio was not observed. A technical warning says that AudioContext was not permitted to start without user action; overall accessibility is unclear.",
+  "technical_clues": [
+    "candidate_only: The frame change from loading to the main menu is consistent with the passage of time/animation and does not by itself establish acceptance of the test inputs.",
+    "candidate_only: Canvas entities, an engine indicator, and configuration constants are reported as empty in the metadata; therefore, the engine type or internal logic cannot be inferred.",
+    "candidate_only: An AudioContext warning and software WebGL fallback were recorded; these are runtime-environment clues, not proof of game behavior.",
+    "candidate_only: Several resource-loading errors with statuses 403, 400, and a remote config error were recorded; their effect on the game was not observed."
+  ],
+  "transferable_principles": [
+    "Divide onboarding into staged, understandable feedback, but measure actual progress only through an observable state change.",
+    "Clarify the goal and starting options before entering the primary interaction, and keep the start path separate from the settings menu.",
+    "For input evaluation, do not rely solely on visual change; input acceptance must be confirmed by a direct, repeatable response.",
+    "Make progress, failure, and reward feedback visible within the game loop itself so that the design claim remains separate from actual execution."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, score/rank should reflect only skill and gameplay execution, not purchase or wallet activity and not a paid advantage.",
+    "From this sample, only the principle of separating onboarding from the main loop is applicable; none of its controls or loop has been confirmed for Candle Climber.",
+    "free brake, horizontal direction change, and a branching path requiring a new control should not be introduced into the design; if such an option is raised, it is merely a hypothesis requiring a separate test.",
+    "Any reward or progress claim in Candle Climber must be supported by direct, testable feedback, not merely page text or an official card."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this sample’s appearance, naming, characters, environments, texts, sounds, or assets.",
+    "Do not copy the official card’s claim about the hunting/crafting loop as confirmed behavior or a definitive execution pattern.",
+    "Do not repeat a change across two or more frames and loading progression as proof of accepted controls or a gameplay loop."
+  ],
+  "evidence": [
+    {
+      "claim": "The progress bar and the message «Cooling the obsidian…» are directly visible in the loading-stage screenshot.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-07:screenshot:load"
+    },
+    {
+      "claim": "The recorded load-stage text reports the message «Raising the volcano…»; this text is not assumed to be the same as the legible text in the screenshot.",
+      "source_type": "page_text",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-07:page_text:load"
+    },
+    {
+      "claim": "The next stage is still a loading screen and the message «Waking the creatures…» is visible; active or controllable gameplay was not observed.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-07:screenshot:after_start"
+    },
+    {
+      "claim": "The fallback frames show the main menu with the options New expedition, Enemy lab, Controls, and Settings.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-07:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The combined-input frame still shows the main menu, and no direct response to the inputs can be identified.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-07:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame also shows the main menu; no outcome, win, or loss was observed.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-07:screenshot:late"
+    },
+    {
+      "claim": "The official card/text claims a goal of tracking creatures, crafting and upgrading, and lighting the marker; this claim was not confirmed by a complete playtest.",
+      "source_type": "official_card",
+      "stage": "gallery_card",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-07:official_card:gallery_card"
+    },
+    {
+      "claim": "The page text says that the game is single-player and that progress is saved in the browser.",
+      "source_type": "page_text",
+      "stage": "late",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-07:page_text:late"
+    },
+    {
+      "claim": "An AudioContext warning, software WebGL fallback, and network errors were recorded in the trace; their effect on the game experience is not certain.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-07:technical_trace:load"
+    },
+    {
+      "claim": "The metadata says that the screenshot change may be caused by animation or the passage of time and is not proof of input comprehension.",
+      "source_type": "technical_trace",
+      "stage": "after_key_burst",
+      "certainty": "candidate_only",
+      "source_reference": "game-07:technical_trace:after_key_burst"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "This analysis relies only on evidence.json and five input frames from this game. The first two frames are from the current capture and the next three are from fallback-1; the three stages after starting timed out in the current run. No complete execution, gameplay loop, outcome, accepted control, audio, or internal data was observed. The absence of an element in the initial frame does not establish its absence from the game as a whole."
+}

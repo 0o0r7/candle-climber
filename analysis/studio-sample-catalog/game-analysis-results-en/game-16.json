@@ -1,0 +1,103 @@
+{
+  "id": "game-16",
+  "title": "BeatStage 3D",
+  "observation_level": "page_only",
+  "observed_goal": "The menu screenshots show the stated goal “hit the arrows on beat and outperform the group.” This goal was not observed during active gameplay or in a result. The official card also claims fast arrow chains and competition with three rivals, but this claim was not play-tested.",
+  "observed_controls": [
+    "On the menu page, the arrows ← ↑ ↓ → are introduced as inputs; their acceptance during active gameplay was not observed.",
+    "On the menu page, Space for beat and Esc for pause are introduced; their functionality during active gameplay was not observed.",
+    "The metadata tested Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight+Space for 900 milliseconds, but a frame change alone does not prove that the input was accepted."
+  ],
+  "observed_core_loop": "Game loop not observed; the available evidence is inconclusive; the frames progress from loading and textual instructions to the main menu and show no clear sequence of input, feedback, repetition, and active-game result.",
+  "progress_feedback": "The loading frames show 9%, 58%, and 85%; this is loading progress only, not score or game progress. Score, combo, timing, Fever, or rank feedback was not observed in the frames; the available evidence is inconclusive.",
+  "decisions_risk_reward": "In-game decisions and the risk/reward relationship were not observed; the available evidence is inconclusive. A song-selection option and a Warm-up option are visible in the menu, but the consequences of the choice or execution risk cannot be established from these frames.",
+  "rewards": "Reward, score increase, combo, Fever, or power move was not observed in the screenshots; the available evidence is inconclusive. Items such as combo and Fever appear only in the official card’s claim and were not play-tested.",
+  "penalties_failure": "Penalty, error, loss, multiplier reduction, or failure was not observed; the available evidence is inconclusive.",
+  "outcomes_replay": "Win/loss outcome, song end, result screen, or replay was not observed; the available evidence is inconclusive; therefore replay capability and motivation to repeat also cannot be determined from the available evidence.",
+  "onboarding": "The menu page shows a Warm-up option labeled Guided tutorial stage and a HOW TO PLAY option. The page text says to enter the arrows and press Space on beat 4; this is text/menu-based onboarding, and educational success or stage execution was not observed.",
+  "visual_audio_accessibility": "The screenshots show a neon 3D scene, colored lights, a logo, and a high-contrast menu. The page text mentions Original music and Dance mocap: AIST++ (CC BY 4.0) and recommends headphones; actual sound was not heard. Subtitle status, volume adjustment, color-blindness support, reduced motion, and other accessibility features were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The metadata recorded two canvases with dimensions 1280×800; this is a possible technical clue for canvas rendering, not proof of game logic.",
+    "The resources recorded 7 scripts, one stylesheet, 32 images, 38 fetches, and one XHR; the code was not scanned and no tuning constant or engine marker was recorded.",
+    "An AudioContext warning says that sound must start after a user gesture; this is a possible clue of a browser audio limitation and does not establish music execution.",
+    "A fallback to software WebGL warning was recorded; this may affect rendering, but does not establish the cause of the frame change or game behavior."
+  ],
+  "transferable_principles": [
+    "Introduce multi-step inputs with short, visible text and keep success feedback separate from loading progress.",
+    "An optional tutorial path and a quick-start path in the initial menu can simplify user entry.",
+    "For time-based games, direct and recognizable feedback should be visible in the same frame as active execution; a frame change alone is insufficient to prove input acceptance.",
+    "Claim the cost and risk of decisions only when their consequences have been recorded in observable execution."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, any score or rank should reflect only player skill and execution, not purchases or a wallet, and not an economic advantage.",
+    "The general pattern of introducing a tutorial stage and clearly displaying controls can be used for onboarding, but the climbing loop and outcome must be tested separately through actual execution.",
+    "Do not copy free brake, horizontal direction change, or a branch path requiring new controls; adding any of these is only a hypothesis requiring independent testing, not a conclusion from this evidence.",
+    "Do not generalize this game’s claims about combo, Fever, or competition to Candle Climber mechanics; these items were not observed during active play in this review."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game’s name, character, logo, scene, art, asset, or distinctive text.",
+    "Do not copy the official card’s claims about songs, rivals, combo, Fever, or special moves as confirmed mechanics.",
+    "Avoid conclusions about input acceptance, win/loss, or the game loop based solely on a change between two frames.",
+    "Do not reproduce the sound, brand, mocap, or any asset mentioned on the page as an implementation suggestion for another game."
+  ],
+  "evidence": [
+    {
+      "claim": "The load frame shows only the loading scene and 9%; no active or controllable game element is visible.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-16:screenshot:load"
+    },
+    {
+      "claim": "The after_start stage text says to enter the arrows and press Space on beat 4; input acceptance is not visible in the frame.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-16:page_text:after_start"
+    },
+    {
+      "claim": "In after_key_burst, the same textual instruction remains and loading progress of 85% is visible; this change does not prove input acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-16:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame shows the menu page: PLAY, song selection, WARM-UP, HOW TO PLAY, SETTINGS, and the arrow/Space/Esc instructions.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-16:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame still shows the main menu, and neither active gameplay nor a result is observed.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-16:screenshot:late"
+    },
+    {
+      "claim": "The official card claims that fast arrow chains, beats, competition with three rivals, combo, Fever, power move, and four tracks exist; this claim was not confirmed through gameplay.",
+      "source_type": "official_card",
+      "stage": "gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-16:official_card:gallery_description"
+    },
+    {
+      "claim": "The metadata records a visual change but explicitly warns that animation or elapsed time could be its cause, and input acceptance was not established.",
+      "source_type": "technical_trace",
+      "stage": "capture_sequence",
+      "certainty": "candidate_only",
+      "source_reference": "game-16:technical_trace:capture_sequence"
+    },
+    {
+      "claim": "AudioContext requires resume after a user gesture, and a software WebGL fallback was recorded; these are possible technical clues.",
+      "source_type": "technical_trace",
+      "stage": "capture_sequence",
+      "certainty": "candidate_only",
+      "source_reference": "game-16:technical_trace:capture_sequence"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only evidence.json and five current frames of this game were reviewed; no web browsing, rerun, code scan, or hidden-control testing was performed. There is no frame showing active gameplay, a repeatable loop, score, result, or failure. The after_start and after_key_burst stages are still loading pages, while after_combined_input and late are the main menu. The absence of an element in the opening frame does not establish its absence from the game as a whole."
+}

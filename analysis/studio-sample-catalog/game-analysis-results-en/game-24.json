@@ -1,0 +1,102 @@
+{
+  "id": "game-24",
+  "title": "Siege",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "In the opening frame, the page describes the objective as “Bring the whole castle down”; the game frames show a wooden structure, obstacles, and guard/stone counters. Complete destruction or a win was not observed.",
+  "observed_controls": [
+    "The page text says to hold and drag downward to prepare the catapult, drag sideways to change direction, and release to fire.",
+    "The page text also shows wheel control for angle and the V key for Survey on the opening screen.",
+    "In the input recording, Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight+Space for 900 milliseconds were attempted; definitive acceptance of any of these general inputs is not established by this evidence."
+  ],
+  "observed_core_loop": "Part of the loop is observable: the catapult and target scene, the Angle/Power indicator, and the Stones inventory are visible, and the scene state and score changed in later frames. The complete cycle of aiming, preparation, firing, impact, and return/next stage was not observed repeatedly and in full in the frames.",
+  "progress_feedback": "A score of 0 is visible in after_start and after_key_burst, and a score of 210 with +100 and +110 is visible in after_combined_input and late; the stone counter also appears one slot less full in later frames. This difference between frames alone does not prove that a specific input was accepted and may also be related to time/animation.",
+  "decisions_risk_reward": "The page text claims that the player should adjust angle and power and use powder kegs for chain explosions; the frames show the structure, kegs, and the angle/power indicator. Actual decision-making, the risk of each shot, and its precise relationship to score were not observed in a complete run.",
+  "rewards": "A score was observed on the HUD. The page text claims that each unused stone is worth 2,500 and that chain explosions provide scoring/rewards; this claim was not tested in a complete game run.",
+  "penalties_failure": "A decrease in the stone inventory is plausible when comparing frames, but no penalty, failure conditions, lost turn, or failure outcome was observed/is known.",
+  "outcomes_replay": "The Pause button and Survey option are visible in the game frame, and the opening screen has Levels and Leaderboard options; replay, stage completion, winning, losing, or a star result was not observed.",
+  "onboarding": "The opening screen has a Lay Siege button and brief objective text. After entering the game, an on-screen text guide shows dragging, turning, and releasing controls; complete interactive instruction or confirmation that the controls were understood was not observed.",
+  "visual_audio_accessibility": "The frames show a low-detail 3D environment with a high-contrast HUD, large text buttons, and a 中文/English language control. Game audio, subtitles, accessibility settings, adjustable text size, or alternative input support was not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "A canvas with dimensions 1280×800 was recorded; this is only a technical clue about the display surface and does not establish the mechanics.",
+    "The resource recording shows 7 script, 3 font, 1 stylesheet, and 3 fetch; the script code was not scanned, and no tuning constant or engine marker was recorded.",
+    "A console warning about WebGL software fallback and a 403 error were recorded; their relationship to the game mechanics is unclear.",
+    "A visual change between frames was recorded, but the metadata itself explicitly warns that the change may be due to animation or the passage of time and is not proof of input acceptance."
+  ],
+  "transferable_principles": [
+    "Pair a multi-parameter aiming loop with immediate numerical feedback so the player can understand the effect of their decision.",
+    "Display limited resources transparently so that every action has a comparable cost and opportunity.",
+    "Provide control instruction alongside the first active scene using brief, visible text.",
+    "Separate outcome feedback from a merely animated state and provide a direct, verifiable indicator of success or failure."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, the principle of simultaneously displaying status, limited resources, and numerical feedback can be used; score/rank should reflect skill only.",
+    "Do not introduce any advantage arising from purchases or a wallet; resources and ranking should remain in-game and skill-based.",
+    "Do not introduce free brake, horizontal direction changes, or a branching path requiring a new control; each is only a hypothesis requiring separate testing.",
+    "Use brief instruction and immediate feedback, but draw mechanical conclusions only after observing the complete loop and a direct outcome."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game’s name, character, art, environment, level, text, audio, brand, or asset.",
+    "Do not transfer the card’s claims about the objective, chain explosions, or stone value as confirmed mechanics into another design.",
+    "Do not infer from the difference between two frames that a specific input was necessarily accepted or treat the cause of the change as certain."
+  ],
+  "evidence": [
+    {
+      "claim": "The opening screen shows the title Siege, the objective Bring the whole castle down, and the Lay Siege, Levels, Leaderboard, and Settings options.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-24:screenshot:load"
+    },
+    {
+      "claim": "The post-start screen shows a HUD for Timber Fort, Score, Guards, Stones, Angle 36°, and Power 0%, along with an aiming/preparation/firing guide.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-24:screenshot:after_start"
+    },
+    {
+      "claim": "The page text describes the controls as holding and dragging downward to prepare, dragging sideways to turn, and releasing to fire.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-24:page_text:after_start"
+    },
+    {
+      "claim": "In after_key_burst, the active structure/target and counters are visible, but Score is still 0; this frame does not establish acceptance of keyboard input.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-24:screenshot:after_key_burst"
+    },
+    {
+      "claim": "In after_combined_input, a score of 210 and +100 and +110 feedback are visible, and the scene view has changed.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-24:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The page text describes powder-keg explosions on impact, chain collapse, and a value of 2,500 for each unused stone.",
+      "source_type": "page_text",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-24:page_text:late"
+    },
+    {
+      "claim": "The official card describes the objective as completely destroying the castle, chaining keg explosions, and saving stones for three stars; this card was not confirmed by a complete game run.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-24:official_card:load"
+    },
+    {
+      "claim": "The technical trace reports a canvas with dimensions 1280×800, 7 script, 3 font, one stylesheet, three fetch, a WebGL software fallback warning, and a 403 error; their relationship to the mechanics is unclear.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-24:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only evidence.json and five current frames of this game were used; no web browsing, rerun, or code review was performed. capture_status is complete, but the general input recording and frame changes are not causally established. The complete firing-to-outcome cycle, win/loss conditions, audio, accessibility, and behavior of other stages were not observed; the available evidence is inconclusive."
+}

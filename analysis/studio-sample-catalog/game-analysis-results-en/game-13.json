@@ -1,0 +1,110 @@
+{
+  "id": "game-13",
+  "title": "Lane Runner",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "In the frames, the observable goal is to continue moving forward along a multi-lane route, preserve the squad, and pass threats. The page presents it as an endless run; an ending, win, or loss was not observed in the frames.",
+  "observed_controls": [
+    "The page instructs the player to use Drag or A/D and the left/right directions for steering.",
+    "The page lists Q for grenade, E for medkit, P for pause, and M for mute; use and responsiveness of these keys were not confirmed in the frames.",
+    "The recorded input sequence includes Enter, Space, ArrowUp, w, ArrowRight, and simultaneously holding ArrowRight + Space; a frame change alone does not establish that these inputs were accepted."
+  ],
+  "observed_core_loop": "In the active frames, a squad moves forward along the route; distance reaches 54, 87, and 109 meters from 16, threat increases, enemies appear on the route, and in one frame the text says the squad fires automatically. Combo rises from 0 to 5 and the HUD coin count reaches 5. This evidence shows active gameplay and progress, but the complete and repeatable gameplay loop was not observed.",
+  "progress_feedback": "The HUD directly displays squad, weapon, distance, sector, threat, combo, coins, and a progress/threat bar. The frames show numerical changes in distance, threat, combo, and coins; attributing the changes solely to the test inputs is not certain.",
+  "decisions_risk_reward": "The frame after starting shows two choices, +4 soldiers and ×2 squad size, and the next frame displays text about lane selection and the difference between blue/red gates; these are stated or displayed options and risks/rewards, but successful selection, the precise effect of each option, and the consequence of a collision were not confirmed in this recording.",
+  "rewards": "The frames show the HUD squad increasing from 4 to 8, combo reaching 5, and 5 visible coins. The page text also says that everything in the game is earned; the causal relationship between each increase and a specific input or event was not observed.",
+  "penalties_failure": "The page/frames imply or state the existence of threats, damaging red gates, and obstacles, but damage, a reduction in squad, failure, or the end of a run was not observed in the frames.",
+  "outcomes_replay": "A replay mode or direct result, win, loss, game over, or recorded result of a complete run was not observed; therefore it is unknown.",
+  "onboarding": "The opening frame shows a PLAY button and a HOW TO PLAY section. After entering the game, in-frame guidance about Drag/A/D, gates, and automatic firing is visible; however, the complete tutorial path and confirmation that the controls were learned were not observed.",
+  "visual_audio_accessibility": "The frames show a 3D environment with a central route, squad, enemies, obstacles, prominent HUD, and short text messages. The page has an M option for mute. The actual audio status, subtitles, other accessibility settings, readability for everyone, and audio performance were not observed.",
+  "technical_clues": [
+    "A canvas with dimensions 1280×800 is recorded in the metadata; this is only a technical clue about the display surface.",
+    "The metadata records 7 scripts, 11 images, 1 stylesheet, 142 fetches, and 1 xhr, but the scripts were not scanned; game logic or configuration values cannot be inferred from these numbers.",
+    "The AudioContext warning indicates that starting audio without a user gesture was not permitted; this is a technical clue and does not establish the quality or presence of game audio.",
+    "A WebGL software fallback warning is recorded; this may affect rendering, but it does not establish the cause of frame changes or input acceptance.",
+    "No engine marker or tuning constant candidate was recorded in the metadata, and no page error or request failure was reported; several 403/400 errors and a remote config error were also recorded."
+  ],
+  "transferable_principles": [
+    "Provide simultaneous feedback on continuous progress using several simple, readable indicators, without making game comprehension dependent on narrative details or specific assets.",
+    "Provide brief in-run guidance precisely when a decision is needed, and keep the distance between route selection and an observable consequence short.",
+    "In endless-run games, a gradual increase in pressure and visible counters can clarify the decision-making rhythm; the effect of each factor should be assessed with a separate test.",
+    "Keep the primary controls limited and explicit, and provide feedback for each input that can be distinguished from animation alone."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, continuous distance/threat feedback and a gradual increase in pressure can provide abstract inspiration, but score/rank should reflect skill only.",
+    "Every reward or upgrade should provide an advantage without a purchase or wallet; the text of this game discusses earn in play, but this is only a comparative principle, not a recommendation to copy details.",
+    "An understandable linear route and limited choices could be a test idea; free brake, horizontal direction changes, or a branching route requiring new controls should not be added except as hypotheses requiring a separate test."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game's name, characters, art, environment, text, sounds, brands, or assets.",
+    "Do not cite the official card's claim about survivor squad, gates, hordes, traps, and endless run as confirmed fact without an independent playthrough.",
+    "Do not conclude from a change across two frames or its simultaneity with inputs that a key or control was accepted.",
+    "Do not treat the absence of an element in the opening frame as evidence of its absence from the entire game, and do not fill in an unobserved result/loss."
+  ],
+  "evidence": [
+    {
+      "claim": "The opening frame shows the PLAY, DAILY RUN, ARMORY, and SETTINGS menu items and the initial score/distance/coins indicators.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-13:screenshot:load"
+    },
+    {
+      "claim": "In the frame after starting, active gameplay is visible with squad equal to 4, distance equal to 16m, sector 1, Drag/A/D guidance, and two choices, +4 soldiers and ×2 squad size.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-13:screenshot:after_start"
+    },
+    {
+      "claim": "In the after_key_burst frame, squad equal to 8, distance equal to 54m, and threat equal to 1.1 are visible, and the text concerns blue/red gates and lane selection.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-13:screenshot:after_key_burst"
+    },
+    {
+      "claim": "In the after_combined_input frame, enemies are on the route, combo equals 5, distance equals 87m, 5 coins are visible, and the text “Your squad fires automatically” appears.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-13:screenshot:after_combined_input"
+    },
+    {
+      "claim": "In the late frame, distance equals 109m, sector 1, threat equals 1.2, and squad equals 8 are visible; no result or failure is visible.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-13:screenshot:late"
+    },
+    {
+      "claim": "The page announces controls Drag/A/D, Q, E, P, and M, and describes the game as endless/free and without ads/paywalls/timers.",
+      "source_type": "page_text",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-13:page_text:load"
+    },
+    {
+      "claim": "The official game card describes it as an endless run involving guiding a survivor squad, gates, hordes, and traps; this claim was not completed in this playtest.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-13:official_card:load"
+    },
+    {
+      "claim": "The metadata records a frame change but explicitly warns that screenshot changes may result from animation or the passage of time and do not establish input acceptance.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "candidate_only",
+      "source_reference": "game-13:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "The metadata records a canvas with dimensions 1280×800, an AudioContext warning, and a WebGL software fallback; these are technical clues, not proof of game logic.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-13:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "This analysis is based only on evidence.json and five current frames of this game; no web browsing or fresh execution was performed. The inputs were recorded generically and start_action is none; temporal changes/animation may have played a role in the frames. The complete loop, successful gate/lane selection, effect of Q/E, audio, failure, win, replay, and final result were not observed."
+}

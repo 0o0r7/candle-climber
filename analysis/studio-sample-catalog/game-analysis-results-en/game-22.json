@@ -1,0 +1,121 @@
+{
+  "id": "game-22",
+  "title": "Frostline Zero",
+  "observation_level": "page_only",
+  "observed_goal": "The page text describes the goal as outrunning the avalanche and reaching the finish line; only the main menu and background scene are visible in the screenshots, and the goal was not observed during active game execution.",
+  "observed_controls": [
+    "Page text: AD / left and right keys for steering",
+    "Page text: Space / W / up key for jumping, with the option to hold for greater height",
+    "Page text: Shift for air slam and boosting on large drops",
+    "Page text: S / down key for braking",
+    "Page text: R to restart and Esc to pause",
+    "Page text: WASD and arrow keys for two-player mode; the exact player assignments are stated on the page"
+  ],
+  "observed_core_loop": "not observed; the available evidence is inconclusive; no frame, repeated cycle, run start, collision, complete jump, or return to a reproducible state was recorded.",
+  "progress_feedback": "The page shows the phrases Personal best, Stage 1, No finish yet, 0 clears, and 0 deaths; in-game progress, distance to the finish, or outcome feedback was not observed.",
+  "decisions_risk_reward": "The page text mentions the risk of collision and destruction after one hit and lists steering, jumping, braking, and air slam controls; choice and trade-offs during active game execution were not observed; the available evidence is inconclusive.",
+  "rewards": "The page text refers to finish, personal best, and clears; actual rewards, scoring, or content unlocking were not observed; the available evidence is inconclusive.",
+  "penalties_failure": "The page text claims that one hit causes the run to end, and the official card mentions outrunning the avalanche; failure or an outcome screen was not observed in the frames.",
+  "outcomes_replay": "The page text contains the Restart run option, but its execution, winning, losing, run completion, or replay cycle was not observed; the available evidence is inconclusive.",
+  "onboarding": "The main menu displays textual control instructions and the Start Run option; entry into active gameplay and interactive instruction were not observed.",
+  "visual_audio_accessibility": "The screenshots show a readable, high-contrast menu, textual control labels, and a 3D/snowy background. Audio was not observed; the available evidence is inconclusive; only a technical AudioContext error was recorded. Accessibility settings were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "A canvas with dimensions 1280×800 is recorded in the metadata; this is only a technical clue and does not establish game behavior.",
+    "The metadata records 8 scripts, one stylesheet, three fonts, one image, and several fetch/ping requests; script bytes and engine markers were not scanned, so no conclusion is drawn about the implementation.",
+    "A console warning says that AudioContext was not permitted to start after a user gesture; this is a technical clue about audio status, not proof of the presence or absence of game audio.",
+    "A WebGL software fallback warning and one 403 error were recorded; their effect on the game experience is not clear from the inputs.",
+    "Changes between frames may be caused by animation or elapsed time; the metadata explicitly says that input acceptance was not proven."
+  ],
+  "transferable_principles": [
+    "Present goals, controls, and feedback clearly and visibly before entering the core loop.",
+    "Risk should be accompanied by immediate, recognizable feedback, but do not infer balance from menu-only frames.",
+    "For testability, design a short, repeatable loop with a start, decision, consequence, and opportunity to repeat.",
+    "Keep official claims separate from genuinely observed behavior, and do not treat temporal image changes alone as evidence of input acceptance."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, treat only the general principle of clearly displaying controls, danger, and feedback as transferable; do not reproduce any asset, name, text, or appearance from this game.",
+    "Tie score/rank only to player skill and performance, not to purchases or wallet and not to a paid advantage.",
+    "Do not introduce a free brake, horizontal direction change, or branching route requiring new controls; if such an option is examined, treat it solely as a hypothesis requiring separate testing.",
+    "Do not draw a definitive conclusion about the loop, outcome, or feeling of control from this sample, because active execution and outcome were not observed in the frames."
+  ],
+  "do_not_copy": [
+    "Do not copy or propose the name, character, visual style, environment, text, audio, brand, or assets of Frostline Zero.",
+    "Do not reproduce the official card's claim about the route, obstacles, or run length as a confirmed capability.",
+    "Do not present a change in menu selection state or differences between frames as accepted input or game progress.",
+    "Do not use a branching route requiring new controls, a free brake, or any purchase/wallet-dependent advantage in Candle Climber."
+  ],
+  "evidence": [
+    {
+      "claim": "The main menu remains in all submitted frames, and active execution or a run start is not visible; the Start Run option and controls panel are visible in the frames.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-22:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame also shows the main menu; the brightening/visual change of the selected option alone does not prove acceptance of Start or game execution.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-22:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame still shows the main menu, the No finish yet status, and 0 clears · 0 deaths; key execution or active gameplay was not confirmed.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-22:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame shows the background scene and main menu, with no direct finish or death visible.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-22:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame also shows the main menu, and the No finish yet, 0 clears, and 0 deaths statuses have not changed.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-22:screenshot:late"
+    },
+    {
+      "claim": "The controls page displays steering, jumping, air slam, braking, restarting, and pausing with the corresponding keys.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-22:page_text:after_start"
+    },
+    {
+      "claim": "The page text states that the goal is to reach the finish under avalanche pressure, with the risk of ending after one hit.",
+      "source_type": "page_text",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-22:page_text:after_start"
+    },
+    {
+      "claim": "The official game card claims that a 2.3-kilometer hand-crafted route, gaps, glowing rails, and an avalanche pursuit exist; this claim was not playtested through complete game execution in this evidence.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-22:official_card:load"
+    },
+    {
+      "claim": "The metadata records that visual interaction may be caused by animation or elapsed time and that input acceptance was not proven.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "candidate_only",
+      "source_reference": "game-22:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "The metadata records a canvas with dimensions 1280×800 and AudioContext warnings, a WebGL software fallback, and a 403 error; these are only technical clues.",
+      "source_type": "technical_trace",
+      "stage": "late",
+      "certainty": "candidate_only",
+      "source_reference": "game-22:technical_trace:late"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "Only the metadata-and-capture-evidence file and five frames of this game were reviewed; no web browsing, rerun of the game, or hidden control was performed. start_action is none, capture has partial status, some screenshots timed out, and the recorded input is not a game-specific playtest. Therefore, the game loop, outcome, audio, accessibility, scoring, obstacles, and actual control behavior were not observed; the available evidence is inconclusive. The absence of an element in the initial frame does not prove its absence from the entire game."
+}

@@ -1,0 +1,101 @@
+{
+  "id": "game-09",
+  "title": "Sands",
+  "observation_level": "page_only",
+  "observed_goal": "The page text describes a goal of building/growing a desert settlement and cultivating an oasis; active gameplay or a playable objective was not observed; the available evidence is inconclusive.",
+  "observed_controls": [
+    "not observed; the available evidence is inconclusive; acceptance of any of the inputs Enter, Space, ArrowUp, w, ArrowRight, or the combination of holding ArrowRight + Space was not confirmed in the frames."
+  ],
+  "observed_core_loop": "not observed; the available evidence is inconclusive; the frames show a loading screen with a progress bar and changing messages, not a repeatable game loop.",
+  "progress_feedback": "The screenshots show a progress bar and stage percentages; the metadata text recorded 4%, 74%, 78%, 79%, and 83% for the stages, respectively. Changes between frames alone do not show that input was accepted and may be caused by animation or the passage of time.",
+  "decisions_risk_reward": "not observed; the available evidence is inconclusive; no playable player decision, risk, choice, or trade-off was seen in the frames.",
+  "rewards": "The page text mentions a «harmony bonus» after clicking dust devils, but this claim was not confirmed in gameplay/a playable loop.",
+  "penalties_failure": "not observed; the available evidence is inconclusive; no failure, penalty, or error message was seen in the frames.",
+  "outcomes_replay": "not observed; the available evidence is inconclusive; no outcome, win/loss, stage completion, or replay possibility was seen in the frames.",
+  "onboarding": "The loading screen has a title and subtitle and displays instructional/atmospheric messages; interactive onboarding or a usable start menu was not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The screenshots show a full-screen image of an illustrated desert world, the title Sands, a subtitle, a progress bar, and white text on a dark background. Audio was not observed; the available evidence is inconclusive; the metadata recorded an AudioContext warning. Accessibility features were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The metadata records two canvases: one 300×150 and the other 1280×800, both with CSS dimensions of 1280×800; this is only a technical clue and does not establish the architecture or role of either canvas.",
+    "The metadata records 9 scripts, one stylesheet, 90 images, one XHR, and 8 fetches; the scripts were not scanned, and no engine marker or tuning constant was reported.",
+    "The AudioContext warning says that starting audio after a user gesture was not permitted; therefore, the game’s audio state cannot be inferred from this evidence.",
+    "A WebGL software-fallback warning and a 403 response were recorded; their relationship to the game logic was not observed; the available evidence is inconclusive.",
+    "The metadata explicitly warns that a screenshot change may be animation or the passage of time and is not proof that input was understood."
+  ],
+  "transferable_principles": [
+    "Progress should be accompanied by clear visual feedback distinguishable from changes caused solely by time.",
+    "Short, staged guidance can introduce the apparent objective without exposing technical details.",
+    "To claim that a game loop exists, action, feedback, and a repeatable outcome must be seen across multiple independent frames.",
+    "Environmental feedback can create a sense of progress, but it should not be treated as a measurable game outcome."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, only the general principles of progress feedback and staged guidance are transferable; these frames do not confirm a control pattern or game loop.",
+    "Any score/rank in Candle Climber should reflect skill only, not purchases or a wallet, and should not create an advantage from payment.",
+    "Avoid a free brake and horizontal direction changes; a branching path requiring new controls is likewise presented only as a hypothesis requiring testing, not as a conclusion from this game.",
+    "Any potential adaptation should remain abstract and should not reproduce this game’s name, characters, art, level, text, audio, brand, or assets."
+  ],
+  "do_not_copy": [
+    "Do not reproduce any specific name, character, art, level, text, audio, brand, or asset from this game.",
+    "Do not copy/interpret the increase in percentage between frames as causation by input or proof of a game loop.",
+    "Do not turn the official card’s claim about building a settlement, water channels, gardens, or postcard-perfect moments into a definite mechanic without playtesting."
+  ],
+  "evidence": [
+    {
+      "claim": "The load frame shows a loading screen with the title Sands, the subtitle A DESERT DIORAMA, a progress bar, and the text Raising the dunes.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-09:screenshot:load"
+    },
+    {
+      "claim": "In the after_start frame, the same loading screen shows the text Dust devils wander the basin. Click one for a harmony bonus. and 74%.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-09:screenshot:after_start"
+    },
+    {
+      "claim": "The page text for the after_key_burst stage records 78% and guidance to click dust devils for a harmony bonus.",
+      "source_type": "page_text",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-09:page_text:after_key_burst"
+    },
+    {
+      "claim": "The page text for the after_combined_input stage records 79%; this change alone does not establish acceptance of the combined input.",
+      "source_type": "page_text",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-09:page_text:after_combined_input"
+    },
+    {
+      "claim": "The late frame shows the message After a sandstorm, spice blooms break through the sand. and a progress bar at approximately 84%; no game outcome or complete loop was observed.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-09:screenshot:late"
+    },
+    {
+      "claim": "The official game card presents it as an experience of shaping a desert settlement, arranging architecture, directing water to gardens, and discovering picturesque moments.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-09:official_card:load"
+    },
+    {
+      "claim": "The metadata records a screenshot change but cautions that it may be caused by animation or the passage of time and is not proof that input was understood.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-09:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "The console recorded an AudioContext warning, a WebGL software fallback, and a 403 response; their effect on the game logic was not observed; the available evidence is inconclusive.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-09:technical_trace:load"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "All evidence is limited to the loading screen and recorded metadata. No observable active gameplay, accepted control, repeatable loop, outcome, win/loss, or clear game menu was seen. The percentage figures in the metadata text differ slightly from the readable percentages in some screenshots; therefore, they were used only as recorded loading feedback. No web browsing was performed, and no files outside this game’s inputs were used."
+}

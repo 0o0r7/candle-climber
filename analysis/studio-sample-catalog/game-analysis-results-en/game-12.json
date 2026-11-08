@@ -1,0 +1,103 @@
+{
+  "id": "game-12",
+  "title": "Game Dev Game",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "In the opening frame, the overall goal of the start screen—starting a jam and selecting settings—is visible. The official card text claims that the goal is a race against time to build a game, create features, fix bugs, manage energy and morale, and outpace competitors; this claim was not tested through the complete game loop.",
+  "observed_controls": [
+    "The tutorial text in the after_start frame says that a note should be clicked to focus on it.",
+    "The Skip tutorial and Next buttons are visible in the after_key_burst frame and subsequent frames.",
+    "The Enter, Space, ArrowUp, w, ArrowRight keys, and holding ArrowRight together with Space are recorded only in metadata as attempted inputs; their acceptance was not observed; the available evidence is inconclusive."
+  ],
+  "observed_core_loop": "The after_start frame shows selecting one idea from three cards, and the after_key_burst frame shows a build screen with a backlog, resources, and an initial tutorial; the repeated loop of selection, building, testing/releasing, and outcome was not fully observed in the frames.",
+  "progress_feedback": "In the active frames, bars for ENERGY, HYPE, and BUGS, a clock, a backlog counter, an Estimated Score label, and the UNPLAYABLE status are visible. A change of frame alone does not prove that an input was accepted or that progress occurred because of interaction.",
+  "decisions_risk_reward": "The after_start frame shows different work-time, FUN, and RISK values on the idea cards, and an on-theme x1.5 multiplier is visible for one card; this decision-making and its effect were not tested in a complete run. The official card text also claims energy and morale management and score-based competition, but this was not executively confirmed.",
+  "rewards": "In the opening frame, a SCORE x1.00 multiplier is visible for the selected mode, and one card in the after_start frame has an on-theme x1.5 multiplier. No final reward, content unlock, or attainable outcome was observed.",
+  "penalties_failure": "In the after_key_burst frame, Estimated Score is 0 and the status is UNPLAYABLE, and the tutorial text says that the game is not playable without a Player Controller. No loss, time penalty, or final failure message was observed.",
+  "outcomes_replay": "The outcome, win, loss, final score, and possibility of replay were not observed in the frames; the available evidence is inconclusive.",
+  "onboarding": "The opening screen has START JAM and HOW TO PLAY buttons. After entering the game, the TUTORIAL 1/5 window explains that the backlog contains planned features and that a sticky note should be clicked to focus; this tutorial did not advance in the frames.",
+  "visual_audio_accessibility": "The frames show a visually prominent interface with color contrast, status panels, and numerous text elements; readability at other sizes, subtitles/audio settings, and full accessibility were not observed; the available evidence is inconclusive. Audio was not evaluated in the available evidence.",
+  "technical_clues": [
+    "The metadata records a canvas with a size of 1280x800; this is only a technical clue and does not support a definitive conclusion about the game's design.",
+    "The technical log records Godot Engine 4.7.2, WebGL 2.0/Emscripten, and single-threaded execution; this is a technical clue, not evidence of a game mechanic.",
+    "A resource-loading error with status 403 was recorded, while page_status is loaded and capture_status is completed; its effect on the game was not observed; the available evidence is inconclusive.",
+    "The metadata explicitly states that a visual change may result from animation or the passage of time and does not establish input acceptance."
+  ],
+  "transferable_principles": [
+    "Present understandable decisions by showing work time/cost, risk, and comparable return simultaneously.",
+    "Show progress with readable states and multi-source feedback, without interpreting a frame change alone as interaction success.",
+    "Before entering the main loop, provide step-by-step onboarding and a visible minimum requirement.",
+    "Build competition through score and skill-based choices, not through payment or a purchased advantage."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, the principle of clearly comparing cost/risk/return could be transferred only to climbing skill choices or timing; score/rank should measure skill alone.",
+    "Do not propose any purchase advantage, wallet, or payment for progression or ranking.",
+    "Avoid free brake, horizontal direction changes, and a branching route requiring new controls; any use of them is only a hypothesis requiring separate testing, not a conclusion from these frames.",
+    "Feedback should make status and risk readable, but this analysis is not evidence for adopting any specific asset, name, character, or game text."
+  ],
+  "do_not_copy": [
+    "Do not reproduce any specific name, character, art, level, text, sound, brand, or asset.",
+    "Do not present the official card's claims about the loop and competition as observed facts without a complete run.",
+    "Do not treat a change between two frames or a visual change alone as proof of an accepted input or progress.",
+    "Do not treat the absence of an element in the opening frame as evidence that it is absent from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The opening screen shows the title, selected mode, score multiplier, start options, and guidance.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-12:screenshot:load"
+    },
+    {
+      "claim": "Three idea cards with differences in work time, FUN, RISK, and an on-theme multiplier are visible in the idea-selection window.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-12:screenshot:after_start"
+    },
+    {
+      "claim": "The tutorial says that the backlog holds planned features and that the sticky note must be clicked to focus; the Player Controller is identified as necessary for playability.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-12:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The build screen shows energy, hype, bugs, time, backlog, an estimated score of 0, and UNPLAYABLE statuses.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-12:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input and late frames still show tutorial 1/5 and backlog status 0/2 DONE; the complete loop or outcome was not observed.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-12:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The official card claims a race against time to build a game, create features, fix bugs, manage energy and morale, and outpace competitors.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-12:official_card:load"
+    },
+    {
+      "claim": "The Enter, Space, ArrowUp, w, ArrowRight keys, and holding ArrowRight together with Space were attempted in the capture, but the metadata does not confirm their acceptance.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "candidate_only",
+      "source_reference": "game-12:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "A visual change may be animation or the passage of time; canvas 1280x800 and Godot/WebGL/Emscripten execution were recorded.",
+      "source_type": "technical_trace",
+      "stage": "late",
+      "certainty": "candidate_only",
+      "source_reference": "game-12:technical_trace:late"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only metadata-and-capture-evidence and five frames of this game were reviewed; no web browsing or rerun was performed. start_action is none, the staged text in the metadata is empty, inputs were only attempted, and the frames do not complete the initial tutorial. Therefore, the conclusion is valid regarding the observed goal and UI, but acceptance of controls, the repeated loop, final reward, failure, and replay remain unknown."
+}

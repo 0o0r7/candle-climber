@@ -1,0 +1,113 @@
+{
+  "id": "game-34",
+  "title": "Cloud Climber",
+  "observation_level": "page_only",
+  "observed_goal": "The menu page shows two options, «Daily Climb» and «Endless Climb»; the exact objective of the active game, the climbing cycle, and the win condition were not observed in the frames. The official climb card claims climbing, steering, and passing through stars, but this claim was not verified through full game execution.",
+  "observed_controls": [
+    "On the settings page, the page text states horizontal movement with the left/right keys or A/D.",
+    "The page text mentions holding and dragging the mouse toward the destination for steering.",
+    "The page text mentions the left stick or D-pad on a gamepad for steering.",
+    "The page text mentions holding the touch arrow buttons.",
+    "The page text mentions Start for pausing, Y for retrying, and Esc for pausing.",
+    "The page text states that jumping is automatic; acceptance of these inputs during the game cycle was not observed."
+  ],
+  "observed_core_loop": "not observed; the available evidence is inconclusive; the evidentiary frames show only loading, the mode-selection menu, and the settings window, and no recurring cycle of jumping/steering/landing/progression was recorded.",
+  "progress_feedback": "The loading frame shows 0%, and the frame after starting shows 17%; this change may represent loading progress or the passage of time and does not establish game progress or input acceptance. The menu displays a record of 0 m for Daily Climb and Endless Climb.",
+  "decisions_risk_reward": "not observed; the available evidence is inconclusive; the Daily Climb and Endless Climb menu options and the claim of a «shared tower today»/«fresh tower» are present, but actual in-game decisions, the risk of falling, or a risk-reward tradeoff were not seen in the frames.",
+  "rewards": "not observed; the available evidence is inconclusive; only the textual indicators «Today's best: 0 m» and «Best: 0 m» are visible in the menu, and no reward, in-game scoring, or recording of a new record was observed.",
+  "penalties_failure": "not observed; the available evidence is inconclusive; failure, falling, lives, resetting, or a loss message are not visible in the frames.",
+  "outcomes_replay": "not observed; the available evidence is inconclusive; no win, loss, end of turn, or retry cycle was observed in the frames. The settings text only mentions Y for retrying.",
+  "onboarding": "The menu page names two modes, and the settings window provides control instructions in text. The frames do not show the start of an active game or an interactive tutorial; therefore, onboarding sufficiency in the actual game is unclear.",
+  "visual_audio_accessibility": "The frames show a colorful visual interface with a settings menu. Visible settings include Master, Music, and Sounds; an Effects selection between High/Low; Screen Shake between On/Off; and a language selection of 中文/English. Actual audio, readability during execution, subtitles, or complete accessibility were not observed.",
+  "technical_clues": [
+    "The metadata records the presence of a canvas with dimensions 1280×800; this is a technical clue, not a gameplay-design conclusion.",
+    "The page log reports Godot Engine v4.7.2 and WebGL 2.0/Emscripten execution; this is only a technical clue about the execution technology.",
+    "The metadata records no engine marker or tuning constant candidate, and the scripts were not scanned.",
+    "The metadata warning specifies that the generic input sequence is not a dedicated game playtest and that image changes alone do not establish input acceptance."
+  ],
+  "transferable_principles": [
+    "If the game relies on automatic climbing, the legibility of the horizontal path and state feedback should be clear without assuming hidden controls.",
+    "Separating a practice/endless mode from a competitive synchronized mode can separate practice from comparison, provided it is tested in the actual game.",
+    "Independent settings for audio, effects, screen shake, and language give the player direct control over the experience.",
+    "Progress and records should be displayed with feedback attributable to the player's action, not merely to a change in time or animation."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, the principle of automatic climbing and a focus on horizontal steering skill can be used as a testable hypothesis; these frames do not confirm it in active gameplay.",
+    "Every score/rank should reflect skill only and should not grant an advantage through a purchase or wallet.",
+    "Do not add a free brake, horizontal direction change, or branching path requiring new control; each should be considered only if formulated as a hypothesis and tested separately.",
+    "Separating practice from daily competition could inspire Candle Climber, but its exact structure cannot be transferred from this record."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game's name, character, illustrations, artistic elements, or visual assets.",
+    "Do not copy this game's text, labels, language presentation, or menu layout.",
+    "Do not repeat the claimed existence of moving/collapsing/spring platforms, stars, or an endless tower as a design fact without observing active gameplay.",
+    "Do not assume that the inputs listed in the menu are accepted controls or definite game behavior."
+  ],
+  "evidence": [
+    {
+      "claim": "The load frame shows the Cloud Climber page with a value of 0%.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-34:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame shows the same page with a value of 17%, but this change alone does not establish game progress or input acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-34:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame shows the Daily Climb and Endless Climb menu, records of 0 m, and an option to start climbing.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-34:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame shows the Settings window with Master/Music/Sounds, Effects, Screen Shake, Language, and control text.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-34:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame shows the same settings window in terms of visible content, and no active-game result is visible in it.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-34:screenshot:late"
+    },
+    {
+      "claim": "The page text states horizontal control with left/right or A/D, steering with mouse, gamepad, and touch, pausing with Start/Esc, retrying with Y, and automatic jumping.",
+      "source_type": "page_text",
+      "stage": "after_combined_input",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-34:page_text:after_combined_input"
+    },
+    {
+      "claim": "The official game card claims that the player must jump, steer, and pass through stars and climb an endless sky tower.",
+      "source_type": "official_card",
+      "stage": "gallery_card",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-34:official_card:gallery_card"
+    },
+    {
+      "claim": "The metadata records Godot Engine v4.7.2, WebGL 2.0/Emscripten, and a canvas of 1280×800.",
+      "source_type": "technical_trace",
+      "stage": "capture_metadata",
+      "certainty": "direct",
+      "source_reference": "game-34:technical_trace:capture_metadata"
+    },
+    {
+      "claim": "An image change in the generic input record may result from animation or the passage of time and does not establish that the input was understood.",
+      "source_type": "technical_trace",
+      "stage": "capture_metadata",
+      "certainty": "direct",
+      "source_reference": "game-34:technical_trace:capture_metadata"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only metadata-and-capture-evidence and five frames of this game were examined; web browsing, rerunning, and hidden-control analysis were not performed. After loading, the frames reached the menu/settings, and the complete game cycle, input acceptance, falling, winning, losing, or record outcome was not observed. The change between the two frames, according to the metadata warning, is not proof of accepted input. The absence of gameplay elements in the opening frame also does not establish their absence from the game as a whole."
+}

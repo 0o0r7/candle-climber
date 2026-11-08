@@ -1,0 +1,103 @@
+{
+  "id": "game-25",
+  "title": "Drift King",
+  "observation_level": "partial_gameplay",
+  "observed_goal": "The page text presents a 60-second driving/lateral-sliding objective and achieving a better score; the frames show an active scene and a countdown timer, but achievement of the objective or direct scoring was not observed; the available evidence is inconclusive.",
+  "observed_controls": [
+    "Page text: WASD or the arrow keys for movement; the opening frame also mentions SPACE for the handbrake and controller A input.",
+    "In-game instructional text: turn and press SPACE to swing out the rear section.",
+    "Inputs recorded in metadata include Enter, Space, ArrowUp, w, ArrowRight, and holding ArrowRight + Space for 900 milliseconds; acceptance of these inputs has not been demonstrated.",
+    "No definitively effective input or complete controller mapping was not observed; the available evidence is inconclusive."
+  ],
+  "observed_core_loop": "The after_start frame shows an active driving scene with time 60 and speed zero; subsequent frames show times 58 and 57 and speeds of 16 and 2 kilometers per hour, while the late frame shows zero speed and a reset message. A complete repeating loop of movement, drifting, scoring, and ending was not observed; the available evidence is inconclusive.",
+  "progress_feedback": "Visible feedback includes SCORE, TIME, KM/H, a ×1 multiplier, and a 0-degree angle in the extracted text, as well as changes in time/speed values across the frames; SCORE remains zero in the observed gameplay frames. No multiplier increase, ring reward, or final progression was not observed; the available evidence is inconclusive.",
+  "decisions_risk_reward": "The page text claims that a larger angle and longer sliding provide a higher multiplier, that hitting a wall ends the current drift, and that passing through glowing rings provides a reward. These are text/card claims, and their successful execution or risk-reward relationship was not confirmed in the frames.",
+  "rewards": "According to the page text, the claimed rewards include a higher multiplier for longer sliding and a reward for passing through rings; no actual score or reward was not observed; the available evidence is inconclusive.",
+  "penalties_failure": "According to the page text, hitting a wall ends the drift; the late frame shows the message «Stuck? Press R to reset». No loss, score deduction, or direct end-state result was not observed; the available evidence is inconclusive.",
+  "outcomes_replay": "No win/loss outcome, end screen, record submission, or replay cycle was not observed; the available evidence is inconclusive; only a reset option/message when stuck is visible in the late frame.",
+  "onboarding": "The load frame shows a start button and textual guidance on controls and rules. After entering the game, contextual instructional text for turning and SPACE appears. Initial comprehensibility is direct in textual terms, but onboarding success during gameplay was not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The frames show a readable third-person view with a prominent, high-contrast HUD; the in-image text is in English, and the load frame shows a language option with a Chinese symbol. Game audio was not observed; the available evidence is inconclusive; metadata records only an AudioContext warning. No other accessibility settings was not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "A canvas with dimensions 1280×800 is recorded in metadata, and the game images come from that same rendered scene; this is a technical clue and does not establish the internal architecture.",
+    "An AudioContext warning about the need for a user gesture was recorded; this is only a clue about audio initialization status and does not establish the presence or quality of audible sound.",
+    "A software WebGL fallback and a 403 error for a leaderboard-related resource were recorded; their effect on the game was not observed; the available evidence is inconclusive.",
+    "Changes in the image and numbers between frames may result from animation or the passage of time; metadata explicitly states that input acceptance has not been demonstrated."
+  ],
+  "transferable_principles": [
+    "Clarify the short-term objective and HUD indicators before starting.",
+    "Tie risk and reward to an observable skill commitment, not to purchasing or assets.",
+    "Provide immediate feedback through time, speed, or performance-chain status.",
+    "Provide recovery from a stuck state through a simple optional action."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, score/rank should reflect only skill and gameplay execution, not purchasing or wallet activity and not a financial advantage.",
+    "The short-term objective, unambiguous HUD, and immediate feedback can serve as inspiration without reproducing this game's visual identity or content.",
+    "I do not recommend free brake, horizontal direction changes, or a branching path requiring new controls as definite features; each is only a hypothesis requiring separate testing.",
+    "A simple recovery message could be a source of inspiration, provided it is tested with Candle Climber's controls and skill loop."
+  ],
+  "do_not_copy": [
+    "Do not reproduce this game's name, text, layout, visual identity, scene, vehicle, color scheme, or identifiable assets.",
+    "Do not carry over the claimed multiplier, rings, leaderboard, or game outcome as design facts without independent execution.",
+    "Do not use changes between two frames to draw conclusions about input acceptance or the existence of a complete loop."
+  ],
+  "evidence": [
+    {
+      "claim": "The objective page presents 60 seconds, lateral sliding, and achieving a better score.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-25:official_card:load"
+    },
+    {
+      "claim": "The load frame shows a start button and guidance for WASD/the arrow keys, SPACE, and the claimed rules.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-25:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame shows an active gameplay scene, SCORE zero, TIME 60, and zero speed.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-25:screenshot:after_start"
+    },
+    {
+      "claim": "In after_key_burst, time 58 and speed 16 are visible, but SCORE is zero; this change alone does not demonstrate input acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-25:screenshot:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame shows speed 2, time 57, and guidance for turning and SPACE; successful drifting or direct scoring is not visible.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-25:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame shows zero speed and a reset message when stuck; the final game outcome is not visible.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-25:screenshot:late"
+    },
+    {
+      "claim": "Metadata records the claimed controls and tested inputs, but includes the caveat that image changes may be animation or the passage of time.",
+      "source_type": "technical_trace",
+      "stage": "after_combined_input",
+      "certainty": "candidate_only",
+      "source_reference": "game-25:technical_trace:after_combined_input"
+    },
+    {
+      "claim": "Metadata records a canvas with dimensions 1280×800, an AudioContext warning, a software WebGL fallback, and a leaderboard-related 403 error.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "candidate_only",
+      "source_reference": "game-25:technical_trace:load"
+    }
+  ],
+  "confidence": "medium",
+  "limitations": "Only evidence.json and five current frames of this game were reviewed; no web browsing, independent interactive execution, or code review was performed. The frames do not show a complete loop, scoring, successful drifting, a reward ring, win/loss, or a leaderboard. Changes between two frames alone do not demonstrate accepted input, and the absence of an element in the opening frame does not establish its absence from the game as a whole."
+}

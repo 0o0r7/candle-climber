@@ -1,0 +1,79 @@
+{
+  "id": "game-21",
+  "title": "Lion City: After Hours",
+  "observation_level": "page_only",
+  "observed_goal": "On the page/menu text, the stated goal is one night with six contracts; its execution was not observed in the frames; the available evidence is inconclusive.",
+  "observed_controls": [
+    "In the page text and frames, Enter for Select and Esc for Back are visible.",
+    "No dedicated driving, movement, vehicle-selection, or in-game interaction controls were observed as active; the available evidence is inconclusive; the metadata also records controls_attempted as empty."
+  ],
+  "observed_core_loop": "No active gameplay loop, driving, contract, pursuit, or delivery was observed in the frames; the available evidence is inconclusive.",
+  "progress_feedback": "The main menu shows a counter of 0/6 contracts and $250 banked; a change to it was not observed in the frames; the available evidence is inconclusive.",
+  "decisions_risk_reward": "No executable decisions or risk/reward were observed; the available evidence is inconclusive. The official card text claims high-risk drift, cash, and increasing police heat, but this claim was not confirmed through gameplay.",
+  "rewards": "The initial amount of $250 banked is visible in the menu; the source and mechanism for earning rewards were not observed in gameplay; the available evidence is inconclusive. The official claim about cash and score has not yet been playtested.",
+  "penalties_failure": "No penalty, failure, arrest, or loss of progress was observed; the available evidence is inconclusive.",
+  "outcomes_replay": "No win, loss, contract outcome, end of loop, or replay evidence was observed; the available evidence is inconclusive.",
+  "onboarding": "The main menu is visible with the options HIT THE STREETS, RECORDS, CONTROLS, and SETTINGS and language selection EN/中文; successful entry into the game or interactive tutorial was not observed; the available evidence is inconclusive.",
+  "visual_audio_accessibility": "The frames show a 3D nighttime menu with neon contrast and the EN/中文 language option. Audio cannot be evaluated from the frames; according to the trace, AudioContext was not allowed to start automatically. Text size, legibility, and full accessibility were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "The page was recorded with HTTP 200 and page_status=loaded and has multiple canvases with recorded dimensions; this is only a technical clue and does not establish that the game is active.",
+    "The console recorded a WebGL software fallback warning and 404, 403, 400 errors, as well as failure to receive remote config; their effect on the game was not observed; the available evidence is inconclusive.",
+    "AudioContext was not allowed to start because there was no user gesture; this is a technical clue and by itself does not establish that the game has no sound."
+  ],
+  "transferable_principles": [
+    "Reflect a multi-stage goal with a simple, readable counter on the same initial screen.",
+    "Design and test risk and reward only after observing the real loop and with understandable feedback.",
+    "Display the primary inputs and the active state of the game explicitly and accessibly before relying on a change of frame.",
+    "In the event of a loading or media-start error, provide a fallback state and a clear message, and evaluate it separately from the game logic."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, score/rank should reflect only skill and performance, not purchases or wallet and not an economic advantage.",
+    "Any risk/reward pattern is transferable from this evidence only as a hypothesis requiring testing; its implementation should be examined with clear feedback and without guessing about the controls.",
+    "I do not recommend free brake, horizontal direction change, or a branching path requiring a new control; if examined, it should be only a separate hypothesis requiring testing."
+  ],
+  "do_not_copy": [
+    "Do not reproduce the official claim about an open world, vehicle classes, contracts, drift, or police heat as a confirmed capability.",
+    "Do not reproduce or propose this game’s name, characters, art, level, text, sound, brand, or assets.",
+    "Do not use a change between two frames to draw conclusions about input acceptance, progress, or the game loop.",
+    "Do not treat the absence of an element in the initial frame as its absence from the entire game."
+  ],
+  "evidence": [
+    {
+      "claim": "The load, after_start, after_key_burst, and after_combined_input frames all show the main menu with HIT THE STREETS, RECORDS, CONTROLS, SETTINGS, and 0/6 contracts · $250 banked; active gameplay or an execution result is not visible.",
+      "source_type": "screenshot",
+      "stage": "load; after_start; after_key_burst; after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-21:screenshot:load; after_start; after_key_burst; after_combined_input"
+    },
+    {
+      "claim": "The page text in the after_start, after_key_burst, after_combined_input, and late stages records the same main menu and the Enter/Select and Esc/Back instructions.",
+      "source_type": "page_text",
+      "stage": "after_start; after_key_burst; after_combined_input; late",
+      "certainty": "direct",
+      "source_reference": "game-21:page_text:after_start; after_key_burst; after_combined_input; late"
+    },
+    {
+      "claim": "The official card claims that the game includes a compact open city, 9 vehicle classes, drift for cash, increasing police heat, and 6 courier contracts; this claim was not confirmed through playtesting.",
+      "source_type": "official_card",
+      "stage": "gallery_description",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-21:official_card:gallery_description"
+    },
+    {
+      "claim": "The metadata says controls_attempted is empty, start_action=none, and interaction_visual_change_signal=null; a possible visual change is not proof of input acceptance.",
+      "source_type": "technical_trace",
+      "stage": "capture metadata",
+      "certainty": "direct",
+      "source_reference": "game-21:technical_trace:capture metadata"
+    },
+    {
+      "claim": "The trace includes AudioContext blocked, HTTP 404/403/400 errors, failure of remote config, and a WebGL software fallback.",
+      "source_type": "technical_trace",
+      "stage": "console_messages",
+      "certainty": "direct",
+      "source_reference": "game-21:technical_trace:console_messages"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "Only the input files for this game were examined, and no web browsing was performed. capture_status=partial; the load, after_start, and late screenshots are from fallback-1, while the two middle frames are from current. Several screenshots timed out, the generic keyboard sequence was omitted because focus was on a text/select input, and there is no frame showing active gameplay, a complete loop, an outcome, or accepted input. The metadata records no visual change, but any frame change, if present, could be due to animation or elapsed time."
+}

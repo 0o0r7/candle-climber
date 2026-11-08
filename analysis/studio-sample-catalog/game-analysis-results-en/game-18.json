@@ -1,0 +1,100 @@
+{
+  "id": "game-18",
+  "title": "Sizzle Up!",
+  "observation_level": "page_only",
+  "observed_goal": "No goal beyond displaying the opening menu was observed in the screenshots. The official card text claims that the game is about running a restaurant and performing several service/cooking activities, but this claim was not confirmed by the game execution.",
+  "observed_controls": [
+    "not observed; the available evidence is inconclusive"
+  ],
+  "observed_core_loop": "not observed; the available evidence is inconclusive; no repeating cycle of interaction, processing, feedback, and outcome is visible in the frames.",
+  "progress_feedback": "not observed; the available evidence is inconclusive; no progress indicator, score, customer, order, timer, or stage outcome was observed in the frames.",
+  "decisions_risk_reward": "not observed; the available evidence is inconclusive; no playable decision, risk, reward, or trade-off was seen during active execution.",
+  "rewards": "not observed; the available evidence is inconclusive; the card claims that tips can be chained and the business grown, but these aspects were not playtested.",
+  "penalties_failure": "not observed; the available evidence is inconclusive; no loss, error, penalty, or failure is present in the frames.",
+  "outcomes_replay": "not observed; the available evidence is inconclusive; no win/loss outcome or replayability was observed in the recorded execution.",
+  "onboarding": "In the page-menu screenshot, the options «Open Your Restaurant», «How to Play», «Settings» and the «Sound on» control are visible. This is only the menu structure and does not show that onboarding or entry into active gameplay was completed successfully.",
+  "visual_audio_accessibility": "Visually, a restaurant-like 3D menu with large buttons and visible contrast was captured. The «Sound on» control and page text about music are present, but audio playback, accessibility quality, actual settings, and their behavior were not observed; the available evidence is inconclusive.",
+  "technical_clues": [
+    "Possible technical clue: the metadata mentions use of Three.js in the page footer text; this is only a page clue and does not establish the game's architecture or logic.",
+    "Possible technical clue: the console recorded a fallback warning to software WebGL; this concerns the capture environment, not the game mechanics.",
+    "Possible technical clue: a resource-loading error with status 403 was recorded, but the resource and its effect on the game were not identified.",
+    "The metadata states that no canvas inventory, engine marker, or tuning constant candidate was recorded; therefore, game mechanics or parameters cannot be inferred from these items."
+  ],
+  "transferable_principles": [
+    "If the game loop is confirmed in a future test, the goal, input, feedback, and outcome should be recorded separately and observably.",
+    "Analyze system growth or expansion as a mechanic only when the state change and its consequence are observed in repeated execution.",
+    "For skill-based decisions, feedback must be linked to a specific action and an observable outcome; a mere difference between two frames is insufficient.",
+    "Keep the opening menu and promotional text separate from evidence of active execution."
+  ],
+  "candle_climber_relevance": [
+    "For Candle Climber, every score/rank should reflect only skill and game outcome, not purchases or a wallet, and not a paid advantage.",
+    "This case provides no confirmed transferable mechanic from Sizzle Up!; therefore, no control or loop should be assumed to be adapted from it.",
+    "Avoid a free brake, horizontal direction change, or branching path requiring a new control; if such an option is proposed, it is merely a hypothesis requiring separate testing."
+  ],
+  "do_not_copy": [
+    "Do not reproduce the official card's claims about cooking, service, tips, hiring, or growth as confirmed mechanics.",
+    "Do not copy or propose the 3D menu, name, character, text, audio, brand, or assets seen in the frames.",
+    "Do not interpret minor changes between frames as input acceptance, progress, or a game loop.",
+    "The controls Space, ArrowUp, W, ArrowRight, or key-hold combinations are only inputs tested in the metadata, not observed or confirmed controls."
+  ],
+  "evidence": [
+    {
+      "claim": "The load frame shows the opening menu with the buttons Open Your Restaurant, How to Play, Settings, and Sound on; no active gameplay or outcome is visible in it.",
+      "source_type": "screenshot",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-18:screenshot:load"
+    },
+    {
+      "claim": "The after_start frame still shows the same opening menu; successful game start is not established by this frame.",
+      "source_type": "screenshot",
+      "stage": "after_start",
+      "certainty": "direct",
+      "source_reference": "game-18:screenshot:after_start"
+    },
+    {
+      "claim": "The after_key_burst frame shows the opening menu; the page text in the metadata includes From one grill to the busiest dining room in town, Open Your Restaurant, How to Play, Settings, and Sound on.",
+      "source_type": "page_text",
+      "stage": "after_key_burst",
+      "certainty": "direct",
+      "source_reference": "game-18:page_text:after_key_burst"
+    },
+    {
+      "claim": "The after_combined_input frame still shows the opening menu, and a change in the frame alone does not establish input acceptance.",
+      "source_type": "screenshot",
+      "stage": "after_combined_input",
+      "certainty": "direct",
+      "source_reference": "game-18:screenshot:after_combined_input"
+    },
+    {
+      "claim": "The late frame shows the opening menu, and no outcome or game loop is observed in it.",
+      "source_type": "screenshot",
+      "stage": "late",
+      "certainty": "direct",
+      "source_reference": "game-18:screenshot:late"
+    },
+    {
+      "claim": "The official card claims that the player, as a chef-owner, must seat guests, cook eight dishes, throw plates, chain tips, hire staff, and progress from a hands-on cook to a restaurant star; this claim was not playtested.",
+      "source_type": "official_card",
+      "stage": "load",
+      "certainty": "stated_not_playtested",
+      "source_reference": "game-18:official_card:load"
+    },
+    {
+      "claim": "The metadata recorded the page status as loaded, the capture status as budget_timeout, and the completed stages as empty.",
+      "source_type": "technical_trace",
+      "stage": "load",
+      "certainty": "direct",
+      "source_reference": "game-18:technical_trace:load"
+    },
+    {
+      "claim": "A software WebGL warning and a 403 error were recorded in the console; their effect on the game mechanics is unclear.",
+      "source_type": "technical_trace",
+      "stage": "late",
+      "certainty": "candidate_only",
+      "source_reference": "game-18:technical_trace:late"
+    }
+  ],
+  "confidence": "high",
+  "limitations": "This analysis uses only evidence.json and the five fallback frames from this game. All frames show the opening menu; there is no clearly active gameplay, loop, accepted input, outcome, audio, or scanned technical data to confirm the mechanics. The metadata explicitly warns that an image change may be caused by animation or the passage of time. The absence of an element in these frames does not establish its absence from the game as a whole."
+}
