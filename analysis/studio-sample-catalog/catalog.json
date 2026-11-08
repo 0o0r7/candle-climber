@@ -1,0 +1,374 @@
+{
+  "catalog_count": 40,
+  "category_counts": {
+    "Racing and sports": 7,
+    "Strategy and sim": 9,
+    "Arcade and puzzle": 8,
+    "Adventure": 4,
+    "Action": 12
+  },
+  "template_count": 4,
+  "record_source": "official public sample-game menu card",
+  "games": [
+    {
+      "id": "game-01",
+      "index": 1,
+      "title": "Iron Rift FPS",
+      "category": "Action",
+      "is_template": false,
+      "gallery_description": "Rip through eight escalating waves of war machines in a stylish push-forward FPS. Master brutal weapons, aggressive movement, combat augments, and Overdrive before facing the three-phase Warden boss—or challenge five bots in classic deathmatch.",
+      "launch_url": "https://ironrift-ilxdh8dd.manus.game/"
+    },
+    {
+      "id": "game-02",
+      "index": 2,
+      "title": "Space Worm 3D",
+      "category": "Arcade and puzzle",
+      "is_template": false,
+      "gallery_description": "Devour a living cosmos in a fast, competitive 3D worm arena. Grow on stardust, swallow celestial bodies for permanent powers, boost through hazards, and outmaneuver rival worms in free-for-all or 6v6 team battles.",
+      "launch_url": "https://spaceworm-ghpurmn2.manus.game/"
+    },
+    {
+      "id": "game-03",
+      "index": 3,
+      "title": "Side Scroller",
+      "category": "Action",
+      "is_template": true,
+      "gallery_description": "Create a fast-paced side-scrolling adventure with action combat and obstacles to overcome. Design enemies and environments around your hero and world, giving players an adventure that moves forward with every battle and breakthrough. Grapple enemies, steal weapons, hurl anything you can grab, and blast through explosive hand-painted battlefields in a relentless arcade side-scroller.",
+      "launch_url": "https://sidescroll-3hlxbydu.manus.game/"
+    },
+    {
+      "id": "game-04",
+      "index": 4,
+      "title": "The Rogue",
+      "category": "Action",
+      "is_template": false,
+      "gallery_description": "Forge a four-spell build from seven elements, tear through cursed chambers, and face escalating wardens in a fast 3D roguelite built for solo, co-op, and arena runs.",
+      "launch_url": "https://therogue-nxtazlpc.manus.game/"
+    },
+    {
+      "id": "game-05",
+      "index": 5,
+      "title": "Canyon Circuit",
+      "category": "Racing and sports",
+      "is_template": false,
+      "gallery_description": "Drift, boost, jump, and wall-ride through a gigantic sunlit canyon circuit where every car is equal and every clean line earns speed.",
+      "launch_url": "https://canyonrace.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-06",
+      "index": 6,
+      "title": "Super Dungeon",
+      "category": "Action",
+      "is_template": false,
+      "gallery_description": "Break curfew, descend beneath Super Academy, chain heroic powers through dangerous classrooms, rescue trapped classmates, and outfight two towering bosses.",
+      "launch_url": "https://superdungeon.manustest.game/"
+    },
+    {
+      "id": "game-07",
+      "index": 7,
+      "title": "Caveman vs Wild",
+      "category": "Action",
+      "is_template": false,
+      "gallery_description": "Track beasts across a lush volcanic island, read their tells, dodge and punish, then turn every carve into stronger gear and a path to the signal tower.",
+      "launch_url": "https://cavwild-k48tgxml.manus.game/"
+    },
+    {
+      "id": "game-08",
+      "index": 8,
+      "title": "Space Worm 2D",
+      "category": "Arcade and puzzle",
+      "is_template": false,
+      "gallery_description": "Grow a glossy cosmic worm by devouring energy and celestial bodies, boost through a hazard-packed arena, bite smaller rivals in two, steal the bounty crown, and chase the galaxy’s longest run.",
+      "launch_url": "https://spaceworm-bckxphtn.manus.game/"
+    },
+    {
+      "id": "game-09",
+      "index": 9,
+      "title": "Sands",
+      "category": "Strategy and sim",
+      "is_template": false,
+      "gallery_description": "Shape a tranquil desert settlement, stack sun-baked architecture, channel water into gardens, and discover postcard-perfect moments across a living oasis.",
+      "launch_url": "https://sands-2.manustest.game/"
+    },
+    {
+      "id": "game-10",
+      "index": 10,
+      "title": "Frosthold",
+      "category": "Strategy and sim",
+      "is_template": false,
+      "gallery_description": "Hold the last ember against a lethal whiteout. Scavenge coal and food, rescue 18 frozen survivors, assign jobs, expand the settlement, and build a beacon before the cold claims everyone.",
+      "launch_url": "https://frosthold-9cagdgfy.manus.game/"
+    },
+    {
+      "id": "game-11",
+      "index": 11,
+      "title": "Wildclaw: Colossus Hunt",
+      "category": "Action",
+      "is_template": false,
+      "gallery_description": "Track colossal beasts across a living wilderness, vault their deadliest attacks, grapple aboard, and carve at glowing vital points with a massive blade.",
+      "launch_url": "https://wildclaw-dh6unrw2.manus.game/"
+    },
+    {
+      "id": "game-12",
+      "index": 12,
+      "title": "Game Dev Game",
+      "category": "Strategy and sim",
+      "is_template": false,
+      "gallery_description": "Race the clock in a chaotic indie game jam. Build features, squash runaway bugs, manage energy and your buddy’s morale, post devlogs, and outscore rival jammers before the deadline hits.",
+      "launch_url": "https://gamedevgame.manustest.game/"
+    },
+    {
+      "id": "game-13",
+      "index": 13,
+      "title": "Lane Runner",
+      "category": "Action",
+      "is_template": false,
+      "gallery_description": "Steer a growing survivor squad through high-stakes gates, shred zombie hordes, dodge brutal traps, and chase an endless run with no paywalls.",
+      "launch_url": "https://lanerunner-dy5jumhh.manus.game/"
+    },
+    {
+      "id": "game-14",
+      "index": 14,
+      "title": "Hero Academy Architect",
+      "category": "Strategy and sim",
+      "is_template": false,
+      "gallery_description": "Build and power a bustling superhero school, train elemental specialists, and turn smart campus planning into spectacular house victories.",
+      "launch_url": "https://hero-academy.manustest.game/"
+    },
+    {
+      "id": "game-15",
+      "index": 15,
+      "title": "Superhero High School (RTS)",
+      "category": "Strategy and sim",
+      "is_template": true,
+      "gallery_description": "Command a squad of super-powered students through an eight-wave campus siege. Rescue classmates, capture rooms, outsmart flanking invader squads, and unleash each hero’s power before the Mecha-Mascot crushes school spirit.",
+      "launch_url": "https://superhero-5t6pkglf.manus.game/"
+    },
+    {
+      "id": "game-16",
+      "index": 16,
+      "title": "BeatStage 3D",
+      "category": "Arcade and puzzle",
+      "is_template": false,
+      "gallery_description": "Hit rapid-fire arrow chains, nail the beat, and out-dance three rivals on a reactive neon stage. Build combos, trigger Fever, and unleash freestyle power moves across four original tracks in this 3D rhythm showdown.",
+      "launch_url": "https://beatstage-zhugvcri.manus.game/"
+    },
+    {
+      "id": "game-17",
+      "index": 17,
+      "title": "TerraForge",
+      "category": "Adventure",
+      "is_template": false,
+      "gallery_description": "Explore a smooth, rounded survival world where every tree, hill, and cabin feels handcrafted—gather, craft, build, hunt, fire arrows, survive the night, and shape a home without a single voxel.",
+      "launch_url": "https://terraforge-ws4hdshx.manus.game/"
+    },
+    {
+      "id": "game-18",
+      "index": 18,
+      "title": "Sizzle Up!",
+      "category": "Strategy and sim",
+      "is_template": false,
+      "gallery_description": "Race through a lively fine-dining rush as chef-owner Mei: seat guests, cook eight dishes, throw plates across the room, chain tips, hire staff, and grow from hands-on cook to restaurant star.",
+      "launch_url": "https://sizzle.manustest.game/"
+    },
+    {
+      "id": "game-19",
+      "index": 19,
+      "title": "Super Defense",
+      "category": "Strategy and sim",
+      "is_template": false,
+      "gallery_description": "Build a team of student heroes and turn a besieged campus into a spectacular defense show—deploy elemental powers, chain wild combos, and survive escalating waves and screen-filling bosses.",
+      "launch_url": "https://superdef-wnpj6rdv.manus.game/"
+    },
+    {
+      "id": "game-20",
+      "index": 20,
+      "title": "Skybound Academy",
+      "category": "Adventure",
+      "is_template": false,
+      "gallery_description": "Launch skyward through four floating academy zones, steering a first-year hero between platforms, storms, drones, rescues, and clutch air jumps on the climb to the Headmaster’s rooftop trial.",
+      "launch_url": "https://skybound-myc8c9et.manus.game/"
+    },
+    {
+      "id": "game-21",
+      "index": 21,
+      "title": "Lion City: After Hours",
+      "category": "Racing and sports",
+      "is_template": false,
+      "gallery_description": "Own the neon night in a compact open-world city—hijack nine vehicle classes, drift for risky cash, outrun escalating police heat, and fight through six courier contracts before banking your score.",
+      "launch_url": "https://lioncity-34tb4jay.manus.game/"
+    },
+    {
+      "id": "game-22",
+      "index": 22,
+      "title": "Frostline Zero",
+      "category": "Racing and sports",
+      "is_template": false,
+      "gallery_description": "One hit and you shatter. Snowboard a neon glacier canyon, clear gaps, grind light rails and outrun the avalanche on a hand-built 2.3 km run.",
+      "launch_url": "https://frostline.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-23",
+      "index": 23,
+      "title": "Critter Kart",
+      "category": "Racing and sports",
+      "is_template": false,
+      "gallery_description": "Six critters, three laps, one very sticky valley. Drift for boosts, fire pepper jets and honey traps, and race five rivals to the finish in Sugarloop Valley.",
+      "launch_url": "https://critterkart.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-24",
+      "index": 24,
+      "title": "Siege",
+      "category": "Arcade and puzzle",
+      "is_template": false,
+      "gallery_description": "Wind the catapult and bring the whole castle down. Aim, charge and fire at timber forts and stone keeps, chain powder-barrel blasts and save stones for a three-star siege.",
+      "launch_url": "https://siege.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-25",
+      "index": 25,
+      "title": "Drift King",
+      "category": "Racing and sports",
+      "is_template": false,
+      "gallery_description": "Sixty seconds, one neon city, as much sideways as you dare. Chain long drifts, thread the glowing rings, and top the daily leaderboard.",
+      "launch_url": "https://driftking.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-26",
+      "index": 26,
+      "title": "Mini Golf Isles",
+      "category": "Racing and sports",
+      "is_template": false,
+      "gallery_description": "Three floating holes, one tiny ball, every stroke counts. Putt past windmills, bounce off springs and warp through portals across the sky islands.",
+      "launch_url": "https://golfisle.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-27",
+      "index": 27,
+      "title": "Strike Bowl",
+      "category": "Racing and sports",
+      "is_template": false,
+      "gallery_description": "Five frames, 150 max, same lane for everyone today. Curve your hook, crash the pins in a neon retro alley and chase the perfect game.",
+      "launch_url": "https://strikebowl.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-28",
+      "index": 28,
+      "title": "Faraway",
+      "category": "Adventure",
+      "is_template": false,
+      "gallery_description": "A peaceful 3D exploration game above the clouds. Wander a windswept, flower-covered hill, meet a silent robot guardian with a flowing red ribbon, and search for 10 hidden stars.",
+      "launch_url": "https://faraway.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-29",
+      "index": 29,
+      "title": "Helix Drop",
+      "category": "Arcade and puzzle",
+      "is_template": false,
+      "gallery_description": "Spin the tower and drop the bouncing ball through the gaps, all the way down. Smash through layers, dodge the red and climb today's board.",
+      "launch_url": "https://helixdrop.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-30",
+      "index": 30,
+      "title": "Nebula Pinball",
+      "category": "Arcade and puzzle",
+      "is_template": false,
+      "gallery_description": "A hand-inked space table with multiball storms, gravity wells and comet rushes. Flip, nudge and spell N-E-B-U-L-A to light every mission.",
+      "launch_url": "https://nebulapb.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-31",
+      "index": 31,
+      "title": "Mushroom Garrison",
+      "category": "Strategy and sim",
+      "is_template": false,
+      "gallery_description": "Plant blooming mushroom turrets and defend the forest seed vault. Branch every upgrade, stop fast, armored, flying and splitting pests across three winding maps.",
+      "launch_url": "https://mushgarr.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-32",
+      "index": 32,
+      "title": "Starveil Barrage",
+      "category": "Action",
+      "is_template": false,
+      "gallery_description": "Thread the nebula, breach the gate, chain every graze. A vertical bullet-hell where near misses charge a screen-clearing burst against a three-phase guardian warship.",
+      "launch_url": "https://starveil.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-33",
+      "index": 33,
+      "title": "Lantern Wayfarer",
+      "category": "Adventure",
+      "is_template": false,
+      "gallery_description": "Carry the last flame through the swallowing murk. Run, wall-jump and dash through a fog-drowned forest where hidden platforms only appear in your lantern's light.",
+      "launch_url": "https://lantern.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-34",
+      "index": 34,
+      "title": "Cloud Climber",
+      "category": "Arcade and puzzle",
+      "is_template": false,
+      "gallery_description": "Bounce, steer and climb past the stars. Hop a kitten up an endless sky tower of crumbling, sliding and springy platforms, and race everyone on today's shared tower.",
+      "launch_url": "https://cldclimb.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-35",
+      "index": 35,
+      "title": "Neon Alley Brawl",
+      "category": "Action",
+      "is_template": false,
+      "gallery_description": "One night. One alley. Every Serpent in the way. Chain combos, grab street props as weapons and punch your way to the gang boss in a rain-soaked neon beat-'em-up.",
+      "launch_url": "https://neonalley.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-36",
+      "index": 36,
+      "title": "Mushies - Merge Puzzle",
+      "category": "Arcade and puzzle",
+      "is_template": true,
+      "gallery_description": "Create an easy-to-pick-up puzzle game built around dropping and merging objects. Bring in your own characters, items, and visual theme, and give players the satisfaction of discovering new combinations and reaching their next goal.",
+      "launch_url": "https://merge-puzzle.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-37",
+      "index": 37,
+      "title": "Mage Knight",
+      "category": "Action",
+      "is_template": false,
+      "gallery_description": "Forge your own spell arsenal from seven elements, then blast through a haunted dungeon with chained magic and perfectly timed dodges. Face elemental rivals in the Arena, team up in co-op, or challenge a friend to an online duel.",
+      "launch_url": "https://mageknight-tvruof4s.manus.game/"
+    },
+    {
+      "id": "game-38",
+      "index": 38,
+      "title": "Nebula Squadron",
+      "category": "Action",
+      "is_template": false,
+      "gallery_description": "Pilot a pearl-powered ship through cosmic gardens. Dodge dazzling bullet storms, slow time, unleash wild power-ups, and take on colossal petal-winged guardians.",
+      "launch_url": "https://nebulasq-bpdmngfj.manus.game/"
+    },
+    {
+      "id": "game-39",
+      "index": 39,
+      "title": "Card Battler",
+      "category": "Strategy and sim",
+      "is_template": true,
+      "gallery_description": "Create a strategic card battler built around deck building, unit deployment, and spell combinations. Design cards and abilities around your own theme, giving players room to develop their tactics through clever combinations and well-timed plays.",
+      "launch_url": "https://card-battler.manus-game-showcase.com/"
+    },
+    {
+      "id": "game-40",
+      "index": 40,
+      "title": "Shadow",
+      "category": "Action",
+      "is_template": false,
+      "gallery_description": "A side-scrolling samurai action game set in a rain-soaked neon city. Dash and slash through enemies, reflect bullets, focus time into slow motion and rewind failed encounters. Features a story prologue, vertical hideout infiltration and a boss duel.",
+      "launch_url": "https://ying-bilingu.manus-game-showcase.com/"
+    }
+  ]
+}
