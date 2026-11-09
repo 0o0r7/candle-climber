@@ -1,37 +1,86 @@
 # Base44 sandbox dev environment for Candle Climber.
-# Runs the Next.js app FROM THE CLONED SOURCE (bun dev server, hot reload) on host
-# port 3000. Dependencies are installed at container start from bun.lock so edits
-# to source/package.json never need an image rebuild.
+#
+# `web` (host port 3000, the preview entry point) serves the standalone
+# "Candle Climber — UI Etudes" client app from ./etudes using the Vite dev
+# server, straight from the cloned source, so edits hot-reload.
+# Dependencies are installed at container start from etudes/bun.lock; nothing is
+# baked into an image.
+#
+# The original Next.js game still runs from this same checkout behind the
+# `game` profile (host port 3001): `docker compose --profile game up -d`.
 services:
   web:
     image: oven/bun:1
-    working_dir: /app
-    # Non-interactive, lockfile-preserving install, then exec the dev server so it
-    # owns PID 1 and receives signals. `bun run dev` = `next dev -p 3000`.
-    command: ["sh", "-ec", "bun install --frozen-lockfile && exec bun run dev"]
+    working_dir: /app/etudes
+    # Non-interactive, lockfile-preserving install, then exec the Vite dev server
+    # so it owns PID 1 and receives signals directly.
+    command:
+      [
+        "sh",
+        "-ec",
+        "bun install --frozen-lockfile && exec bun ./node_modules/vite/bin/vite.js --host 0.0.0.0 --port 3000 --strictPort",
+      ]
+    labels:
+      base44.project: Candle Climber — UI Etudes
+      base44.kind: web
+      base44.port: "3000"
     ports:
       - "3000:3000" # required public preview entry point
     volumes:
-      - .:/app # live source: Next dev + HMR reflect edits immediately
+      - .:/app # live source: Vite HMR reflects edits immediately
     environment:
       - NODE_ENV=development
-      - NEXT_TELEMETRY_DISABLED=1
-      # Bind mounts often don't deliver inotify events into the container; force
-      # polling so hot reload actually fires.
-      - WATCHPACK_POLLING=true
+      # Bind mounts often don't deliver inotify events into the container.
       - CHOKIDAR_USEPOLLING=true
-      # Passed through bare (platform-provided) — used by next.config.ts to allow
-      # the preview proxy's origin/host for dev assets + HMR. Unset outside Base44.
+      # Passed through bare (platform-provided). vite.config.ts widens Vite's
+      # dev-server host allowlist only when BASE44_PREVIEW_MODE === "1".
       - BASE44_PREVIEW_MODE
       - BASE44_PUBLIC_HOST_SUFFIX
       - BASE44_SANDBOX_HOST_DOMAIN
-    # Optional external credentials (e.g. DATABASE_URL for MongoDB Atlas leaderboard
-    # persistence). Last entry so a dashboard value always wins over defaults.
+    # Optional external credentials for the game live here; last entry so a
+    # dashboard value always wins over defaults. The etude app makes no calls.
     env_file:
       - /run/base44/app.env
     restart: on-failure
     healthcheck:
-      # Probes real app responsiveness (the dev server answers HTTP), not just an open port.
+      # Probes real app responsiveness, not just an open port.
+      test:
+        [
+          "CMD-SHELL",
+          "bun -e \"fetch('http://127.0.0.1:3000/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
+
+  # The original Next.js game application. Not part of the preview entry point;
+  # start it explicitly with: docker compose --profile game up -d
+  game:
+    profiles: ["game"]
+    image: oven/bun:1
+    working_dir: /app
+    command: ["sh", "-ec", "bun install --frozen-lockfile && exec bun run dev"]
+    labels:
+      base44.project: Candle Climber Game
+      base44.kind: web
+      base44.port: "3001"
+    ports:
+      - "3001:3000"
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - BASE44_PREVIEW_MODE
+      - BASE44_PUBLIC_HOST_SUFFIX
+      - BASE44_SANDBOX_HOST_DOMAIN
+    env_file:
+      - /run/base44/app.env
+    restart: on-failure
+    healthcheck:
       test:
         [
           "CMD-SHELL",

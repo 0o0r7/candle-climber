@@ -4,6 +4,17 @@ Imported Next.js 16 app. These are the non-obvious things about running it here.
 
 ## Run it
 
+On branch `candle-climber-ui` the preview entry point serves the standalone
+`etudes/` mockup app (Vite + React, no Next/server/auth) on host port 3000:
+
+```bash
+docker compose -f docker-compose.base44.yml up -d
+docker compose -f docker-compose.base44.yml logs -f web   # Vite dev server output
+
+# the original Next.js game runs from the same checkout behind a profile:
+docker compose -f docker-compose.base44.yml --profile game up -d   # host port 3001
+```
+
 ```bash
 docker compose -f docker-compose.base44.yml up -d --build
 docker compose -f docker-compose.base44.yml logs -f web   # dev server output

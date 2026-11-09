@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@theme {
+  --color-page: #101418;
+  --color-stage: #1a2026;
+  --color-panel: #151b21;
+  --color-ink: #e6edf3;
+  --color-muted: #8b98a5;
+  --color-teal: #2dd4bf;
+  --color-up: #3fb950;
+  --color-down: #e5534b;
+  --color-cb-up: #0072b2;
+  --color-cb-down: #d55e00;
+  --radius-etude: 8px;
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Etude 4 motion — everything below is switched off instantly when the scene
+   resolves to "reduced" (manual toggle or prefers-reduced-motion). */
+@keyframes cc-drift-a {
+  from {
+    transform: translate3d(-18px, 0, 0);
+  }
+  to {
+    transform: translate3d(26px, 0, 0);
+  }
+}
+
+@keyframes cc-drift-b {
+  from {
+    transform: translate3d(24px, 0, 0);
+  }
+  to {
+    transform: translate3d(-20px, 0, 0);
+  }
+}
+
+@keyframes cc-glow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.16);
+    opacity: 0.95;
+  }
+}
+
+@keyframes cc-bob {
+  0%,
+  100% {
+    transform: translateY(-7px);
+  }
+  50% {
+    transform: translateY(7px);
+  }
+}
+
+.cc-drift-a {
+  animation: cc-drift-a 26s ease-in-out infinite alternate;
+}
+
+.cc-drift-b {
+  animation: cc-drift-b 38s ease-in-out infinite alternate;
+}
+
+.cc-glow {
+  animation: cc-glow 4.2s ease-in-out infinite;
+}
+
+.cc-bob {
+  animation: cc-bob 2.6s ease-in-out infinite;
+}
+
+.rm-scene[data-motion="reduced"] *,
+.rm-scene[data-motion="reduced"] *::before,
+.rm-scene[data-motion="reduced"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* Range inputs — teal accent, compact tracks inside the 2.5D stage. */
+input[type="range"].cc-range {
+  accent-color: var(--color-teal);
+  height: 16px;
+  cursor: pointer;
+}
