@@ -17,11 +17,11 @@
 
 | # | Pattern | Verdict | Evidence (file:line · test · runtime) |
 |---|---|---|---|
-| 1 | **Climax / set-piece** | **partial** (unchanged) | Pacing exists: `director.ts:113` `sectorAt()`; the last 12 candles are a gap-free run-in (`director.ts:50` `SUMMIT_APPROACH`), consumed by the level builder at `level.ts:73`. The summit is still a *landing*: `engine.ts` `graduate()` fires on landing/pass and opens the celebration panel, then World 2. Pinned by `test/summit.test.ts` (a–f). No encounter on the climb itself. |
+| 1 | **Climax / set-piece** | **present** (P0.7 — was "partial") | Pacing: `director.ts` `sectorAt()`; a gap-free approach (`SUMMIT_APPROACH`), then the last 3 candles under the cap are the **closing bell**: they fold regardless of colour on a fixed fuse (`level.ts` `FINALE_FUSE`, `engine.ts` `crumbleFuse`) and are telegraphed by cap ticks (`render-v2.ts`). Landing the cap still graduates, now with a burst + float + shake. Pinned by `test/director.test.ts` "P0.7 closing bell", `test/summit.test.ts` (a–f, g, h). See §5. |
 | 2 | **Build choice** | **closed (practice lane)** — was "absent" | New `game/cc/loadout.ts`: three loadouts, each trading one forgiveness window for another; `recoveryForRun()` (`loadout.ts:87`) forces scored runs to STANDARD. Engine consumes the profile (`engine.ts:145`, `:202` press buffer, landing coyote refill, air-jump refill). UI: `GameCanvas.tsx` ready panel, rendered only when `archive` is true. Tests: `test/loadout.test.ts` (10 cases). |
 | 3 | **Quality score** | **present and measured** | `style.ts:23` `STYLE_LATE_RUNWAY = 20`, `style.ts:26` points `{late:3, save:2}`; engine grants at `engine.ts:382-383` (`save` before `late`, so a rescue never double-counts). `/ops` block at `ops/page.tsx:200-204`. Tests: `test/style.test.ts`. |
 | 4 | **Modes** | **present** | crypto / stocks / launchpad × 4 timeframes + archive: `game/cc/level-source.ts`, selector `GameCanvas.tsx` `ModeSelector`; `test/modes.test.ts`, `test/timeframe.test.ts`. |
-| 5 | **Meta-progression** | **weak** (unchanged) | `lib/achievements.ts` — 10 definitions (`ACHIEVEMENT_DEFS`), unlocked set persisted in `localStorage` only (`cc_achievements_v1`). No cross-device profile, no currency, no unlock tree. `test/achievements.test.ts` pins the logic, not the depth. |
+| 5 | **Meta-progression** | **present, cosmetic** (P0.7 — was "weak") | `lib/career.ts`: 10 ranks, XP from candles + combo + STYLE + milestones, clamped and capped per run, persisted in `localStorage` (`cc_career_v1`) and shown by `CareerBar.tsx`; two rank achievements hook the ladder (`rank_5`, `rank_10`). No score/physics field exists in `Career` by construction, so the shared board is untouched (`docs/CAREER.md`). Tests: `test/career.test.ts`, `test/achievements.test.ts`. |
 | 6 | **Inputs** | **closed** — was "jump + RUSH, no gamepad" | New `game/cc/gamepad.ts`: standard-mapping intent + edge detection, pure and unit-tested (`test/gamepad.test.ts`, 9 cases). Poll loop in `GameCanvas.tsx` calls the **same** `Engine.press()/pressRush()/release()` — no extra reach (documented in `docs/GAMEPAD.md`). Keyboard remains the primary path; touch unchanged. |
 | 7 | **Telegraphing** | **present** | Candle colour via `palette.ts` (CVD-separated, pinned by `test/palette.test.ts`), crumble tell + `MAX_UP` fairness clamp in `level.ts`, sector banner + hint from `director.ts` `SECTOR_LABELS`. |
 | 8 | **World / tone** | **strong** | "The chart is the level" + Death Card (`game/cc/deathcard.ts`), landing copy (`src/app/page.tsx`). Unchanged this pass. |
@@ -29,8 +29,10 @@
 | 10 | **Polish** | **half → improved** | Variety: the 5 original synth voices are now **8** incl. `air` and `style` (`sound.ts:76-90`), wired from the engine (`engine.ts:207`, `:395`) and pinned by `test/loadout.test.ts` ("audio variety wiring"). Still absent: music, and no audio for sector transitions. Particles / shake / slow-mo unchanged. |
 
 **Net movement this pass:** #2 absent → closed (practice lane), #6 minimal → closed,
-#10 half → improved. The weakest remaining pattern is **#1 climax**, then **#5
-meta-progression**.
+#10 half → improved. **Third pass (P0.7, §5):** #1 partial → present, #5 weak →
+present (cosmetic), and the two open items it carried (durable telemetry, rival
+air-jump parity) are closed. No pattern is now rated absent or weak; the
+remaining gaps are depth/polish, listed in §4.
 
 ---
 
@@ -125,11 +127,33 @@ not been tried on physical hardware.
 
 ## 4. What is deliberately NOT done
 
-- **Climax encounter (#1):** needs a design decision about what the summit *is*
-  (a boss, a timed sprint, a collapse). Adding hazards to the last 12 candles
-  would silently rewrite difficulty priors that P0.2 just authored and tested.
-- **Meta-progression depth (#5):** any real layer (currency, unlocks, cross-device
-  profile) interacts with `docs/ECONOMY-LAWS.md` and the wallet lanes. Not a
-  unilateral change.
 - **Ranked build choice (#2 beyond practice):** requires the owner's call on
   whether per-player physics may touch the shared board.
+- **Cross-device career profile (#5):** a server profile needs identity; that is
+  an auth-surface decision, not a progression one (see `docs/CAREER.md`).
+- **Music and sector audio cues (#10):** still the largest remaining polish gap.
+
+## 5. Third pass — P0.7 (the items §4 used to list as open)
+
+Each line names the code and the test that pins it; this section was written
+after the change set, so nothing here is projected.
+
+| Was open | Now | Evidence |
+|---|---|---|
+| Summit is "a landing, not an encounter" (#1) | **closed** — three closing-bell candles fold under the cap, the cap never folds | `director.ts` (`SUMMIT_FINALE`, finale sector), `level.ts` (`FINALE_FUSE`), `engine.ts` (`crumbleFuse`, graduation burst), `test/director.test.ts` "P0.7 closing bell", `test/summit.test.ts` (g)/(h) |
+| Telemetry resets on restart (G1 follow-up) | **closed** — append-only NDJSON store, default when no `DATABASE_URL` | `lib/run-telemetry-file.ts`, `test/run-telemetry-file.test.ts` (restart, window, torn line, concurrent writes) |
+| Rival never uses the air jump (G3) | **closed** — forecasts the untouched arc, spends the air jump only when it misses | `rival/planner.ts` (`evalNoPress`, `evalAirPressNow`), `rival/bot.ts`, `test/rival-bot.test.ts` "P0.7 rival air jump" |
+| Meta-progression "weak" (#5) | **present (cosmetic)** — 10-rank career + 2 rank achievements | `lib/career.ts`, `CareerBar.tsx`, `test/career.test.ts`, `docs/CAREER.md` |
+
+Fairness line for the whole set: the finale is **authored**, not adaptive (gaps
+stay 0 there, so reach priors are untouched); telemetry is **aggregate** and
+still PII-free; the bot's new verb is the **same one the player has** (the
+weaker impulse, no extra reach); career XP is **cosmetic** and is never an input
+to score or physics.
+
+Verification run for this pass: `bun test` → **734 pass / 0 fail** (65 files),
+`bunx tsc --noEmit --incremental false` → clean, `bun run lint` → 0 errors.
+Runtime: `/api/telemetry/run` reports `"store":"file"`, a posted event survived a
+dev-server restart and appeared in the `/ops` sector table as its own
+`CLOSING BELL` row; `/play` renders the career bar and starts a run with no
+console errors at the tablet viewport.

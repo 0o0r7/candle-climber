@@ -1,7 +1,7 @@
 // Level builder: candles -> playable platforms (rolling-normalized heights)
 import type { Candle, Platform } from "./types";
 import { hashString, mulberry32 } from "./rng";
-import { sectorAt, INTRO_CANDLES } from "./director";
+import { sectorAt, isFinaleCandle, INTRO_CANDLES } from "./director";
 
 export const CANDLE_W = 96;
 export const PLATFORM_W = 72; // was 62 — G2: wider caps, less dead space between candles
@@ -16,6 +16,12 @@ export const EASE_CANDLES = 2; // candles right after the pad
 export const EASE_STEP = 48;   // max |Δy| per step inside the ease window (vs MAX steps)
 export const MAX_UP = 112;   // jump reach ≈ 158px (JUMP_V 815) — keep every step reachable
 export const MAX_DOWN = 170;
+
+/** P0.7: the fixed fuse of a closing-bell candle, in seconds. Deliberately
+ *  LONGER than the base crumble time (0.26s) and floored against the day's
+ *  mutation (`Math.max` in the engine): the finale must read as "you cannot
+ *  stop here", never as "twitch faster than the rest of the level". */
+export const FINALE_FUSE = 0.34;
 
 export function buildPlatforms(candles: Candle[], seedStr: string): Platform[] {
   const gapRnd = mulberry32(hashString("cc-gaps:" + seedStr));
@@ -78,7 +84,11 @@ export function buildPlatforms(candles: Candle[], seedStr: string): Platform[] {
     // a solid, non-folding runway. Before this the first red candles sat right
     // at the pad edge and folded in 0.15-0.26s — the measured death point of
     // every opening run (bot and human alike). Red still means fragile after it.
-    const crumble = launch || i < INTRO_CANDLES ? false : !up;
+    // P0.7 CLOSING BELL: the three candles under the summit fold regardless of
+    // colour. Their `fuse` is what makes them readable — the renderer draws a
+    // colour-independent tell for any platform that carries one.
+    const finale = isFinaleCandle(i, candles.length);
+    const crumble = launch || i < INTRO_CANDLES ? false : finale || !up;
     const w = launch ? CANDLE_W : gap ? 0 : PLATFORM_W;
 
     plats.push({
@@ -92,6 +102,7 @@ export function buildPlatforms(candles: Candle[], seedStr: string): Platform[] {
       wickBottom: loY,
       up,
       crumble,
+      fuse: finale ? FINALE_FUSE : undefined,
       state: gap ? "gone" : "solid",
       crumbleT: 0,
       passed: false,

@@ -11,9 +11,10 @@
 //  e) leaderboard MAX_SCORE_PER_CANDLE covers both engine gain modes (70/140)
 //  f) graduated death-card variant lines (pure helper; canvas-free)
 import { describe, test, expect } from "bun:test";
-import { buildPlatforms, CANDLE_W } from "@/game/cc/level";
+import { buildPlatforms, CANDLE_W, FINALE_FUSE } from "@/game/cc/level";
 import { syntheticCandles, LIMIT } from "@/game/cc/level-source";
-import { Engine, VIEW_W } from "@/game/cc/engine";
+import { Engine, VIEW_W, crumbleFuse } from "@/game/cc/engine";
+import { BASE_MODS } from "@/game/cc/mutations";
 import {
   MAX_SCORE_PER_CANDLE,
   MAX_GAIN_NORMAL,
@@ -160,6 +161,34 @@ describe("W4 summit + graduation arc", () => {
     expect(MAX_SCORE_PER_CANDLE).toBeGreaterThanOrEqual(MAX_GAIN_WORLD2); // 175 >= 140
     // P3.6: the cap now also covers the RUSH premium (world2 full combo × 1.25)
     expect(MAX_SCORE_PER_CANDLE).toBe(175);
+  });
+
+  test("g) closing-bell candles burn on a fixed fuse, floored above the mutation", () => {
+    // the authored fuse wins on a normal day…
+    expect(crumbleFuse({ fuse: FINALE_FUSE }, BASE_MODS)).toBe(FINALE_FUSE);
+    // …and a HARSHER mutation (PAPER HANDS, 0.15s) cannot shorten it either
+    expect(crumbleFuse({ fuse: FINALE_FUSE }, { ...BASE_MODS, crumbleTime: 0.15 })).toBe(FINALE_FUSE);
+    // a softer mutation still relaxes the whole level, finale included
+    expect(crumbleFuse({ fuse: FINALE_FUSE }, { ...BASE_MODS, crumbleTime: 0.5 })).toBe(0.5);
+    // platforms without a fuse keep the day's crumble time (no global change)
+    expect(crumbleFuse({}, { ...BASE_MODS, crumbleTime: 0.21 })).toBe(0.21);
+  });
+
+  test("h) the summit is a moment: graduating emits a burst, a float and shake", () => {
+    const seedStr = SEEDS[0];
+    const { plats } = fixture(seedStr);
+    const summit = plats[plats.length - 1];
+    const e = makeEngine(seedStr);
+    e.camX = summit.x + summit.w + 10 - VIEW_W * 0.3;
+    e.py = summit.y - 40;
+    e.vy = 0;
+    const floatsBefore = e.floats.length;
+    e.step(1 / 60);
+    expect(e.graduated).toBe(true);
+    expect(e.floats.length).toBeGreaterThan(floatsBefore);
+    expect(e.floats.some((f) => f.text === "SUMMIT")).toBe(true);
+    expect(e.particles.length).toBeGreaterThan(0);
+    expect(e.shake).toBeGreaterThan(0);
   });
 
   test("f) graduated death-card variant lines (pure helper, canvas-free)", () => {

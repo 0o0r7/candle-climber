@@ -19,11 +19,11 @@ recurring across small-session arcade games:
 
 | # | Pattern | Candle Climber status (2026-11-10) | Evidence |
 |---|---|---|---|
-| 1 | **Climax / set-piece** | partial — the summit now has a gap-free approach and the chart is paced in named sectors (P0.2); it is still a landing, not an encounter | `game/cc/director.ts`, [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
+| 1 | **Climax / set-piece** | present — the summit approach stays a clean runway, then three **closing-bell** candles fold under the cap (one authored idea: keep the rhythm), a cap telegraph and a graduation burst land the moment (P0.7) | `game/cc/director.ts`, `game/cc/level.ts`, [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
 | 2 | **Build choice** | present (practice lane) — three loadouts trade one forgiveness window for another; scored runs are pinned to STANDARD (`recoveryForRun`), so the daily board keeps one physics | `game/cc/loadout.ts`, [`PRACTICE-LOADOUTS.md`](PRACTICE-LOADOUTS.md) |
 | 3 | **Quality score** | present and measured — STYLE (late hops + forgiveness saves) sits *beside* the score, not inside it; `/ops` reports engagement and the LATE/SAVE split (P0.5) | `game/cc/style.ts`, [`STYLE-SCORE.md`](STYLE-SCORE.md), [`TELEMETRY.md`](TELEMETRY.md) |
 | 4 | **Modes** | present — crypto / stocks / launchpad × 4 timeframes + archive | `lib/market-selector.ts` |
-| 5 | **Meta-progression** | weak — 10 achievements, localStorage only | `lib/achievements.ts` |
+| 5 | **Meta-progression** | present (cosmetic) — 12 achievements plus a 10-rank career ladder with XP from volume, combo, STYLE and milestones (P0.7). XP never touches score, physics or the board; the reason is stated once in [`CAREER.md`](CAREER.md) | `lib/career.ts`, [`CAREER.md`](CAREER.md) |
 | 6 | **Inputs** | present — keyboard + touch + gamepad (standard mapping, same `Engine.press()`, no scoring surface) | `game/cc/gamepad.ts`, [`GAMEPAD.md`](GAMEPAD.md) |
 | 7 | **Telegraphing** | present — candle colour, crumble tell, fairness clamp | `game/cc/engine.ts` |
 | 8 | **World / tone** | strong — "the chart is the level", Death Card | `docs/GAME_DESIGN.md` |
@@ -36,16 +36,21 @@ recurring across small-session arcade games:
 |---|---|---|
 | P0.1 | run telemetry intake + the `/ops` death histogram (§2) | **shipped** — [`TELEMETRY.md`](TELEMETRY.md) |
 | P0.2 | deterministic difficulty director: sectors, safe opening, summit run-in | **shipped** — [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
-| P0.3 | air jump (second jump) with the same forgiveness windows | **shipped (engine)** — [`AIR-JUMP.md`](AIR-JUMP.md). The re-tuning risk was removed by arithmetic instead of tuning: `AIR_JUMP_V = 660` puts the second jump's reach (~104px) **under** `MAX_UP` (112px), so it can never clear an authored step — the clamp, the terrain and every difficulty prior stay untouched (pinned by `test/airjump.test.ts`). Forgiveness is parity by order: coyote keeps the air jump, a no-jump-left press stays buffered. Still open: the rival bot does not spend it — a deliberate balance change, and the P0.5 sector table is now the instrument that would justify it (real runs are still needed). |
+| P0.3 | air jump (second jump) with the same forgiveness windows | **shipped (engine)** — [`AIR-JUMP.md`](AIR-JUMP.md). The re-tuning risk was removed by arithmetic instead of tuning: `AIR_JUMP_V = 660` puts the second jump's reach (~104px) **under** `MAX_UP` (112px), so it can never clear an authored step — the clamp, the terrain and every difficulty prior stay untouched (pinned by `test/airjump.test.ts`). Forgiveness is parity by order: coyote keeps the air jump, a no-jump-left press stays buffered. **Closed in P0.7:** the rival bot now spends the same single air jump, and only when its untouched arc would miss (`evalNoPress` → `evalAirPressNow`), so it recovers like a player and gains no reach (`test/rival-bot.test.ts` "P0.7 rival air jump"). |
 | P0.4 | STYLE quality axis: `LATE` hops (+3) and forgiveness `SAVE`s (+2) | **shipped** — [`STYLE-SCORE.md`](STYLE-SCORE.md) |
 | P0.5 | measurement for the two items above: STYLE engagement + sector deaths on `/ops` | **shipped** — [`TELEMETRY.md`](TELEMETRY.md) §3.1–3.2. STYLE is read as engagement (`engaged %`, mean/median/p90, LATE vs SAVE). Sector deaths are **exposure-normalized** (`deaths ÷ runs that reached that sector kind`), so a long sector cannot win the table by length alone, and the sector is derived server-side with the director's own `sectorAt()`. |
 
 | P0.6 | build choice + input breadth + audio variety: practice loadouts, gamepad, per-verb voices | **shipped** — [`PRACTICE-LOADOUTS.md`](PRACTICE-LOADOUTS.md), [`GAMEPAD.md`](GAMEPAD.md). The loadout law is arithmetic like the air jump's: it moves *when* a press is accepted, never *how far* it flies, and `recoveryForRun(practice, id)` pins every scored run to STANDARD — so the choice exists without giving the daily board a second physics. |
 
-With build choice, inputs and the measurement in place, the patterns the game
-still scores worst on are **climax (#1)** — the summit is a landing, not an
-encounter — and **meta-progression (#5)**. The second-pass audit that decides
-each of these is [`PATTERN-AUDIT-2026-11-10.md`](PATTERN-AUDIT-2026-11-10.md).
+| P0.7 | the three remaining gaps: summit set-piece, durable telemetry, rival parity, career | **shipped** — closing-bell finale (`DIFFICULTY-DIRECTOR.md` §closing bell), file-backed telemetry store (`TELEMETRY.md` §2), rival air-jump parity (`AIR-JUMP.md`), career ladder ([`CAREER.md`](CAREER.md)). Every one is a fairness-preserving change: authored instead of adaptive, cosmetic instead of scoring, parity instead of extra reach. |
+
+With clear case and meta-progression in place, no pattern in the ten-pattern
+frame is still rated *absent* or *weak*. What remains is depth and polish, and
+each item below names the measurement that would settle it rather than a guess:
+music and sector audio cues (#10), a cross-device profile (#5, needs identity),
+and the final accessibility pass on the live UI (contrast of new surfaces, focus
+order, reduced-motion coverage). The second-pass audit that scored the table is
+[`PATTERN-AUDIT-2026-11-10.md`](PATTERN-AUDIT-2026-11-10.md).
 
 ## 2. Measurement and level analytics
 

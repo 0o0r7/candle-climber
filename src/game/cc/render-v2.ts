@@ -397,6 +397,27 @@ function drawSlabV2(ctx: CanvasRenderingContext2D, e: Engine, p: Platform, d: Sl
   roundRect(ctx, cx - 2, p.y - camY - 4, p.w + 4, 8, 4);
   ctx.stroke();
 
+  // P0.7 CLOSING BELL tell. A fuse candle folds regardless of its colour, so
+  // the warning cannot live in the green/red body material (a green candle has
+  // no charred cracks). Three fuse ticks burn along the cap, colour-independent
+  // and pulsing off engine time (no wall clock), so the finale's forced crumble
+  // is always telegraphed before it costs anyone a run.
+  if (p.fuse && p.state === "solid") {
+    const pulse = 0.55 + 0.45 * Math.sin(e.time * 6 + p.i * 1.7);
+    ctx.save();
+    ctx.globalAlpha = pulse;
+    ctx.strokeStyle = ACCENT_DOWN;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let k = 1; k <= 3; k++) {
+      const fx = cx + (p.w * k) / 4;
+      ctx.moveTo(fx, p.y - camY - 1);
+      ctx.lineTo(fx, p.y - camY + 6);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
   // material glow (pre-rendered sprite — no per-frame shadowBlur)
   if (p.up) {
     blitGlow(ctx, st, "lime", "rgba(204,255,0,0.85)", cx + p.w / 2, p.y - camY, p.w * 1.9, 30, 0.08 + 0.2 * d.glow);

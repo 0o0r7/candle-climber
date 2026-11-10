@@ -14,11 +14,11 @@
 //     engine's own jump math at the SLOWEST camera speed of the run.
 import { describe, test, expect } from "bun:test";
 import {
-  sectorAt, gapChanceAt, sectorRoute,
-  INTRO_CANDLES, SUMMIT_APPROACH, CYCLE_LEN, TREND_LEN, SQUEEZE_LEN, BREATHER_LEN,
+  sectorAt, gapChanceAt, sectorRoute, isFinaleCandle,
+  INTRO_CANDLES, SUMMIT_APPROACH, SUMMIT_FINALE, CYCLE_LEN, TREND_LEN, SQUEEZE_LEN, BREATHER_LEN,
 } from "@/game/cc/director";
 import {
-  buildPlatforms, CANDLE_W, PLATFORM_W, LAUNCH_PAD, EASE_CANDLES, MAX_UP, MAX_DOWN,
+  buildPlatforms, CANDLE_W, PLATFORM_W, LAUNCH_PAD, EASE_CANDLES, MAX_UP, MAX_DOWN, FINALE_FUSE,
 } from "@/game/cc/level";
 import { syntheticCandles, LIMIT } from "@/game/cc/level-source";
 import { vibeLaunchCandles, type VibeLaunch } from "@/lib/vibe-launch";
@@ -86,8 +86,16 @@ describe("P0.2 director — pure, deterministic schedule", () => {
   test("the last SUMMIT_APPROACH candles are gap-free (earned landing)", () => {
     for (let i = LIMIT - SUMMIT_APPROACH; i < LIMIT; i++) {
       expect(gapChanceAt(i, LIMIT)).toBe(0);
+    }
+    // P0.7: the approach is the clean runway; the 3 candles directly UNDER the
+    // cap are the closing bell (a separate beat), and the cap stays SUMMIT.
+    for (let i = LIMIT - SUMMIT_APPROACH; i < LIMIT - 1 - SUMMIT_FINALE; i++) {
       expect(sectorAt(i, LIMIT).kind).toBe("summit");
     }
+    for (let i = LIMIT - 1 - SUMMIT_FINALE; i < LIMIT - 1; i++) {
+      expect(sectorAt(i, LIMIT).kind).toBe("finale");
+    }
+    expect(sectorAt(LIMIT - 1, LIMIT).kind).toBe("summit"); // the cap never folds
     expect(sectorAt(LIMIT, 0).kind).not.toBe("summit"); // endless terrain: no summit
   });
 
@@ -116,7 +124,12 @@ describe("P0.2 director — pure, deterministic schedule", () => {
     expect(route[0].start).toBe(0);
     expect(route[0].sector.kind).toBe("intro");
     expect(route[route.length - 1].sector.kind).toBe("summit");
-    expect(route[route.length - 1].start).toBe(LIMIT - SUMMIT_APPROACH);
+    expect(route[route.length - 1].start).toBe(LIMIT - 1);
+    // P0.7: the summit approach → closing bell → cap sequence is its own shape.
+    expect(route[route.length - 2].sector.kind).toBe("finale");
+    expect(route[route.length - 2].start).toBe(LIMIT - 1 - SUMMIT_FINALE);
+    expect(route[route.length - 3].sector.kind).toBe("summit");
+    expect(route[route.length - 3].start).toBe(LIMIT - SUMMIT_APPROACH);
     // no duplicate consecutive sectors
     for (let i = 1; i < route.length; i++) expect(route[i].sector.id).not.toBe(route[i - 1].sector.id);
   });
@@ -154,6 +167,25 @@ describe("P0.2 director — buildPlatforms honours the schedule", () => {
         for (const p of plats.slice(0, INTRO_CANDLES)) expect(p.crumble).toBe(false);
         // …and red candles DO fold again after it (the rule is delayed, not removed)
         expect(plats.slice(INTRO_CANDLES).some((p) => p.crumble)).toBe(true);
+      }
+    }
+  });
+
+  test("P0.7 closing bell: every candle under the cap folds, the cap never does", () => {
+    for (const f of FIXTURES) {
+      for (const seed of SEEDS) {
+        const plats = buildPlatforms(f.candles, seed);
+        const n = plats.length;
+        for (let k = 1; k <= SUMMIT_FINALE; k++) {
+          const p = plats[n - 1 - k];
+          expect(isFinaleCandle(p.i, n)).toBe(true);
+          expect(p.crumble).toBe(true); // colour-independent: green folds too
+          expect(p.fuse).toBe(FINALE_FUSE);
+          expect(p.w).toBeGreaterThan(0); // rhythm check, never a reach check
+        }
+        expect(plats[n - 1].fuse).toBeUndefined(); // the summit cap stays landable
+        // exactly the authored finale carries a fuse — no drift into the rest
+        expect(plats.filter((p) => p.fuse !== undefined).length).toBe(SUMMIT_FINALE);
       }
     }
   });

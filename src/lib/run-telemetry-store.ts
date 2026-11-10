@@ -9,6 +9,7 @@
 // captured as economy-path P2 alerts and NEVER thrown back into the run (LAW 1:
 // play is never blocked by an integration).
 import { captureError } from "@/lib/telemetry";
+import { createFileTelemetryStore } from "@/lib/run-telemetry-file";
 import {
   summarizeRunEvents,
   EMPTY_TELEMETRY_SUMMARY,
@@ -17,7 +18,7 @@ import {
 } from "@/lib/run-telemetry";
 
 export interface RunTelemetryStore {
-  readonly kind: "memory" | "mongo";
+  readonly kind: "memory" | "mongo" | "file";
   record(e: RunTelemetryEvent): Promise<void>;
   /** Aggregate over events received in the last `windowDays` (default 7). */
   summary(now: number, windowDays?: number): Promise<TelemetrySummary>;
@@ -132,8 +133,13 @@ export function getRunTelemetry(): RunTelemetryStore {
   const g = globalThis as typeof globalThis & { [GLOBAL_KEY]?: RunTelemetryStore };
   if (g[GLOBAL_KEY]) return g[GLOBAL_KEY];
   const uri = process.env.DATABASE_URL ?? "";
-  g[GLOBAL_KEY] = uri.startsWith("mongodb://") || uri.startsWith("mongodb+srv://")
-    ? new MongoRunTelemetryStore()
-    : new MemoryRunTelemetryStore();
+  if (uri.startsWith("mongodb://") || uri.startsWith("mongodb+srv://")) {
+    g[GLOBAL_KEY] = new MongoRunTelemetryStore();
+  } else {
+    // P0.7: no database is not the same as no memory. The append-only file
+    // store survives a dev-server restart, which is what the difficulty work
+    // actually needs; memory is only the last resort for a read-only disk.
+    g[GLOBAL_KEY] = createFileTelemetryStore() ?? new MemoryRunTelemetryStore();
+  }
   return g[GLOBAL_KEY];
 }

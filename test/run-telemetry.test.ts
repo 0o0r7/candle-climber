@@ -206,9 +206,10 @@ describe("summarizeRunEvents (P0.5 sectors)", () => {
 
   test("labels come from the director, in traversal order", () => {
     const s = sample();
-    expect(s.sectors.map((x) => x.kind)).toEqual(["intro", "trend", "squeeze", "breather", "summit"]);
+    // P0.7: the closing bell sits between the last breather and the cap.
+    expect(s.sectors.map((x) => x.kind)).toEqual(["intro", "trend", "squeeze", "breather", "finale", "summit"]);
     expect(s.sectors.map((x) => x.label)).toEqual([
-      "MARKET OPEN", "TREND", "SQUEEZE", "CONSOLIDATION", "THE SUMMIT",
+      "MARKET OPEN", "TREND", "SQUEEZE", "CONSOLIDATION", "CLOSING BELL", "THE SUMMIT",
     ]);
   });
 

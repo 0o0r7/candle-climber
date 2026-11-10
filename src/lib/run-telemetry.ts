@@ -20,6 +20,7 @@ import {
   SECTOR_LABELS,
   INTRO_CANDLES,
   SUMMIT_APPROACH,
+  SUMMIT_FINALE,
   CYCLE_LEN,
   type SectorKind,
 } from "@/game/cc/director";
@@ -158,7 +159,7 @@ const EMPTY_STYLE: StyleTelemetry = {
 };
 
 /** Fixed display order — the same order the player crosses them. */
-const SECTOR_ORDER: readonly SectorKind[] = ["intro", "trend", "squeeze", "breather", "summit"];
+const SECTOR_ORDER: readonly SectorKind[] = ["intro", "trend", "squeeze", "breather", "finale", "summit"];
 
 export const EMPTY_TELEMETRY_SUMMARY: TelemetrySummary = {
   total: 0,
@@ -195,6 +196,10 @@ function kindsReached(candle: number, total: number): SectorKind[] {
   if (eff >= INTRO_CANDLES + SUMMIT_APPROACH) {
     const summitStart = Math.max(INTRO_CANDLES, eff - SUMMIT_APPROACH);
     if (candle >= summitStart) kinds.add("summit");
+    // P0.7 closing bell: its own exposure band, so a finale death is measured
+    // against the runs that actually got there (same rule as the summit).
+    const finaleStart = eff - 1 - SUMMIT_FINALE;
+    if (candle >= finaleStart) kinds.add("finale");
   }
   return [...kinds];
 }
@@ -223,8 +228,8 @@ export function summarizeRunEvents(events: readonly RunTelemetryEvent[]): Teleme
   let styleTotal = 0;
   let styleLate = 0;
   let styleSave = 0;
-  const sectorDeaths: Record<SectorKind, number> = { intro: 0, trend: 0, squeeze: 0, breather: 0, summit: 0 };
-  const sectorReached: Record<SectorKind, number> = { intro: 0, trend: 0, squeeze: 0, breather: 0, summit: 0 };
+  const sectorDeaths: Record<SectorKind, number> = { intro: 0, trend: 0, squeeze: 0, breather: 0, finale: 0, summit: 0 };
+  const sectorReached: Record<SectorKind, number> = { intro: 0, trend: 0, squeeze: 0, breather: 0, finale: 0, summit: 0 };
 
   for (const e of events) {
     if (e.graduated) graduations++;

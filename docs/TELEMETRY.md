@@ -38,8 +38,21 @@ by, which is deliberate: the questions are population questions.
 
 - `DATABASE_URL` set to a MongoDB URI → collection `candleclimber.run_telemetry`,
   TTL index of **90 days** (`ts`). Telemetry is behavioral data with a shelf life.
-- Otherwise → in-memory (5,000 events, resets with the process), same accepted
-  tradeoff as the leaderboard store. `/ops` names the active backend.
+- Otherwise → **append-only NDJSON on the server's own disk**
+  (`src/lib/run-telemetry-file.ts`, P0.7): one event per line at
+  `CC_TELEMETRY_DIR` (default `$TMPDIR/candleclimber-telemetry/runs.ndjson`),
+  bounded to the newest 20,000 rows and compacted every 250 appends. It survives
+  a dev-server restart, a hot reload and a same-machine redeploy — which is what
+  curve work actually needs, since the previous default erased the sample the
+  numbers came from. The directory is deliberately **outside the repository**:
+  telemetry is runtime state, never a source artifact.
+- Only if that directory is not writable → in-memory (5,000 events, resets with
+  the process). `/ops` and `POST /api/telemetry/run` name the active backend
+  (`mongo` / `file` / `memory`).
+
+The three backends share one contract: the same normalizer, the same 7-day window,
+the same summarizer — so a number means the same thing whichever store produced
+it (`test/run-telemetry-file.test.ts` pins the window and the restart case).
 
 Writes are fire-and-forget: the game never awaits the request and never reports a
 failure. A Mongo outage must not touch a run's end state (LAW 1).
@@ -103,6 +116,11 @@ Two rules the math keeps:
 - A run past the level's last candle is in the post-graduation endless sky,
   where the summit band no longer applies; it is classified with the plain
   cycle (`total = 0`). An endless run therefore never inflates "THE SUMMIT".
+- **`CLOSING BELL` is its own band (P0.7).** The three folding candles under the
+  cap are exposure-counted only for runs that actually reached them, so a
+  finale death is measured against the players who got there — the same rule the
+  summit band already used. Without that band, a P0.7 finale failure would have
+  been attributed to `THE SUMMIT` and read as "the clean runway got harder".
 
 ## 4. Intake rules
 

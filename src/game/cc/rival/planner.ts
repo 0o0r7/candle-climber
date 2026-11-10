@@ -14,7 +14,7 @@ import type { Platform } from "../types";
 import type { MutationMods } from "../mutations";
 import type { BotPersonality } from "./personality";
 import {
-  GRAVITY, JUMP_V, JUMP_CUT, HANG_GRAVITY, RUSH_SPEED,
+  GRAVITY, JUMP_V, JUMP_CUT, AIR_JUMP_V, HANG_GRAVITY, RUSH_SPEED,
   CAM_BASE, CAM_ACCEL, CAM_MAX, PLAYER_W, PLAYER_H, VIEW_H,
 } from "../engine";
 import { hashString } from "../rng";
@@ -66,23 +66,35 @@ function speedAt(time: number, mods: MutationMods, rush: boolean): number {
   return Math.min(cap, base + time * CAM_ACCEL) * (rush ? RUSH_SPEED : 1);
 }
 
+/** Which verb the simulated press spends — the two impulses differ (the air
+ *  jump is deliberately weaker, see AIR_JUMP_V), so the rollout must too. */
+type PressKind = "ground" | "air" | "none";
+
 /**
  * Forward-simulate ONE press variant from the snapshot. Mirrors engine.step's
  * jump path exactly: buffered jump executes at the END of the first step; a
  * "cut" applies release (vy ×= JUMP_CUT, hang ends) before the second step.
+ * `kind` selects the impulse: the ground jump, the weaker air jump (P0.7 bot
+ * parity — the same verb the player has), or none at all (forecast).
  */
-function simulatePress(s: BotSnapshot, plats: Platform[], mods: MutationMods, rush: boolean, hold: boolean): PressEval {
-  const jumpHeldStart = s.grounded || s.vy === 0; // press requires ground or coyote — caller guarantees
-  if (!jumpHeldStart) return FAIL;
+function simulatePress(
+  s: BotSnapshot, plats: Platform[], mods: MutationMods, rush: boolean, hold: boolean,
+  kind: PressKind = "ground",
+): PressEval {
+  if (kind === "ground") {
+    const jumpHeldStart = s.grounded || s.vy === 0; // press requires ground or coyote — caller guarantees
+    if (!jumpHeldStart) return FAIL;
+  }
 
   let px = s.px, py = s.py, vy = s.vy, t = s.time;
-  let pressed = false, cutDone = !hold ? false : true; // cut variant releases after step 1
+  let pressed = kind === "none", cutDone = !hold ? false : true; // cut variant releases after step 1
   const i0 = Math.max(0, s.groundIdx);
   const iMax = Math.min(plats.length - 1, i0 + SCAN_AHEAD);
 
   for (let k = 1; k <= MAX_SIM_STEPS; k++) {
-    // cut fires between step 1 and 2 (driver calls release() right after press)
-    if (!hold && !cutDone && k >= 2) { vy *= JUMP_CUT; cutDone = true; }
+    // cut fires between step 1 and 2 (driver calls release() right after press);
+    // a forecast ("none") never cut — there is no press to release
+    if (!hold && kind !== "none" && !cutDone && k >= 2) { vy *= JUMP_CUT; cutDone = true; }
     t += FIXED_DT;
     px += speedAt(t, mods, rush) * FIXED_DT;
     const hangK = (hold || !cutDone) && vy < 0 ? HANG_GRAVITY : 1;
@@ -90,7 +102,11 @@ function simulatePress(s: BotSnapshot, plats: Platform[], mods: MutationMods, ru
     py += vy * FIXED_DT;
 
     // buffered jump executes at the end of the first step (engine order)
-    if (!pressed) { vy = -JUMP_V * mods.jump; pressed = true; continue; }
+    if (!pressed) {
+      vy = -(kind === "air" ? AIR_JUMP_V : JUMP_V) * mods.jump;
+      pressed = true;
+      continue;
+    }
 
     // landing check (falling only) — exact mirror of the engine's scan
     if (vy >= 0) {
@@ -130,6 +146,25 @@ export function evalPressNow(s: BotSnapshot, plats: Platform[], mods: MutationMo
     full: simulatePress(s, plats, mods, rush, true),
     cut: simulatePress(s, plats, mods, rush, false),
   };
+}
+
+/**
+ * P0.7 — "leave the arc alone": forecast where the CURRENT arc lands with no
+ * further input (the jump is still held, so gravity-hang still applies). Used
+ * to decide whether the rival needs its recovery verb at all.
+ */
+export function evalNoPress(s: BotSnapshot, plats: Platform[], mods: MutationMods, rush: boolean): PressEval {
+  return simulatePress(s, plats, mods, rush, true, "none");
+}
+
+/**
+ * P0.7 — "spend the air jump NOW": the exact impulse the player gets
+ * (`AIR_JUMP_V`, weaker than the ground jump by design, docs/AIR-JUMP.md),
+ * applied at this tick of the airborne arc. The bot spends it only when the
+ * unaltered arc misses, so it recovers like a player — it never gains reach.
+ */
+export function evalAirPressNow(s: BotSnapshot, plats: Platform[], mods: MutationMods, rush: boolean): PressEval {
+  return simulatePress(s, plats, mods, rush, true, "air");
 }
 
 /**

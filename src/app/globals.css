@@ -339,6 +339,14 @@ button.cc-wallet-chip { cursor: pointer; }
      suppress only the double-tap zoom gesture on the playfield itself */
   touch-action: manipulation;
 }
+/* A11y (WCAG 2.4.7): the playfield is a real control (role=button, tabIndex 0)
+   and it used to remove its focus indicator entirely. It is the size of the
+   frame, so a full default ring would read as a border around the game; the
+   inset lime hairline marks focus without competing with the candle colours. */
+.cc-stage:focus-visible {
+  outline: 2px solid rgba(204, 255, 0, 0.55);
+  outline-offset: -3px;
+}
 .cc-canvas {
   width: 100%;
   height: 100%;
@@ -476,6 +484,30 @@ button.cc-wallet-chip { cursor: pointer; }
   letter-spacing: 0.1em;
 }
 .cc-best b { color: #fff; }
+
+/* P0.7 CAREER — meta-progression lane. Cosmetic only: this bar never implies a
+   gameplay bonus, because XP never touches the climb (docs/career.ts header). */
+.cc-career { margin-top: 12px; font-family: var(--cc-mono); }
+.cc-career-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  color: var(--cc-faint);
+}
+.cc-career-rank { color: #fff; }
+.cc-career-xp b { color: var(--cc-lime); font-weight: 600; }
+.cc-career-track {
+  margin-top: 6px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--cc-hairline);
+  overflow: hidden;
+}
+.cc-career-track i { display: block; height: 100%; background: var(--cc-lime); transition: width 240ms ease-out; }
+.cc-career-next { margin-top: 5px; font-size: 10px; letter-spacing: 0.08em; color: var(--cc-faint); }
+@media (prefers-reduced-motion: reduce) { .cc-career-track i { transition: none; } }
 
 .cc-liquidated {
   font-family: var(--cc-display);

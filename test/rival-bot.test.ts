@@ -12,14 +12,15 @@ import { join } from "node:path";
 
 import { personalityForCharId, DEFAULT_PERSONALITY } from "@/game/cc/rival/personality";
 import {
-  evalPressNow, shouldPress, wantRush, slopTicks, FIXED_DT, PANIC_TICKS,
+  evalPressNow, evalNoPress, evalAirPressNow, shouldPress, wantRush, slopTicks,
+  FIXED_DT, PANIC_TICKS,
   type BotSnapshot, type PressEval,
 } from "@/game/cc/rival/planner";
 import { RivalBot, pickRivalCharId, rivalVerdict } from "@/game/cc/rival/bot";
 import { RIVAL_ALPHA } from "@/game/cc/rival/rival-render";
 import { BASE_MODS } from "@/game/cc/mutations";
-import { buildPlatforms, PLATFORM_W, CANDLE_W } from "@/game/cc/level";
-import { PLAYER_W, PLAYER_H } from "@/game/cc/engine";
+import { buildPlatforms, PLATFORM_W, CANDLE_W, MAX_UP } from "@/game/cc/level";
+import { PLAYER_W, PLAYER_H, AIR_JUMP_V, GRAVITY } from "@/game/cc/engine";
 import { syntheticCandles } from "@/game/cc/level-source";
 import { CHARACTERS } from "@/game/cc/characters";
 import type { Platform } from "@/game/cc/types";
@@ -223,6 +224,43 @@ describe("P7.1 jump planner — personality-gated decisions", () => {
     expect(Math.abs(a)).toBeLessThanOrEqual(3);
     // zero sloppiness never deviates (cop executes exactly)
     expect(slopTicks(SEED, 7, personalityForCharId("wickcop"))).toBe(0);
+  });
+});
+
+describe("P0.7 rival air jump — same verb as the player, never extra reach", () => {
+  // a gap directly under a falling run: the untouched arc drops through it and
+  // is already too low for the higher candles ahead — the player's exact
+  // recovery case (docs/AIR-JUMP.md), not a free boost.
+  const plats = [plat(0), plat(1, 0, { w: 0 }), plat(2, -60), plat(3, -60), plat(4, -60)];
+  const falling: BotSnapshot = {
+    px: 100, py: -20, vy: 250, grounded: false, groundIdx: -1,
+    time: 20, rush: false, sinceLand: 0.4,
+  };
+
+  test("forecast: the untouched arc misses", () => {
+    expect(evalNoPress(falling, plats, BASE_MODS, false).ok).toBe(false);
+  });
+
+  test("the air jump rescues the same arc onto a platform ahead", () => {
+    const air = evalAirPressNow(falling, plats, BASE_MODS, false);
+    expect(air.ok).toBe(true);
+    expect(air.landIdx).toBe(3); // never back onto the platform it fell from
+    expect(air.alignment).toBeGreaterThan(0.5);
+  });
+
+  test("air jump math stays weaker than an authored step (MAX_UP prior intact)", () => {
+    const rise = (AIR_JUMP_V * AIR_JUMP_V) / (2 * GRAVITY);
+    expect(rise).toBeLessThan(MAX_UP);
+  });
+
+  test("both helpers are pure: same snapshot ⇒ byte-identical, no mutation", () => {
+    const before = JSON.stringify(falling);
+    const platsBefore = JSON.stringify(plats);
+    const a = JSON.stringify(evalAirPressNow(falling, plats, BASE_MODS, false));
+    const b = JSON.stringify(evalAirPressNow(falling, plats, BASE_MODS, false));
+    expect(a).toBe(b);
+    expect(JSON.stringify(falling)).toBe(before);
+    expect(JSON.stringify(plats)).toBe(platsBefore);
   });
 });
 

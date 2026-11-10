@@ -33,6 +33,12 @@ import SettingsPanel from "@/components/cc/SettingsPanel";
 import AchievementsPanel from "@/components/cc/AchievementsPanel";
 import { useSettings } from "@/lib/settings-context";
 import { ACHIEVEMENTS_KEY, ACHIEVEMENT_DEFS, checkAchievements, loadUnlocked, mergeUnlocked, saveUnlocked, defsFor } from "@/lib/achievements";
+// P0.7 career — cosmetic long-horizon progression (rank + XP). Never scores.
+import {
+  applyRun as applyCareerRun, loadCareer, saveCareer, rankFor,
+  CAREER_KEY, type Career,
+} from "@/lib/career";
+import CareerBar from "@/components/cc/CareerBar";
 import { toast } from "sonner";
 import { RivalBot, pickRivalCharId, rivalVerdict } from "@/game/cc/rival/bot";
 import { personalityForCharId } from "@/game/cc/rival/personality";
@@ -290,6 +296,11 @@ export default function GameCanvas() {
   const ledgerRef = useRef<StatsLedger>(emptyLedger());
   const usedRushRef = useRef(false); // per-run RUSH usage — feeds DIAMOND HANDS honestly
   const [currentStreak, setCurrentStreak] = useState(0); // streak chip renders from state (refs don't re-render)
+  // P0.7 CAREER — cosmetic meta-progression (lib/career.ts). Loaded on mount,
+  // folded once per finished run, shown on the ready card. It never touches the
+  // engine, the score or the ranked lane.
+  const [career, setCareer] = useState<Career | null>(null);
+  const [careerGain, setCareerGain] = useState(0);
   const runRecordedRef = useRef(false);
   const tfRef = useRef<GameInterval>("1w"); // self-ghost key needs the interval
   const modeRef = useRef<GameMode>("crypto"); // P0.1 telemetry lane label (ref: no re-subscribe)
@@ -408,6 +419,7 @@ export default function GameCanvas() {
     selfDBRef.current = loadSelfGhostDB(localStorage.getItem(SELF_GHOST_KEY)); // P2 self-ghost
     ledgerRef.current = loadLedger(localStorage.getItem(STATS_KEY)); // P2 stats ledger
     setCurrentStreak(ledgerRef.current.currentStreak);
+    setCareer(loadCareer(localStorage.getItem(CAREER_KEY))); // P0.7 career
     const requested = (params.get("symbol") ?? "").toUpperCase();
     const requestedDate = params.get("date");
     const isArch = isArchiveDate(requestedDate, utcDateStr());
@@ -709,6 +721,34 @@ export default function GameCanvas() {
     try { localStorage.setItem(STATS_KEY, saveLedger(ledgerRef.current)); } catch { /* private mode */ }
     setCurrentStreak(ledgerRef.current.currentStreak); // streak chip renders from state
 
+    // P0.7 CAREER — fold the run into the cosmetic profile FIRST, so the
+    // achievement check below can see the new rank. XP is cosmetic by law
+    // (lib/career.ts): same terrain, same physics, same board at every rank.
+    let careerRank = 0;
+    try {
+      const out = applyCareerRun(
+        loadCareer(localStorage.getItem(CAREER_KEY)),
+        {
+          candlesPassed: r.candlesPassed,
+          bestStreak: r.bestStreak,
+          style: r.style ?? 0,
+          graduated: r.graduated === true,
+          world2: r.world2 === true,
+          died,
+        },
+        Date.now(),
+      );
+      localStorage.setItem(CAREER_KEY, saveCareer(out.career));
+      setCareer(out.career);
+      setCareerGain(out.gained);
+      careerRank = rankFor(out.career.xp).level;
+      if (out.rankedUp) {
+        toast(`⬆ RANK ${out.levelAfter} · ${rankFor(out.career.xp).name}`, {
+          description: `+${out.gained.toLocaleString()} XP this run — cosmetic only, the chart stays identical.`,
+        });
+      }
+    } catch { /* private mode — the career bar simply stays hidden */ }
+
     // Achievement check — compare run stats against definitions
     try {
       const existing = loadUnlocked(localStorage.getItem(ACHIEVEMENTS_KEY));
@@ -722,6 +762,7 @@ export default function GameCanvas() {
         enteredWorld2: r.world2 === true,
         currentStreak: ledgerRef.current.currentStreak,
         duelWins: parseTally(localStorage.getItem(DUEL_TALLY_KEY) ?? "").w,
+        careerRank,
       });
       const { newlyUnlocked, all } = mergeUnlocked(existing, satisfied);
       if (newlyUnlocked.length > 0) {
@@ -1835,7 +1876,11 @@ export default function GameCanvas() {
         aria-label="Game area — tap or press space to jump"
         tabIndex={0}
       >
-        <canvas ref={canvasRef} className="cc-canvas" />
+        {/* The playfield is a visual canvas; the interactive element is the
+            .cc-stage wrapper above, which already carries the role, label and
+            keyboard focus. Hiding the canvas itself stops screen readers from
+            announcing an unlabelled graphic before the game description. */}
+        <canvas ref={canvasRef} className="cc-canvas" aria-hidden="true" />
 
         {phase === "loading" && (
           <div className="cc-overlay"><div className="cc-panel"><p className="cc-loading">LOADING DAILY CHART…</p></div></div>
@@ -1932,6 +1977,9 @@ export default function GameCanvas() {
               {currentStreak > 0 && (
                 <p className="cc-streak">🔥 {currentStreak} DAY STREAK</p>
               )}
+              {/* P0.7 CAREER — the long-horizon lane, visible where runs begin.
+                  Cosmetic by law: the same chart, the same physics at every rank. */}
+              {career && <CareerBar career={career} gained={careerGain} />}
               {/* Visual QA 2026-10-14 (owner flag): the inline how-to paragraph
                   block is GONE — it duplicated the 5-step tutorial wizard
                   (HOW TO PLAY re-opens it) and bloated the card enough to

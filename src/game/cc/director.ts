@@ -20,7 +20,7 @@
 // Nothing here touches geometry that `level.ts` does not already clamp, and the
 // RNG draw order in `buildPlatforms` is unchanged — the level stays a pure
 // function of (candles, seed).
-export type SectorKind = "intro" | "trend" | "squeeze" | "breather" | "summit";
+export type SectorKind = "intro" | "trend" | "squeeze" | "breather" | "summit" | "finale";
 
 /** Display name per kind — the banner in-game and the /ops rows read the same
  *  string (one label, no drift between what players see and what ops reports). */
@@ -30,6 +30,7 @@ export const SECTOR_LABELS: Record<SectorKind, string> = {
   squeeze: "SQUEEZE",
   breather: "CONSOLIDATION",
   summit: "THE SUMMIT",
+  finale: "CLOSING BELL",
 };
 
 export interface Sector {
@@ -48,6 +49,14 @@ export interface Sector {
 export const INTRO_CANDLES = 12;
 /** Gap-free run-in to the summit — the last landing is earned, not gambled. */
 export const SUMMIT_APPROACH = 12;
+/** P0.7 THE CLOSING BELL: the candles directly under the summit cap FOLD.
+ *  Before this the summit approach was a flat 12-candle runway and the summit
+ *  itself was only a landing (`docs/PATTERN-AUDIT-2026-11-10.md` #1 "the summit
+ *  is still a landing"). The finale is a set-piece with ONE idea — "no more
+ *  standing still" — authored from the index alone, so it stays identical for
+ *  every player and every replay. Gaps stay 0 there: the skill asked for is
+ *  rhythm, not reach, so the difficulty priors are untouched. */
+export const SUMMIT_FINALE = 3;
 export const TREND_LEN = 16;
 export const SQUEEZE_LEN = 14;
 export const BREATHER_LEN = 10;
@@ -69,6 +78,14 @@ const SUMMIT: Sector = {
   kind: "summit",
   name: SECTOR_LABELS.summit,
   hint: "clean runway to the top · land it",
+  gap: 0,
+};
+
+const FINALE: Sector = {
+  id: "finale",
+  kind: "finale",
+  name: SECTOR_LABELS.finale,
+  hint: "every candle folds now · keep the rhythm, no stopping",
   gap: 0,
 };
 
@@ -113,7 +130,13 @@ function breather(cycle: number): Sector {
 export function sectorAt(index: number, total = 0): Sector {
   const i = Math.max(0, Math.floor(index));
   if (i < INTRO_CANDLES) return INTRO;
-  if (total >= INTRO_CANDLES + SUMMIT_APPROACH && i >= total - SUMMIT_APPROACH) return SUMMIT;
+  if (total >= INTRO_CANDLES + SUMMIT_APPROACH) {
+    const summitIdx = total - 1; // the LAST platform carries the summit marker
+    // P0.7: the three candles UNDER the cap are the set-piece; the cap itself
+    // is not (a collapsing summit would undercut the moment it celebrates).
+    if (i >= summitIdx - SUMMIT_FINALE && i < summitIdx) return FINALE;
+    if (i >= total - SUMMIT_APPROACH) return SUMMIT;
+  }
 
   const c = i - INTRO_CANDLES;
   const cycle = Math.floor(c / CYCLE_LEN);
@@ -126,6 +149,12 @@ export function sectorAt(index: number, total = 0): Sector {
 /** Gap probability for a candle index — the only knob `level.ts` consumes. */
 export function gapChanceAt(index: number, total = 0): number {
   return sectorAt(index, total).gap;
+}
+
+/** True for the closing-bell candles (folding, gap-free, directly under the
+ *  summit cap). The level builder is the only consumer. */
+export function isFinaleCandle(index: number, total = 0): boolean {
+  return sectorAt(index, total).kind === "finale";
 }
 
 /**

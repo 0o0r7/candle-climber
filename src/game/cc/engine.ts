@@ -76,6 +76,14 @@ export interface RecoveryProfile {
 
 export const DEFAULT_RECOVERY: RecoveryProfile = { coyote: COYOTE, buffer: BUFFER, airJumps: AIR_JUMPS };
 
+/** P0.7: seconds a platform survives once it starts folding. A closing-bell
+ *  candle carries its own `fuse`; `Math.max` keeps the finale at least as
+ *  forgiving as the day's mutation, so "PAPER HANDS" cannot make the authored
+ *  set-piece harder than the level around it. */
+export function crumbleFuse(p: Pick<Platform, "fuse">, mods: MutationMods): number {
+  return p.fuse ? Math.max(p.fuse, mods.crumbleTime) : mods.crumbleTime;
+}
+
 export interface EngineCallbacks {
   onDeath: (r: RunResult) => void;
   onScore: (score: number, combo: number) => void;
@@ -234,6 +242,13 @@ export class Engine {
   private graduate() {
     if (this.graduated) return;
     this.graduated = true;
+    // P0.7 set-piece payoff: the summit is a MOMENT, not just a flag. A gold
+    // burst + a beat of shake fire inside the live run before the panel opens,
+    // so the climb ends on a hit rather than a screen change. Presentation
+    // only — nothing here touches score, physics or determinism.
+    this.spawnParticles(30, this.px + PLAYER_W / 2, this.py + PLAYER_H / 2, STYLE_COLOR, 380);
+    this.spawnFloat(this.px + PLAYER_W / 2, this.py - 34, "SUMMIT", STYLE_COLOR);
+    this.shake = Math.max(this.shake, 10);
     this.cb.onSfx?.("victory");
     this.cb.onGraduate?.();
   }
@@ -360,7 +375,10 @@ export class Engine {
     for (const p of this.plats) {
       if (p.state === "crumbling") {
         p.crumbleT += dt;
-        if (p.crumbleT >= this.mods.crumbleTime) {
+        // P0.7: a closing-bell candle burns on its OWN fixed fuse (floored
+        // against the day's mutation) so the finale is identical on every
+        // mutation — same tell, same window, no surprise.
+        if (p.crumbleT >= crumbleFuse(p, this.mods)) {
           p.state = "gone";
           this.spawnParticles(10, p.x + p.w / 2, p.y, PLATFORM_DOWN, 140);
           if (this.groundPlat === p) { this.grounded = false; this.groundPlat = null; this.coyote = 0; }

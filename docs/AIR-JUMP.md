@@ -57,14 +57,15 @@ it unchanged.
 - **No leaderboard coupling.** `score`, the `MAX_SCORE_PER_CANDLE` cap and the
   run-token contract are untouched — the air jump changes no number a
   submission is graded on (`docs/ECONOMY-LAWS.md`).
-- **No rival-bot change in this step.** The bot's planner mirrors the engine's
-  *ground* jump and calls `press()` only from the ground or inside coyote, so it
-  simply does not use the second jump. That makes the rival marginally easier to
-  beat, which is a **balance** change, not a correctness one — and a balance
-  change needs a before/after measurement. P0.5 shipped that instrument
-  (`/ops` death histogram + sector table, `docs/TELEMETRY.md`); the bot change
-  itself waits for real runs rather than for code. Tracking it here instead of
-  guessing.
+- **Rival parity (P0.7).** The bot now owns the same single air jump the player
+  has: `evalNoPress()` forecasts the untouched arc, and only when that arc would
+  miss does `evalAirPressNow()` test the recovery impulse. It presses through
+  the same `Engine.press()` path as the keyboard, so it gains no new reach — it
+  recovers exactly like a player (`rival/planner.ts`, `rival/bot.ts`, pinned by
+  `test/rival-bot.test.ts` "P0.7 rival air jump"). The balance objection above
+  still stands in the other direction: the bot now *can* rescue, so its numbers
+  are no longer a slightly-weaker baseline. Read them as a player-shaped rival,
+  not as a fixed difficulty; `/ops` remains the instrument for that question.
 
 ## Determinism
 

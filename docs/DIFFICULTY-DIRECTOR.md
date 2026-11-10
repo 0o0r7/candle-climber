@@ -33,7 +33,8 @@ difficulty.
 | `SQUEEZE` | +14 | 22% → 28% | the same idea, tighter — no new hazard |
 | `CONSOLIDATION` | +10 | 4% | breather: rebuild the combo |
 | …cycle repeats | 40 | +2 points per cycle, capped at 3 | pressure without a new rule |
-| `THE SUMMIT` | last 12 | none | the final landing is earned, not gambled |
+| `THE SUMMIT` | 12 before the cap | none | the final landing is earned, not gambled |
+| `CLOSING BELL` | last 3 under the cap | none | **every candle folds** — keep the rhythm, no stopping (P0.7) |
 
 Three invariants hold across every fixture and seed (`test/director.test.ts`):
 
@@ -53,9 +54,31 @@ determinism pins still pass.
 ## What the player sees
 
 A sector banner (`MARKET OPEN` / `TREND` / `SQUEEZE` / `CONSOLIDATION` /
-`THE SUMMIT`) fades in when they cross a boundary, carrying a one-line
-telegraph. It is keyed on the sector id, so each boundary replays the fade. No
-score, no rule change, no reward — telegraphing only.
+`THE SUMMIT` / `CLOSING BELL`) fades in when they cross a boundary, carrying a
+one-line telegraph. It is keyed on the sector id, so each boundary replays the
+fade. No score, no rule change, no reward — telegraphing only.
+
+### The closing bell (P0.7 — the summit set-piece)
+
+The last `SUMMIT_FINALE` (3) candles **under** the summit cap carry a `fuse` and
+fold regardless of colour (`level.ts`), because "the summit is just a final
+platform" was the audit's #1 gap. The idea is authored, not adaptive: gaps stay
+0 there, so the finale asks for *rhythm* (never stand still) and never for more
+reach — every difficulty prior above still describes the level exactly.
+
+Fairness is in the numbers, not in the copy:
+
+- the fuse is `FINALE_FUSE` (0.34s), **longer** than the base crumble time
+  (0.26s), and `crumbleFuse()` floors it against the day's mutation — a
+  `PAPER HANDS` day cannot make the set-piece tighter than the level around it;
+- the summit cap itself never carries a fuse (a collapsing summit would undercut
+  the moment it celebrates);
+- a fuse candle is telegraphed by three pulsing ticks on its cap
+  (`render-v2.ts`), a **colour-independent** tell, because a folding *green*
+  candle has no charred cracks to read;
+- `test/director.test.ts` pins "exactly the finale carries a fuse, the cap
+  never does"; `test/summit.test.ts` pins the fuse arithmetic and the graduation
+  burst.
 
 ## Evidence (measured 2026-11-10, `bun test`)
 

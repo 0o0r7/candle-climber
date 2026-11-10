@@ -19,6 +19,8 @@ export interface AchievementCheckInput {
   enteredWorld2: boolean;
   currentStreak: number; // daily streak (days)
   duelWins: number;
+  /** P0.7 career rank (1-based; 0/absent = not loaded). Cosmetic only. */
+  careerRank?: number;
 }
 
 export const ACHIEVEMENT_DEFS: AchievementDef[] = [
@@ -36,6 +38,10 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
   { id: "streak_7", name: "WEEKLY WARRIOR", desc: "Play 7 days in a row" },
   { id: "duel_win_1", name: "CHART CHALLENGER", desc: "Win your first duel" },
   { id: "world2", name: "BUYBACK KING", desc: "Enter World 2 (post-graduation)" },
+  // P0.7 career lane — a long-horizon pair, so the ten-rank ladder has a
+  // visible payoff at its midpoint and its ceiling (lib/career.ts).
+  { id: "rank_5", name: "WHALE WATCHER", desc: "Reach career rank 5" },
+  { id: "rank_10", name: "CANDLE TYCOON", desc: "Reach career rank 10 — the top of the ladder" },
 ];
 
 /** Which achievements are satisfied by this run's stats? */
@@ -51,6 +57,8 @@ export function checkAchievements(input: AchievementCheckInput): string[] {
   if (input.currentStreak >= 7) unlocked.push("streak_7");
   if (input.duelWins >= 1) unlocked.push("duel_win_1");
   if (input.enteredWorld2) unlocked.push("world2");
+  if ((input.careerRank ?? 0) >= 5) unlocked.push("rank_5");
+  if ((input.careerRank ?? 0) >= 10) unlocked.push("rank_10");
   return unlocked;
 }
 

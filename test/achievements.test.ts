@@ -23,9 +23,10 @@ const base = {
 };
 
 describe("achievements", () => {
-  test("all 10 definitions are unique and well-formed", () => {
-    expect(ACHIEVEMENT_DEFS.length).toBe(10);
-    expect(new Set(ACHIEVEMENT_DEFS.map((d) => d.id)).size).toBe(10);
+  test("all 12 definitions are unique and well-formed", () => {
+    // 10 original + the P0.7 career pair (rank_5 / rank_10).
+    expect(ACHIEVEMENT_DEFS.length).toBe(12);
+    expect(new Set(ACHIEVEMENT_DEFS.map((d) => d.id)).size).toBe(12);
     for (const d of ACHIEVEMENT_DEFS) {
       expect(d.name.length).toBeGreaterThan(0);
       expect(d.desc.length).toBeGreaterThan(0);

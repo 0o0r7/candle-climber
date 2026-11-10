@@ -23,7 +23,8 @@ import type { Candle } from "../types";
 import type { MutationMods } from "../mutations";
 import { personalityForCharId, type BotPersonality } from "./personality";
 import {
-  evalPressNow, shouldPress, wantRush, slopTicks, FIXED_DT, PANIC_TICKS,
+  evalPressNow, evalNoPress, evalAirPressNow, shouldPress, wantRush, slopTicks,
+  FIXED_DT, PANIC_TICKS,
   type BotSnapshot,
 } from "./planner";
 
@@ -175,6 +176,15 @@ export class RivalBot {
       const ev = evalPressNow(this.snap(), e.plats, e.mods, e.rush);
       if (ev.full.ok || ev.cut.ok) act = { press: true, hold: ev.full.ok };
       else if (e.coyote <= dt + 1e-9) act = { press: true, hold: true }; // go out jumping
+    } else if (!e.grounded && e.vy > 0 && e.airJumpsLeft > 0 && e.coyote <= 0) {
+      // P0.7 bot parity: the rival owns the SAME single air jump the player
+      // does (AIR_JUMPS = 1, weaker impulse). It looks only while FALLING and
+      // only when the untouched arc would miss — a rescue, never a boost, so
+      // its reach and the level's difficulty priors are unchanged.
+      const s = this.snap();
+      if (!evalNoPress(s, e.plats, e.mods, e.rush).ok && evalAirPressNow(s, e.plats, e.mods, e.rush).ok) {
+        act = { press: true, hold: true };
+      }
     }
 
     if (act) {

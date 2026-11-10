@@ -59,6 +59,10 @@ export interface Platform {
   wickBottom: number;
   up: boolean; // green candle
   crumble: boolean; // red candles crumble
+  /** P0.7 closing-bell candles: a FIXED fuse (seconds) that overrides the
+   *  day's crumble time. Present only on the summit finale, and drawn as a
+   *  colour-independent tell so a folding green candle is never a surprise. */
+  fuse?: number;
   state: 'solid' | 'crumbling' | 'gone';
   crumbleT: number; // seconds since crumble started
   passed: boolean; // camera already passed it
