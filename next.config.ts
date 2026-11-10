@@ -46,6 +46,11 @@ const nextConfig: NextConfig = {
         ],
       }
     : {}),
+  experimental: {
+    // `next upgrade --agent=security` keeps this app on the security track for
+    // future same-major advisories (set during the 16.4.0 → 16.4.6 patch).
+    agentUpgrade: "security",
+  },
   reactStrictMode: false,
   // Emit client-side source maps so @sentry/nextjs can upload them (Next 16
   // does NOT emit .map for client chunks by default — without this the Sentry
