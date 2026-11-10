@@ -74,6 +74,14 @@ function noise(dur: number, vol = 0.14) {
 
 export const sfx = {
   jump: () => blip(300, 540, 0.12, "square", 0.08),
+  // P0.6 audio variety: the second jump reads as a DIFFERENT verb — quieter,
+  // higher, shorter (air, not ground). Same instrument family so the run still
+  // sounds like one voice (docs/AUDIO.md).
+  air: () => blip(430, 760, 0.09, "square", 0.055),
+  // STYLE is gold in the HUD, so it is gold in the ear too: a clean fifth up.
+  // Short and low-volume because it can fire several times per second on a
+  // master run — variety must never become noise.
+  style: () => blip(880, 1320, 0.08, "triangle", 0.05),
   land: () => blip(180, 140, 0.06, "triangle", 0.07),
   crumble: () => noise(0.22, 0.12),
   death: () => { blip(320, 60, 0.5, "sawtooth", 0.12); noise(0.3, 0.1); },

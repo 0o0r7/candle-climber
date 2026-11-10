@@ -20,15 +20,15 @@ recurring across small-session arcade games:
 | # | Pattern | Candle Climber status (2026-11-10) | Evidence |
 |---|---|---|---|
 | 1 | **Climax / set-piece** | partial — the summit now has a gap-free approach and the chart is paced in named sectors (P0.2); it is still a landing, not an encounter | `game/cc/director.ts`, [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
-| 2 | **Build choice** | absent — the daily mutation is imposed, not chosen | `game/cc/mutations.ts` |
+| 2 | **Build choice** | present (practice lane) — three loadouts trade one forgiveness window for another; scored runs are pinned to STANDARD (`recoveryForRun`), so the daily board keeps one physics | `game/cc/loadout.ts`, [`PRACTICE-LOADOUTS.md`](PRACTICE-LOADOUTS.md) |
 | 3 | **Quality score** | present and measured — STYLE (late hops + forgiveness saves) sits *beside* the score, not inside it; `/ops` reports engagement and the LATE/SAVE split (P0.5) | `game/cc/style.ts`, [`STYLE-SCORE.md`](STYLE-SCORE.md), [`TELEMETRY.md`](TELEMETRY.md) |
 | 4 | **Modes** | present — crypto / stocks / launchpad × 4 timeframes + archive | `lib/market-selector.ts` |
 | 5 | **Meta-progression** | weak — 10 achievements, localStorage only | `lib/achievements.ts` |
-| 6 | **Inputs** | minimal — jump + RUSH, no gamepad | `components/cc/GameCanvas.tsx` |
+| 6 | **Inputs** | present — keyboard + touch + gamepad (standard mapping, same `Engine.press()`, no scoring surface) | `game/cc/gamepad.ts`, [`GAMEPAD.md`](GAMEPAD.md) |
 | 7 | **Telegraphing** | present — candle colour, crumble tell, fairness clamp | `game/cc/engine.ts` |
 | 8 | **World / tone** | strong — "the chart is the level", Death Card | `docs/GAME_DESIGN.md` |
 | 9 | **Social** | present — async duel, ghost, rival bot, boards | `game/cc/duel.ts`, `ghost.ts`, `rival/` |
-| 10 | **Polish** | half — particles/shake/slow-mo, 5 synth SFX, no music | `game/cc/sound.ts`, `render-v2.ts` |
+| 10 | **Polish** | half — particles/shake/slow-mo; 8 synth voices (the air jump and STYLE now have their own, P0.6); still no music, no sector cue | `game/cc/sound.ts`, `render-v2.ts` |
 
 ### The P0 build queue (updated 2026-11-10)
 
@@ -40,9 +40,12 @@ recurring across small-session arcade games:
 | P0.4 | STYLE quality axis: `LATE` hops (+3) and forgiveness `SAVE`s (+2) | **shipped** — [`STYLE-SCORE.md`](STYLE-SCORE.md) |
 | P0.5 | measurement for the two items above: STYLE engagement + sector deaths on `/ops` | **shipped** — [`TELEMETRY.md`](TELEMETRY.md) §3.1–3.2. STYLE is read as engagement (`engaged %`, mean/median/p90, LATE vs SAVE). Sector deaths are **exposure-normalized** (`deaths ÷ runs that reached that sector kind`), so a long sector cannot win the table by length alone, and the sector is derived server-side with the director's own `sectorAt()`. |
 
-With quality score now present, the pattern the game still scores worst on is
-**build choice (#2)** — plus the measurement that tells you whether any of these
-changes worked (§2).
+| P0.6 | build choice + input breadth + audio variety: practice loadouts, gamepad, per-verb voices | **shipped** — [`PRACTICE-LOADOUTS.md`](PRACTICE-LOADOUTS.md), [`GAMEPAD.md`](GAMEPAD.md). The loadout law is arithmetic like the air jump's: it moves *when* a press is accepted, never *how far* it flies, and `recoveryForRun(practice, id)` pins every scored run to STANDARD — so the choice exists without giving the daily board a second physics. |
+
+With build choice, inputs and the measurement in place, the patterns the game
+still scores worst on are **climax (#1)** — the summit is a landing, not an
+encounter — and **meta-progression (#5)**. The second-pass audit that decides
+each of these is [`PATTERN-AUDIT-2026-11-10.md`](PATTERN-AUDIT-2026-11-10.md).
 
 ## 2. Measurement and level analytics
 

@@ -24,6 +24,10 @@ import { recordWreck, wrecksFor, loadWreckDB, saveWreckDB, type WreckDB, type Wr
 import { makeDeathCard, normalizeRivalTag } from "@/game/cc/deathcard";
 import { DEFAULT_CHAR_ID, getChar } from "@/game/cc/characters";
 import { sfx, setMuted, setVolume, unlockAudio } from "@/game/cc/sound";
+// P0.6: the build choice (practice lane only) + gamepad input — the two
+// ten-pattern gaps that were still open (docs/PATTERN-AUDIT-2026-11-10.md).
+import { DEFAULT_LOADOUT, LOADOUT_ORDER, loadoutById, recoveryForRun, type LoadoutId } from "@/game/cc/loadout";
+import { padEdges, pickActivePad, readPadIntent, type PadIntent } from "@/game/cc/gamepad";
 import { vibrate, isCoarsePointer as detectCoarsePointer } from "@/game/cc/haptics";
 import SettingsPanel from "@/components/cc/SettingsPanel";
 import AchievementsPanel from "@/components/cc/AchievementsPanel";
@@ -195,6 +199,7 @@ export default function GameCanvas() {
   // the latest value without recreating the engine mid-run.
   const settingsRef = useRef(settings);
   useEffect(() => { settingsRef.current = settings; }, [settings]);
+
   // Achievement toast queue — newly unlocked ids this session
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
   // P2.4: yesterday's episode — honest aggregates over the day's submissions
@@ -210,6 +215,16 @@ export default function GameCanvas() {
   // P2.2: H1 ARCHIVE — /?symbol=&date=<past UTC date> plays real history as
   // PRACTICE terrain (submission suppressed; W1 staleness stays authoritative).
   const [archive, setArchive] = useState(false);
+  // P0.6 build choice: a PRACTICE-only loadout. It trades one forgiveness window
+  // for another and never adds reach or score, so the ranked lane stays pinned
+  // to STANDARD (recoveryForRun(false, …)) and the daily board keeps one physics.
+  const [loadout, setLoadout] = useState<LoadoutId>(DEFAULT_LOADOUT);
+  const loadoutRef = useRef<LoadoutId>(DEFAULT_LOADOUT);
+  const archiveRef = useRef(false);
+  // The engine factory runs once per run ([] deps), so the practice/loadout
+  // decision reaches it through refs — the same pattern as settingsRef.
+  useEffect(() => { loadoutRef.current = loadout; }, [loadout]);
+  useEffect(() => { archiveRef.current = archive; }, [archive]);
   const [archOpen, setArchOpen] = useState(false);
   // P2.5: H3 WRECKAGE — per-device frozen death ghosts (decor only)
   const wreckDBRef = useRef<WreckDB>({});
@@ -970,6 +985,9 @@ export default function GameCanvas() {
       },
       mut.mods,
       d.seed.date + d.seed.symbol, // W4: world-2 sky seed (same string as the level)
+      // P0.6: practice runs may use the picked loadout; every scored run is
+      // forced to STANDARD here, at the one place an engine is built.
+      recoveryForRun(archiveRef.current, loadoutRef.current),
     );
   }, []);
 
@@ -1216,6 +1234,42 @@ export default function GameCanvas() {
     window.addEventListener("keyup", up);
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
   }, [phase, startRun, enterWorld2, togglePause]);
+
+  // P0.6 gamepad (ten-pattern #6 "inputs: jump + RUSH, no gamepad").
+  // The mapping lives in src/game/cc/gamepad.ts (pure, unit-tested); this loop
+  // only polls it and calls the SAME engine verbs the keyboard does — no extra
+  // reach, no scoring surface, so pad parity is exact. Phase comes from
+  // phaseRef so a poll never acts on a stale render.
+  useEffect(() => {
+    if (typeof navigator === "undefined" || typeof navigator.getGamepads !== "function") return;
+    let raf = 0;
+    let prev: PadIntent = { jump: false, rush: false, pause: false };
+    const poll = () => {
+      raf = requestAnimationFrame(poll);
+      const next = readPadIntent(pickActivePad(Array.from(navigator.getGamepads())));
+      const edge = padEdges(prev, next);
+      prev = next;
+      const ph = phaseRef.current;
+      if (edge.pausePressed) {
+        if (ph === "running") togglePause();
+        return;
+      }
+      if (edge.jumpPressed) {
+        if (showTutorialRef.current) return; // the wizard owns the first press
+        if (ph === "ready" || ph === "dead") startRun();
+        else if (ph === "graduated") enterWorld2();
+        else if (ph === "running" && !pausedRef.current) engineRef.current?.press();
+      }
+      if (edge.jumpReleased) engineRef.current?.release();
+      if (edge.rushPressed) {
+        // G5 parity with the Shift key: RUSH only counts while a run is live.
+        if (ph === "running") { usedRushRef.current = true; engineRef.current?.pressRush(); }
+      }
+      if (edge.rushReleased) engineRef.current?.releaseRush();
+    };
+    raf = requestAnimationFrame(poll);
+    return () => cancelAnimationFrame(raf);
+  }, [startRun, enterWorld2, togglePause]);
 
   const onPointerDown = (ev: React.PointerEvent) => {
     // G2 owner note: the death/ready panels live inside the stage — never hijack
@@ -1838,6 +1892,35 @@ export default function GameCanvas() {
                   <span className="cc-duel-head">DUEL · {duel.name} SET THE BAR</span>
                   <span className="cc-duel-target">BEAT <b>{duel.score.toLocaleString()}</b> PTS · {duel.candlesPassed} CANDLES</span>
                   <span className="cc-duel-note">same chart · {duel.date === utcDateStr() ? "live terrain" : "archive terrain — practice duel"} · record {tallyLabel(duelTally)}</span>
+                </div>
+              )}
+              {/* P0.6 build choice — PRACTICE ONLY. The ranked lane never renders
+                  this and never accepts it: recoveryForRun() pins scored runs to
+                  STANDARD, so the daily board keeps a single physics. */}
+              {archive && (
+                <div className="cc-loadout" role="radiogroup" aria-label="practice loadout">
+                  <span className="cc-loadout-title">PRACTICE LOADOUT · unscored run</span>
+                  <div className="cc-loadout-row">
+                    {LOADOUT_ORDER.map((id) => {
+                      const l = loadoutById(id);
+                      const on = loadout === id;
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          role="radio"
+                          aria-checked={on}
+                          className={`cc-loadout-opt${on ? " is-on" : ""}`}
+                          onClick={() => setLoadout(id)}
+                          title={`${l.gain} · ${l.cost}`}
+                        >
+                          <b>{l.name}</b>
+                          <span>{l.gain}</span>
+                          <em>{l.cost}</em>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
               <button className="cc-btn cc-btn-start cc-cta" onClick={startRun}>START CLIMB</button>

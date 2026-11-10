@@ -59,7 +59,22 @@ export const CAM_MAX = 400; // was 470 — late-game still tense, no longer fran
 export const CAM_LERP = 4.2;         // the original single follow rate
 export const CAM_GROUND_STRIP = 24;  // takeoff platform keeps this strip visible at the frame bottom
 
-export type SfxName = "jump" | "land" | "crumble" | "milestone" | "victory";
+// P0.6 audio variety (ten-pattern #10): every verb gets its own voice. `air`
+// and `style` are deliberately separate from `jump` — a second jump that sounds
+// like the first one is invisible, and a STYLE event that sounds like a landing
+// is a missed reward (Jonasson/Purho, "Juice it or lose it").
+export type SfxName = "jump" | "air" | "land" | "crumble" | "style" | "milestone" | "victory";
+
+/** Per-run forgiveness windows. Defaults ARE the shipped constants; a loadout
+ *  (P0.6, practice lane only) may trade one window for another — never adds
+ *  reach, so terrain difficulty priors stay intact (see docs/PRACTICE-LOADOUTS.md). */
+export interface RecoveryProfile {
+  coyote: number;
+  buffer: number;
+  airJumps: number;
+}
+
+export const DEFAULT_RECOVERY: RecoveryProfile = { coyote: COYOTE, buffer: BUFFER, airJumps: AIR_JUMPS };
 
 export interface EngineCallbacks {
   onDeath: (r: RunResult) => void;
@@ -114,17 +129,27 @@ export class Engine {
   private w2rnd: (() => number) | null = null;
   private seedStr: string;
   private cb: EngineCallbacks;
+  /** P0.6: forgiveness windows for THIS run (practice loadouts override them). */
+  recovery: RecoveryProfile;
 
   // player world x is always locked to the screen anchor (30% of view)
   get px(): number {
     return this.camX + VIEW_W * PLAYER_X_FRAC - PLAYER_W / 2;
   }
 
-  constructor(plats: Platform[], cb: EngineCallbacks, mods: MutationMods = BASE_MODS, seedStr = "") {
+  constructor(
+    plats: Platform[],
+    cb: EngineCallbacks,
+    mods: MutationMods = BASE_MODS,
+    seedStr = "",
+    recovery: RecoveryProfile = DEFAULT_RECOVERY,
+  ) {
     this.plats = plats;
     this.cb = cb;
     this.mods = mods;
     this.seedStr = seedStr;
+    this.recovery = recovery;
+    this.airJumpsLeft = recovery.airJumps;
     // start ON the first platform: camera aligned so the player anchor
     // sits right on the platform center (safe runway)
     const start = plats.find((p) => p.state === "solid") ?? plats[0];
@@ -140,7 +165,7 @@ export class Engine {
     // P0.4: remember where the press STARTED. A jump that only fires because
     // of coyote time / the input buffer is a SAVE (see grantStyle).
     this.pressedAirborne = !this.grounded;
-    this.buffer = BUFFER; this.jumpHeld = true; this.jumpCut = false;
+    this.buffer = this.recovery.buffer; this.jumpHeld = true; this.jumpCut = false;
   }
   release() {
     this.jumpHeld = false;
@@ -179,6 +204,7 @@ export class Engine {
       `${kind === "late" ? "LATE" : "SAVE"} +${pts}`,
       STYLE_COLOR,
     );
+    this.cb.onSfx?.("style");
   }
 
   private die(cause: DeathCause) {
@@ -314,8 +340,8 @@ export class Engine {
           this.lastLandUp = p.up;
           if (!this.grounded) this.cb.onSfx?.("land");
           this.grounded = true;
-          this.coyote = COYOTE;
-          this.airJumpsLeft = AIR_JUMPS; // P0.3: the recovery verb is per airborne period
+          this.coyote = this.recovery.coyote;
+          this.airJumpsLeft = this.recovery.airJumps; // P0.3: the recovery verb is per airborne period
           this.groundPlat = p;
           this.lastGroundY = p.y;
           if (p.summit) this.graduate();
@@ -366,7 +392,7 @@ export class Engine {
       this.vy = -AIR_JUMP_V * this.mods.jump;
       this.buffer = 0; this.jumpCut = false; this.pressedAirborne = false;
       this.spawnFloat(this.px + PLAYER_W / 2, this.py - 18, "AIR", AIR_JUMP_COLOR);
-      this.cb.onSfx?.("jump");
+      this.cb.onSfx?.("air");
     }
 
     // death: fell below view
