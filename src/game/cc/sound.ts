@@ -38,6 +38,14 @@ export function setVolume(level: number) {
   }
 }
 
+/** The shared output bus — anything that must obey the same mute/volume slider
+ *  (the music bed, music.ts) connects here instead of opening its own context. */
+export function audioOut(): { ctx: AudioContext; dest: AudioNode } | null {
+  const a = ac();
+  if (!a) return null;
+  return { ctx: a, dest: masterGain ?? a.destination };
+}
+
 function blip(freq0: number, freq1: number, dur: number, type: OscillatorType, vol = 0.12) {
   const a = ac();
   if (!a) return;

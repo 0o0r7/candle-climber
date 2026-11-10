@@ -26,7 +26,7 @@ open TODOs carried from the previous passes.
 | O-3 | The 26-candle skill wall | same root cause as O-2; v2 moves it, does not remove it | **landing telegraph** (shipped: `telegraph.ts` + sky target frame) | `FIXED` (code+tests; visual pass pending) |
 | O-4 | Rival personalities invisible | v1: only RUSH separates them · v2: four distinct outcomes | tied to the chart; two tuning experiments measured + reverted | `DECIDED` |
 | O-5 | No audio for sector transitions | pattern #10, largest remaining polish gap | implemented this pass | `FIXED` |
-| O-6 | Music | pattern #10 depth | not scheduled; sector cues are the interim | `DEFERRED` (owner) |
+| O-6 | Music | pattern #10 depth | **procedural bed shipped** — `music.ts`, four biome sections (the trailer's score) | `FIXED` (ear pass pending) |
 | O-7 | Summit / closing bell never played by a human | engine search proved reachable, not playable by hand | needs one human session | `OPEN` |
 | O-8 | Build choice on the **ranked** lane | per-player forgiveness would touch a shared board | owner call | `DEFERRED` (owner) |
 | O-9 | Cross-device career profile | needs a server identity | owner call (auth surface) | `DEFERRED` (owner) |
@@ -197,12 +197,28 @@ rival is local and cosmetic (it never posts a score), so no board is affected.
 - `test/sector-audio.test.ts`: 4 tests — six unique motifs, audible range,
   a real 72-candle chart crosses all six (no dead cue), one kind per index.
 
-## O-6 · Music — DEFERRED (owner)
+## O-6 · Music — FIXED (procedural bed; ear pass pending)
 
-Still the largest polish gap after O-5. A music bed is a product decision (does
-the game want a continuous loop over a 30–90 s run, and does that fight the
-jump/land rhythm?). Sector cues now cover the "the chart changed" information
-that was missing; music is atmosphere, not signal.
+**The decision that used to be open** was "does the game want a continuous loop,
+and would it fight the jump/land rhythm?". The material already answered it: the
+X trailer (`scripts/trailer/audio.mjs`) ships a per-biome score — one section per
+biome, fixed tempo and key, bars that cross-fade with the weather change. That is
+the game's own soundtrack, already written and already proven on video; the only
+thing missing was playing it *in the game*.
+
+**Shipped:** `src/game/cc/music.ts` — the same four sections (temperate 100 BPM,
+desert 108, storm 132, tundra 76), synthesised with the existing zero-asset
+WebAudio synth, scheduled bar by bar, gated on `running && !paused`, cross-faded
+on a biome change, and routed through the shared master gain so the existing mute
+and volume slider already apply (no new setting). Detail: [`MUSIC.md`](MUSIC.md).
+
+**Why this does not repeat O-1's mistake:** the bed cannot change a run. It is
+not read by the engine, it adds no state, and its gains (≤ 0.08 per voice, bus at
+0.5) sit ~−20 dB under the jump/land transients, so it cannot mask the rhythm it
+plays over. The volume slider is the player's own escape hatch.
+
+**Still open, honestly:** nobody has *listened* to it in a real mix. `bun test`
+pins the score; it cannot judge the mix. Same session as O-7.
 
 ## O-7 · The summit has never been played by a human — OPEN (needs one session)
 

@@ -28,7 +28,7 @@ recurring across small-session arcade games:
 | 7 | **Telegraphing** | present — candle colour, crumble tell, fairness clamp | `game/cc/engine.ts` |
 | 8 | **World / tone** | strong — "the chart is the level", Death Card | `docs/GAME_DESIGN.md` |
 | 9 | **Social** | present — async duel, ghost, rival bot, boards | `game/cc/duel.ts`, `ghost.ts`, `rival/` |
-| 10 | **Polish** | half — particles/shake/slow-mo; 8 synth voices (the air jump and STYLE now have their own, P0.6); still no music, no sector cue | `game/cc/sound.ts`, `render-v2.ts` |
+| 10 | **Polish** | present — particles/shake/slow-mo; 8 synth voices; the six sector cues (O-5) and, since O-6, a **procedural music bed** — the trailer's four biome sections played in-game (zero assets, cross-faded on a biome change) | `game/cc/sound.ts`, `game/cc/music.ts`, [`MUSIC.md`](MUSIC.md), `render-v2.ts` |
 
 ### The P0 build queue (updated 2026-11-10)
 
@@ -47,9 +47,11 @@ recurring across small-session arcade games:
 With clear case and meta-progression in place, no pattern in the ten-pattern
 frame is still rated *absent* or *weak*. What remains is depth and polish, and
 each item below names the measurement that would settle it rather than a guess:
-music and sector audio cues (#10), a cross-device profile (#5, needs identity),
-and the final accessibility pass on the live UI (contrast of new surfaces, focus
-order, reduced-motion coverage). The second-pass audit that scored the table is
+a cross-device profile (#5, needs identity), and the final accessibility pass on
+the live UI (contrast of new surfaces, focus order, reduced-motion coverage). The
+audio gap (#10) is closed by O-5 and O-6 — sector cues plus the procedural bed in
+[`MUSIC.md`](MUSIC.md) — and what it still lacks is one human ear, not code. The
+second-pass audit that scored the table is
 [`PATTERN-AUDIT-2026-11-10.md`](PATTERN-AUDIT-2026-11-10.md).
 
 ## 2. Measurement and level analytics

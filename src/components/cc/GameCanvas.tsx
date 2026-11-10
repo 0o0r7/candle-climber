@@ -24,6 +24,8 @@ import { recordWreck, wrecksFor, loadWreckDB, saveWreckDB, type WreckDB, type Wr
 import { makeDeathCard, normalizeRivalTag } from "@/game/cc/deathcard";
 import { DEFAULT_CHAR_ID, getChar } from "@/game/cc/characters";
 import { sfx, setMuted, setVolume, unlockAudio } from "@/game/cc/sound";
+// The trailer's per-biome score, ported into the game (docs/MUSIC.md).
+import { startMusic, stopMusic } from "@/game/cc/music";
 // P0.6: the build choice (practice lane only) + gamepad input — the two
 // ten-pattern gaps that were still open (docs/PATTERN-AUDIT-2026-11-10.md).
 import { DEFAULT_LOADOUT, LOADOUT_ORDER, loadoutById, recoveryForRun, type LoadoutId } from "@/game/cc/loadout";
@@ -1731,6 +1733,16 @@ export default function GameCanvas() {
     if (phase !== "running" || paused) return;
     sfx.sector(sectorKind);
   }, [sectorKind, phase, paused]);
+  // MUSIC (#10 depth): the trailer's four biome sections, played while the run
+  // is live (docs/MUSIC.md). Same gate as the sector cue — running and not
+  // paused — so the bed can never play under a dialog or a death panel, and a
+  // biome change cross-fades instead of cutting. It rides the existing shared
+  // AudioContext, so mute and the volume slider already apply: no new setting.
+  useEffect(() => {
+    if (phase === "running" && !paused) startMusic(biomeId ?? "temperate");
+    else stopMusic();
+  }, [phase, paused, biomeId]);
+  useEffect(() => stopMusic, []);
   const canSubmit = Boolean(data?.runToken) && !archive; // archive = practice (H1)
   // Death Card mint gate — wallet-only + today's runs only (the SERVER enforces
   // both again; this gate just keeps the button honest in the UI).
