@@ -26,6 +26,12 @@
  *       HEADED=1  (watch it play)
  *
  * Exit: 0 = graduated · 1 = did not graduate · 2 = environment/setup problem.
+ *
+ * VISIBILITY — this file is a regression tool, NOT shippable content. It lives here
+ * so the summit proof stays re-runnable by any agent or reviewer, but it must move
+ * to the private archive (with its `!/scripts/summit-bot.ts` .gitignore negation)
+ * before the repository goes public or the ranked lane accepts real submissions.
+ * Track it as docs/OPEN-ITEMS.md §O-10 — the "why" and the checklist are there.
  */
 import { chromium } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";

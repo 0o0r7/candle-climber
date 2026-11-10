@@ -30,6 +30,7 @@ open TODOs carried from the previous passes.
 | O-7 | Summit / closing bell never played by a human | engine search proved reachable, not playable by hand | needs one human session | `OPEN` |
 | O-8 | Build choice on the **ranked** lane | per-player forgiveness would touch a shared board | owner call | `DEFERRED` (owner) |
 | O-9 | Cross-device career profile | needs a server identity | owner call (auth surface) | `DEFERRED` (owner) |
+| O-10 | `scripts/summit-bot.ts` sits in the **public** tree | it is a solver: it hands out a summit-clearing input line | keep it for regression now; move to the private archive before the repo/board goes public | `DEFERRED` (coder agent) |
 
 ---
 
@@ -231,6 +232,43 @@ splits an already thin population). Needs a product call, not code.
 has is wallet-optional by design, so a server-side career means deciding whether
 career follows a wallet, an account, or stays local. No code change is honest
 before that decision.
+
+## O-10 · `scripts/summit-bot.ts` must move to the private archive before public release — DEFERRED (coder agent)
+
+**Why it is committed today.** The bot is the only *mechanical* proof that the
+closing bell is playable, not merely reachable (O-7). It plans with the shipped
+`RivalBot` + `Planner` against the same `/api/launchpad` payload the page fetches,
+then replays the generated tick table through the page's own keyboard handler —
+nothing writes engine state. Living next to the engine is what lets any future
+agent or reviewer re-run the proof:
+
+```bash
+docker compose -f docker-compose.base44.yml exec -T web \
+  env GAME_URL="https://3000-<preview-host>/play?renderer=v2" bun scripts/summit-bot.ts
+# exit 0 = graduated · 1 = did not graduate · 2 = environment problem
+```
+
+**Why it cannot ship in a public repo.** It is a *solver*, not content. Anyone
+reading it can extract a summit-clearing input line, and it documents precisely
+how the planner values terrain — the same edge the rival uses. Next to a public
+leaderboard that is a fairness hole, not a "game feel" spoiler.
+
+**The action — for the coder agent, before either trigger fires** (the repository
+becomes public, **or** the ranked lane accepts real submissions):
+
+1. move `scripts/summit-bot.ts` — and its `.gitignore` negation
+   (`!/scripts/summit-bot.ts`) — into the **private archive** that already holds
+   the internal audits and runbooks;
+2. leave this section (and its reproduction command) in place as the pointer, so
+   the proof stays discoverable from the public tree;
+3. carry the exit-code check into the release gate run from the private checkout —
+   regression coverage must not disappear together with the file;
+4. until then do **not** link the script from the site, the README, the showcase
+   copy, or any public post.
+
+**Verified state:** committed in `3729758`; re-run 2026-11-10 on the launchpad
+chart (seed `2026-11-10 · MONKE`) → `plan 60 candles · 755 pts`, `graduated: true`,
+`died: false`, zero console/page errors, ~29 s of replayed play.
 
 ---
 
