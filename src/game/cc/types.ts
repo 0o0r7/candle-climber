@@ -85,4 +85,7 @@ export interface RunResult {
   /** W4 graduation arc: milestone flags carried into the death card + UI. */
   graduated?: boolean;
   world2?: boolean;
+  /** P0.4 quality axis (game/cc/style.ts): risky late hops + forgiveness saves.
+   *  Optional — absent means "no style events", never "unknown". */
+  style?: number;
 }

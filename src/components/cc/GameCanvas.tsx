@@ -844,6 +844,7 @@ export default function GameCanvas() {
             candleIndex: eng.candlesPassed,
             graduated: true,
             world2: eng.world2,
+            style: eng.style,
           });
           setHud({ score: Math.floor(eng.score), combo: 0, candles: eng.candlesPassed });
           // P7.1: local verdict at the summit (rival is frozen while panels are up).
@@ -986,6 +987,7 @@ export default function GameCanvas() {
           candleIndex: prevEng.candlesPassed,
           graduated: true,
           world2: prevEng.world2,
+          style: prevEng.style,
         },
         false,
       );
@@ -2048,7 +2050,7 @@ export default function GameCanvas() {
             <div className="cc-death-score">
               <span className="cc-death-num">{result.score.toLocaleString()}</span>
               <span className="cc-death-sub">
-                {result.candlesPassed} candles · best streak x{result.bestStreak} · PB {best.toLocaleString()}
+                {result.candlesPassed} candles · best streak x{result.bestStreak} · style {result.style ?? 0} · PB {best.toLocaleString()}
               </span>
             </div>
             {verdict && <p className="cc-vs-verdict" role="status">{verdict}</p>}
@@ -2093,7 +2095,7 @@ export default function GameCanvas() {
             <div className="cc-death-score">
               <span className="cc-death-num">{result.score.toLocaleString()}</span>
               <span className="cc-death-sub">
-                {result.candlesPassed} candles · best streak x{result.bestStreak} · PB {best.toLocaleString()}
+                {result.candlesPassed} candles · best streak x{result.bestStreak} · style {result.style ?? 0} · PB {best.toLocaleString()}
               </span>
             </div>
             {rivalGap > 0 && top && (

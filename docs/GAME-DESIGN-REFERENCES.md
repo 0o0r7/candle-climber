@@ -21,7 +21,7 @@ recurring across small-session arcade games:
 |---|---|---|---|
 | 1 | **Climax / set-piece** | partial — the summit now has a gap-free approach and the chart is paced in named sectors (P0.2); it is still a landing, not an encounter | `game/cc/director.ts`, [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
 | 2 | **Build choice** | absent — the daily mutation is imposed, not chosen | `game/cc/mutations.ts` |
-| 3 | **Quality score** | absent — score = candles × combo × rush | `lib/scoring.ts` |
+| 3 | **Quality score** | present — STYLE (late hops + forgiveness saves) sits *beside* the score, not inside it | `game/cc/style.ts`, [`STYLE-SCORE.md`](STYLE-SCORE.md) |
 | 4 | **Modes** | present — crypto / stocks / launchpad × 4 timeframes + archive | `lib/market-selector.ts` |
 | 5 | **Meta-progression** | weak — 10 achievements, localStorage only | `lib/achievements.ts` |
 | 6 | **Inputs** | minimal — jump + RUSH, no gamepad | `components/cc/GameCanvas.tsx` |
@@ -30,9 +30,18 @@ recurring across small-session arcade games:
 | 9 | **Social** | present — async duel, ghost, rival bot, boards | `game/cc/duel.ts`, `ghost.ts`, `rival/` |
 | 10 | **Polish** | half — particles/shake/slow-mo, 5 synth SFX, no music | `game/cc/sound.ts`, `render-v2.ts` |
 
-The patterns worth building next are the two the game scores worst on —
-**quality score (#3)** and **build choice (#2)** — plus the measurement that
-tells you whether either worked (see §2).
+### The P0 build queue (updated 2026-11-10)
+
+| Item | What it produces | Status |
+|---|---|---|
+| P0.1 | run telemetry intake + the `/ops` death histogram (§2) | **shipped** — [`TELEMETRY.md`](TELEMETRY.md) |
+| P0.2 | deterministic difficulty director: sectors, safe opening, summit run-in | **shipped** — [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
+| P0.3 | air jump (second jump) with the same forgiveness windows | **next — not started.** Not a free add: extra reach changes the `MAX_UP` fairness clamp (`level.ts`), the rival bot's planner and every existing difficulty prior, so it needs its own re-tuning pass and a before/after death histogram. |
+| P0.4 | STYLE quality axis: `LATE` hops (+3) and forgiveness `SAVE`s (+2) | **shipped** — [`STYLE-SCORE.md`](STYLE-SCORE.md) |
+
+With quality score now present, the pattern the game still scores worst on is
+**build choice (#2)** — plus the measurement that tells you whether any of these
+changes worked (§2).
 
 ## 2. Measurement and level analytics
 

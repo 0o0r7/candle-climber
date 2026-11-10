@@ -4,6 +4,7 @@ import { CANDLE_W, PLATFORM_W, WORLD2_CHUNK, genWorld2Chunk } from "./level";
 import { BASE_MODS, type MutationMods } from "./mutations";
 import { BASE_GAIN, WORLD2_GAIN, COMBO_CAP, COMBO_STEP, RUSH_GAIN } from "@/lib/scoring";
 import { hashString, mulberry32 } from "./rng";
+import { STYLE_COLOR, STYLE_LATE_RUNWAY, styleGain, type StyleEvent } from "./style";
 
 export const VIEW_W = 800; // logical units (canvas is scaled to fit)
 export const VIEW_H = 480;
@@ -84,6 +85,10 @@ export class Engine {
   time = 0;
   // run stats
   score = 0; candlesPassed = 0; streak = 0; bestStreak = 0;
+  // P0.4 STYLE (quality axis): LATE hops + forgiveness SAVEs. Input-derived
+  // only, so the tally is replay-exact and never touches `score`.
+  style = 0; styleLate = 0; styleSave = 0;
+  private pressedAirborne = false; // last press started off the ground
   lastLandUp: boolean | null = null;
   dead = false; deathCause: DeathCause = 'fell'; deathT = 0;
   shake = 0;
@@ -117,7 +122,12 @@ export class Engine {
 
   get playerScreenX() { return this.px - this.camX; }
 
-  press() { this.buffer = BUFFER; this.jumpHeld = true; this.jumpCut = false; }
+  press() {
+    // P0.4: remember where the press STARTED. A jump that only fires because
+    // of coyote time / the input buffer is a SAVE (see grantStyle).
+    this.pressedAirborne = !this.grounded;
+    this.buffer = BUFFER; this.jumpHeld = true; this.jumpCut = false;
+  }
   release() {
     this.jumpHeld = false;
     if (this.vy < 0 && !this.jumpCut) { this.vy *= JUMP_CUT; this.jumpCut = true; }
@@ -144,6 +154,19 @@ export class Engine {
     }
   }
 
+  /** P0.4: add one STYLE event and telegraph it in gold. Score is untouched. */
+  private grantStyle(kind: StyleEvent) {
+    const pts = styleGain(kind);
+    this.style += pts;
+    if (kind === "late") this.styleLate++; else this.styleSave++;
+    this.spawnFloat(
+      this.px + PLAYER_W / 2,
+      this.py - 20,
+      `${kind === "late" ? "LATE" : "SAVE"} +${pts}`,
+      STYLE_COLOR,
+    );
+  }
+
   private die(cause: DeathCause) {
     if (this.dead) return;
     this.dead = true;
@@ -159,6 +182,7 @@ export class Engine {
       candleIndex: this.candlesPassed,
       graduated: this.graduated,
       world2: this.world2,
+      style: this.style,
     });
   }
 
@@ -303,8 +327,17 @@ export class Engine {
 
     // buffered jump execution
     if (this.buffer > 0 && (this.grounded || this.coyote > 0)) {
+      // P0.4 STYLE, measured BEFORE the takeoff platform is cleared: runway is
+      // the px of platform left ahead of the player's right edge — a jump from
+      // the last STYLE_LATE_RUNWAY px is a LATE hop (rode it to the edge).
+      const takeoff = this.grounded ? this.groundPlat : null;
+      const runway = takeoff ? takeoff.x + takeoff.w - (this.px + PLAYER_W) : Infinity;
+      const rescue = this.pressedAirborne; // press began off the ground
       this.vy = -JUMP_V * this.mods.jump;
       this.grounded = false; this.groundPlat = null; this.coyote = 0; this.buffer = 0; this.jumpCut = false;
+      this.pressedAirborne = false;
+      if (rescue) this.grantStyle("save");
+      else if (runway <= STYLE_LATE_RUNWAY) this.grantStyle("late");
       this.cb.onSfx?.("jump");
     }
 

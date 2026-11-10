@@ -21,6 +21,7 @@
 | External design sources behind current decisions (feel, difficulty, retention) | [`GAME-DESIGN-REFERENCES.md`](GAME-DESIGN-REFERENCES.md) |
 | Run telemetry contract + how to read the death histogram | [`TELEMETRY.md`](TELEMETRY.md) |
 | The daily chart's authored pacing (sectors, invariants, evidence) | [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
+| The STYLE quality axis (late hops, forgiveness saves, fairness) | [`STYLE-SCORE.md`](STYLE-SCORE.md) |
 | Review gates for every PR | [`PR-CHECKLIST.md`](PR-CHECKLIST.md) |
 | Persian glossary for chat | [`GLOSSARY-FA.md`](GLOSSARY-FA.md) |
 
