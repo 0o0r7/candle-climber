@@ -45,6 +45,9 @@ import {
 // shareUrl() mints /play?ref=… links, shareRef() joins with "&" so a duel
 // link + ref parse as TWO params, not one malformed blob (see share.ts).
 import { shareRef, shareUrl } from "@/game/cc/share";
+// P0.2 difficulty director — the day's authored pacing, shown as a sector
+// banner when the player crosses into a new sector (pure index → sector).
+import { sectorAt } from "@/game/cc/director";
 import type { CandleData, RunResult } from "@/game/cc/types";
 import { TUTORIAL_KEY } from "@/lib/tutorial-key";
 import Tutorial from "@/components/cc/Tutorial";
@@ -1599,6 +1602,9 @@ export default function GameCanvas() {
   const weatherChip = v2 && weather && (weather.wind >= 0.15 || weather.fog >= 0.3)
     ? `${weather.windLabel} · ${weather.fogLabel}`
     : null;
+  // P0.2 difficulty director: which authored sector the run is in right now.
+  // Derived from candles passed (pure), so it never adds engine state.
+  const sector = data ? sectorAt(hud.candles, data.candles.length) : null;
   const canSubmit = Boolean(data?.runToken) && !archive; // archive = practice (H1)
   // Death Card mint gate — wallet-only + today's runs only (the SERVER enforces
   // both again; this gate just keeps the button honest in the UI).
@@ -1740,6 +1746,15 @@ export default function GameCanvas() {
           {hud.combo > 1 && <div className="cc-chip cc-chip-combo">x{(1 + Math.min(hud.combo, 12) * 0.5).toFixed(1)}</div>}
         </div>
       </div>
+
+      {/* P0.2 sector banner — the director's beat, keyed so each new sector
+          replays the fade (telegraph only: no score, no rule change). */}
+      {sector && phase === "running" && !paused && (
+        <div className="cc-sector-banner" key={sector.id} role="status">
+          <span className="cc-sector-name">{sector.name}</span>
+          <span className="cc-sector-hint">{sector.hint}</span>
+        </div>
+      )}
 
       {/* Canvas stage */}
       <div

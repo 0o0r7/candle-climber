@@ -832,6 +832,44 @@ button.cc-wallet-chip { cursor: pointer; }
   background: rgba(106, 99, 200, 0.12);
   white-space: nowrap;
 }
+/* ---- P0.2 difficulty director — sector entry banner ----
+   Telegraph, not reward: it names the authored beat the player just entered
+   (MARKET OPEN / TREND / SQUEEZE / CONSOLIDATION / THE SUMMIT) and fades out.
+   Keyed on the sector id in JSX, so each boundary replays this animation. */
+.cc-sector-banner {
+  position: absolute;
+  top: 62px;
+  left: 50%;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+  pointer-events: none;
+  animation: cc-sector-in 2.8s ease-out forwards;
+}
+.cc-sector-name {
+  font-family: var(--cc-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cc-lime);
+}
+.cc-sector-hint {
+  font-family: var(--cc-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--cc-faint);
+}
+@keyframes cc-sector-in {
+  0%   { opacity: 0; transform: translate(-50%, -8px); }
+  12%  { opacity: 1; transform: translate(-50%, 0); }
+  72%  { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -6px); }
+}
+
 .cc-mut-banner {
   display: flex;
   align-items: baseline;
@@ -1580,6 +1618,12 @@ button.cc-wallet-chip { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   .cc-burn-flame, .cc-grad-flame, .cc-gcf { animation: none; }
   .cc-gcf { opacity: 0.5; }
+  /* the sector telegraph stays readable, just without the slide/fade */
+  .cc-sector-banner { animation: none; opacity: 0.9; transform: translate(-50%, 0); }
+}
+@media (max-width: 640px) {
+  .cc-sector-name { font-size: 16px; }
+  .cc-sector-hint { font-size: 10px; }
 }
 
 /* E2.5 airdrop board page (/airdrop) */

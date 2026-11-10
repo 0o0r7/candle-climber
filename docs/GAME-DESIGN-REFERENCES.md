@@ -19,7 +19,7 @@ recurring across small-session arcade games:
 
 | # | Pattern | Candle Climber status (2026-11-10) | Evidence |
 |---|---|---|---|
-| 1 | **Climax / set-piece** | partial — the summit is a platform, not an encounter | `game/cc/level.ts` (`summit` flag) |
+| 1 | **Climax / set-piece** | partial — the summit now has a gap-free approach and the chart is paced in named sectors (P0.2); it is still a landing, not an encounter | `game/cc/director.ts`, [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
 | 2 | **Build choice** | absent — the daily mutation is imposed, not chosen | `game/cc/mutations.ts` |
 | 3 | **Quality score** | absent — score = candles × combo × rush | `lib/scoring.ts` |
 | 4 | **Modes** | present — crypto / stocks / launchpad × 4 timeframes + archive | `lib/market-selector.ts` |

@@ -1,6 +1,7 @@
 // Level builder: candles -> playable platforms (rolling-normalized heights)
 import type { Candle, Platform } from "./types";
 import { hashString, mulberry32 } from "./rng";
+import { sectorAt, INTRO_CANDLES } from "./director";
 
 export const CANDLE_W = 96;
 export const PLATFORM_W = 72; // was 62 — G2: wider caps, less dead space between candles
@@ -21,6 +22,10 @@ export function buildPlatforms(candles: Candle[], seedStr: string): Platform[] {
   const plats: Platform[] = [];
   const closeYs: number[] = [];
   const W = 40; // rolling normalization window
+  // P0.2 difficulty director: consecutive gaps are never allowed (one gap is a
+  // jump; two in a row would need a 200px+ leap that the speed curve cannot pay
+  // for early in the chart). Tracked across the loop, pure per (candles, seed).
+  let gapRun = 0;
 
   for (let i = 0; i < candles.length; i++) {
     const lo0 = Math.max(0, i - W + 1);
@@ -58,8 +63,22 @@ export function buildPlatforms(candles: Candle[], seedStr: string): Platform[] {
 
     const hiY = Math.min(cY, norm(candles[i].h));
     const loY = Math.max(cY, norm(candles[i].l));
-    const gap = launch || ease ? false : !tiny && gapRnd() < 0.13; // was 0.18 — G2: full gaps rarer
-    const crumble = launch ? false : !up;
+    // P0.2: the gap chance is authored per sector (director.ts) instead of one
+    // global 0.13. The RNG is drawn exactly once per non-pad platform in a
+    // state-free stream (no conditional draws), so the level stays a pure
+    // function of (candles, seed) — only the compared threshold changed.
+    let gap = false;
+    if (!launch && !ease) {
+      const roll = gapRnd(); // one draw per platform — a fixed, state-free stream
+      const chance = sectorAt(i, candles.length).gap;
+      gap = !tiny && gapRun === 0 && roll < chance;
+    }
+    gapRun = gap ? gapRun + 1 : 0;
+    // P0.2 SAFE OPENING (Thorson grammar: teach in a safe space): the intro is
+    // a solid, non-folding runway. Before this the first red candles sat right
+    // at the pad edge and folded in 0.15-0.26s — the measured death point of
+    // every opening run (bot and human alike). Red still means fragile after it.
+    const crumble = launch || i < INTRO_CANDLES ? false : !up;
     const w = launch ? CANDLE_W : gap ? 0 : PLATFORM_W;
 
     plats.push({
