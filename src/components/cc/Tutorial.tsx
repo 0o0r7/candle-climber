@@ -19,7 +19,7 @@ const steps: Step[] = [
   {
     visual: "jump",
     title: "Tap to jump",
-    body: "Tap the screen or press Space to jump. Hold longer for a higher jump. Release early for a shorter hop. Time your jumps to the gaps between candles.",
+    body: "Tap the screen or press Space to jump. Hold longer for a higher jump. Release early for a shorter hop. One air jump is in hand each time you leave a ledge — press again mid-air to rescue a short arc, and landing refills it.",
   },
   {
     visual: "rush",

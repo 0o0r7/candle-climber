@@ -36,7 +36,7 @@ recurring across small-session arcade games:
 |---|---|---|
 | P0.1 | run telemetry intake + the `/ops` death histogram (§2) | **shipped** — [`TELEMETRY.md`](TELEMETRY.md) |
 | P0.2 | deterministic difficulty director: sectors, safe opening, summit run-in | **shipped** — [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
-| P0.3 | air jump (second jump) with the same forgiveness windows | **next — not started.** Not a free add: extra reach changes the `MAX_UP` fairness clamp (`level.ts`), the rival bot's planner and every existing difficulty prior, so it needs its own re-tuning pass and a before/after death histogram. |
+| P0.3 | air jump (second jump) with the same forgiveness windows | **shipped (engine)** — [`AIR-JUMP.md`](AIR-JUMP.md). The re-tuning risk was removed by arithmetic instead of tuning: `AIR_JUMP_V = 660` puts the second jump's reach (~104px) **under** `MAX_UP` (112px), so it can never clear an authored step — the clamp, the terrain and every difficulty prior stay untouched (pinned by `test/airjump.test.ts`). Forgiveness is parity by order: coyote keeps the air jump, a no-jump-left press stays buffered. Still open: the rival bot does not spend it (deliberate balance change, needs the P0.5 histogram). |
 | P0.4 | STYLE quality axis: `LATE` hops (+3) and forgiveness `SAVE`s (+2) | **shipped** — [`STYLE-SCORE.md`](STYLE-SCORE.md) |
 
 With quality score now present, the pattern the game still scores worst on is

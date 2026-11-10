@@ -20,6 +20,17 @@ export const JUMP_V = 815;      // was 760 — reach ≈ 158px, more margin over
 export const JUMP_CUT = 0.72;   // release early = short hop (variable-height jump)
 export const COYOTE = 0.12;     // was 0.09
 export const BUFFER = 0.16;     // was 0.12
+// P0.3 air jump (second jump): ONE recovery impulse per airborne period.
+// Deliberately WEAKER than the ground jump, and the fairness law is arithmetic:
+//   air reach = AIR_JUMP_V² / (2·GRAVITY) ≈ 104px  <  MAX_UP (112px, level.ts)
+// So the second jump can never substitute for the first one the level was
+// authored around: every authored step still needs the ground jump, and the air
+// jump only buys forgiveness (fix a bad arc, catch a lower platform). That is
+// what keeps the daily chart comparable — same terrain, same difficulty priors,
+// no MAX_UP re-tune — see docs/AIR-JUMP.md.
+export const AIR_JUMPS = 1;
+export const AIR_JUMP_V = 660;  // ≈ 104px of rise — under MAX_UP by design
+export const AIR_JUMP_COLOR = "#8FB9FF"; // distinct from score (lime) and STYLE (gold)
 const CRUMBLE_TIME = 0.26;
 // P3.6 skill-jump controls (PLATFORMER-UX-RESEARCH §5/§6 contract):
 export const RUSH_SPEED = 1.28;   // SHIFT held → camera ×1.28 (opt-in risk, may exceed the un-rushed cap)
@@ -72,6 +83,8 @@ export class Engine {
   py = 0; vy = 0;
   grounded = false; groundPlat: Platform | null = null;
   coyote = 0; buffer = 0; jumpHeld = false; jumpCut = false;
+  // P0.3: second jumps left in this airborne period (refilled on every landing).
+  airJumpsLeft = AIR_JUMPS;
   // P3.6 RUSH: opt-in risk input — hold to trade safety for height-speed.
   // Deterministic (input state + fixed timestep), W5-pinned.
   rush = false;
@@ -299,6 +312,7 @@ export class Engine {
           if (!this.grounded) this.cb.onSfx?.("land");
           this.grounded = true;
           this.coyote = COYOTE;
+          this.airJumpsLeft = AIR_JUMPS; // P0.3: the recovery verb is per airborne period
           this.groundPlat = p;
           this.lastGroundY = p.y;
           if (p.summit) this.graduate();
@@ -338,6 +352,17 @@ export class Engine {
       this.pressedAirborne = false;
       if (rescue) this.grantStyle("save");
       else if (runway <= STYLE_LATE_RUNWAY) this.grantStyle("late");
+      this.cb.onSfx?.("jump");
+    } else if (this.buffer > 0 && this.airJumpsLeft > 0) {
+      // P0.3 air jump. Same forgiveness order as the ground jump: the buffer is
+      // read AFTER coyote, so a press coyote cannot save still gets the second
+      // jump, and a press with no jump left stays buffered for the landing.
+      // No STYLE event: this is a verb the player spent, not a fudged timing
+      // window — minting SAVE for it would pay out for a double-press every hop.
+      this.airJumpsLeft--;
+      this.vy = -AIR_JUMP_V * this.mods.jump;
+      this.buffer = 0; this.jumpCut = false; this.pressedAirborne = false;
+      this.spawnFloat(this.px + PLAYER_W / 2, this.py - 18, "AIR", AIR_JUMP_COLOR);
       this.cb.onSfx?.("jump");
     }
 
