@@ -264,8 +264,15 @@
   --cc-card: #16191C;
   --cc-hairline: #24282C;
   --cc-lime: #CCFF00;
-  --cc-up: #5BD08A;
-  --cc-down: #E07856;
+  /* mirrors game/cc/palette.ts — the canvas pair, retuned 2026-11-10 for
+     color-vision separation (docs/ACCESSIBILITY-PALETTE.md). CSS cannot import
+     TS: change BOTH here and in palette.ts, or test/palette.test.ts will not
+     cover the UI that teaches the color. */
+  --cc-up: #66DE9A;
+  --cc-down: #A24C2F;
+  /* text/small-accent red — 6.25:1 on the bg; the surface above is a shape
+     color and is too dark for small text (mirrors ACCENT_DOWN in palette.ts) */
+  --cc-down-ink: #E07856;
   --cc-ink: #0E1400;
   --cc-purple: #6A63C8;
   --cc-faint: #8A9099; /* G5: 5.7:1 on the dark bg — was 3.07:1 (Lighthouse a11y) */
@@ -474,7 +481,7 @@ button.cc-wallet-chip { cursor: pointer; }
   font-family: var(--cc-display);
   font-weight: 700;
   font-size: clamp(30px, 6vw, 42px);
-  color: var(--cc-down);
+  color: var(--cc-down-ink);
   letter-spacing: 0.04em;
 }
 .cc-death-num {
@@ -944,7 +951,7 @@ button.cc-wallet-chip { cursor: pointer; }
   color: var(--cc-faint);
 }
 .cc-realmove-row b.up { color: var(--cc-up); }
-.cc-realmove-row b.down { color: var(--cc-down); }
+.cc-realmove-row b.down { color: var(--cc-down-ink); }
 .cc-realmove-sep { color: var(--cc-faint); }
 
 /* ---- W4: graduation arc (summit → GRADUATED → world 2) ---- */
@@ -1196,7 +1203,7 @@ button.cc-wallet-chip { cursor: pointer; }
 }
 .cc-arch-tag.calm { color: #AEB6BC; border-color: rgba(174, 182, 188, 0.3); }
 .cc-arch-tag.rocky { color: #fff; border-color: rgba(255, 255, 255, 0.28); }
-.cc-arch-tag.brutal { color: var(--cc-down); border-color: rgba(224, 120, 86, 0.4); }
+.cc-arch-tag.brutal { color: var(--cc-down-ink); border-color: rgba(224, 120, 86, 0.4); }
 .cc-arch-tag.legendary { color: #FFD24A; border-color: rgba(255, 210, 74, 0.45); background: rgba(255, 210, 74, 0.08); }
 /* VD-7 fix: the honest lazy placeholder reads as loading, not broken */
 .cc-arch-tag:not(.calm):not(.rocky):not(.brutal):not(.legendary) {
@@ -1748,7 +1755,7 @@ button.cc-wallet-chip { cursor: pointer; }
   letter-spacing: 0.12em;
   color: var(--cc-up);
 }
-.cc-tut-candle-label.coral { color: var(--cc-down); }
+.cc-tut-candle-label.coral { color: var(--cc-down-ink); }
 .cc-tut-jump {
   display: flex;
   align-items: flex-end;
@@ -2666,7 +2673,7 @@ a.cc-btn { text-decoration: none; display: inline-flex; align-items: center; jus
   padding: 10px 14px;
   cursor: pointer;
 }
-.cc-stats-wipe:hover { color: var(--cc-down); border-color: rgba(224, 120, 86, 0.4); }
+.cc-stats-wipe:hover { color: var(--cc-down-ink); border-color: rgba(224, 120, 86, 0.4); }
 
 /* ===================== /leaderboard public board (side 3) ================= */
 .cc-lb-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 0; }

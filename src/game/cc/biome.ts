@@ -7,6 +7,7 @@
 // only VISUALIZE the biome; no biome effect may break market legibility.
 import type { Candle } from "./types";
 import { hashString } from "./rng";
+import { platformRgba } from "./palette";
 
 export type BiomeId = "temperate" | "desert" | "tundra" | "storm";
 
@@ -39,7 +40,7 @@ const BIOMES: Record<BiomeId, Biome> = {
     particleCount: 26,
     particleSpeed: 1,
     particleType: "spark",
-    abyssColor: "rgba(224,120,86,0.10)",
+    abyssColor: platformRgba(false, 0.1),
   },
   desert: {
     id: "desert",
@@ -75,7 +76,7 @@ const BIOMES: Record<BiomeId, Biome> = {
     particleCount: 40,
     particleSpeed: 2.5,
     particleType: "rain",
-    abyssColor: "rgba(224,120,86,0.14)",
+    abyssColor: platformRgba(false, 0.14),
   },
 };
 

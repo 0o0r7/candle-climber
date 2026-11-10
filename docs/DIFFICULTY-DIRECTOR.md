@@ -74,4 +74,7 @@ score, no rule change, no reward — telegraphing only.
   leaderboard, ghosts and duels live in the memory store); once real seasons
   exist, a change like this needs a level version in the seed string.
 - Density numbers are design priors, not measurements: the `/ops` death
-  histogram (P0.1) is what will confirm or reject them once real runs exist.
+  histogram (P0.1) and its sector table (P0.5, `docs/TELEMETRY.md` §3.2) are
+  what confirm or reject them once real runs exist. The sector table is
+  exposure-normalized (`deaths ÷ runs that reached that kind`) and is derived
+  from this file's `sectorAt()`, so it can never disagree with the terrain.

@@ -22,6 +22,7 @@
 | Run telemetry contract + how to read the death histogram | [`TELEMETRY.md`](TELEMETRY.md) |
 | The daily chart's authored pacing (sectors, invariants, evidence) | [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
 | The STYLE quality axis (late hops, forgiveness saves, fairness) | [`STYLE-SCORE.md`](STYLE-SCORE.md) |
+| Why the up/down candle pair was retuned for color-vision deficiencies (measured) | [`ACCESSIBILITY-PALETTE.md`](ACCESSIBILITY-PALETTE.md) |
 | The air jump: why the second jump is a forgiveness verb, not extra reach | [`AIR-JUMP.md`](AIR-JUMP.md) |
 | Review gates for every PR | [`PR-CHECKLIST.md`](PR-CHECKLIST.md) |
 | Persian glossary for chat | [`GLOSSARY-FA.md`](GLOSSARY-FA.md) |

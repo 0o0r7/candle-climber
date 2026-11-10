@@ -1,6 +1,7 @@
 // Canvas renderer — locked vibe/vibe design language
 import { Engine, VIEW_W, VIEW_H, type FloatText } from "./engine";
 import { CANDLE_W } from "./level";
+import { ACCENT_DOWN, PLATFORM_UP, PLATFORM_DOWN, platformCapColor, platformRgba } from "./palette";
 import { drawCandleRain } from "./rain";
 import { drawRival } from "./rival/rival-render";
 import { drawGhost } from "./ghost-render";
@@ -14,9 +15,9 @@ export const COLORS = {
   card: "#16191C",
   hairline: "#24282C",
   lime: "#CCFF00",
-  up: "#5BD08A",
+  up: PLATFORM_UP,
   upDeep: "#0F7A40",
-  down: "#E07856",
+  down: PLATFORM_DOWN,
   ink: "#0E1400",
   purple: "#6A63C8",
   faint: "#5E636B",
@@ -63,7 +64,7 @@ export function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, camX: n
   const wx = x + p.w / 2;
   const wTop = p.wickTop - camY;
   const wBot = p.wickBottom - camY;
-  ctx.strokeStyle = p.up ? "rgba(91,208,138,0.45)" : "rgba(224,120,86,0.45)";
+  ctx.strokeStyle = platformRgba(p.up, 0.45);
   ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(wx, wTop);
@@ -86,7 +87,7 @@ export function drawPlatform(ctx: CanvasRenderingContext2D, p: Platform, camX: n
   ctx.stroke();
 
   // platform surface cap (the walkable top)
-  const capColor = p.up ? COLORS.lime : "#F0A48E";
+  const capColor = platformCapColor(p.up);
   ctx.fillStyle = capColor;
   roundRect(ctx, cx - 2, p.y - camY - 4, p.w + 4, 8, 4);
   ctx.fill();
@@ -144,8 +145,8 @@ function drawPlayer(ctx: CanvasRenderingContext2D, e: Engine) {
   ctx.strokeStyle = COLORS.ink;
   ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(x + 14, y + 6); ctx.lineTo(x + 20, y + 6); ctx.stroke();
-  // scarf
-  ctx.fillStyle = COLORS.down;
+  // scarf — the coral accent, not the (darker) platform surface
+  ctx.fillStyle = ACCENT_DOWN;
   roundRect(ctx, x - 2 + (e.grounded ? 0 : -4), y + 20, 8, 5, 2);
   ctx.fill();
   ctx.restore();
@@ -227,7 +228,7 @@ function drawBackdrop(ctx: CanvasRenderingContext2D, camX: number, camY: number)
   // depth glow at bottom (the "abyss")
   const g = ctx.createLinearGradient(0, VIEW_H - 130, 0, VIEW_H);
   g.addColorStop(0, "rgba(12,14,16,0)");
-  g.addColorStop(1, "rgba(224,120,86,0.10)");
+  g.addColorStop(1, platformRgba(false, 0.1));
   ctx.fillStyle = g;
   ctx.fillRect(0, VIEW_H - 130, VIEW_W, 130);
 }

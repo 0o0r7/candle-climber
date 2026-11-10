@@ -197,6 +197,28 @@ export default async function OpsPage({
         )}
       </Block>
 
+      <Block title="STYLE — 7D (P0.4 · measured by P0.5)">
+        <Row k="engaged runs" v={`${tele?.style.runs ?? 0} · ${Math.round((tele?.style.share ?? 0) * 100)}%`} note="runs with ≥1 LATE hop or SAVE" />
+        <Row k="mean / median" v={`${(tele?.style.mean ?? 0).toFixed(1)} / ${tele?.style.median ?? 0}`} note="STYLE points per finished run (zeros included)" />
+        <Row k="p90 (engaged)" v={String(tele?.style.p90 ?? 0)} note="the precise tail of players who use the axis" />
+        <Row k="events" v={`LATE ${tele?.style.late ?? 0} · SAVE ${tele?.style.save ?? 0}`} note="edge hops · forgiveness rescues" />
+      </Block>
+
+      <Block title="SECTOR DEATHS — 7D (P0.2 × P0.5)">
+        {(tele?.sectors ?? []).filter((s) => s.reached > 0).length === 0 ? (
+          <Row k="sample" v="0 runs" note="needs finished runs with a known level length" />
+        ) : (
+          (tele?.sectors ?? []).filter((s) => s.reached > 0).map((s) => (
+            <Row
+              key={s.kind}
+              k={s.label}
+              v={<><Bar n={Math.round(s.rate * 100)} max={100} /> {s.deaths}/{s.reached} · {Math.round(s.rate * 100)}%</>}
+              note="ended here / runs that reached it — exposure-normalized"
+            />
+          ))
+        )}
+      </Block>
+
       <Block title="WEIGHTS LEDGER (E2.2–E2.6)">
         <Row k="run rows" v={String(wStats.runRows)} note={`${wStats.todayRuns} today · ${wStats.weekRuns} last-7d`} />
         <Row k="event rows" v={String(wStats.eventRows)} note="practice / prediction / vault" />

@@ -88,4 +88,8 @@ export interface RunResult {
   /** P0.4 quality axis (game/cc/style.ts): risky late hops + forgiveness saves.
    *  Optional — absent means "no style events", never "unknown". */
   style?: number;
+  /** P0.5: the same tally split into its two events, so telemetry can tell
+   *  which half of the quality axis players actually use. */
+  styleLate?: number;
+  styleSave?: number;
 }

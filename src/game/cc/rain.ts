@@ -7,6 +7,7 @@
 // (index, engine time, level seed). Same seed + same sim time ⇒ same frame,
 // forever. Time comes from e.time (engine-driven), never the wall clock.
 import { hashString } from "./rng";
+import { platformRgb } from "./palette";
 
 export interface RainGlyph {
   x: number;
@@ -39,7 +40,7 @@ export function drawCandleRain(ctx: CanvasRenderingContext2D, e: { time: number 
   if (!seedStr) return;
   for (let i = 0; i < 34; i++) {
     const g = rainGlyph(i, e.time, seedStr, w, h);
-    const rgb = g.up ? "91,208,138" : "224,120,86"; // same up/down palette as the card/candles
+    const rgb = platformRgb(g.up); // one palette: the card, the candles and this rain
     ctx.strokeStyle = `rgba(${rgb},${(g.alpha * 0.8).toFixed(3)})`;
     ctx.lineWidth = 1;
     ctx.beginPath();

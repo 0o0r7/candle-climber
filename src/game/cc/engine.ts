@@ -5,6 +5,7 @@ import { BASE_MODS, type MutationMods } from "./mutations";
 import { BASE_GAIN, WORLD2_GAIN, COMBO_CAP, COMBO_STEP, RUSH_GAIN } from "@/lib/scoring";
 import { hashString, mulberry32 } from "./rng";
 import { STYLE_COLOR, STYLE_LATE_RUNWAY, styleGain, type StyleEvent } from "./style";
+import { PLATFORM_DOWN, platformColor } from "./palette";
 
 export const VIEW_W = 800; // logical units (canvas is scaled to fit)
 export const VIEW_H = 480;
@@ -196,6 +197,8 @@ export class Engine {
       graduated: this.graduated,
       world2: this.world2,
       style: this.style,
+      styleLate: this.styleLate,
+      styleSave: this.styleSave,
     });
   }
 
@@ -307,7 +310,7 @@ export class Engine {
         if (feet >= p.y && feet - this.vy * dt <= p.y + 14) {
           this.py = p.y - PLAYER_H;
           this.vy = 0;
-          if (!this.grounded) this.spawnParticles(5, this.px + PLAYER_W / 2, p.y, p.up ? "#5BD08A" : "#E07856", 90);
+          if (!this.grounded) this.spawnParticles(5, this.px + PLAYER_W / 2, p.y, platformColor(p.up), 90);
           this.lastLandUp = p.up;
           if (!this.grounded) this.cb.onSfx?.("land");
           this.grounded = true;
@@ -333,7 +336,7 @@ export class Engine {
         p.crumbleT += dt;
         if (p.crumbleT >= this.mods.crumbleTime) {
           p.state = "gone";
-          this.spawnParticles(10, p.x + p.w / 2, p.y, "#E07856", 140);
+          this.spawnParticles(10, p.x + p.w / 2, p.y, PLATFORM_DOWN, 140);
           if (this.groundPlat === p) { this.grounded = false; this.groundPlat = null; this.coyote = 0; }
         }
       }

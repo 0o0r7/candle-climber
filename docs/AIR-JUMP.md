@@ -61,8 +61,10 @@ it unchanged.
   *ground* jump and calls `press()` only from the ground or inside coyote, so it
   simply does not use the second jump. That makes the rival marginally easier to
   beat, which is a **balance** change, not a correctness one — and a balance
-  change needs the before/after death histogram (P0.5) before anyone tunes the
-  bot around it. Tracking it here instead of guessing.
+  change needs a before/after measurement. P0.5 shipped that instrument
+  (`/ops` death histogram + sector table, `docs/TELEMETRY.md`); the bot change
+  itself waits for real runs rather than for code. Tracking it here instead of
+  guessing.
 
 ## Determinism
 

@@ -22,6 +22,16 @@
 // function of (candles, seed).
 export type SectorKind = "intro" | "trend" | "squeeze" | "breather" | "summit";
 
+/** Display name per kind — the banner in-game and the /ops rows read the same
+ *  string (one label, no drift between what players see and what ops reports). */
+export const SECTOR_LABELS: Record<SectorKind, string> = {
+  intro: "MARKET OPEN",
+  trend: "TREND",
+  squeeze: "SQUEEZE",
+  breather: "CONSOLIDATION",
+  summit: "THE SUMMIT",
+};
+
 export interface Sector {
   /** Stable id — changes at every sector boundary (HUD banner key). */
   id: string;
@@ -49,7 +59,7 @@ const ESCALATION_CAP = 3; // …capped: no cycle is harder than this many notche
 const INTRO: Sector = {
   id: "intro",
   kind: "intro",
-  name: "MARKET OPEN",
+  name: SECTOR_LABELS.intro,
   hint: "solid tape · learn the jump and the crumble tell",
   gap: 0,
 };
@@ -57,7 +67,7 @@ const INTRO: Sector = {
 const SUMMIT: Sector = {
   id: "summit",
   kind: "summit",
-  name: "THE SUMMIT",
+  name: SECTOR_LABELS.summit,
   hint: "clean runway to the top · land it",
   gap: 0,
 };
@@ -67,7 +77,7 @@ function trend(cycle: number): Sector {
   return {
     id: `trend-${cycle}`,
     kind: "trend",
-    name: "TREND",
+    name: SECTOR_LABELS.trend,
     hint: "gaps ahead · jump early, land centered",
     gap: 0.12 + k * ESCALATION_STEP,
   };
@@ -78,7 +88,7 @@ function squeeze(cycle: number): Sector {
   return {
     id: `squeeze-${cycle}`,
     kind: "squeeze",
-    name: "SQUEEZE",
+    name: SECTOR_LABELS.squeeze,
     hint: "tight tape · plan two platforms ahead",
     gap: 0.22 + k * ESCALATION_STEP,
   };
@@ -88,7 +98,7 @@ function breather(cycle: number): Sector {
   return {
     id: `breather-${cycle}`,
     kind: "breather",
-    name: "CONSOLIDATION",
+    name: SECTOR_LABELS.breather,
     hint: "breather · rebuild the combo",
     gap: 0.04,
   };

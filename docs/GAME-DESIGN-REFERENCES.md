@@ -21,7 +21,7 @@ recurring across small-session arcade games:
 |---|---|---|---|
 | 1 | **Climax / set-piece** | partial — the summit now has a gap-free approach and the chart is paced in named sectors (P0.2); it is still a landing, not an encounter | `game/cc/director.ts`, [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
 | 2 | **Build choice** | absent — the daily mutation is imposed, not chosen | `game/cc/mutations.ts` |
-| 3 | **Quality score** | present — STYLE (late hops + forgiveness saves) sits *beside* the score, not inside it | `game/cc/style.ts`, [`STYLE-SCORE.md`](STYLE-SCORE.md) |
+| 3 | **Quality score** | present and measured — STYLE (late hops + forgiveness saves) sits *beside* the score, not inside it; `/ops` reports engagement and the LATE/SAVE split (P0.5) | `game/cc/style.ts`, [`STYLE-SCORE.md`](STYLE-SCORE.md), [`TELEMETRY.md`](TELEMETRY.md) |
 | 4 | **Modes** | present — crypto / stocks / launchpad × 4 timeframes + archive | `lib/market-selector.ts` |
 | 5 | **Meta-progression** | weak — 10 achievements, localStorage only | `lib/achievements.ts` |
 | 6 | **Inputs** | minimal — jump + RUSH, no gamepad | `components/cc/GameCanvas.tsx` |
@@ -36,8 +36,9 @@ recurring across small-session arcade games:
 |---|---|---|
 | P0.1 | run telemetry intake + the `/ops` death histogram (§2) | **shipped** — [`TELEMETRY.md`](TELEMETRY.md) |
 | P0.2 | deterministic difficulty director: sectors, safe opening, summit run-in | **shipped** — [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
-| P0.3 | air jump (second jump) with the same forgiveness windows | **shipped (engine)** — [`AIR-JUMP.md`](AIR-JUMP.md). The re-tuning risk was removed by arithmetic instead of tuning: `AIR_JUMP_V = 660` puts the second jump's reach (~104px) **under** `MAX_UP` (112px), so it can never clear an authored step — the clamp, the terrain and every difficulty prior stay untouched (pinned by `test/airjump.test.ts`). Forgiveness is parity by order: coyote keeps the air jump, a no-jump-left press stays buffered. Still open: the rival bot does not spend it (deliberate balance change, needs the P0.5 histogram). |
+| P0.3 | air jump (second jump) with the same forgiveness windows | **shipped (engine)** — [`AIR-JUMP.md`](AIR-JUMP.md). The re-tuning risk was removed by arithmetic instead of tuning: `AIR_JUMP_V = 660` puts the second jump's reach (~104px) **under** `MAX_UP` (112px), so it can never clear an authored step — the clamp, the terrain and every difficulty prior stay untouched (pinned by `test/airjump.test.ts`). Forgiveness is parity by order: coyote keeps the air jump, a no-jump-left press stays buffered. Still open: the rival bot does not spend it — a deliberate balance change, and the P0.5 sector table is now the instrument that would justify it (real runs are still needed). |
 | P0.4 | STYLE quality axis: `LATE` hops (+3) and forgiveness `SAVE`s (+2) | **shipped** — [`STYLE-SCORE.md`](STYLE-SCORE.md) |
+| P0.5 | measurement for the two items above: STYLE engagement + sector deaths on `/ops` | **shipped** — [`TELEMETRY.md`](TELEMETRY.md) §3.1–3.2. STYLE is read as engagement (`engaged %`, mean/median/p90, LATE vs SAVE). Sector deaths are **exposure-normalized** (`deaths ÷ runs that reached that sector kind`), so a long sector cannot win the table by length alone, and the sector is derived server-side with the director's own `sectorAt()`. |
 
 With quality score now present, the pattern the game still scores worst on is
 **build choice (#2)** — plus the measurement that tells you whether any of these

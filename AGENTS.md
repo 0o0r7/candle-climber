@@ -56,7 +56,7 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/          # 200
 curl -s http://localhost:3000/api/candles | head -c 200                  # seed + candles
 curl -s http://localhost:3000/api/leaderboard                            # {"store":"memory"}
 curl -s "http://localhost:3000/api/leaderboard?board=official"           # wallet-bound lane (only submissions with a VALID personal_sign ownership proof land here)
-curl -s http://localhost:3000/ops                                        # E4.1 economy dashboard (noindex, aggregate counts only) — includes the P0.1 run-telemetry death histogram
+curl -s http://localhost:3000/ops                                        # E4.1 economy dashboard (noindex, aggregate counts only) — P0.1 death histogram + the P0.5 STYLE and sector-death blocks (docs/TELEMETRY.md §3.1–3.2)
 curl -s -X POST http://localhost:3000/api/telemetry/run -H 'content-type: application/json' \
   -d '{"candle":12,"cause":"fell"}'                                      # P0.1 intake; one event per finished run (contract: docs/TELEMETRY.md)curl -s "http://localhost:3000/api/onchain/quote?symbol=TSLA"            # live official Chainlink price (W6)
 curl -s "http://localhost:3000/api/candles?symbol=TSLA" | head -c 400    # seed.onchain verification block

@@ -1,7 +1,7 @@
 # TELEMETRY — the run contract and how to read `/ops`
 
-> P0.1. Written 2026-11-10. Why this exists, with sources:
-> [`GAME-DESIGN-REFERENCES.md`](GAME-DESIGN-REFERENCES.md) §2.
+> P0.1, extended by P0.5 (STYLE + sector deaths). Written 2026-11-10. Why this
+> exists, with sources: [`GAME-DESIGN-REFERENCES.md`](GAME-DESIGN-REFERENCES.md) §2.
 > Code: `src/lib/run-telemetry.ts` (pure math) ·
 > `src/lib/run-telemetry-store.ts` (memory / Mongo) ·
 > `src/app/api/telemetry/run/route.ts` (intake).
@@ -25,6 +25,9 @@ nothing — the ledger does not count it either.
 | `device` | `touch` · `keyboard` | coarse-pointer probe | mobile vs desktop difficulty |
 | `mode` | `crypto` · `stocks` · `launchpad` | active mode | per-mode histograms |
 | `interval` | `1w` · `1d` · `4h` · `1h` | active timeframe | per-terrain histograms |
+| `styleLate` | int, clamped 0–1000 | P0.4 `LATE` hops | is the *risk* half of the quality axis used? |
+| `styleSave` | int, clamped 0–1000 | P0.4 `SAVE`s | is the *rescue* half used, or farmed? |
+| `total` | int, clamped 0–600 | candles in the day's level | the death index is only classifiable against the level length (the summit band is `f(index, total)`) |
 | `ts` | ms epoch | **server clock** | windowing; the client's clock is never trusted |
 
 **Never collected:** names, wallets, addresses, IPs, user agents, run tokens,
@@ -59,6 +62,48 @@ The **RUN TELEMETRY — 7D** block reports the last seven days:
 The histogram is deaths only — an abandoned summit run is a success and would
 otherwise drag the curve down.
 
+### 3.1 STYLE — 7D (P0.4 measured by P0.5)
+
+The quality axis has to be measured or it is decoration. Definitions:
+
+| Row | Definition | What it answers |
+|---|---|---|
+| `engaged runs` | runs with ≥ 1 `LATE` or `SAVE`, over all finished runs | does anyone play for style, or is it invisible? |
+| `mean / median` | mean = STYLE points per **finished run** (zeros included); median = over **engaged runs only** | is the average climb stylish, or is a minority carrying it? |
+| `p90 (engaged)` | the 90th percentile among engaged runs | how high does the best precision go? |
+| `events` | total `LATE` vs `SAVE` across the window | which half of the axis does the design actually invite? |
+
+Reading priors: `engaged ≈ 0%` means STYLE is not telegraphed enough (the floats
+or the tutorial are failing). `SAVE` ≫ `LATE` means the axis is rewarding
+accidents rather than decisions. Both are design signals, not bugs.
+
+### 3.2 SECTOR DEATHS — 7D (P0.2 measured by P0.5)
+
+The director authors the chart in sectors (`docs/DIFFICULTY-DIRECTOR.md`). A raw
+death count per sector would just rank the sectors by length, so the row is
+**exposure-normalized**:
+
+| Row | Definition |
+|---|---|
+| `deaths` | runs whose **last candle lies inside** that sector kind (abandoned runs excluded — they did not die) |
+| `reached` | runs that **traversed at least one sector of that kind** (abandoned runs included: reaching the summit is exposure) |
+| `rate` | `deaths / reached` — of the runs that got there, the share that ended there |
+
+Read it as a hazard, not a volume: `SQUEEZE` holding half of all deaths is
+expected (it is the tight sector); `SQUEEZE` showing a *rate* twice `TREND`'s is
+the design statement that it is the sharp one. A sector whose rate is high while
+`reached` is small is a set-piece spike, and that is the case the P0.2 pacing
+would have to answer for.
+
+Two rules the math keeps:
+
+- The sector is derived **server-side** from `(candle, total)` with the same
+  `sectorAt()` the terrain uses — no client-supplied label, no second copy of
+  the pacing table.
+- A run past the level's last candle is in the post-graduation endless sky,
+  where the summit band no longer applies; it is classified with the plain
+  cycle (`total = 0`). An endless run therefore never inflates "THE SUMMIT".
+
 ## 4. Intake rules
 
 - `POST /api/telemetry/run`, JSON, body capped at 2 KB.
@@ -74,7 +119,7 @@ otherwise drag the curve down.
 # one synthetic event through the real route (then read it back on /ops)
 curl -s -X POST http://localhost:3000/api/telemetry/run \
   -H 'content-type: application/json' \
-  -d '{"candle":12,"score":340,"streak":3,"cause":"fell","device":"keyboard","mode":"crypto","interval":"1w"}'
+  -d '{"candle":12,"score":340,"streak":3,"cause":"fell","device":"keyboard","mode":"crypto","interval":"1w","styleLate":2,"styleSave":1,"total":220}'
 # → {"ok":true,"store":"memory"}
 
 curl -s http://localhost:3000/ops | grep -A2 "RUN TELEMETRY"

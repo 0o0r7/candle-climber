@@ -4,6 +4,7 @@
 // "the chart is the level" connection visible without explanation.
 import { useEffect, useRef } from "react";
 import type { Candle } from "@/game/cc/types";
+import { platformColor, platformRgba } from "@/game/cc/palette";
 
 export default function MiniChart({
   candles,
@@ -45,14 +46,14 @@ export default function MiniChart({
       const up = c.c >= c.o;
       const cx = pad + i * cw + cw / 2;
       // wick
-      ctx.strokeStyle = up ? "rgba(91,208,138,0.7)" : "rgba(224,120,86,0.7)";
+      ctx.strokeStyle = platformRgba(up, 0.7);
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(cx, y(c.h));
       ctx.lineTo(cx, y(c.l));
       ctx.stroke();
       // body
-      ctx.fillStyle = up ? "#5BD08A" : "#E07856";
+      ctx.fillStyle = platformColor(up);
       const top = y(Math.max(c.o, c.c));
       const bot = y(Math.min(c.o, c.c));
       const bw = Math.max(3, cw * 0.62);

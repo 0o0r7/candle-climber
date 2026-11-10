@@ -18,6 +18,7 @@ import { NEUTRAL_WEATHER, type Weather } from "./weather";
 import { drawBiomeSky, drawBiomeParticles, drawBiomeVignette } from "./biome-render";
 import { biomeById, type Biome, type BiomeId } from "./biome";
 import { drawCandleRain } from "./rain";
+import { ACCENT_DOWN, PLATFORM_DOWN_RGB, platformCapColor, platformRgba } from "./palette";
 import { type Wreck } from "./wreckage";
 import { hashString, mulberry32 } from "./rng";
 import { BEACON_ALPHA, CONFETTI_LIFE, gradConfetti, type GradShard } from "./grad";
@@ -282,7 +283,7 @@ function drawSlabV2(ctx: CanvasRenderingContext2D, e: Engine, p: Platform, d: Sl
 
   const wx = x + p.w / 2;
   // wick line — SAME colors/geometry as v1 (market legibility is gameplay)
-  ctx.strokeStyle = p.up ? "rgba(91,208,138,0.45)" : "rgba(224,120,86,0.45)";
+  ctx.strokeStyle = platformRgba(p.up, 0.45);
   ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(wx, p.wickTop - camY);
@@ -387,7 +388,7 @@ function drawSlabV2(ctx: CanvasRenderingContext2D, e: Engine, p: Platform, d: Sl
   }
 
   // walkable cap — IDENTICAL geometry to v1 (readability is gameplay)
-  const capColor = p.up ? COLORS.lime : "#F0A48E";
+  const capColor = platformCapColor(p.up);
   ctx.fillStyle = capColor;
   roundRect(ctx, cx - 2, p.y - camY - 4, p.w + 4, 8, 4);
   ctx.fill();
@@ -731,8 +732,8 @@ function drawPlayerV2(ctx: CanvasRenderingContext2D, e: Engine, st: V2State, cha
   ctx.strokeStyle = COLORS.ink;
   ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(x + 14, y + 6); ctx.lineTo(x + 20, y + 6); ctx.stroke();
-  // scarf
-  ctx.fillStyle = COLORS.down;
+  // scarf — the coral accent, not the (darker) platform surface
+  ctx.fillStyle = ACCENT_DOWN;
   roundRect(ctx, x - 2 + (e.grounded ? 0 : -4), y + 20, 8, 5, 2);
   ctx.fill();
   ctx.restore();
@@ -849,7 +850,7 @@ function drawVaultV2(ctx: CanvasRenderingContext2D, e: Engine, peakIdx: number, 
   ctx.fill();
   ctx.fillStyle = "rgba(14,20,0,0.35)"; // ink seam
   ctx.fillRect(bx + 2, by + ch - 8, cw - 4, 2);
-  ctx.strokeStyle = "rgba(91,208,138,0.55)"; // up-green edge — trustworthy
+  ctx.strokeStyle = platformRgba(true, 0.55); // up-green edge — trustworthy
   ctx.lineWidth = 1.5;
   roundRect(ctx, bx, by, cw, ch, 4);
   ctx.stroke();
@@ -868,7 +869,7 @@ function drawVaultV2(ctx: CanvasRenderingContext2D, e: Engine, peakIdx: number, 
   ctx.fillStyle = waxLit;
   roundRect(ctx, 0, -lidH, cw, lidH, 3);
   ctx.fill();
-  ctx.strokeStyle = "rgba(91,208,138,0.7)";
+  ctx.strokeStyle = platformRgba(true, 0.7);
   ctx.lineWidth = 1.5;
   roundRect(ctx, 0, -lidH, cw, lidH, 3);
   ctx.stroke();
@@ -1000,7 +1001,7 @@ function drawWrecks(ctx: CanvasRenderingContext2D, e: Engine, wrecks: Wreck[]) {
     const y = w.y - camY;
     if (x < -30 || x > VIEW_W + 30 || y < -30 || y > VIEW_H + 30) continue;
     const tint =
-      w.cause === "crumbled" ? "224,120,86" :
+      w.cause === "crumbled" ? PLATFORM_DOWN_RGB :
       w.cause === "wicked" ? "106,99,200" : "174,182,188";
     // ghost body + wick
     ctx.globalAlpha = 0.2;

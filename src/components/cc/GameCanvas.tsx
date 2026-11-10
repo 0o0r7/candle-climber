@@ -279,6 +279,10 @@ export default function GameCanvas() {
   const tfRef = useRef<GameInterval>("1w"); // self-ghost key needs the interval
   const modeRef = useRef<GameMode>("crypto"); // P0.1 telemetry lane label (ref: no re-subscribe)
   useEffect(() => { modeRef.current = mode; }, [mode]);
+  // P0.5: the daily level's candle count, captured with the terrain so the
+  // telemetry lane can classify a death into a director sector (the summit
+  // band is a function of the level's total length).
+  const levelTotalRef = useRef(0);
 
   // E2 economy hooks (LAW 1: display-only — the game never reads these):
   // E2.3 practice lane note (archive run banked 0.5 weight), E2.4 vault state,
@@ -475,6 +479,7 @@ export default function GameCanvas() {
       .then((d: CandleData) => {
         if (!alive) return;
         seedRef.current = d.seed.date + d.seed.symbol;
+        levelTotalRef.current = d.candles.length;
         wrecksRef.current = wrecksFor(wreckDBRef.current, seedRef.current);
         setData(d);
         setMutation(dailyMutation(d.seed.date + d.seed.symbol));
@@ -548,6 +553,7 @@ export default function GameCanvas() {
           candles: syntheticCandles(date, LIMIT, iv),
         };
         seedRef.current = d.seed.date + d.seed.symbol;
+        levelTotalRef.current = d.candles.length;
         wrecksRef.current = wrecksFor(wreckDBRef.current, seedRef.current);
         setData(d);
         setMutation(dailyMutation(d.seed.date + d.seed.symbol));
@@ -732,6 +738,11 @@ export default function GameCanvas() {
         device: detectCoarsePointer() ? "touch" : "keyboard",
         mode: modeRef.current,
         interval: tfRef.current,
+        // P0.5: the STYLE tally (counts, not points) + the level length the
+        // death index must be classified against. Still PII-free aggregates.
+        styleLate: r.styleLate ?? 0,
+        styleSave: r.styleSave ?? 0,
+        total: levelTotalRef.current,
       }),
     }).catch(() => {});
   }, []);
@@ -988,6 +999,8 @@ export default function GameCanvas() {
           graduated: true,
           world2: prevEng.world2,
           style: prevEng.style,
+          styleLate: prevEng.styleLate,
+          styleSave: prevEng.styleSave,
         },
         false,
       );

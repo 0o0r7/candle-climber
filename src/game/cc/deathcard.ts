@@ -1,5 +1,6 @@
 // Death card generator — 1080x1350 share PNG (X-optimized)
 import { COLORS } from "./render";
+import { ACCENT_DOWN, platformRgba } from "./palette";
 import type { RunResult } from "./types";
 
 // ---- P3.1 rivalry tag: pure normalizer so W5 can pin the contract canvas-free ----
@@ -103,7 +104,7 @@ export async function makeDeathCard(o: CardOpts): Promise<Blob | null> {
   // real-market legibility line — "you died on the REAL chart"
   if (typeof o.realMovePct === "number") {
     const pct = `${o.realMovePct >= 0 ? "+" : ""}${o.realMovePct.toFixed(1)}%`;
-    ctx.fillStyle = o.realMovePct >= 0 ? COLORS.up : COLORS.down;
+    ctx.fillStyle = o.realMovePct >= 0 ? COLORS.up : ACCENT_DOWN;
     ctx.font = "500 28px 'JetBrains Mono', monospace";
     const diff = o.difficulty ? ` · ${o.difficulty}` : "";
     ctx.fillText(`REAL MOVE ${pct}${diff}`, 72, 455);
@@ -168,13 +169,13 @@ export async function makeDeathCard(o: CardOpts): Promise<Blob | null> {
     }
     if (causeLine) {
       // the run later ended (world 2 liquidation) — keep it honest, lowercase
-      ctx.fillStyle = COLORS.down;
+      ctx.fillStyle = ACCENT_DOWN;
       ctx.font = "500 26px 'JetBrains Mono', monospace";
       ctx.fillText(causeLine.toLowerCase(), 72, my);
     }
   } else if (causeLine) {
     // cause line
-    ctx.fillStyle = COLORS.down;
+    ctx.fillStyle = ACCENT_DOWN;
     ctx.font = "600 40px 'Clash Display', sans-serif";
     ctx.fillText(causeLine, 72, 1010);
 
@@ -250,7 +251,7 @@ function drawMiniCandles(ctx: CanvasRenderingContext2D, x: number, y: number, w:
     const bodyH = 30 + r * (h - 60);
     const bx = x + i * cw + cw * 0.2;
     const by = y + (h - bodyH) * (0.2 + 0.6 * Math.abs(rnd(i + 40)));
-    ctx.strokeStyle = up ? "rgba(91,208,138,0.5)" : "rgba(224,120,86,0.5)";
+    ctx.strokeStyle = platformRgba(up, 0.5);
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(bx + cw * 0.3, by - 14);

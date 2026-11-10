@@ -4,6 +4,7 @@
 // no unbounded values, palette-locked colors only.
 import { describe, expect, test } from "bun:test";
 import { BEACON_ALPHA, CONFETTI_N, gradConfetti } from "../src/game/cc/grad";
+import { PLATFORM_UP, PLATFORM_DOWN } from "../src/game/cc/palette";
 
 describe("grad celebration data (ART V4)", () => {
   test("same seed ⇒ bit-identical shards (order + values)", () => {
@@ -47,7 +48,7 @@ describe("grad celebration data (ART V4)", () => {
 
   test("palette lock — every color is from the locked set", () => {
     const allowed = new Set([
-      "#CCFF00", "#5BD08A", "#6A63C8", "#E07856", "#E0B04E", "#F5F7FA",
+      "#CCFF00", PLATFORM_UP, "#6A63C8", PLATFORM_DOWN, "#E0B04E", "#F5F7FA",
     ]);
     for (const s of gradConfetti("seed-z")) expect(allowed.has(s.color)).toBe(true);
     expect(BEACON_ALPHA).toBeGreaterThan(0);

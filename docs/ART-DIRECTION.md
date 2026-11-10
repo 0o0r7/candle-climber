@@ -2,8 +2,11 @@
 
 > Written 2026-09-30. Extends — never replaces — the locked design system of the
 > original project plan §2
-> (palette `#101214`/`#CCFF00`/`#5BD08A`/`#E07856`/`#6A63C8`, Clash Display / JetBrains
-> Mono / Instrument Sans, mascot **Wick** the blockbot). Companion docs:
+> (palette `#101214`/`#CCFF00`/`#66DE9A`/`#A24C2F`/`#6A63C8`, Clash Display / JetBrains
+> Mono / Instrument Sans, mascot **Wick** the blockbot). The up/down pair was
+> retuned on 2026-11-10 for color-vision separation — see
+> [`ACCESSIBILITY-PALETTE.md`](ACCESSIBILITY-PALETTE.md); the semantic rule below
+> is unchanged. Companion docs:
 > the internal growth strategy (private archive).
 > Chat language FA · Doc language EN.
 
@@ -18,14 +21,15 @@ data-driven constraint is the advantage: infinite verisimilitude, documentary cl
 
 **Semantic rule (inviolable):** up-green and down-coral always mean up/down. No biome,
 era, or weather effect may ever break the market legibility the gameplay depends on
-(`#5BD08A` platforms stay trustworthy, `#E07856` platforms stay threatening).
+(`#66DE9A` platforms stay trustworthy, `#A24C2F` platforms stay threatening —
+values pinned by `test/palette.test.ts`).
 
 ## 2. Candle → world grammar (the core table)
 
 | Candle anatomy | World translation | Material (locked palette) |
 |---|---|---|
-| Green body | grown slab: mossy living stone / crystal, upward veins | up-green `#5BD08A` on card `#16191C`, lime `#CCFF00` vein glow |
-| Red body | cracked charred slab with ember particles | down-coral `#E07856`, ink `#0E1400` cracks |
+| Green body | grown slab: mossy living stone / crystal, upward veins | up-green `#66DE9A` on card `#16191C`, lime `#CCFF00` vein glow |
+| Red body | cracked charred slab with ember particles | down-coral `#A24C2F`, ink `#0E1400` cracks |
 | Long upper wick | hanging spikes / chains / antenna masts (danger ceiling) | hairline `#24282C` silhouettes + lime tips |
 | Long lower wick | roots / underpillars — grip points below the slab | hairline strokes |
 | Doji (tiny body) | small floating island — risky, high-reward perch | card tone, lime outline |

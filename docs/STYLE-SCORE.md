@@ -59,9 +59,10 @@ no jump, gravity, speed or gain constant changed in this workstream.
 ## Known limits
 
 - The window (`STYLE_LATE_RUNWAY = 20 px`) is a design prior, not a measured
-  value. The honest calibration is the `/ops` run telemetry (P0.1): once a
-  `style` field is added there, the distribution of `late`/`save` per 100 candles
-  tells us whether 20 px is a real risk or free points.
+  value. P0.5 has since added the measurement (`styleLate`/`styleSave` on the run
+  event, `/ops` §3.1): the engaged share and the LATE/SAVE split are what decide
+  whether 20 px is a real risk or free points. The number still needs real runs —
+  a prior becomes evidence only when the table has a sample.
 - STYLE is per run, not per account; there is no career aggregate yet.
 - The death-card PNG keeps its three-box stat row (width-bound); STYLE shows in
   the app's result panel, not on the share image.

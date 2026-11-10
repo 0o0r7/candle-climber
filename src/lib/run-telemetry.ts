@@ -15,6 +15,15 @@
 // /api/telemetry/run accepts it from the client.
 import type { DeathCause } from "@/game/cc/types";
 import type { GameInterval } from "@/game/cc/level-source";
+import {
+  sectorAt,
+  SECTOR_LABELS,
+  INTRO_CANDLES,
+  SUMMIT_APPROACH,
+  CYCLE_LEN,
+  type SectorKind,
+} from "@/game/cc/director";
+import { styleScore } from "@/game/cc/style";
 
 /** A finished run. `abandoned` = summit reached, player retried from the
  *  graduated panel (a run that ended without dying — not a difficulty signal). */
@@ -34,6 +43,15 @@ export interface RunTelemetryEvent {
   device: TelemetryDevice;
   mode: TelemetryMode;
   interval: GameInterval;
+  /** P0.4 STYLE events at run end (counts, not points — points are derived from
+   *  game/cc/style.ts so the scale has ONE definition). Absent on rows written
+   *  before P0.5: treated as zero, never as "unknown". */
+  styleLate?: number;
+  styleSave?: number;
+  /** Candles in the daily level. The death index alone cannot say WHICH sector
+   *  a run died in, because the summit approach is a function of (index, total).
+   *  0 = unknown/endless ⇒ the director's cycle applies with no summit band. */
+  total?: number;
   /** server-side receive time (client clock is never trusted) */
   ts: number;
 }
@@ -44,6 +62,10 @@ export const EARLY_DEATH_CANDLE = 10;
  *  world 2 is endless, so clamps are generous but bounded. */
 export const MAX_CANDLE = 600;
 export const MAX_SCORE = 10_000_000;
+/** STYLE events are at most one per platform passed, so the ceiling follows
+ *  the candle ceiling — generous, but bounded so a forged payload cannot skew
+ *  the mean. */
+export const MAX_STYLE_EVENTS = 1_000;
 /** Histogram bin width (death indexes) and the open-ended overflow bin. */
 export const HISTOGRAM_BIN = 20;
 export const HISTOGRAM_MAX_BIN = 240;
@@ -81,6 +103,9 @@ export function normalizeRunEvent(raw: unknown, now = Date.now()): RunTelemetryE
     device: pick(DEVICES, r.device, "keyboard"),
     mode: pick(MODES, r.mode, "crypto"),
     interval: pick(INTERVALS, r.interval, "1w"),
+    styleLate: clampInt(r.styleLate, MAX_STYLE_EVENTS),
+    styleSave: clampInt(r.styleSave, MAX_STYLE_EVENTS),
+    total: clampInt(r.total, MAX_CANDLE),
     ts: now,
   };
 }
@@ -88,6 +113,28 @@ export function normalizeRunEvent(raw: unknown, now = Date.now()): RunTelemetryE
 export interface HistogramBin {
   bucket: number; // 0, 20, 40 … 240 (= 240+)
   count: number;
+}
+
+/** P0.5 — is the quality axis used at all, and how generously? */
+export interface StyleTelemetry {
+  runs: number; // finished runs with at least one LATE or SAVE
+  share: number; // 0..1 of finished runs
+  mean: number; // STYLE points per finished run (all runs, zeros included)
+  median: number; // median among runs that scored any (0 when none did)
+  p90: number; // the precise tail among those runs
+  late: number; // total LATE events
+  save: number; // total SAVE events
+}
+
+/** P0.5 — sector hazard. `reached` is the exposure denominator: runs that got
+ *  as far as a sector of this kind. A sector with few deaths but a high `rate`
+ *  is the sharp one. */
+export interface SectorTelemetry {
+  kind: SectorKind;
+  label: string;
+  deaths: number; // runs whose last candle is inside this kind (abandoned excluded)
+  reached: number; // runs that entered at least one sector of this kind
+  rate: number; // deaths / reached (0 when nothing reached it)
 }
 
 export interface TelemetrySummary {
@@ -102,7 +149,16 @@ export interface TelemetrySummary {
   touchShare: number; // 0..1
   causeCounts: Record<TelemetryCause, number>;
   histogram: HistogramBin[]; // deaths only
+  style: StyleTelemetry; // P0.4 axis, measured (P0.5)
+  sectors: SectorTelemetry[]; // P0.2 director sectors, measured (P0.5)
 }
+
+const EMPTY_STYLE: StyleTelemetry = {
+  runs: 0, share: 0, mean: 0, median: 0, p90: 0, late: 0, save: 0,
+};
+
+/** Fixed display order — the same order the player crosses them. */
+const SECTOR_ORDER: readonly SectorKind[] = ["intro", "trend", "squeeze", "breather", "summit"];
 
 export const EMPTY_TELEMETRY_SUMMARY: TelemetrySummary = {
   total: 0,
@@ -116,7 +172,33 @@ export const EMPTY_TELEMETRY_SUMMARY: TelemetrySummary = {
   touchShare: 0,
   causeCounts: { fell: 0, crumbled: 0, wicked: 0, abandoned: 0 },
   histogram: [],
+  style: EMPTY_STYLE,
+  sectors: [],
 };
+
+/** The effective level length for sector classification: past the last candle
+ *  the run is in the endless post-summit world, where the summit band no longer
+ *  applies — classify it with the plain cycle (total = 0). */
+function effectiveTotal(candle: number, total: number): number {
+  return total > 0 && candle >= total ? 0 : total;
+}
+
+/** Sector kinds traversed by candle `candle` (the exposure denominator).
+ *  Bounded work per event: once the intro + one full cycle have passed, every
+ *  cycling kind has been seen, so only the summit band needs its own check.
+ *  `test/run-telemetry.test.ts` cross-checks this against a brute-force walk. */
+function kindsReached(candle: number, total: number): SectorKind[] {
+  const eff = effectiveTotal(candle, total);
+  const kinds = new Set<SectorKind>();
+  const limit = Math.min(candle, INTRO_CANDLES + CYCLE_LEN - 1);
+  for (let i = 0; i <= limit; i++) kinds.add(sectorAt(i, eff).kind);
+  if (eff >= INTRO_CANDLES + SUMMIT_APPROACH) {
+    const summitStart = Math.max(INTRO_CANDLES, eff - SUMMIT_APPROACH);
+    if (candle >= summitStart) kinds.add("summit");
+  }
+  return [...kinds];
+}
+
 
 function percentile(sorted: readonly number[], p: number): number | null {
   if (sorted.length === 0) return null;
@@ -136,12 +218,37 @@ export function summarizeRunEvents(events: readonly RunTelemetryEvent[]): Teleme
   let graduations = 0;
   let rush = 0;
   let touch = 0;
+  // P0.5
+  const styleScores: number[] = []; // runs that scored any STYLE, for percentiles
+  let styleTotal = 0;
+  let styleLate = 0;
+  let styleSave = 0;
+  const sectorDeaths: Record<SectorKind, number> = { intro: 0, trend: 0, squeeze: 0, breather: 0, summit: 0 };
+  const sectorReached: Record<SectorKind, number> = { intro: 0, trend: 0, squeeze: 0, breather: 0, summit: 0 };
 
   for (const e of events) {
     if (e.graduated) graduations++;
     if (e.rush) rush++;
     if (e.device === "touch") touch++;
     causeCounts[e.cause] = (causeCounts[e.cause] ?? 0) + 1;
+
+    // P0.5 STYLE — the points scale comes from game/cc/style.ts, never a copy.
+    const late = e.styleLate ?? 0;
+    const save = e.styleSave ?? 0;
+    styleLate += late;
+    styleSave += save;
+    const pts = styleScore({ late, save });
+    styleTotal += pts;
+    if (pts > 0) styleScores.push(pts);
+
+    // P0.5 SECTORS — every run is exposure for the sectors it crossed; only
+    // deaths are attributed to the sector the run ENDED in.
+    const total = e.total ?? 0;
+    for (const kind of kindsReached(e.candle, total)) sectorReached[kind]++;
+    if (e.cause !== "abandoned") {
+      sectorDeaths[sectorAt(e.candle, effectiveTotal(e.candle, total)).kind]++;
+    }
+
     if (e.cause === "abandoned") continue;
     deathCandles.push(e.candle);
     const bucket = Math.min(HISTOGRAM_MAX_BIN, Math.floor(e.candle / HISTOGRAM_BIN) * HISTOGRAM_BIN);
@@ -149,12 +256,29 @@ export function summarizeRunEvents(events: readonly RunTelemetryEvent[]): Teleme
   }
 
   deathCandles.sort((a, b) => a - b);
+  styleScores.sort((a, b) => a - b);
   const deaths = deathCandles.length;
   const earlyDeaths = deathCandles.filter((c) => c <= EARLY_DEATH_CANDLE).length;
   const histogram: HistogramBin[] = [];
   for (let b = 0; b <= HISTOGRAM_MAX_BIN; b += HISTOGRAM_BIN) {
     histogram.push({ bucket: b, count: bins.get(b) ?? 0 });
   }
+  const style: StyleTelemetry = {
+    runs: styleScores.length,
+    share: styleScores.length / events.length,
+    mean: styleTotal / events.length,
+    median: percentile(styleScores, 0.5) ?? 0,
+    p90: percentile(styleScores, 0.9) ?? 0,
+    late: styleLate,
+    save: styleSave,
+  };
+  const sectors: SectorTelemetry[] = SECTOR_ORDER.map((kind) => ({
+    kind,
+    label: SECTOR_LABELS[kind],
+    deaths: sectorDeaths[kind],
+    reached: sectorReached[kind],
+    rate: sectorReached[kind] > 0 ? sectorDeaths[kind] / sectorReached[kind] : 0,
+  }));
 
   return {
     total: events.length,
@@ -168,5 +292,7 @@ export function summarizeRunEvents(events: readonly RunTelemetryEvent[]): Teleme
     touchShare: touch / events.length,
     causeCounts,
     histogram,
+    style,
+    sectors,
   };
 }

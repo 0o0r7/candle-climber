@@ -3,6 +3,7 @@
 // params and the unit suite pins them (same seed ⇒ same celebration — the W5
 // determinism spirit applied to the token-era visuals, ART-DIRECTION §7 V4).
 import { hashString, mulberry32 } from "./rng";
+import { PLATFORM_UP, PLATFORM_DOWN } from "./palette";
 
 export const CONFETTI_N = 46;      // shards in the summit volley
 export const CONFETTI_LIFE = 3.2;  // seconds until the last shard fades
@@ -13,7 +14,7 @@ export const BEACON_ALPHA = 0.16;  // resting summit beacon after the burst
 // grammar, so it may never dominate a celebration); gold nods to the summit
 // flag; wax-white is the shine chip.
 const CONFETTI_COLORS = [
-  "#CCFF00", "#5BD08A", "#5BD08A", "#6A63C8", "#E07856", "#E0B04E", "#F5F7FA",
+  "#CCFF00", PLATFORM_UP, PLATFORM_UP, "#6A63C8", PLATFORM_DOWN, "#E0B04E", "#F5F7FA",
 ];
 
 export interface GradShard {
