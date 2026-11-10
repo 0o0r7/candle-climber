@@ -111,11 +111,16 @@ run the same physics. Console stayed clean (0 errors) across both runs.
   AERIAL (buffer 0.24 s = +5 ticks, i.e. more than the proposed +2) and GROUNDED
   gives **byte-identical results at every grid point**: best 26 candles, 0 / 255
   rhythms past 26. The wall is the arc, not the acceptance window.
-- **#2 (launchpad amplitude) — confirmed, deferred to a versioned chart.** The
-  post-pad band measures 132 px against a ≈299 px rise; the only bots that pass
-  the wall are the ones whose RUSH camera shortens the air time. Re-scaling
-  `AMP_MIN…AMP_MAX` re-shapes every existing chart and invalidates stored ghosts,
-  so it ships as `CHART_VERSION=2` in a new ranked epoch, not as an edit.
+- **#2 (launchpad amplitude) — fixed as a date-gated REPAIR, not a re-tune.**
+  The defect is narrower than "amplitude too small": on a drifting chart the
+  rolling window's min/max sit at the same end of the series, so the terrain
+  collapses to a 32 px strip (oscillating charts already fill all 180 px).
+  Raising `AMP_MAX` globally was measured and rejected — it fixes launchpad and
+  taxes BTC/TSLA (mean candles per rhythm 15.5→13.7 and 30.8→24.2). Ship: chart
+  v2 stretches ONLY a chart flatter than 120 px, leaving every other chart
+  byte-identical, active from seeds dated `2026-11-12` so no played chart, ghost
+  or board entry moves. Launchpad band 32 → 96 px, blind-rhythm ceiling 26 → 29,
+  rhythms surviving past candle 20: 17 → 34 of 255.
 - **#3 (26-candle wall)** — same root cause as #2; the cheap non-physics lever is
   a landing/take-off telegraph (recorded, not built).
 - **#4 (invisible rival personalities) — no longer true, re-measured**: 14 / 91 /

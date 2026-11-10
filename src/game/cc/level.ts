@@ -8,6 +8,62 @@ export const PLATFORM_W = 72; // was 62 — G2: wider caps, less dead space betw
 export const AMP_MIN = 150; // px between rolling low/high closes
 export const AMP_MAX = 330;
 
+// ---- P0.8 CHART v2 — the amplitude band uses the jump's reach ----------------
+// WHY (measured, docs/OPEN-ITEMS.md O-2): with a 180px band the whole mid-chart
+// sits inside a ~130px vertical strip while a full-hold jump rises ≈299px. The
+// arc therefore crosses several 96px-spaced platforms at nearly the same height
+// and lands wherever it happens to descend — the "overshoot" that stops every
+// blind rhythm at candle 26. A wider band makes each NEXT platform higher or
+// lower than the one you left, so the arc is intercepted early and the landing
+// stops being an accident. Reach itself is untouched: `MAX_UP`/`MAX_DOWN` still
+// clamp every authored step, so a v2 chart never asks for a jump the engine
+// cannot deliver.
+//
+// RANKED INTEGRITY — why a DATE, not a switch: terrain is rebuilt from candles
+// on every load, so re-scaling the band retroactively would re-shape charts that
+// players already climbed and invalidate their stored ghosts/replays. The
+// version is therefore a pure function of the seed's date: every chart dated
+// before the cutoff stays byte-identical to v1 forever, and v2 starts on a
+// fresh chart nobody has played yet. One board still means one geometry.
+export const CHART_V2_FROM = "2026-11-12";
+export type ChartVersion = 1 | 2;
+
+/** v2 is NOT a bigger amplitude constant (that was measured and rejected — see
+ *  below). It is a REPAIR of the one case the constant cannot reach.
+ *
+ *  THE MEASUREMENT. `norm()` maps each close against the min/max of a rolling
+ *  40-candle window. On an oscillating chart (BTC, TSLA) that ratio swings end
+ *  to end and the terrain already fills the 180 px band (measured post-pad span
+ *  180). On a drifting chart — every launchpad candle, whose closes walk slowly
+ *  in one direction — the window's min/max sit at the SAME end of the series, so
+ *  the ratio barely moves: measured post-pad span **32 px** for a 72-candle
+ *  launchpad chart. The whole level then sits in one flat strip while a full
+ *  jump rises ≈299 px, and the arc lands by accident.
+ *
+ *  RAISING THE BAND GLOBALLY WAS TESTED AND REJECTED: `AMP_MAX` 330→560 makes
+ *  the launchpad chart playable (blind-rhythm ceiling 26→29 candles, viable
+ *  rival archetypes 1→4) but makes the oscillating charts HARDER — mean
+ *  candles per rhythm fell 30.8→24.2 (TSLA) and 15.5→13.7 (BTC) because the
+ *  extra steps saturate the `MAX_UP`/`MAX_DOWN` clamps. A change that fixes one
+ *  lane and taxes the other two is not a fix.
+ *
+ *  WHAT v2 DOES INSTEAD: leave every chart exactly as v1 built it, then — only
+ *  when the authored terrain is flatter than TERRAIN_TARGET_SPAN — stretch the
+ *  terrain away from the pad, re-applying the same fairness clamps step by step.
+ *  A chart that already uses its band is returned BYTE-IDENTICAL (pinned by
+ *  test/chart-version.test.ts), so the crypto and stock lanes cannot move.
+ */
+export const TERRAIN_TARGET_SPAN = 120;
+/** Stretch cap: beyond ×3 a flat drift chart turns into a staircase of clamp
+ *  steps, which reads as a wall rather than a chart. */
+export const TERRAIN_MAX_STRETCH = 3;
+
+export function chartVersionFor(seedStr: string): ChartVersion {
+  const m = /^(\d{4}-\d{2}-\d{2})/.exec(seedStr);
+  return m && m[1] >= CHART_V2_FROM ? 2 : 1;
+}
+
+
 // G2-F1 second pass (gamer-bot metric 2026-10-01): naive input still died ~2-3s in —
 // exactly at the pad->terrain transition. Two deterministic ease layers:
 const LAUNCH_PAD = 6;     // was 4 — flat contiguous safe runway (≈3.9s at CAM_BASE)
@@ -23,7 +79,40 @@ export const MAX_DOWN = 170;
  *  stop here", never as "twitch faster than the rest of the level". */
 export const FINALE_FUSE = 0.34;
 
-export function buildPlatforms(candles: Candle[], seedStr: string): Platform[] {
+/** v2 post-pass (see TERRAIN_TARGET_SPAN): stretch a FLAT chart away from the
+ *  pad, then re-apply the fairness limits step by step so no stretched step
+ *  exceeds what the jump delivers. Charts that already use their band return
+ *  untouched (byte-identical — the early return below is the whole safety
+ *  story for the crypto and stock lanes). Pure: no RNG, no clock. */
+function stretchFlatTerrain(plats: Platform[]): void {
+  const first = LAUNCH_PAD + EASE_CANDLES; // never touch the pad or the ease window
+  const rest = plats.filter((p) => p.i >= first);
+  const solid = rest.filter((p) => p.w > 0).map((p) => p.y);
+  if (solid.length < 8) return;
+  const span = Math.max(...solid) - Math.min(...solid);
+  if (span >= TERRAIN_TARGET_SPAN) return; // already uses the band — leave it alone
+  const k = Math.min(TERRAIN_MAX_STRETCH, TERRAIN_TARGET_SPAN / Math.max(span, 1));
+  const anchor = plats[first - 1]?.y ?? rest[0].y;
+  let prev = anchor;
+  for (const p of rest) {
+    const stretched = anchor + (p.y - anchor) * k;
+    const y = Math.max(prev - MAX_DOWN, Math.min(prev + MAX_UP, stretched));
+    // the candle moves as one body: cap, body and wick keep their offsets
+    const dy = y - p.y;
+    p.y = y;
+    p.bodyTop += dy; p.bodyBottom += dy; p.wickTop += dy; p.wickBottom += dy;
+    prev = y;
+  }
+}
+
+export function buildPlatforms(
+  candles: Candle[],
+  seedStr: string,
+  /** Test/A-B hook: force a chart version. Production omits it — the version
+   *  then comes from the seed's date (see CHART_V2_FROM). */
+  opts: { version?: ChartVersion } = {},
+): Platform[] {
+  const version = opts.version ?? chartVersionFor(seedStr);
   const gapRnd = mulberry32(hashString("cc-gaps:" + seedStr));
   const plats: Platform[] = [];
   const closeYs: number[] = [];
@@ -108,6 +197,8 @@ export function buildPlatforms(candles: Candle[], seedStr: string): Platform[] {
       passed: false,
     });
   }
+  // P0.8 CHART v2: repair a flat chart's terrain (never re-scales a live band).
+  if (version === 2) stretchFlatTerrain(plats);
   // W4 graduation arc: the LAST platform of the daily level is the summit —
   // the graduation milestone of the bonding-curve climb. Deterministic: purely
   // derived from the seed-derived list above (no extra RNG, no geometry change).

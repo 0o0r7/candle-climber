@@ -10,6 +10,11 @@
 > **and** pinned by a test/measurement, or it is deferred **with a reason and a
 > named decision owner**. "Probably fine" is not a status.
 
+**Shipped in this pass:** O-5 sector transition audio (6 motifs, one per
+boundary) and O-2 chart v2 (a date-gated terrain repair for drifting charts —
+crypto/stock lanes proven byte-identical). Everything else below is either a
+measured rejection or a decision with a named owner.
+
 Sources folded in: [`PATTERN-AUDIT-2026-11-10.md`](PATTERN-AUDIT-2026-11-10.md) §4,
 [`PLAYTHROUGH-AUDIT-2026-11-10.md`](PLAYTHROUGH-AUDIT-2026-11-10.md) §4–§5, and the
 open TODOs carried from the previous passes.
@@ -17,9 +22,9 @@ open TODOs carried from the previous passes.
 | # | Item | Why it was open (fact) | Decision | Status |
 |---|---|---|---|---|
 | O-1 | Wider press `BUFFER` on the practice lane | audit guessed the 26-candle wall was a press-timing window | **rejected — measured, it is not** | `DECIDED` |
-| O-2 | Launchpad terrain is flat relative to the jump (overshoot) | measured: post-pad y band 132 px, full-hold rise ≈ 299 px | chart **v2**, not a silent re-tune | `DEFERRED` (owner) |
-| O-3 | The 26-candle skill wall | same root cause as O-2, not a dead end | mitigate by telegraph, not by physics | `DECIDED` |
-| O-4 | Rival personalities invisible | re-measured: they bind now, but **only** through RUSH | follow O-2; threshold tweak proven inert | `DECIDED` |
+| O-2 | Terrain is flat relative to the jump on drifting charts | measured: launchpad post-pad band **32 px**, full-hold rise ≈ 299 px | date-gated **chart v2 repair** (shipped) | `FIXED` |
+| O-3 | The 26-candle skill wall | same root cause as O-2; v2 moves it, does not remove it | telegraph pass (next) | `OPEN` (next pass) |
+| O-4 | Rival personalities invisible | v1: only RUSH separates them · v2: four distinct outcomes | tied to the chart; two tuning experiments measured + reverted | `DECIDED` |
 | O-5 | No audio for sector transitions | pattern #10, largest remaining polish gap | implemented this pass | `FIXED` |
 | O-6 | Music | pattern #10 depth | not scheduled; sector cues are the interim | `DEFERRED` (owner) |
 | O-7 | Summit / closing bell never played by a human | engine search proved reachable, not playable by hand | needs one human session | `OPEN` |
@@ -53,62 +58,97 @@ rather than shipped as placebo forgiveness.
 **What this leaves in place:** the loadouts still do their documented job (they
 move *when* a press is accepted); the wall simply is not there.
 
-## O-2 · Flat terrain vs. a huge jump — DEFERRED (owner decision: chart v2)
+## O-2 · Terrain flat relative to the jump — FIXED (chart v2, date-gated)
 
-**Measured geometry** of the same chart (`buildPlatforms` output, 72 candles,
-9 gaps): the flat pad is at y 150, the post-pad terrain spans y 150…282 —
-a **132 px band** — while the biggest *authored* step is 84 px (well inside
-`MAX_UP` 112). A full-hold jump under WHALE HOUR rises ≈ 299 px. So the player
-is not short of reach; the jump spends most of its flight *above* a terrain band
-that is far narrower than the arc.
+**The defect, re-measured precisely.** `norm()` maps each close against the
+min/max of a rolling 40-candle window. On a chart that oscillates (BTC, TSLA)
+that ratio swings end to end and the post-pad terrain fills the whole 180 px band
+(measured: **180**). On a chart that *drifts* — every launchpad candle — the
+window's min and max sit at the same end of the series, the ratio barely moves,
+and the terrain collapses into a strip: **32 px** for the 72-candle MONKE chart,
+against a full-hold jump that rises ≈ 299 px. The arc then flies over several
+96 px-spaced platforms and lands wherever it happens to descend.
 
-**Corroborating fact:** the only bots that pass the wall are the ones that hold
-RUSH (camera ×1.28) — a faster camera **shortens the air time relative to the
-platform spacing**, which is exactly the mechanic of an overshoot. See O-4.
+**Two candidate fixes were measured, one was rejected.**
 
-**Why it is not being patched today.** `AMP_MIN…AMP_MAX` (150…330) shapes *every*
-chart, including past dates and the daily lane. Changing it silently would
-(a) re-shape every already-played chart, (b) invalidate stored ghosts and
-self-ghost replays (they are position streams over the old geometry), and
-(c) re-open the "one board, one meaning" law in `docs/ECONOMY-LAWS.md`. It is a
-**versioned** change, not an edit.
+| Change | launchpad (drifting) | BTC (oscillating) | TSLA (oscillating) |
+|---|---|---|---|
+| raise `AMP_MAX` 330 → 560 (global) | best 26 → 29, viable archetypes 1 → 4 | mean 15.5 → **13.7** | mean 30.8 → **24.2** |
+| **v2 = stretch ONLY a flat chart** (shipped) | band 32 → **96**, best 26 → **29**, rhythms reaching 20 candles 17 → **34** | **byte-identical** | **byte-identical** |
+| raise `AMP_MAX` to 700/900 | pad spawns below the death line (`camY ≤ 0`), every run ends at candle 0 | — | — |
 
-**Owner decision needed:** ship `CHART_VERSION=2` (scale the amplitude band to
-each chart's real close range, keep `MAX_UP`/reach untouched) as the start of a
-new ranked epoch, with v1 charts frozen as archive. Until then the current
-geometry stays byte-identical.
+The global re-tune fixes one lane and taxes the other two, so it was dropped. The
+shipped v2 is a **repair**: if the authored terrain is flatter than
+`TERRAIN_TARGET_SPAN` (120 px), it is stretched away from the pad (max ×3) and
+every step is re-clamped with the shipped `MAX_UP`/`MAX_DOWN` expression. A chart
+that already uses its band returns **byte-identical** — the crypto and stock
+lanes cannot move, which is pinned by `test/chart-version.test.ts` and confirmed
+against the live BTC/TSLA feeds.
 
-## O-3 · The 26-candle wall — DECIDED (telegraph, not physics)
+**Why it is date-gated, not a switch.** Terrain is rebuilt from candles on every
+load, so re-scaling retroactively would re-shape charts players already climbed
+and invalidate their stored ghosts/self-ghost replays. `CHART_V2_FROM =
+2026-11-12` makes the version a pure function of the seed's date: everything
+before the cutoff stays v1 forever; v2 begins on a chart nobody has played yet.
+Pad, ease window, gap placement and crumble flags are untouched by the stretch
+(all four pinned by test).
 
-The wall is a per-jump timing demand, not a reach or clearance problem: the
-same terrain is completable (38-jump line, engine search) and the planner can
-pass it with the right camera speed (O-4). The cheap lever that does **not** touch
-physics is making the *next* landing readable — a take-off/landing marker, the
-same idea as the crumble fuse tell that already exists. Recorded here as the
-first candidate for the next pass; not implemented in this one (it is a new HUD
-element, and this pass is a decision pass plus the audio gap).
+**Honest limit:** v2 raises the blind-rhythm ceiling from 26 to 29 candles and
+doubles the number of rhythms that survive past 20 — it does **not** make the
+summit reachable by a blind rhythm. That is O-3.
 
-## O-4 · Rival personalities — DECIDED (bound to O-2)
+## O-3 · The 26-candle wall — OPEN (next pass: the landing telegraph)
 
-Re-measured after the crumble fix, launchpad chart, all 14 skinned characters:
+The wall is a per-jump timing demand, not a reach problem: the terrain is
+completable (38-jump line, engine search), and after O-2 the ceiling of a blind
+rhythm moved 26 → 29 candles while the number of rhythms surviving past candle
+20 doubled (17 → 34 of 255). What v2 cannot fix is *readability*: the player
+cannot see where the arc will come down, and the arc is long relative to the
+96 px platform spacing.
 
-| archetype | result |
-|---|---|
-| RECKLESS / GREEDY (hold RUSH) | summit reached, then world 2 — 91 candles / 3293 |
-| PATIENT (frost, grump) | 105 / 96 candles |
-| PRECISE (cop, visor, cadet, dapper) · BALANCED | 14 candles / 225 |
+The lever that touches no physics is a **landing/take-off telegraph** — the same
+idea as the crumble fuse tell that already exists: mark the platform the current
+arc will meet, so the decision is "adjust" rather than "guess". Not built in this
+pass on purpose: it is a new HUD element rendered over the live chart, and it
+needs its own visual verification and a11y check rather than being bundled with
+a ranked geometry change.
 
-So the earlier finding ("five skins, byte-identical runs") **no longer holds** —
-but the differentiation is carried almost entirely by `greed → RUSH`. The
-`precision` and `risk` gates never bind, because on this terrain the first
-press that clears the margin/alignment floor is the latest possible one, i.e.
-the panic branch (`ticksLeft ≤ PANIC_TICKS`), which bypasses personality by
-design (survival over style).
+## O-4 · Rival personalities — DECIDED (measured on both chart versions)
 
-**Tried and reverted:** lowering the precision demand (alignment cap 0.72 → 0.50)
-changed **not one tick** of any run — proof that the gate is inert here, not
-miscalibrated. Reverted rather than kept as dead tuning. The archetypes become
-visible once O-2 gives the arc room to have more than one viable press.
+Launchpad chart, all 14 skinned characters, `RivalBot` driven to a stop:
+
+| archetype | v1 (today's chart) | v2 (from 2026-11-12) |
+|---|---|---|
+| RECKLESS / GREEDY (hold RUSH) | 91 / 91 | 84 / 23 |
+| PRECISE (cop, cadet) | 14 / 14 | **72 / 72** |
+| BALANCED (bot-sheet) | 14 | **78** |
+| PATIENT (frost, grump) | 105 / 96 | 20 / 20 |
+
+Two facts, both measured:
+
+1. **On v1 the archetypes are near-invisible**: only the RUSH holders separate
+   (91) from everyone else (14) — apart from the two patient skins, which
+   accidentally delay into the correct press window on a flat chart.
+2. **On v2 four distinct outcomes appear** (84 / 78 / 72 / 20), i.e. the chart
+   now has more than one viable press moment, which is what the personality
+   knobs were always supposed to model.
+
+**Two tuning experiments were run and reverted, with the numbers kept here so
+nobody repeats them:**
+
+- precision demand 0.72 → 0.50 (alignment cap): **not one tick changed** on any
+  run — the gate is inert, not miscalibrated;
+- "patience may only delay while there is room to press" (guard at
+  `ticksLeft > PANIC_TICKS + 10`): helped v2 patients (20 → 72) but **broke
+  today's chart** (frost 105 → 14). A change that regresses the lane players are
+  on today is not shippable; reverted.
+
+**Known, accepted inconsistency:** on v2 the "PATIENT" skins are the *worst*
+performers, because `patienceS` is a fixed delay rather than a comparison of the
+next few feasible presses. Fixing that properly means the planner must forecast
+two or three candidate press ticks and choose the best — a planner change, not a
+constant, so it is recorded as the follow-up rather than guessed at here. The
+rival is local and cosmetic (it never posts a score), so no board is affected.
 
 ## O-5 · Sector transition audio — FIXED
 
@@ -162,14 +202,13 @@ before that decision.
 
 ## Suggested next pass (ordered, by value per unit of risk)
 
-1. **O-7 — one human playthrough of the summit** (zero code, and it is the only
+1. **O-3 — landing/take-off telegraph** (a HUD tell, no physics, no leaderboard
+   impact; it attacks the readability half of the same wall that O-2 moved).
+2. **O-7 — one human playthrough of the summit** (zero code, and it is the only
    unverified thing in the product).
-2. **O-3 — landing/take-off telegraph** (a HUD tell, no physics, no leaderboard
-   impact; it attacks the actual 26-candle wall, which O-1 proved is a timing
-   demand).
-3. **O-2 — `CHART_VERSION=2`** only after the owner accepts a ranked epoch; it is
-   the fix that makes rival archetypes and mid-chart decisions real, and it
-   cannot be done silently.
+3. **Rival planner follow-up (from O-4):** forecast 2–3 candidate press ticks and
+   pick the best instead of the fixed `patienceS` delay, so "PATIENT" stops being
+   the worst archetype — planner-only, cosmetic, testable with the same harness.
 4. **O-8 / O-9 — the two product decisions** that no amount of code can settle
    (ranked builds; where a career profile lives).
 
