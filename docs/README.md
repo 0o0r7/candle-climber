@@ -18,6 +18,8 @@
 | Visual system and asset pipeline | [`ART-DIRECTION.md`](ART-DIRECTION.md) · [`ART_PROMPTS_V2.md`](ART_PROMPTS_V2.md) |
 | Retired layers and why they stay retired | [`RETIRED-FEATURES.md`](RETIRED-FEATURES.md) |
 | Input/UX research behind the engine feel | [`PLATFORMER-UX-RESEARCH.md`](PLATFORMER-UX-RESEARCH.md) |
+| External design sources behind current decisions (feel, difficulty, retention) | [`GAME-DESIGN-REFERENCES.md`](GAME-DESIGN-REFERENCES.md) |
+| Run telemetry contract + how to read the death histogram | [`TELEMETRY.md`](TELEMETRY.md) |
 | Review gates for every PR | [`PR-CHECKLIST.md`](PR-CHECKLIST.md) |
 | Persian glossary for chat | [`GLOSSARY-FA.md`](GLOSSARY-FA.md) |
 

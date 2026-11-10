@@ -13,6 +13,8 @@ import { opsAuthorized } from "@/lib/ops-auth"; // G5: moderation detail default
 import { fetchBurnedWick } from "@/lib/burn";
 import { fetchMeter, ethHuman } from "@/lib/meter";
 import { graduationState, weightsFrozen, POST_GRAD_LANES } from "@/lib/graduation";
+import { getRunTelemetry } from "@/lib/run-telemetry-store"; // P0.1 death histogram
+import { HISTOGRAM_MAX_BIN, type TelemetrySummary } from "@/lib/run-telemetry";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +25,7 @@ export const metadata: Metadata = {
 
 const NA = "n/a";
 
-function Row({ k, v, note }: { k: string; v: string; note?: string }) {
+function Row({ k, v, note }: { k: string; v: ReactNode; note?: string }) {
   return (
     <tr>
       <td style={{ padding: "4px 12px 4px 0", whiteSpace: "nowrap", color: "#888" }}>{k}</td>
@@ -33,8 +35,19 @@ function Row({ k, v, note }: { k: string; v: string; note?: string }) {
   );
 }
 
-function Block({ title, children }: { title: string; children: ReactNode }) {
+/** P0.1: text histogram bar (server-rendered, no client JS — same posture as
+ *  every other read on this page). */
+const BAR_WIDTH = 22;
+function Bar({ n, max }: { n: number; max: number }) {
+  const filled = max > 0 ? Math.round((n / max) * BAR_WIDTH) : 0;
   return (
+    <span style={{ color: "#8fd14f", letterSpacing: 2, fontFamily: "ui-monospace, monospace" }}>
+      {"█".repeat(Math.max(n > 0 ? 1 : 0, filled))}
+    </span>
+  );
+}
+
+function Block({ title, children }: { title: string; children: ReactNode }) {  return (
     <section style={{ marginBottom: 28 }}>
       <h2 style={{ fontSize: 15, marginBottom: 6, borderBottom: "1px solid #333", paddingBottom: 4 }}>{title}</h2>
       {/* sweep 4 (2026-10-14): rows MUST live in a <tbody> — bare <tr> under
@@ -73,6 +86,16 @@ export default async function OpsPage({
   let flaggedGuest = NA;
   let flaggedOfficial = NA;
   let flaggedRows: Awaited<ReturnType<ReturnType<typeof getBoard>["top"]>> = [];
+
+  // P0.1: gameplay telemetry (death histogram) — aggregate, PII-free, 7d window.
+  // Fail-open like every other ops read: a dead store renders "n/a".
+  let tele: TelemetrySummary | null = null;
+  let teleStore = NA;
+  try {
+    const t = getRunTelemetry();
+    teleStore = t.kind;
+    tele = await t.summary(now);
+  } catch { /* fail-open */ }
   try {
     const rs = getScoreReports();
     if (ops) reports = await rs.recent(10);
@@ -90,6 +113,11 @@ export default async function OpsPage({
     // operator; the count is public below.
     if (ops) flaggedRows = [...g, ...o].filter((e) => e.flagged === true).slice(0, 20);
   } catch { /* fail-open */ }
+
+  // P0.1: histogram scale — the tallest bin sets the full bar width.
+  const histMax = tele && tele.histogram.length > 0
+    ? Math.max(1, ...tele.histogram.map((b) => b.count))
+    : 1;
 
   return (
     <main style={{ maxWidth: 720, margin: "0 auto", padding: "32px 20px", fontFamily: "ui-monospace, monospace", color: "#ddd" }}>
@@ -125,6 +153,48 @@ export default async function OpsPage({
           v={laneS.topRefs.length ? laneS.topRefs.map((r) => `${r.ref}:${r.count}`).join(" · ") : "(none yet)"}
           note="E5.5 attribution — Gate G5 evidence"
         />
+      </Block>
+
+      <Block title="RUN TELEMETRY — 7D (P0.1)">
+        <Row k="store" v={teleStore} note="DATABASE_URL or in-memory (resets on restart)" />
+        {!tele || tele.total === 0 ? (
+          <Row k="sample" v="0 runs" note="one aggregate event per finished run — play a run to seed it" />
+        ) : (
+          <>
+            <Row k="finished runs" v={String(tele.total)} note="deaths + abandoned summit runs" />
+            <Row k="deaths / graduations" v={`${tele.deaths} / ${tele.graduations}`} />
+            <Row
+              k="median death"
+              v={tele.medianDeathCandle === null ? NA : `candle ${tele.medianDeathCandle}`}
+              note="where half of all deaths happen"
+            />
+            <Row
+              k="p90 death"
+              v={tele.p90DeathCandle === null ? NA : `candle ${tele.p90DeathCandle}`}
+              note="the long tail of good runs"
+            />
+            <Row
+              k="early deaths (≤10)"
+              v={`${tele.earlyDeaths} · ${Math.round(tele.earlyDeathRate * 100)}%`}
+              note="the 'died in the first candles' signal"
+            />
+            <Row
+              k="rush / touch share"
+              v={`${Math.round(tele.rushShare * 100)}% · ${Math.round(tele.touchShare * 100)}%`}
+            />
+            <Row
+              k="causes"
+              v={`fell ${tele.causeCounts.fell} · crumbled ${tele.causeCounts.crumbled} · wicked ${tele.causeCounts.wicked}`}
+            />
+            {tele.histogram.filter((b) => b.count > 0).map((b) => (
+              <Row
+                key={b.bucket}
+                k={b.bucket === HISTOGRAM_MAX_BIN ? `${b.bucket}+` : `${b.bucket}–${b.bucket + 19}`}
+                v={<><Bar n={b.count} max={histMax} /> {b.count}</>}
+              />
+            ))}
+          </>
+        )}
       </Block>
 
       <Block title="WEIGHTS LEDGER (E2.2–E2.6)">

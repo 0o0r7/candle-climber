@@ -274,6 +274,8 @@ export default function GameCanvas() {
   const [currentStreak, setCurrentStreak] = useState(0); // streak chip renders from state (refs don't re-render)
   const runRecordedRef = useRef(false);
   const tfRef = useRef<GameInterval>("1w"); // self-ghost key needs the interval
+  const modeRef = useRef<GameMode>("crypto"); // P0.1 telemetry lane label (ref: no re-subscribe)
+  useEffect(() => { modeRef.current = mode; }, [mode]);
 
   // E2 economy hooks (LAW 1: display-only — the game never reads these):
   // E2.3 practice lane note (archive run banked 0.5 weight), E2.4 vault state,
@@ -707,6 +709,28 @@ export default function GameCanvas() {
         }
       }
     } catch { /* private mode */ }
+
+    // P0.1: gameplay telemetry — ONE aggregate event per finished run, so the
+    // death histogram on /ops measures where runs actually end. Fire-and-forget
+    // and PII-free (index/cause/coarse labels only); a failure is silent and
+    // never touches the run's end state (LAW 1).
+    void fetch("/api/telemetry/run", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        candle: r.candlesPassed,
+        score: r.score,
+        streak: r.bestStreak,
+        cause: r.cause ?? "abandoned",
+        graduated: r.graduated === true,
+        world2: r.world2 === true,
+        rush: usedRushRef.current,
+        device: detectCoarsePointer() ? "touch" : "keyboard",
+        mode: modeRef.current,
+        interval: tfRef.current,
+      }),
+    }).catch(() => {});
   }, []);
 
   // P7.1: the rival's skin/personality is deterministic per level seed — the
