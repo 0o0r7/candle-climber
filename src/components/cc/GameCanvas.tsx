@@ -286,6 +286,9 @@ export default function GameCanvas() {
   const pausedRef = useRef(false);
   const pausePanelRef = useRef<HTMLDivElement | null>(null);
   const phaseRef = useRef<Phase>("loading"); // blur/visibility handlers read this
+  // #10 sector audio: the last sector kind the player HEARD (null at run start),
+  // so the motif fires once per boundary and never on the opening beat.
+  const sectorCueRef = useRef<string | null>(null);
 
   // P2 self-ghost state — refs for the RAF loop, state for the UI note
   const selfDBRef = useRef<SelfGhostDB>({});
@@ -1066,6 +1069,7 @@ export default function GameCanvas() {
       maybeSaveSelfGhost(data, prevEng.candlesPassed, Math.floor(prevEng.score));
     }
     runRecordedRef.current = false; // fresh run — the ledger guard resets
+    sectorCueRef.current = null;    // fresh run — the first sector cue is a boundary, not the intro
     applyPause(false); // a restart is always an unpause
     unlockAudio();
     const eng = buildEngine(data, mutation);
@@ -1715,6 +1719,18 @@ export default function GameCanvas() {
   // P0.2 difficulty director: which authored sector the run is in right now.
   // Derived from candles passed (pure), so it never adds engine state.
   const sector = data ? sectorAt(hud.candles, data.candles.length) : null;
+  const sectorKind = sector?.kind ?? null;
+  // Ten-pattern #10: the banner's beat, made audible. Keyed off the SAME pure
+  // sectorAt() the banner renders, so the cue and the banner can never disagree;
+  // no engine state is added and nothing here can affect a run.
+  useEffect(() => {
+    if (!sectorKind) return;
+    const prev = sectorCueRef.current;
+    sectorCueRef.current = sectorKind;
+    if (prev === null || prev === sectorKind) return; // run start · same beat
+    if (phase !== "running" || paused) return;
+    sfx.sector(sectorKind);
+  }, [sectorKind, phase, paused]);
   const canSubmit = Boolean(data?.runToken) && !archive; // archive = practice (H1)
   // Death Card mint gate — wallet-only + today's runs only (the SERVER enforces
   // both again; this gate just keeps the button honest in the UI).

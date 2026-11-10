@@ -127,6 +127,12 @@ not been tried on physical hardware.
 
 ## 4. What is deliberately NOT done
 
+> **Live status of every open item below is tracked in
+> [`OPEN-ITEMS.md`](OPEN-ITEMS.md)** (one row per item, each with the reason, the
+> decision and what was actually done). Sector audio, listed here as the largest
+> remaining gap, has since been **closed** (motifs in `sound.ts`, wired in
+> `GameCanvas`, pinned by `test/sector-audio.test.ts`).
+
 - **Ranked build choice (#2 beyond practice):** requires the owner's call on
   whether per-player physics may touch the shared board.
 - **Cross-device career profile (#5):** a server profile needs identity; that is

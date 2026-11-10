@@ -104,6 +104,27 @@ run the same physics. Console stayed clean (0 errors) across both runs.
    TREND → SQUEEZE → CONSOLIDATION → THE SUMMIT → CLOSING BELL — and every one of
    them is silent.
 
+### Resolution (same day) — see [`OPEN-ITEMS.md`](OPEN-ITEMS.md)
+
+- **#1 (wider practice `BUFFER`) — rejected by measurement.** A 255-rhythm grid
+  (`hold` 12…26 × `rest` 4…20) replayed on this exact chart under STANDARD,
+  AERIAL (buffer 0.24 s = +5 ticks, i.e. more than the proposed +2) and GROUNDED
+  gives **byte-identical results at every grid point**: best 26 candles, 0 / 255
+  rhythms past 26. The wall is the arc, not the acceptance window.
+- **#2 (launchpad amplitude) — confirmed, deferred to a versioned chart.** The
+  post-pad band measures 132 px against a ≈299 px rise; the only bots that pass
+  the wall are the ones whose RUSH camera shortens the air time. Re-scaling
+  `AMP_MIN…AMP_MAX` re-shapes every existing chart and invalidates stored ghosts,
+  so it ships as `CHART_VERSION=2` in a new ranked epoch, not as an edit.
+- **#3 (26-candle wall)** — same root cause as #2; the cheap non-physics lever is
+  a landing/take-off telegraph (recorded, not built).
+- **#4 (invisible rival personalities) — no longer true, re-measured**: 14 / 91 /
+  96 / 105 candles across the archetypes. The differentiation runs through
+  `greed → RUSH`; the precision gate is inert here (lowering its threshold moved
+  no run by a single tick, so the tweak was reverted).
+- **#5 (sector audio) — fixed**: `SECTOR_MOTIFS` in `sound.ts`, fired once per
+  boundary from `GameCanvas`, pinned by `test/sector-audio.test.ts`.
+
 ## 5. What was *not* verified in the real app
 
 The summit, the graduation panel and the closing-bell finale were reached in the
