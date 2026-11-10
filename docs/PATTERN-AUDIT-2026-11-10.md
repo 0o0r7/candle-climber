@@ -153,6 +153,11 @@ to score or physics.
 
 Verification run for this pass: `bun test` → **734 pass / 0 fail** (65 files),
 `bunx tsc --noEmit --incremental false` → clean, `bun run lint` → 0 errors.
+Read the build in play too: the launchpad lane was played end to end in
+`docs/PLAYTHROUGH-AUDIT-2026-11-10.md` — it found a red-candle landing bug this
+pass missed (a fold was treated as "not a surface", so every red candle was a
+fall-through death and the chart was unwinnable past candle 12).
+
 Runtime: `/api/telemetry/run` reports `"store":"file"`, a posted event survived a
 dev-server restart and appeared in the `/ops` sector table as its own
 `CLOSING BELL` row; `/play` renders the career bar and starts a run with no

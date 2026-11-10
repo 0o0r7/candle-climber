@@ -367,7 +367,18 @@ export class Engine {
     }
     if (this.grounded) {
       const p = this.groundPlat;
-      const stillOn = p && this.solidUnder(this.px, p) && Math.abs(this.py + PLAYER_H - p.y) < 4 && this.vy === 0;
+      // A candle the player just landed on may be FOLDING: red candles start
+      // crumbling on contact (that tell + its fuse ARE the mechanic). A folding
+      // candle is still a surface, so this "did I slip off the edge?" re-check
+      // must not ask `state === "solid"` (solidUnder's question): reading it the
+      // strict way un-grounded the player on the very tick it landed on a red
+      // candle, so a red candle could never be stood on — its fuse and tell were
+      // unreachable, and any red candle the arc came down on was a fall-through
+      // death no input could avoid. The candle now holds until its fuse runs
+      // out; `state === "gone"` (crumble update below) is what ends it.
+      const onSurface = !!p && p.state !== "gone"
+        && this.px + PLAYER_W > p.x + 6 && this.px < p.x + p.w - 2;
+      const stillOn = onSurface && Math.abs(this.py + PLAYER_H - p.y) < 4 && this.vy === 0;
       if (!stillOn) { this.grounded = false; this.groundPlat = null; }
     }
 
