@@ -23,7 +23,7 @@ open TODOs carried from the previous passes.
 |---|---|---|---|---|
 | O-1 | Wider press `BUFFER` on the practice lane | audit guessed the 26-candle wall was a press-timing window | **rejected — measured, it is not** | `DECIDED` |
 | O-2 | Terrain is flat relative to the jump on drifting charts | measured: launchpad post-pad band **32 px**, full-hold rise ≈ 299 px | date-gated **chart v2 repair** (shipped) | `FIXED` |
-| O-3 | The 26-candle skill wall | same root cause as O-2; v2 moves it, does not remove it | telegraph pass (next) | `OPEN` (next pass) |
+| O-3 | The 26-candle skill wall | same root cause as O-2; v2 moves it, does not remove it | **landing telegraph** (shipped: `telegraph.ts` + sky target frame) | `FIXED` (code+tests; visual pass pending) |
 | O-4 | Rival personalities invisible | v1: only RUSH separates them · v2: four distinct outcomes | tied to the chart; two tuning experiments measured + reverted | `DECIDED` |
 | O-5 | No audio for sector transitions | pattern #10, largest remaining polish gap | implemented this pass | `FIXED` |
 | O-6 | Music | pattern #10 depth | not scheduled; sector cues are the interim | `DEFERRED` (owner) |
@@ -97,7 +97,7 @@ Pad, ease window, gap placement and crumble flags are untouched by the stretch
 doubles the number of rhythms that survive past 20 — it does **not** make the
 summit reachable by a blind rhythm. That is O-3.
 
-## O-3 · The 26-candle wall — OPEN (next pass: the landing telegraph)
+## O-3 · The 26-candle wall — FIXED (landing telegraph shipped)
 
 The wall is a per-jump timing demand, not a reach problem: the terrain is
 completable (38-jump line, engine search), and after O-2 the ceiling of a blind
@@ -108,10 +108,44 @@ cannot see where the arc will come down, and the arc is long relative to the
 
 The lever that touches no physics is a **landing/take-off telegraph** — the same
 idea as the crumble fuse tell that already exists: mark the platform the current
-arc will meet, so the decision is "adjust" rather than "guess". Not built in this
-pass on purpose: it is a new HUD element rendered over the live chart, and it
-needs its own visual verification and a11y check rather than being bundled with
-a ranked geometry change.
+arc will meet, so the decision is "adjust" rather than "guess".
+
+**Shipped.** `src/game/cc/telegraph.ts` answers that one question from the SAME
+forward simulation the rival bot plans with (`rival/planner.ts`), so the tell
+cannot drift from the physics:
+
+- **grounded** → the arc of a full-hold press taken NOW (`evalPressNow().full`);
+- **airborne** → the live arc, with the gravity-hang gate read from the real
+  `jumpHeld` (`evalArc`, a new optional `hangOverride` on the rollout — the
+  bot's own calls are untouched, so its behaviour is byte-identical).
+
+A landing at or behind the lane the player already occupies is reported as "no
+target", so the tell never marks a candle that is not ahead. Nothing writes
+engine state, consumes RNG or touches score/candles: presentation only, which is
+why the ranked board and stored ghosts are unaffected.
+
+**Rendering** (`render-v2.ts`, `drawTelegraphV2`): a target frame in the OPEN SKY
+above the target candle (bar + two end ticks), a descending chevron above it, and
+a dot on the cap — three redundant channels, so colour is never the only one. The
+frame deliberately sits in the sky rather than over the candle body: a stroke on
+up-green or down-coral blends into the candle it is marking. Every stroke is
+painted twice, ink under chalk, so one of the pair always keeps a ≥3:1 boundary
+on any surface (pinned in `test/palette.test.ts`); `prefers-reduced-motion` stops
+the pulse. The legacy v1 renderer (`/?renderer=v1`) does not draw it.
+
+**Pinned** (`test/telegraph.test.ts`, against a live `Engine`, not the planner):
+
+| claim | measurement |
+|---|---|
+| the tell is the landing | every in-air answer after the release tick, and every full-hold answer, equals `groundPlat.i` of the jump the engine actually flew (374 assertions across 8 jumps) |
+| the hang gate is real | a cut jump's pre-release answers describe the UNCUT arc and flip exactly at the release — asserted as its own case (`cutChecks > 0`) |
+| presentation only | `py/vy/time/camX/camY/score/candlesPassed` identical before and after reading the tell |
+| never behind | every marked index is `> laneOf(player)` and `state === "solid"`, `w > 0` |
+| deterministic | two identical engines stepped identically produce identical tell sequences |
+
+**Honest limit:** the tell is verified in the engine and in the DOM-side pixel
+scan of the canvas; the *visual* pass (is it pleasant and legible in motion on
+the real chart) plus the summit playthrough in O-7 remain human checks.
 
 ## O-4 · Rival personalities — DECIDED (measured on both chart versions)
 
@@ -202,8 +236,7 @@ before that decision.
 
 ## Suggested next pass (ordered, by value per unit of risk)
 
-1. **O-3 — landing/take-off telegraph** (a HUD tell, no physics, no leaderboard
-   impact; it attacks the readability half of the same wall that O-2 moved).
+1. ~~O-3 — landing/take-off telegraph~~ (shipped; see the section above).
 2. **O-7 — one human playthrough of the summit** (zero code, and it is the only
    unverified thing in the product).
 3. **Rival planner follow-up (from O-4):** forecast 2–3 candidate press ticks and

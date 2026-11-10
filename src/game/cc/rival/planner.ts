@@ -80,6 +80,10 @@ type PressKind = "ground" | "air" | "none";
 function simulatePress(
   s: BotSnapshot, plats: Platform[], mods: MutationMods, rush: boolean, hold: boolean,
   kind: PressKind = "ground",
+  /** O-3: override the gravity-hang gate. An AIRBORNE forecast must mirror the
+   *  player's real release state (the engine hangs only while `jumpHeld`),
+   *  while the bot's own rollouts keep deriving it from `hold`/the cut. */
+  hangOverride?: boolean,
 ): PressEval {
   if (kind === "ground") {
     const jumpHeldStart = s.grounded || s.vy === 0; // press requires ground or coyote — caller guarantees
@@ -97,7 +101,8 @@ function simulatePress(
     if (!hold && kind !== "none" && !cutDone && k >= 2) { vy *= JUMP_CUT; cutDone = true; }
     t += FIXED_DT;
     px += speedAt(t, mods, rush) * FIXED_DT;
-    const hangK = (hold || !cutDone) && vy < 0 ? HANG_GRAVITY : 1;
+    const hangOn = hangOverride ?? (hold || !cutDone);
+    const hangK = hangOn && vy < 0 ? HANG_GRAVITY : 1;
     vy += GRAVITY * mods.gravity * hangK * FIXED_DT;
     py += vy * FIXED_DT;
 
@@ -155,6 +160,20 @@ export function evalPressNow(s: BotSnapshot, plats: Platform[], mods: MutationMo
  */
 export function evalNoPress(s: BotSnapshot, plats: Platform[], mods: MutationMods, rush: boolean): PressEval {
   return simulatePress(s, plats, mods, rush, true, "none");
+}
+
+/**
+ * O-3 — forecast the arc ALREADY in the air, exactly as the player is flying it.
+ * The only input that matters after take-off is whether the jump is still held
+ * (the engine's gravity-hang gate), so the caller passes the live `jumpHeld`
+ * instead of the bot's press variant. `evalNoPress` keeps its pinned behaviour
+ * (hold, hang on) for the rival; this is the same rollout with that gate
+ * answered by the engine state.
+ */
+export function evalArc(
+  s: BotSnapshot, plats: Platform[], mods: MutationMods, rush: boolean, jumpHeld: boolean,
+): PressEval {
+  return simulatePress(s, plats, mods, rush, true, "none", jumpHeld);
 }
 
 /**

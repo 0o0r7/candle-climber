@@ -18,7 +18,10 @@ import { NEUTRAL_WEATHER, type Weather } from "./weather";
 import { drawBiomeSky, drawBiomeParticles, drawBiomeVignette } from "./biome-render";
 import { biomeById, type Biome, type BiomeId } from "./biome";
 import { drawCandleRain } from "./rain";
-import { ACCENT_DOWN, PLATFORM_DOWN_RGB, platformCapColor, platformRgba } from "./palette";
+import {
+  ACCENT_DOWN, PLATFORM_DOWN_RGB, TELEGRAPH_CHALK, TELEGRAPH_INK,
+  platformCapColor, platformRgba,
+} from "./palette";
 import { type Wreck } from "./wreckage";
 import { hashString, mulberry32 } from "./rng";
 import { BEACON_ALPHA, CONFETTI_LIFE, gradConfetti, type GradShard } from "./grad";
@@ -27,6 +30,7 @@ import { drawRival } from "./rival/rival-render";
 import { drawGhost } from "./ghost-render";
 import type { GhostView } from "./ghost";
 import type { RivalBot } from "./rival/bot";
+import { landingTell } from "./telegraph";
 import type { Platform } from "./types";
 
 interface V2State {
@@ -831,6 +835,79 @@ function drawForegroundV2(ctx: CanvasRenderingContext2D, e: Engine, st: V2State,
 // teardrop flame — the vault is a candle creature too. Open state = the run
 // passed the peak candle: lid tips back, a lime light column leaks out. All
 // animation is a pure function of engine time (same seed+time ⇒ same frame).
+/* --------------------- O-3 · landing telegraph ----------------------------- */
+
+// "This is the candle your arc comes down on." Drawn from the SAME rollout the
+// rival bot plans with (telegraph.ts → rival/planner.ts), so the tell cannot
+// disagree with the physics. Three redundant channels, none of them colour
+// alone (a11y): a bracket under the target's cap, a descending chevron above it,
+// and a dot on the cap. Every stroke is painted twice — a dark twin underneath —
+// so it stays legible on the lime cap, on a coral candle and over the open sky.
+// Purely decorative: `aria-hidden` canvas, no engine state, no score.
+function drawTelegraphV2(ctx: CanvasRenderingContext2D, e: Engine, reducedMotion: boolean) {
+  const tell = landingTell(e);
+  if (!tell) return;
+  const p = e.plats[tell.idx];
+  if (!p || p.w <= 0) return;
+  const sx = p.x - e.camX;
+  const sy = p.y - e.camY;
+  if (sx > VIEW_W + 60 || sx + p.w < -60 || sy < -50 || sy > VIEW_H + 50) return;
+
+  const cx = sx + p.w / 2;
+  const ink = TELEGRAPH_INK;
+  const chalk = TELEGRAPH_CHALK;
+  const twin = (path: () => void, width: number) => {
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = width + 3;
+    path();
+    ctx.stroke();
+    ctx.strokeStyle = chalk;
+    ctx.lineWidth = width;
+    path();
+  };
+
+  ctx.save();
+  // idle pulse — a pure function of engine time (same seed+time ⇒ same frame)
+  ctx.globalAlpha = reducedMotion ? 0.92 : 0.64 + 0.22 * Math.sin(e.time * 6);
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  // 1. target frame in the OPEN SKY above the candle: a bar with two end ticks
+  // pointing down at the landing surface. Sky, not the candle body, so the tell
+  // never blends into up-green or down-coral (one read on every candle).
+  const bx0 = sx + 3;
+  const bx1 = sx + p.w - 3;
+  const barY = sy - 18;
+  twin(() => {
+    ctx.beginPath();
+    ctx.moveTo(bx0, barY - 7);
+    ctx.lineTo(bx0, barY);
+    ctx.lineTo(bx1, barY);
+    ctx.lineTo(bx1, barY - 7);
+  }, 2);
+
+  // 2. chevron above the bar, pointing down at it (shape cue)
+  const topY = sy - 36;
+  twin(() => {
+    ctx.beginPath();
+    ctx.moveTo(cx - 8, topY);
+    ctx.lineTo(cx, topY + 8);
+    ctx.lineTo(cx + 8, topY);
+  }, 2);
+
+  // 3. the landing point on the cap itself
+  ctx.fillStyle = ink;
+  ctx.beginPath();
+  ctx.arc(cx, sy - 1, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = tell.risky ? ACCENT_DOWN : chalk; // red candle = it will fold
+  ctx.beginPath();
+  ctx.arc(cx, sy - 1, 3.4, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
 function drawVaultV2(ctx: CanvasRenderingContext2D, e: Engine, peakIdx: number, st: V2State) {
   if (peakIdx < 0 || peakIdx >= e.plats.length) return;
   const p = e.plats[peakIdx];
@@ -1136,6 +1213,9 @@ export function renderV2(
     const d = t.slabs[i];
     if (p && d) drawSlabV2(ctx, e, p, d, e.camX, e.camY, st);
   }
+
+  // O-3: the landing tell sits on the playfield, under the player and the FX
+  drawTelegraphV2(ctx, e, reducedMotion);
 
   drawVaultV2(ctx, e, peakIdx, st);
 

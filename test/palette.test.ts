@@ -14,6 +14,8 @@ import {
   PLATFORM_CAP_DOWN,
   PLATFORM_UP_RGB,
   PLATFORM_DOWN_RGB,
+  TELEGRAPH_CHALK,
+  TELEGRAPH_INK,
   platformColor,
   platformCapColor,
   platformRgb,
@@ -121,5 +123,19 @@ describe("candle palette readability", () => {
     expect(`rgba(${PLATFORM_UP_RGB},0.45)`).toBe(platformRgba(true, 0.45));
     expect(rgbOf(PLATFORM_UP).join(",")).toBe(PLATFORM_UP_RGB);
     expect(rgbOf(PLATFORM_DOWN).join(",")).toBe(PLATFORM_DOWN_RGB);
+  });
+
+  test("O-3 telegraph: the chalk/ink twin holds an edge on every surface it can mark", () => {
+    // Neither stroke survives everywhere on its own — chalk is ~1.1:1 on the
+    // lime cap, ink is ~1.04:1 on the dark sky. They are painted ADJACENT, so
+    // the pair is the guarantee: on any surface at least one of the two keeps a
+    // 3:1 boundary (WCAG 1.4.11), and colour is never the only channel (the tell
+    // is also a bracket + chevron + dot).
+    for (const surface of [BG, PLATFORM_UP, PLATFORM_DOWN, PLATFORM_CAP_UP, PLATFORM_CAP_DOWN]) {
+      const best = Math.max(contrast(TELEGRAPH_CHALK, surface), contrast(TELEGRAPH_INK, surface));
+      expect(best).toBeGreaterThanOrEqual(MIN_VS_BG);
+    }
+    // and the stroke stays legible against its own twin
+    expect(contrast(TELEGRAPH_CHALK, TELEGRAPH_INK)).toBeGreaterThanOrEqual(4.5);
   });
 });

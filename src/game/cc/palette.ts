@@ -35,6 +35,14 @@ export const PLATFORM_DOWN_RGB = "162,76,47";
  *  it (WCAG AA body text needs 4.5:1). */
 export const ACCENT_DOWN = "#E07856";
 
+/** O-3 landing telegraph — the neutral "UI over the world" pair. CHALK is the
+ *  stroke, INK is its always-on twin printed underneath: chalk alone is ~1.2:1
+ *  on the lime cap, so the tell never relies on one colour surviving every
+ *  surface it can land on. Neither value carries gameplay meaning (unlike the
+ *  up/down pair), which is what makes a neutral pair safe here. */
+export const TELEGRAPH_CHALK = "#F4F8FF";
+export const TELEGRAPH_INK = "#0B0D0F";
+
 export function platformColor(up: boolean): string {
   return up ? PLATFORM_UP : PLATFORM_DOWN;
 }
