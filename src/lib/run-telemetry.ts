@@ -49,6 +49,10 @@ export interface RunTelemetryEvent {
    *  before P0.5: treated as zero, never as "unknown". */
   styleLate?: number;
   styleSave?: number;
+  /** RESCUE economy: paid revives this run used. A rescued run's death index is
+   *  therefore "where it finally ended", not "where the climb broke" — the two
+   *  are told apart here so the death histogram stays readable. */
+  rescues?: number;
   /** Candles in the daily level. The death index alone cannot say WHICH sector
    *  a run died in, because the summit approach is a function of (index, total).
    *  0 = unknown/endless ⇒ the director's cycle applies with no summit band. */
@@ -67,6 +71,9 @@ export const MAX_SCORE = 10_000_000;
  *  the candle ceiling — generous, but bounded so a forged payload cannot skew
  *  the mean. */
 export const MAX_STYLE_EVENTS = 1_000;
+/** Rescue tags per run (docs/RESCUE-ECONOMY.md) — one today; bounded anyway so a
+ *  forged payload cannot skew the aggregate. */
+export const MAX_RESCUES_TAGGED = 9;
 /** Histogram bin width (death indexes) and the open-ended overflow bin. */
 export const HISTOGRAM_BIN = 20;
 export const HISTOGRAM_MAX_BIN = 240;
@@ -106,6 +113,7 @@ export function normalizeRunEvent(raw: unknown, now = Date.now()): RunTelemetryE
     interval: pick(INTERVALS, r.interval, "1w"),
     styleLate: clampInt(r.styleLate, MAX_STYLE_EVENTS),
     styleSave: clampInt(r.styleSave, MAX_STYLE_EVENTS),
+    rescues: clampInt(r.rescues, MAX_RESCUES_TAGGED),
     total: clampInt(r.total, MAX_CANDLE),
     ts: now,
   };

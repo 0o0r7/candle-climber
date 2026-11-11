@@ -113,7 +113,10 @@ export default async function LeaderboardPage({
                   {e.name}
                   {board === "official" && e.wallet ? <i>{e.wallet}</i> : null}
                 </span>
-                <span className="cc-lb-score">{e.score.toLocaleString()}</span>
+                <span className="cc-lb-score">
+                  {e.rescues ? <i className="cc-lb-rescue" title={`rescued ${e.rescues}× — tagged run`}>↺{e.rescues}</i> : null}
+                  {e.score.toLocaleString()}
+                </span>
                 <span className="cc-lb-sub">{e.candlesPassed.toLocaleString()} candles</span>
               </div>
             ))}

@@ -5,6 +5,18 @@ import { BASE_MODS, type MutationMods } from "./mutations";
 import { BASE_GAIN, WORLD2_GAIN, COMBO_CAP, COMBO_STEP, RUSH_GAIN } from "@/lib/scoring";
 import { hashString, mulberry32 } from "./rng";
 import { STYLE_COLOR, STYLE_LATE_RUNWAY, styleGain, type StyleEvent } from "./style";
+// RESCUE economy (docs/RESCUE-ECONOMY.md): the engine ACCRUES credits live from
+// the same deterministic events that build the score (candle passes, STYLE
+// events, milestones) so the death panel can price a rescue honestly. Spending
+// is UI-side: the engine only counts revives, never knows a price.
+import {
+  CREDIT_PER_CANDLE,
+  CREDIT_PER_STYLE,
+  CREDIT_RUN_BONUS,
+  CREDIT_GRADUATION,
+  CREDIT_WORLD2,
+  MAX_RESCUES_PER_RUN,
+} from "@/lib/credits";
 import { PLATFORM_DOWN, platformColor } from "./palette";
 
 export const VIEW_W = 800; // logical units (canvas is scaled to fit)
@@ -125,6 +137,13 @@ export class Engine {
   // P0.4 STYLE (quality axis): LATE hops + forgiveness SAVEs. Input-derived
   // only, so the tally is replay-exact and never touches `score`.
   style = 0; styleLate = 0; styleSave = 0;
+  // RESCUE economy: credits minted by THIS run (banked at its true end) and the
+  // paid revives it has used. Both derive from deterministic events only.
+  credits = CREDIT_RUN_BONUS;
+  rescues = 0;
+  // The last platform the player actually stood on — the safest place a rescue
+  // may return them to (chosen again at revive time; it may have folded since).
+  lastSafePlat: Platform | null = null;
   private pressedAirborne = false; // last press started off the ground
   lastLandUp: boolean | null = null;
   dead = false; deathCause: DeathCause = 'fell'; deathT = 0;
@@ -165,6 +184,7 @@ export class Engine {
     this.camY = this.py - VIEW_H * 0.55;
     this.camX = start.x + PLATFORM_W / 2 - VIEW_W * PLAYER_X_FRAC;
     this.lastGroundY = start.y;
+    this.lastSafePlat = start;
   }
 
   get playerScreenX() { return this.px - this.camX; }
@@ -205,6 +225,7 @@ export class Engine {
   private grantStyle(kind: StyleEvent) {
     const pts = styleGain(kind);
     this.style += pts;
+    this.credits += CREDIT_PER_STYLE;
     if (kind === "late") this.styleLate++; else this.styleSave++;
     this.spawnFloat(
       this.px + PLAYER_W / 2,
@@ -233,7 +254,67 @@ export class Engine {
       style: this.style,
       styleLate: this.styleLate,
       styleSave: this.styleSave,
+      rescues: this.rescues,
+      credits: Math.floor(this.credits),
     });
+  }
+
+  // ---- RESCUE (paid second chance after a fall) ----
+
+  /** Can this run still buy a rescue? Only after a death, and only up to the
+   *  per-run cap — the SECOND chance is the decision, never a life counter. */
+  rescueAvailable(): boolean {
+    return this.dead && this.rescues < MAX_RESCUES_PER_RUN;
+  }
+
+  /** The safest platform behind the fall: the last one the player stood on when
+   *  it is still a non-folding surface, otherwise the nearest solid green
+   *  platform before it. Returns null only on a level with nothing solid. */
+  private revivePlatform(): Platform | null {
+    const startIdx = this.lastSafePlat ? this.lastSafePlat.i : this.candlesPassed - 1;
+    const from = Math.min(startIdx, this.plats.length - 1);
+    let fallback: Platform | null = null;
+    for (let i = from; i >= 0; i--) {
+      const p = this.plats[i];
+      if (p.w <= 0 || p.state === "gone") continue;
+      if (!p.crumble && p.state === "solid") return p; // a foothold that holds
+      if (!fallback && p.state === "solid") fallback = p;
+    }
+    return fallback ?? this.plats.find((p) => p.state === "solid" && p.w > 0) ?? null;
+  }
+
+  /** Resume a dead run on the safe platform: score, candles and credits are
+   *  KEPT (that is what the credits bought); the combo breaks and no platform
+   *  is re-scored, because `passed` is sticky — a revive can never mint points
+   *  for terrain already climbed. Deterministic: same fall ⇒ same resume pose. */
+  revive(): boolean {
+    if (!this.rescueAvailable()) return false;
+    const target = this.revivePlatform();
+    if (!target) return false;
+    this.rescues++;
+    this.dead = false;
+    this.deathT = 0;
+    this.vy = 0;
+    this.py = target.y - PLAYER_H;
+    this.grounded = true;
+    this.groundPlat = target;
+    this.coyote = this.recovery.coyote;
+    this.airJumpsLeft = this.recovery.airJumps;
+    this.buffer = 0;
+    this.jumpHeld = false;
+    this.jumpCut = false;
+    this.pressedAirborne = false;
+    this.streak = 0;
+    this.lastSafePlat = target;
+    this.lastLandUp = target.up;
+    this.lastGroundY = target.y;
+    this.camX = target.x + target.w / 2 - VIEW_W * PLAYER_X_FRAC;
+    this.camY = Math.min(0, this.py - VIEW_H * 0.52);
+    this.shake = 0;
+    this.spawnParticles(18, this.px + PLAYER_W / 2, this.py + PLAYER_H / 2, STYLE_COLOR, 220);
+    this.spawnFloat(this.px + PLAYER_W / 2, this.py - 26, "RESCUED", STYLE_COLOR);
+    this.cb.onSfx?.("milestone");
+    return true;
   }
 
   // ---- W4 graduation arc ----
@@ -242,6 +323,7 @@ export class Engine {
   private graduate() {
     if (this.graduated) return;
     this.graduated = true;
+    this.credits += CREDIT_GRADUATION;
     // P0.7 set-piece payoff: the summit is a MOMENT, not just a flag. A gold
     // burst + a beat of shake fire inside the live run before the panel opens,
     // so the climb ends on a hit rather than a screen change. Presentation
@@ -258,6 +340,7 @@ export class Engine {
   enterWorld2() {
     if (this.world2) return;
     this.world2 = true;
+    this.credits += CREDIT_WORLD2;
     if (!this.w2rnd) this.w2rnd = mulberry32(hashString(this.seedStr + ":world2"));
     this.ensureWorld2Terrain();
     this.cb.onSfx?.("milestone");
@@ -324,6 +407,7 @@ export class Engine {
         if (p.summit) this.graduate();
         if (p.w > 0) {
           this.candlesPassed = p.i + 1;
+          this.credits += CREDIT_PER_CANDLE; // rescue economy: climbing mints credits
           if (p.up) { this.streak++; this.bestStreak = Math.max(this.bestStreak, this.streak); }
           else this.streak = 0;
           const mult = 1 + Math.min(this.streak, COMBO_CAP) * COMBO_STEP;
@@ -359,6 +443,7 @@ export class Engine {
           this.airJumpsLeft = this.recovery.airJumps; // P0.3: the recovery verb is per airborne period
           this.groundPlat = p;
           this.lastGroundY = p.y;
+          this.lastSafePlat = p; // rescue checkpoint — the last platform stood on
           if (p.summit) this.graduate();
           if (p.crumble && p.state === "solid") { p.state = "crumbling"; p.crumbleT = 0; this.cb.onSfx?.("crumble"); }
           break;

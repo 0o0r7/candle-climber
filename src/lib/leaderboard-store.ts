@@ -34,6 +34,11 @@ export interface BoardEntry {
   season?: string | null; // seasonOf(date) on new rows (pre-season dates ⇒ null)
   ref?: string; // E5.5: opaque referral stamp (sanitizeRef-bounded); metadata only
   flagged?: boolean; // LU-7: statistical anomaly flag — accept-but-flag, persisted for /ops review (G5 129-c #2)
+  /** RESCUE economy (docs/RESCUE-ECONOMY.md): paid revives used by the run.
+   *  Present only when > 0, so rescued rows are VISIBLY tagged wherever scores
+   *  are compared (badge on the board) and legacy rows stay byte-identical.
+   *  Display metadata — never a ranking input, never inside the signed proof. */
+  rescues?: number;
 }
 
 export type BoardFilter = "guest" | "official" | "all";

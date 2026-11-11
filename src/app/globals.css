@@ -544,6 +544,65 @@ button.cc-wallet-chip { cursor: pointer; }
   letter-spacing: 0.06em;
   margin-top: 4px;
 }
+/* RESCUE economy (docs/RESCUE-ECONOMY.md): climb credits ✦ are a DIFFERENT
+   number from the ranked score — own tone (ice cyan, distinct from score lime,
+   STYLE gold and air-jump blue), own chip, own lines. */
+.cc-chip-credit {
+  color: #7FD8E8;
+  border-color: rgba(127, 216, 232, 0.35);
+  font-variant-numeric: tabular-nums;
+}
+.cc-panel-rescue { border-color: rgba(127, 216, 232, 0.35); }
+.cc-rescue-price {
+  font-family: var(--cc-mono);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  color: #DDE2E5;
+  margin-top: 14px;
+}
+.cc-rescue-price b { color: #7FD8E8; }
+.cc-rescue-note {
+  font-family: var(--cc-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  letter-spacing: 0.05em;
+  color: var(--cc-faint);
+  max-width: 42ch;
+  margin: 8px auto 0;
+}
+.cc-credits-line {
+  font-family: var(--cc-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #7FD8E8;
+  margin-top: 10px;
+}
+/* TROPHY CASE — cosmetic-only credit sink (docs/RESCUE-ECONOMY.md §5) */
+.cc-cosmetics { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 8px; }
+.cc-cosmetic-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--cc-hairline);
+  border-radius: 8px;
+  font-family: var(--cc-mono);
+  font-size: 11px;
+}
+.cc-cosmetic-name { color: #dde2e5; letter-spacing: 0.06em; flex: 0 0 auto; }
+.cc-cosmetic-blurb { color: var(--cc-faint); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cc-cosmetic-row .cc-tf-chip { flex: 0 0 auto; color: #7fd8e8; border-color: rgba(127, 216, 232, 0.35); }
+.cc-cosmetic-row .cc-tf-chip:disabled { opacity: 0.5; cursor: default; }
+.cc-cosmetic-flare { font-family: var(--cc-mono); font-size: 11px; letter-spacing: 0.4em; color: #e0b04e; margin-top: 8px; }
+.cc-oath { font-family: var(--cc-mono); font-size: 10px; letter-spacing: 0.14em; color: #7fd8e8; text-align: center; margin-top: 4px; }
+.cc-board-rescue,
+.cc-lb-rescue {
+  font-style: normal;
+  color: #7FD8E8;
+  margin-right: 5px;
+  font-size: 11px;
+  letter-spacing: 0;
+}
 .cc-death-actions {
   display: flex;
   flex-wrap: wrap;

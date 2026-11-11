@@ -61,6 +61,19 @@ import { shareRef, shareUrl } from "@/game/cc/share";
 // banner when the player crosses into a new sector (pure index → sector).
 import { sectorAt } from "@/game/cc/director";
 import type { CandleData, RunResult } from "@/game/cc/types";
+// RESCUE economy (docs/RESCUE-ECONOMY.md): climb credits are earned by play,
+// spendable on ONE revive per run, never purchasable and never a token. The
+// ranked score stays a separate, skill-only number.
+import {
+  CREDITS_KEY, MAX_RESCUES_PER_RUN, RESCUE_COST,
+  addCredits, creditsForRun, emptyWallet, loadWallet, planRescue, saveWallet,
+  spendCredits, type CreditWallet,
+} from "@/lib/credits";
+// TROPHY CASE — the non-competitive credit sink (docs/RESCUE-ECONOMY.md §5):
+// ornaments that decorate the player's OWN panels, never the score or physics.
+import {
+  COSMETICS, COSMETICS_KEY, buyCosmetic, loadOwned, owns, saveOwned,
+} from "@/lib/cosmetics";
 import { TUTORIAL_KEY } from "@/lib/tutorial-key";
 import Tutorial from "@/components/cc/Tutorial";
 import ModeSelector, { type GameMode, loadMode, normalizeModeParam, saveMode } from "@/components/cc/ModeSelector";
@@ -134,6 +147,7 @@ interface BoardEntry {
   wallet?: string | null; // masked short form on GET responses (0x1234…abcd)
   board?: "guest" | "official";
   season?: string | null;
+  rescues?: number; // RESCUE tag (docs/RESCUE-ECONOMY.md) — present only when > 0
 }
 // H4 DAILY REPORT — aggregated over real submissions by /api/report
 interface ReportResp {
@@ -174,8 +188,13 @@ export default function GameCanvas() {
   // P3.2: mutation id flows into the renderers via ref — the RAF loop must not
   // re-subscribe on mutation change (same pattern as seedRef/wrecksRef)
   const mutationIdRef = useRef<string | undefined>(undefined);
-  const [hud, setHud] = useState({ score: 0, combo: 0, candles: 0 });
+  const [hud, setHud] = useState({ score: 0, combo: 0, candles: 0, credits: 0 });
   const [result, setResult] = useState<RunResult | null>(null);
+  // RESCUE economy state: the persisted wallet and whether the death panel is
+  // still OFFERING a revive (the results line derives its numbers from `result`).
+  const [creditWallet, setCreditWallet] = useState<CreditWallet>(() => emptyWallet());
+  const [rescuePending, setRescuePending] = useState(false);
+  const [ownedCosmetics, setOwnedCosmetics] = useState<string[]>([]);
   const [graduated, setGraduated] = useState(false); // W4: summit reached
   const [world2, setWorld2] = useState(false); // W4: post-grad buyback world
   const [best, setBest] = useState(0);
@@ -288,6 +307,9 @@ export default function GameCanvas() {
   const pausedRef = useRef(false);
   const pausePanelRef = useRef<HTMLDivElement | null>(null);
   const phaseRef = useRef<Phase>("loading"); // blur/visibility handlers read this
+  // RESCUE offer mirror — the gamepad poll must not act on a stale render.
+  const rescuePendingRef = useRef(false);
+  useEffect(() => { rescuePendingRef.current = rescuePending; }, [rescuePending]);
   // #10 sector audio: the last sector kind the player HEARD (null at run start),
   // so the motif fires once per boundary and never on the opening beat.
   const sectorCueRef = useRef<string | null>(null);
@@ -425,6 +447,8 @@ export default function GameCanvas() {
     ledgerRef.current = loadLedger(localStorage.getItem(STATS_KEY)); // P2 stats ledger
     setCurrentStreak(ledgerRef.current.currentStreak);
     setCareer(loadCareer(localStorage.getItem(CAREER_KEY))); // P0.7 career
+    setCreditWallet(loadWallet(localStorage.getItem(CREDITS_KEY))); // RESCUE economy
+    setOwnedCosmetics(loadOwned(localStorage.getItem(COSMETICS_KEY))); // TROPHY CASE
     const requested = (params.get("symbol") ?? "").toUpperCase();
     const requestedDate = params.get("date");
     const isArch = isArchiveDate(requestedDate, utcDateStr());
@@ -716,6 +740,25 @@ export default function GameCanvas() {
   const recordFinishedRun = useCallback((r: RunResult, died: boolean) => {
     if (runRecordedRef.current) return;
     runRecordedRef.current = true;
+
+    // RESCUE economy: bank the credits this run minted. Same once-per-run guard
+    // as the ledger — a revive does not end the run, so it never banks twice.
+    // Credits are a SEPARATE number from the score (which is never spent).
+    // `r.credits` is what the engine still holds — credits already spent on a
+    // revive in this run are gone, so they are never banked back.
+    const minted = Math.max(0, Math.floor(r.credits ?? creditsForRun({
+      candlesPassed: r.candlesPassed,
+      styleEvents: (r.styleLate ?? 0) + (r.styleSave ?? 0),
+      graduated: r.graduated === true,
+      world2: r.world2 === true,
+    })));
+    if (minted > 0) {
+      try {
+        const next = addCredits(loadWallet(localStorage.getItem(CREDITS_KEY)), minted, Date.now());
+        localStorage.setItem(CREDITS_KEY, saveWallet(next));
+        setCreditWallet(next);
+      } catch { /* private mode — the wallet simply stays at its last read */ }
+    }
     ledgerRef.current = recordRun(ledgerRef.current, {
       score: r.score,
       candlesPassed: r.candlesPassed,
@@ -803,6 +846,7 @@ export default function GameCanvas() {
         // death index must be classified against. Still PII-free aggregates.
         styleLate: r.styleLate ?? 0,
         styleSave: r.styleSave ?? 0,
+        rescues: r.rescues ?? 0,
         total: levelTotalRef.current,
       }),
     }).catch(() => {});
@@ -886,13 +930,106 @@ export default function GameCanvas() {
     }
   }, [data, name, vaultBusy]);
 
+  // RESCUE economy (docs/RESCUE-ECONOMY.md): a death is no longer the end of a
+  // run — while a revive is still available the panel OFFERS it, and the run is
+  // finalized exactly once here: when the player ends it, or when no revive is
+  // left. Ledger, career, achievements, telemetry, ghost, duels and PB all fold
+  // at this single point, so a revived climb is never recorded twice.
+  const finalizedRef = useRef(false);
+  const finalizeRun = useCallback((r: RunResult, d: CandleData) => {
+    if (finalizedRef.current) return;
+    finalizedRef.current = true;
+    ghostRecRef.current.stop(); // P7.2: stream ends at the run's true end
+    // P2: the run's true end — fold it into the lifetime ledger and
+    // save the stream as this device's own ghost when it beats the old one.
+    recordFinishedRun(r, true);
+    maybeSaveSelfGhost(d, r.candlesPassed, r.score);
+    // E2.3 practice lane: a run on PAST terrain banks 0.5 weight (server
+    // verifies the signed archive token; 2/day cap). Fire-and-forget,
+    // display-only — never blocks or alters the run's end state (LAW 1).
+    if (d.seed.date < utcDateStr() && d.runToken) {
+      // LU-2: sign a wallet-link proof so the weights ledger links to a
+      // verified wallet. Fire-and-forget — the proof failure degrades to
+      // name-only identity (never blocks play, LAW 1.2 fail-open).
+      void (async () => {
+        const walletAddr = localStorage.getItem(WALLET_ADDRESS_KEY);
+        let signature: string | undefined;
+        let proofTs: number | undefined;
+        if (walletAddr && isValidAddress(walletAddr)) {
+          const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+          if (eth) {
+            proofTs = Date.now();
+            const msg = buildWalletLinkProofMessage(
+              { wallet: walletAddr.toLowerCase(), purpose: "practice", date: d.seed.date },
+              proofTs,
+            );
+            const msgHex = "0x" + [...new TextEncoder().encode(msg)].map((b) => b.toString(16).padStart(2, "0")).join("");
+            try {
+              const s = await Promise.race([
+                eth.request({ method: "personal_sign", params: [msgHex, walletAddr] }),
+                new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sign-timeout")), 30_000)),
+              ]);
+              if (typeof s === "string" && /^0x[0-9a-fA-F]{130}$/.test(s)) signature = s;
+            } catch { /* rejected — name-only identity */ }
+          }
+        }
+        const res = await fetch("/api/practice", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            runToken: d.runToken,
+            name: nameRef.current,
+            address: walletAddr ?? undefined,
+            signature,
+            ts: proofTs,
+          }),
+        });
+        const p = (await res.json()) as { ok?: boolean; banked?: number };
+        if (p?.ok && typeof p.banked === "number") {
+          setPracticeNote(`PRACTICE · +${p.banked} WEIGHT BANKED TODAY`);
+        }
+      })().catch(() => {});
+    }
+    // P7.1: local verdict at the run's end — purely client-side, never submitted.
+    // P7.3: the duel verdict is final here; the local W-L-D tally folds once.
+    const bot = botRef.current;
+    const dc = duelRef.current;
+    if (dc) {
+      const v = duelVerdict(dc, { score: r.score, candlesPassed: r.candlesPassed });
+      setVerdict(v.line);
+      setDuelTally((t) => {
+        const nt = applyDuelResult(t, v.outcome);
+        try { localStorage.setItem(DUEL_TALLY_KEY, JSON.stringify(nt)); } catch { /* private mode */ }
+        return nt;
+      });
+    } else if (vsBotRef.current && bot) {
+      setVerdict(rivalVerdict(r.candlesPassed, bot.bestCandles).line);
+    }
+    if (r.score > Number(localStorage.getItem(BEST_KEY) ?? 0)) {
+      localStorage.setItem(BEST_KEY, String(r.score));
+      setBest(r.score);
+    }
+    // refresh today's top so the rival line + board stay fresh
+    fetch(`/api/leaderboard?date=${d.seed.date}`)
+      .then((res) => res.json())
+      .then((b) => setTopBoard(b.entries ?? []))
+      .catch(() => {});
+    // The run's credits are banked now — the live counter must not double them.
+    setHud((h) => ({ ...h, credits: 0 }));
+  }, [recordFinishedRun, maybeSaveSelfGhost]);
+
   const buildEngine = useCallback((d: CandleData, mut: Mutation) => {
     usedRushRef.current = false; // per-run reset — RUSH usage is measured per run
     const plats = buildPlatforms(d.candles, d.seed.date + d.seed.symbol);
     return new Engine(
       plats,
       {
-        onScore: (score, combo) => setHud({ score, combo, candles: engineRef.current?.candlesPassed ?? 0 }),
+        onScore: (score, combo) => setHud({
+          score,
+          combo,
+          candles: engineRef.current?.candlesPassed ?? 0,
+          credits: Math.floor(engineRef.current?.credits ?? 0),
+        }),
         onSfx: (s) => {
           sfx[s]();
           // Haptics — gated by settings, only on coarse-pointer (mobile) devices
@@ -917,8 +1054,15 @@ export default function GameCanvas() {
             graduated: true,
             world2: eng.world2,
             style: eng.style,
+            rescues: eng.rescues,
+            credits: Math.floor(eng.credits),
           });
-          setHud({ score: Math.floor(eng.score), combo: 0, candles: eng.candlesPassed });
+          setHud({
+            score: Math.floor(eng.score),
+            combo: 0,
+            candles: eng.candlesPassed,
+            credits: Math.floor(eng.credits),
+          });
           // P7.1: local verdict at the summit (rival is frozen while panels are up).
           // P7.3: a loaded duel outranks the bot in the verdict line (display
           // only — the tally folds once, at death, since world 2 can still
@@ -935,55 +1079,9 @@ export default function GameCanvas() {
         onDeath: (r) => {
           sfx.death();
           setHasWallet(!!localStorage.getItem(WALLET_ADDRESS_KEY));
-          // E2.3 practice lane: a run on PAST terrain banks 0.5 weight (server
-          // verifies the signed archive token; 2/day cap). Fire-and-forget,
-          // display-only — never blocks or alters the run's end state (LAW 1).
-          if (d.seed.date < utcDateStr() && d.runToken) {
-            // LU-2: sign a wallet-link proof so the weights ledger links to a
-            // verified wallet. Fire-and-forget — the proof failure degrades to
-            // name-only identity (never blocks play, LAW 1.2 fail-open).
-            void (async () => {
-              const walletAddr = localStorage.getItem(WALLET_ADDRESS_KEY);
-              let signature: string | undefined;
-              let proofTs: number | undefined;
-              if (walletAddr && isValidAddress(walletAddr)) {
-                const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-                if (eth) {
-                  proofTs = Date.now();
-                  const msg = buildWalletLinkProofMessage(
-                    { wallet: walletAddr.toLowerCase(), purpose: "practice", date: d.seed.date },
-                    proofTs,
-                  );
-                  const msgHex = "0x" + [...new TextEncoder().encode(msg)].map((b) => b.toString(16).padStart(2, "0")).join("");
-                  try {
-                    const s = await Promise.race([
-                      eth.request({ method: "personal_sign", params: [msgHex, walletAddr] }),
-                      new Promise<never>((_, rej) => setTimeout(() => rej(new Error("sign-timeout")), 30_000)),
-                    ]);
-                    if (typeof s === "string" && /^0x[0-9a-fA-F]{130}$/.test(s)) signature = s;
-                  } catch { /* rejected — name-only identity */ }
-                }
-              }
-              const res = await fetch("/api/practice", {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({
-                  runToken: d.runToken,
-                  name: nameRef.current,
-                  address: walletAddr ?? undefined,
-                  signature,
-                  ts: proofTs,
-                }),
-              });
-              const p = (await res.json()) as { ok?: boolean; banked?: number };
-              if (p?.ok && typeof p.banked === "number") {
-                setPracticeNote(`PRACTICE · +${p.banked} WEIGHT BANKED TODAY`);
-              }
-            })().catch(() => {});
-          }
+          const eng = engineRef.current;
           // H3 WRECKAGE: freeze this death into the device's local map —
           // the exact fall point, visible to future climbers of this level
-          const eng = engineRef.current;
           if (eng) {
             const wreck: Wreck = {
               x: eng.px + 17,
@@ -996,37 +1094,14 @@ export default function GameCanvas() {
             wrecksRef.current = wrecksFor(wreckDBRef.current, seedRef.current);
           }
           setResult(r);
+          setHud({ score: r.score, combo: 0, candles: r.candlesPassed, credits: Math.floor(eng?.credits ?? 0) });
           setPhase("dead");
-          ghostRecRef.current.stop(); // P7.2: stream ends at the death tick
-          // P2: the run's true end — fold it into the lifetime ledger and
-          // save the stream as this device's own ghost when it beats the old one.
-          recordFinishedRun(r, true);
-          maybeSaveSelfGhost(d, r.candlesPassed, r.score);
-          setHud({ score: r.score, combo: 0, candles: r.candlesPassed });
-          // P7.1: local verdict at death — purely client-side, never submitted.
-          // P7.3: the duel verdict is final here; the local W-L-D tally folds once.
-          const bot = botRef.current;
-          const dc = duelRef.current;
-          if (dc) {
-            const v = duelVerdict(dc, { score: r.score, candlesPassed: r.candlesPassed });
-            setVerdict(v.line);
-            setDuelTally((t) => {
-              const nt = applyDuelResult(t, v.outcome);
-              try { localStorage.setItem(DUEL_TALLY_KEY, JSON.stringify(nt)); } catch { /* private mode */ }
-              return nt;
-            });
-          } else if (vsBotRef.current && bot) {
-            setVerdict(rivalVerdict(r.candlesPassed, bot.bestCandles).line);
-          }
-          if (r.score > Number(localStorage.getItem(BEST_KEY) ?? 0)) {
-            localStorage.setItem(BEST_KEY, String(r.score));
-            setBest(r.score);
-          }
-          // refresh today's top so the rival line + board stay fresh
-          fetch(`/api/leaderboard?date=${d.seed.date}`)
-            .then((res) => res.json())
-            .then((b) => setTopBoard(b.entries ?? []))
-            .catch(() => {});
+          // RESCUE economy: while a revive is still available this death is an
+          // OFFER, not the end of the run. The panel prices it; `endRun`
+          // finalizes. No revive left ⇒ fold the run immediately (as before).
+          const revivable = !!eng && eng.rescueAvailable();
+          setRescuePending(revivable);
+          if (!revivable) finalizeRun(r, d);
         },
       },
       mut.mods,
@@ -1065,12 +1140,16 @@ export default function GameCanvas() {
           style: prevEng.style,
           styleLate: prevEng.styleLate,
           styleSave: prevEng.styleSave,
+          rescues: prevEng.rescues,
+          credits: Math.floor(prevEng.credits),
         },
         false,
       );
       maybeSaveSelfGhost(data, prevEng.candlesPassed, Math.floor(prevEng.score));
     }
     runRecordedRef.current = false; // fresh run — the ledger guard resets
+    finalizedRef.current = false;   // fresh run — the RESCUE finalize guard resets
+    setRescuePending(false);        // a new run is never mid-offer
     sectorCueRef.current = null;    // fresh run — the first sector cue is a boundary, not the intro
     applyPause(false); // a restart is always an unpause
     unlockAudio();
@@ -1092,7 +1171,7 @@ export default function GameCanvas() {
     // P7.3: while a duel is loaded, its challenge owns the replay slot —
     // every retry re-pins the challenger's climb (terrain ghosts stand down)
     if (duelRef.current) ghostRef.current = challengeToGhost(duelRef.current);
-    setHud({ score: 0, combo: 0, candles: 0 });
+    setHud({ score: 0, combo: 0, candles: 0, credits: eng.credits });
     setResult(null);
     setRank(null);
     setLaneNote(null);
@@ -1108,6 +1187,83 @@ export default function GameCanvas() {
     lastRef.current = performance.now();
     accRef.current = 0;
   }, [data, mutation, buildEngine, rivalCharId, recordFinishedRun, maybeSaveSelfGhost, applyPause]);
+
+  // RESCUE economy (docs/RESCUE-ECONOMY.md): the death panel's two decisions.
+  // Spendable = credits this run has minted so far + the banked wallet; nothing
+  // here can touch the ranked score, the physics or the terrain.
+  // Live = banked wallet + credits this run has minted (only while the run is
+  // genuinely live; once the run is finalized its credits are in the wallet and
+  // `hud.credits` drops to 0, so nothing is ever counted twice).
+  const liveCredits = (phase === "running" || (phase === "dead" && rescuePending))
+    ? Math.max(0, hud.credits)
+    : 0;
+  const hudCredits = creditWallet.balance + liveCredits;
+  const rescueSpendable = hudCredits;
+  // Results copy: what the run EARNED (contract curve) vs what it SPENT on a
+  // revive — so the panel never shows a bare "0" for a run that paid its way.
+  const runCreditsEarned = result
+    ? creditsForRun({
+        candlesPassed: result.candlesPassed,
+        styleEvents: (result.styleLate ?? 0) + (result.styleSave ?? 0),
+        graduated: result.graduated === true,
+        world2: result.world2 === true,
+      })
+    : 0;
+  const runCreditsSpent = (result?.rescues ?? 0) * RESCUE_COST;
+  const purchaseRescue = useCallback(() => {
+    const eng = engineRef.current;
+    if (!eng || !eng.rescueAvailable()) return;
+    const wallet = loadWallet(localStorage.getItem(CREDITS_KEY));
+    const plan = planRescue(eng.credits, wallet);
+    if (!plan) return; // cannot afford — the panel disables the button
+    // Revive first: a refused revive must never charge the player.
+    if (!eng.revive()) return;
+    let next = wallet;
+    if (plan.fromWallet > 0) {
+      const res = spendCredits(wallet, plan.fromWallet, Date.now());
+      if (res.ok) next = res.wallet;
+      try { localStorage.setItem(CREDITS_KEY, saveWallet(next)); } catch { /* private mode */ }
+    }
+    // Run credits are consumed first — they are not banked while unspent.
+    eng.credits = Math.max(0, eng.credits - plan.fromRun);
+    setCreditWallet(next);
+    setHud({ score: Math.floor(eng.score), combo: 0, candles: eng.candlesPassed, credits: Math.floor(eng.credits) });
+    setResult(null);
+    setRescuePending(false);
+    setPhase("running");
+    ghostRecRef.current.resume(); // one continuous climb in the ghost stream
+    lastRef.current = performance.now();
+    accRef.current = 0;
+  }, []);
+
+  // Decline the rescue: this IS the run's true end, so everything folds now.
+  const endRun = useCallback(() => {
+    if (!result || !data) return;
+    finalizeRun(result, data);
+    setRescuePending(false);
+  }, [result, data, finalizeRun]);
+
+  // TROPHY CASE purchase — credits in, decoration out. Nothing here can touch
+  // the ranked score, the physics or another player's board.
+  const unlockCosmetic = useCallback((id: string) => {
+    const wallet = loadWallet(localStorage.getItem(CREDITS_KEY));
+    const res = buyCosmetic(wallet, ownedCosmetics, id, Date.now());
+    if (!res.ok) {
+      if (res.reason === "short") {
+        toast(`✦ ${res.def?.cost ?? 0} · you have ${wallet.balance}`, {
+          description: "climb credits are earned by climbing — never bought, never a token.",
+        });
+      }
+      return;
+    }
+    try {
+      localStorage.setItem(CREDITS_KEY, saveWallet(res.wallet));
+      localStorage.setItem(COSMETICS_KEY, saveOwned(res.owned));
+    } catch { /* private mode — the case stays at its last read */ }
+    setCreditWallet(res.wallet);
+    setOwnedCosmetics(res.owned);
+    toast(`✦ ${res.def.name} UNLOCKED`, { description: `${res.def.blurb} — cosmetic only.` });
+  }, [ownedCosmetics]);
 
   // W4: from the GRADUATED panel, continue into the post-graduation buyback
   // world — doubled gains, endless procedural sky. The run keeps its score.
@@ -1261,6 +1417,9 @@ export default function GameCanvas() {
       if (ev.code === "Space" || ev.code === "ArrowUp" || ev.code === "KeyW") {
         if (showTutorialRef.current) return; // tutorial handles Space
         ev.preventDefault();
+        // RESCUE offer: two explicit choices (RESCUE / END RUN) — a stray key
+        // must not abandon a run that has not been finalized yet.
+        if (phase === "dead" && rescuePending) return;
         if (phase === "ready" || phase === "dead") startRun();
         else if (phase === "graduated") {
           // Space on the graduated panel = enter world 2 (tap-to-continue parity);
@@ -1280,7 +1439,7 @@ export default function GameCanvas() {
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
-  }, [phase, startRun, enterWorld2, togglePause]);
+  }, [phase, startRun, enterWorld2, togglePause, rescuePending]);
 
   // P0.6 gamepad (ten-pattern #6 "inputs: jump + RUSH, no gamepad").
   // The mapping lives in src/game/cc/gamepad.ts (pure, unit-tested); this loop
@@ -1303,6 +1462,9 @@ export default function GameCanvas() {
       }
       if (edge.jumpPressed) {
         if (showTutorialRef.current) return; // the wizard owns the first press
+        // RESCUE offer: the fall panel owns the stage — a pad press must not
+        // silently abandon an unfinalized run.
+        if (ph === "dead" && rescuePendingRef.current) return;
         if (ph === "ready" || ph === "dead") startRun();
         else if (ph === "graduated") enterWorld2();
         else if (ph === "running" && !pausedRef.current) engineRef.current?.press();
@@ -1390,6 +1552,10 @@ export default function GameCanvas() {
         body: JSON.stringify({
           name: finalName, score: result.score, candlesPassed: result.candlesPassed,
           bestStreak: result.bestStreak, mutation: mutation?.id,
+          // RESCUE tag (docs/RESCUE-ECONOMY.md): how many paid revives this run
+          // used, so the board can mark it honestly. Display metadata — the
+          // score itself is still pinned by the run token (never inflated here).
+          rescues: result.rescues ?? 0,
           symbol: data.seed.symbol, date: data.seed.date,
           // E2.2: optional wallet link so the run also builds airdrop weights.
           // Display-only value from WalletChip — absent = ledger stays identity-only.
@@ -1880,6 +2046,14 @@ export default function GameCanvas() {
               RUSH
             </button>
           )}
+          {/* RESCUE economy: climb credits — separate from the ranked score to
+              its right. Shows the BANKED wallet plus what this run has minted. */}
+          <div
+            className="cc-chip cc-chip-credit"
+            title="climb credits ✦ — earned by climbing, spendable on one rescue per run. Never purchasable, never a token, never a score."
+          >
+            ✦ {hudCredits.toLocaleString()}
+          </div>
           <div className="cc-chip cc-chip-score">{hud.score.toLocaleString()}</div>
           {hud.combo > 1 && <div className="cc-chip cc-chip-combo">x{(1 + Math.min(hud.combo, 12) * 0.5).toFixed(1)}</div>}
         </div>
@@ -2149,6 +2323,39 @@ export default function GameCanvas() {
                     <button className="cc-btn cc-btn-ghost" onClick={() => setArchOpen(true)} title="famous past days as practice terrain — unscored">PAST CHARTS →</button>
                     <a className="cc-btn cc-btn-ghost" href="/stats">YOUR STATS →</a>
                   </div>
+                  {/* TROPHY CASE — the non-competitive credit sink. Ornaments
+                      decorate the player's own panels; nothing here is scored. */}
+                  <div className="cc-sec-title">TROPHY CASE · COSMETIC ONLY</div>
+                  <div className="cc-cosmetics">
+                    {COSMETICS.map((c) => {
+                      const have = owns(ownedCosmetics, c.id);
+                      const affordable = creditWallet.balance >= c.cost;
+                      return (
+                        <div key={c.id} className="cc-cosmetic-row">
+                          <span className="cc-cosmetic-name">{c.name}</span>
+                          <span className="cc-cosmetic-blurb">{c.blurb}</span>
+                          <button
+                            className="cc-tf-chip"
+                            disabled={have || !affordable}
+                            onClick={() => unlockCosmetic(c.id)}
+                            title={
+                              have ? "owned"
+                                : affordable ? "spend climb credits — cosmetic only, never score"
+                                  : `need ${c.cost - creditWallet.balance} more credits — they come from climbing`
+                            }
+                          >
+                            {have ? "OWNED ✓" : `${c.cost} ✦`}
+                          </button>
+                        </div>
+                      );
+                    })}
+                    <p className="cc-vs-note">
+                      cosmetics decorate your own panels — they never touch the score, the physics or another climber&apos;s board.
+                    </p>
+                    {owns(ownedCosmetics, "oath") && (
+                      <p className="cc-oath" aria-hidden>THE CHART IS THE LEVEL · OATH SWORN</p>
+                    )}
+                  </div>
                   {!archive && report && (
                     <div className="cc-report cc-report-fold">
                       <button
@@ -2190,7 +2397,10 @@ export default function GameCanvas() {
                         <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
                           <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
                           <span className="cc-board-name">{e.name}</span>
-                          <span className="cc-board-score">{e.score.toLocaleString()}</span>
+                          <span className="cc-board-score">
+                            {e.rescues ? <i className="cc-board-rescue" title={`rescued ${e.rescues}× — tagged run`}>↺{e.rescues}</i> : null}
+                            {e.score.toLocaleString()}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -2255,7 +2465,57 @@ export default function GameCanvas() {
         </div>
       )}
 
-      {phase === "dead" && result && (
+      {/* RESCUE offer (docs/RESCUE-ECONOMY.md): the fall is priced BEFORE the
+          results, with no timer — cost, balance and the return point are all
+          visible before the player commits, and END RUN is always available. */}
+      {phase === "dead" && result && rescuePending && (
+        <div className="cc-overlay">
+          <div
+            className="cc-panel cc-panel-death cc-panel-rescue"
+            ref={deathPanelRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-label="Fallen — rescue offer"
+          >
+            <h2 className="cc-liquidated" role="alert">FALLEN</h2>
+            <div className="cc-death-score">
+              <span className="cc-death-num">{result.candlesPassed}</span>
+              <span className="cc-death-sub">
+                candles climbed · {result.score.toLocaleString()} pts · best streak x{result.bestStreak}
+              </span>
+            </div>
+            <p className="cc-rescue-price">
+              RESCUE COST <b>{RESCUE_COST} ✦</b> · YOU HAVE <b>{rescueSpendable.toLocaleString()} ✦</b>
+            </p>
+            <p className="cc-rescue-note">
+              you resume on your last solid candle · score and progress kept · the combo resets ·
+              this run is tagged ↺ on the board
+            </p>
+            <div className="cc-death-actions">
+              <button
+                className="cc-btn cc-btn-start"
+                onClick={purchaseRescue}
+                disabled={rescueSpendable < RESCUE_COST}
+                title={
+                  rescueSpendable < RESCUE_COST
+                    ? `need ${RESCUE_COST - rescueSpendable} more credits — they are earned by climbing, never bought`
+                    : "spend credits to continue this run from your last solid candle"
+                }
+              >
+                RESCUE ↺
+              </button>
+              <button className="cc-btn cc-btn-ghost" onClick={endRun}>END RUN</button>
+            </div>
+            <p className="cc-rescue-note" role="status">
+              {rescueSpendable < RESCUE_COST
+                ? `${RESCUE_COST - rescueSpendable} ✦ short · credits come from climbing, not from buying`
+                : `${MAX_RESCUES_PER_RUN} rescue per run · credits are separate from your score`}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {phase === "dead" && result && !rescuePending && (
         <div className="cc-overlay">
           <div className="cc-panel cc-panel-death" ref={deathPanelRef} tabIndex={-1} role="dialog" aria-label="Run ended — results and actions">
             <h2 className="cc-liquidated" role="alert">LIQUIDATED</h2>
@@ -2270,6 +2530,15 @@ export default function GameCanvas() {
                 {result.candlesPassed} candles · best streak x{result.bestStreak} · style {result.style ?? 0} · PB {best.toLocaleString()}
               </span>
             </div>
+            {/* RESCUE economy summary — credits earned are a SEPARATE number
+                from the ranked score above, and a rescued run says so here. */}
+            {owns(ownedCosmetics, "flare") && <p className="cc-cosmetic-flare" aria-hidden>✦ ✦ ✦</p>}
+            <p className="cc-credits-line" role="status">
+              {result.rescues
+                ? `✦ ${runCreditsEarned.toLocaleString()} EARNED · ${runCreditsSpent.toLocaleString()} SPENT ON ↺${result.rescues} RESCUE · BALANCE ${creditWallet.balance.toLocaleString()}`
+                : `✦ ${runCreditsEarned.toLocaleString()} CLIMB CREDITS · BALANCE ${creditWallet.balance.toLocaleString()}`}
+              {owns(ownedCosmetics, "seal") ? " ◆" : ""}
+            </p>
             {rivalGap > 0 && top && (
               <p className="cc-rival">
                 TOP TODAY: <b>{top.name}</b> · {top.score.toLocaleString()} — you were <b>{rivalGap.toLocaleString()}</b> pts behind
@@ -2352,7 +2621,10 @@ export default function GameCanvas() {
                       {e.name}
                       {e.wallet ? <i className="cc-board-wallet">{e.wallet}</i> : null}
                     </span>
-                    <span className="cc-board-score">{e.score.toLocaleString()}</span>
+                    <span className="cc-board-score">
+                      {e.rescues ? <i className="cc-board-rescue" title={`rescued ${e.rescues}× — tagged run`}>↺{e.rescues}</i> : null}
+                      {e.score.toLocaleString()}
+                    </span>
                     <button className="cc-report-btn" onClick={() => reportScore(e)} title="Report suspicious score" aria-label={`Report ${e.name}'s score`}>🚩</button>
                   </div>
                 ))}
@@ -2369,7 +2641,10 @@ export default function GameCanvas() {
                   <div key={`${e.ts ?? i}-${e.name}`} className="cc-board-row">
                     <span className={i < 3 ? "cc-board-rank top" : "cc-board-rank"}>#{i + 1}</span>
                     <span className="cc-board-name">{e.name}</span>
-                    <span className="cc-board-score">{e.score.toLocaleString()}</span>
+                    <span className="cc-board-score">
+                      {e.rescues ? <i className="cc-board-rescue" title={`rescued ${e.rescues}× — tagged run`}>↺{e.rescues}</i> : null}
+                      {e.score.toLocaleString()}
+                    </span>
                     <button className="cc-report-btn" onClick={() => reportScore(e)} title="Report suspicious score" aria-label={`Report ${e.name}'s score`}>🚩</button>
                   </div>
                 ))}

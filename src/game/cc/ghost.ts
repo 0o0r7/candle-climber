@@ -51,6 +51,12 @@ export class GhostRecorder {
     this.active = false;
   }
 
+  /** RESCUE: keep the SAME stream and start ticking again — a revived run is
+   *  one continuous climb, so the ghost must not restart at the rescue pose. */
+  resume() {
+    this.active = true;
+  }
+
   /** Call once per fixed tick while the run is live (running phase only). */
   tick(px: number, py: number) {
     if (!this.active) return;

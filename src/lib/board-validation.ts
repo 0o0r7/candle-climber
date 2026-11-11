@@ -19,6 +19,17 @@ import { MAX_SCORE_PER_CANDLE } from "@/lib/scoring";
 // world 2 extends the terrain indefinitely (W4); 5000 closed candles ≈ a
 // 20+ minute run — the score caps below remain the real anti-cheat gates.
 export const MAX_CANDLES = 5000;
+/** RESCUE tag ceiling (docs/RESCUE-ECONOMY.md): the client reports how many
+ *  paid revives a run used so the row can be marked. It is DISPLAY metadata —
+ *  the score itself is still pinned by the run token + the physical caps below,
+ *  so a forged count can only decorate a row, never inflate a score. */
+export const MAX_RESCUE_TAG = 9;
+
+/** Clamp the client-claimed rescue count. 0/absent ⇒ no tag (legacy rows). */
+export function sanitizeRescues(raw: unknown): number {
+  const n = Math.floor(Number(raw ?? 0));
+  return Number.isFinite(n) && n > 0 ? Math.min(n, MAX_RESCUE_TAG) : 0;
+}
 
 export type SubmissionVerdict =
   | { ok: true; entry: BoardEntry }
@@ -77,6 +88,10 @@ export function validateSubmission(
     season: seasonOf(tok.date), // official records are season-scoped (guest rows carry it too — informational)
     // E5.5: opaque referral stamp — metadata only, never a ranking/lane input
     ...(sanitizeRef(body.ref) ? { ref: sanitizeRef(body.ref) } : {}),
+    // RESCUE tag — display metadata, written only when a revive was used
+    ...(sanitizeRescues((body as { rescues?: unknown }).rescues) > 0
+      ? { rescues: sanitizeRescues((body as { rescues?: unknown }).rescues) }
+      : {}),
   };
 
   // shape validation

@@ -96,4 +96,9 @@ export interface RunResult {
    *  which half of the quality axis players actually use. */
   styleLate?: number;
   styleSave?: number;
+  /** RESCUE economy (docs/RESCUE-ECONOMY.md): how many paid revives this run
+   *  used (0 or 1 today) and how many climb credits it minted. Absent on
+   *  results written before the mechanic existed ⇒ treated as zero. */
+  rescues?: number;
+  credits?: number;
 }
