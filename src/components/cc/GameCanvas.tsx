@@ -1483,7 +1483,12 @@ export default function GameCanvas() {
   const onPointerDown = (ev: React.PointerEvent) => {
     // G2 owner note: the death/ready panels live inside the stage — never hijack
     // clicks meant for the name input or any other control inside them
-    if ((ev.target as HTMLElement | null)?.closest("input,button,a,select,textarea,label")) return;
+    // 2026-11-11: `summary` / `.cc-more-body` were missing here — the
+    // disclosure opened the run instead of its content, so the entry card's
+    // folded options (timeframe, report, TROPHY CASE) could not be reached at
+    // all before playing. Same rule as the sentence above: panel controls own
+    // their clicks, the stage does not.
+    if ((ev.target as HTMLElement | null)?.closest("input,button,a,select,textarea,label,summary,.cc-more-body")) return;
     ev.preventDefault();
     if (pausedRef.current && phase === "running") return; // frozen — the pause dialog owns the stage
     if (phase === "ready") { if (!showTutorialRef.current) startRun(); return; }
