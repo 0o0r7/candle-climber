@@ -479,8 +479,16 @@ class MongoStore implements BoardStore {
 // Memoize BOTH stores: a fresh MongoStore per request would mean a fresh MongoClient
 // per request (Atlas M0 caps connections, and the per-instance 'disabled' circuit-
 // breaker would reset every call — AUDIT finding F3).
-let memoryFallback: MemoryStore | null = null;
 let mongoStore: MongoStore | null = null;
+
+/* The memory store is cached on globalThis, not in a module variable: Next
+ * compiles each route into its OWN module graph, so a module-level singleton
+ * handed /leaderboard and /ops an empty copy of the board that the API route's
+ * writes never reached — the public page rendered "no runs yet" while the game
+ * panel (which reads through the API) showed the same rows. One instance per
+ * PROCESS keeps every bundle in agreement; Mongo is a shared database already,
+ * so that path is untouched. */
+const memorySingleton = globalThis as { __ccMemoryBoard?: MemoryStore };
 
 export function getBoard(): BoardStore {
   const url = process.env.DATABASE_URL ?? "";
@@ -488,6 +496,6 @@ export function getBoard(): BoardStore {
     if (!mongoStore) mongoStore = new MongoStore();
     return mongoStore;
   }
-  if (!memoryFallback) memoryFallback = new MemoryStore();
-  return memoryFallback;
+  if (!memorySingleton.__ccMemoryBoard) memorySingleton.__ccMemoryBoard = new MemoryStore();
+  return memorySingleton.__ccMemoryBoard;
 }
