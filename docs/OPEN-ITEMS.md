@@ -1,4 +1,4 @@
-# OPEN ITEMS — the single register (updated 2026-11-10, after the playthrough audit)
+# OPEN ITEMS — the single register (updated 2026-11-11, after the product audit)
 
 > **خلاصه فارسی:** این فایل تنها مرجع «کارهای باز» است. هر موردی که در ممیزی‌ها
 > باز مانده، اینجا با **دلیل اندازه‌گیری‌شده**، **تصمیم**، **اقدام انجام‌شده** و
@@ -31,6 +31,24 @@ open TODOs carried from the previous passes.
 | O-8 | Build choice on the **ranked** lane | per-player forgiveness would touch a shared board | owner call | `DEFERRED` (owner) |
 | O-9 | Cross-device career profile | needs a server identity | owner call (auth surface) | `DEFERRED` (owner) |
 | O-10 | `scripts/summit-bot.ts` sits in the **public** tree | it is a solver: it hands out a summit-clearing input line | keep it for regression now; move to the private archive before the repo/board goes public | `DEFERRED` (coder agent) |
+
+## Audit 2026-11-11 — the product pass
+
+Full report, method and acceptance criteria: [`PRODUCT-AUDIT-2026-11-11.md`](PRODUCT-AUDIT-2026-11-11.md).
+No product code changed in this pass — it is an audit, and these rows are its queue.
+Evidence classes are kept apart: `measured` = a command run in this session,
+`code` = file/line or a pinning test, `human` = needs a person.
+
+| # | Item | Evidence (fact) | Action | Status |
+|---|---|---|---|---|
+| A-1 | Onboarding wizard covers the footer (the wallet chip's home) and traps keyboard users | `measured`: overlay covers the viewport and the footer hit-test returns an overlay node (z 35 vs footer 15); focus stays on `BODY`; `Escape` does not close | focus trap + `aria-modal` + Escape + footer reachable | `OPEN` (P0) |
+| A-2 | The death panel never says *why* the run ended | `code`: `cause` exists in `types.ts:87` and is sent to telemetry (`GameCanvas.tsx:795`, `:991`) but never rendered | render the cause + one-line hint | `OPEN` (P0) |
+| A-3 | The product funnel is unmeasured | `code`+`code`: `TELEMETRY.md` §1 records one event at run *end*; no start/tutorial/retry/submit event exists | add aggregate funnel events (PII-free) + `/ops` rates | `OPEN` (P0) |
+| A-4 | No human playtest has ever been run against the shipped build | `measured`: blind 300/170 rhythm ends at candle 19 (230 pts) on a 72-candle chart; bot data cannot answer experience questions | run the protocol in the audit §7 | `OPEN` (P0) |
+| A-5 | The wallet/Privy lane is invisible in every build where the flags are unset | `measured`: `NEXT_PUBLIC_WALLET_ENABLED` and `NEXT_PUBLIC_PRIVY_APP_ID` unset in the sandbox → `WalletChip` renders `null`; `.env.production:16` carries a Privy app id | one documented source of truth for the two flags; decide on/off explicitly | `DEFERRED` (owner) |
+| A-6 | Ranked board persistence depends on an env var nobody checks | `measured`: `GET /api/leaderboard` → `"store":"memory"` in the sandbox | require a durable store in production | `DEFERRED` (owner) |
+| A-7 | Run outcome is never announced to assistive tech | `code`: no `aria-live` for death/graduation | one polite live region on run end | `OPEN` (P2) |
+| A-8 | Bundle/load/device performance is unmeasured | `measured`: only a `next dev` server exists in the sandbox, so its timings are not representative | measure a production build on a real device | `OPEN` (P2) |
 
 ---
 
