@@ -2294,6 +2294,31 @@ html { scroll-behavior: smooth; }
   height: auto;
   filter: drop-shadow(0 26px 54px rgba(0, 0, 0, 0.55));
 }
+/* Visual DNA §8.2 — the only two callouts in the system (GREEN HOLDS / RED CRUMBLES).
+   1px dashed chip; the meaning is carried by the word, not the colour alone. */
+.lp-hero-callouts {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+}
+.lp-callout {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px dashed currentColor;
+  border-radius: 4px;
+  font-family: var(--lp-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.lp-callout.up { color: var(--lp-up); }
+.lp-callout.down { color: var(--lp-down); }
+
 .lp-hero-eyebrow {
   font-family: var(--lp-mono);
   font-size: 11px;
@@ -2367,6 +2392,7 @@ html { scroll-behavior: smooth; }
   .lp-hero-stat { text-align: center; }
   .lp-hero-visual { margin-top: 12px; }
   .lp-hero-mascot { width: min(78vw, 320px); }
+  .lp-hero-callouts { justify-content: center; }
 }
 
 /* Sections */

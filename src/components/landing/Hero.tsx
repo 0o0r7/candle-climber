@@ -35,6 +35,14 @@ export default function Hero() {
               <div className="lp-hero-stat-label">RETRIES</div>
             </div>
           </div>
+          {/* Visual DNA §8.2 — the only two callouts in the system: the locked
+              green/coral market meaning (etude F). Kept beside the copy, not on the
+              mascot: measured, a chip floating over the art sat 88% on top of the
+              character's own pixels. */}
+          <div className="lp-hero-callouts">
+            <div className="lp-callout up">GREEN HOLDS</div>
+            <div className="lp-callout down">RED CRUMBLES</div>
+          </div>
         </div>
 
         {/* Owner-supplied hero pose (profile A blockbot), shipped as delivered: the pack's
