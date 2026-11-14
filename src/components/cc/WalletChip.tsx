@@ -18,7 +18,16 @@ const PrivyChip = dynamic(() => import("./WalletChipPrivy"), { ssr: false });
 const InjectedChip = dynamic(() => import("./WalletChipInjected"), { ssr: false });
 
 export default function WalletChip() {
-  if (process.env.NEXT_PUBLIC_WALLET_ENABLED !== "on") return null;
-  if (process.env.NEXT_PUBLIC_PRIVY_APP_ID) return <PrivyChip />;
+  // 2026-11-14 — the gate now matches the documented contract above and in
+  // `.env.production`: a configured Privy App ID *is* the activation signal for
+  // the Privy lane (PrivyProvider mounts on it, middleware CSP admits its hosts).
+  // Before this, `.env.production` set only the App ID, so the first line
+  // returned null and the chip never rendered in a production/preview build —
+  // the "connect wallet button is missing" report. Both signals stay opt-in:
+  // neither set → still null (launch-day default, unchanged).
+  const flagOn = process.env.NEXT_PUBLIC_WALLET_ENABLED === "on";
+  const privyId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+  if (!flagOn && !privyId) return null;
+  if (privyId) return <PrivyChip />;
   return <InjectedChip />;
 }

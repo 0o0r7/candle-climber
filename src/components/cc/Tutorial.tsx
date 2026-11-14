@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Zap, Flame, CalendarClock } from "lucide-react";
 import { TUTORIAL_KEY } from "@/lib/tutorial-key";
 
@@ -52,6 +52,23 @@ export default function Tutorial({ onClose }: { onClose: () => void }) {
     try { localStorage.setItem(TUTORIAL_KEY, "1"); } catch { /* private mode */ }
     onClose();
   };
+
+  // A-1 (2026-11-14): keyboard users had no way out — focus stayed on BODY and
+  // Escape did nothing, so the card was a trap. Focus the primary action on
+  // mount and let Escape take the same path as SKIP.
+  const primaryRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    primaryRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        finish();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const next = () => {
     if (isLast) finish();
@@ -118,7 +135,7 @@ export default function Tutorial({ onClose }: { onClose: () => void }) {
           ) : (
             <button className="cc-btn cc-btn-ghost cc-tut-btn" onClick={finish}>SKIP</button>
           )}
-          <button className="cc-btn cc-btn-start cc-tut-btn" onClick={next}>
+          <button ref={primaryRef} className="cc-btn cc-btn-start cc-tut-btn" onClick={next}>
             {isLast ? "GOT IT" : "NEXT"}
           </button>
         </div>

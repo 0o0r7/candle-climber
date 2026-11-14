@@ -1817,7 +1817,12 @@ button.cc-wallet-chip { cursor: pointer; }
 }
 
 /* ---- Tutorial (step-by-step onboarding guide) ---- */
-.cc-tutorial-overlay { z-index: 35; }
+/* 2026-11-14 (A-1): the tutorial used to be a full-viewport hit-catcher sitting
+   at z 35 over the footer (z 15) — it swallowed clicks on the wallet chip and
+   every footer link. The shell is now click-through; only the card itself
+   takes pointer events, so the footer stays reachable while the tutorial is up. */
+.cc-tutorial-overlay { z-index: 35; pointer-events: none; }
+.cc-tutorial-overlay .cc-tutorial-panel { pointer-events: auto; }
 .cc-tutorial-panel {
   width: min(440px, calc(100vw - 32px));
   max-height: calc(100dvh - 92px);
