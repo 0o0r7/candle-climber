@@ -8,25 +8,31 @@ be treated.
 
 | File | Used by | Source | Status |
 |---|---|---|---|
-| `public/cc/brand/wick-action.webp` | landing hero (`Hero.tsx`) | owner pack `07-bot-first-concept/assets/mascot-action-with-baby.png` (1024×1024, **RGB, white background — no alpha**) | cutout derivative, 720×871, real alpha, 109 KB |
+| `public/cc/brand/wick-hero.webp` | landing hero (`Hero.tsx`) | owner visual-DNA pack `wick-pose-hero-wave.png` (1920×1920, RGBA, **real alpha**, `usage: standalone transparent hero/welcome pose`) | delivered pose downscaled, 1000×1296, alpha untouched, 138 KB |
+
+Two packs ship mascot art and only one of them is web-ready:
+
+- **Visual-DNA pack** (`wick-pose-hero-wave` / `action-climb` / `victory` / `falling`, 1920×1920
+  RGBA) — real transparency, drop straight into the UI. This is the set to use.
+- **`07-bot-first-concept` pack** (26 × `mascot-*.png`, 1024×1024 **RGB on white, no alpha**) —
+  visible-art reference and in-product mockup art only. Putting one of these on a dark surface
+  requires cutting the background out by hand, which is exactly what this repo no longer does.
 
 Profile: `OWNER-REBRIEF-A` (cream/sand blockbot, teal faceplate, black square eyes, two dark
 turrets with lime bars, orange-brown backpack, small companion). Do not blend in the waxy
 `Wick V2` identity or the older blockbot prompt set, and do not restyle the in-game canvas
 player (profile C) to match this art without a separate decision.
 
-## How the cutout was made
+## How the shipped file was produced
 
-The delivered hero art is opaque on white, so it cannot be dropped onto `#101214` as-is
-(the pack's rule: never present a flat background as if it were transparency).
+No background removal and no manual cutout. The delivered `wick-pose-hero-wave.png` already
+carries a real alpha channel (63% of the canvas fully transparent, soft antialiased edges,
+`alpha_range 0–254` per the pack manifest), so the only steps are mechanical delivery ones:
 
-1. Flood-fill from the image border over near-white pixels (`r,g,b ≥ 240`) — only the
-   background connected to the edge is removed, so light tones *inside* the character
-   (shell highlights, the baby's wrap) survive. Leftover light pixels afterwards: 1.1%,
-   which is the antialiased character outline, not background.
-2. Hard alpha (no blur pass): a blurred alpha channel smeared the edge and re-exposed the
-   background, so the export keeps a 1-bit mask; the browser's downscale does the feathering.
-3. Trim to the subject, resize to 720 px wide, export WebP q90 + full alpha quality.
+1. `trim({ threshold: 1 })` — drops the empty transparent margin around the character. Nothing
+   of the subject is cropped.
+2. Resize to 1000 px wide (`withoutEnlargement`).
+3. Export WebP q92 + `alphaQuality 100`, so the delivered alpha survives untouched.
 
 Re-check any new derivative by compositing it on `#101214`, white and lime at final display
 size. A checkerboard in the file, or a grey halo on the dark surface, is a fail.

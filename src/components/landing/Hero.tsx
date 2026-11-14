@@ -37,16 +37,17 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Owner mascot art (profile A blockbot) as a clean transparent cutout.
-            Provenance + the alpha rules it was made under: docs/BRAND-ASSETS.md */}
+        {/* Owner-supplied hero pose (profile A blockbot), shipped as delivered: the pack's
+            PNG already carries real alpha, so nothing is cut out here.
+            Provenance + rules: docs/BRAND-ASSETS.md */}
         <div className="lp-hero-visual">
           <div className="lp-hero-glow" aria-hidden="true" />
           <img
             className="lp-hero-mascot"
-            src="/cc/brand/wick-action.webp"
-            width={720}
-            height={871}
-            alt="Wick, the Candle Climber blockbot, mid-jump with its small companion"
+            src="/cc/brand/wick-hero.webp"
+            width={1000}
+            height={1296}
+            alt="Wick, the Candle Climber blockbot, waving"
           />
         </div>
       </div>
