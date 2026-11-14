@@ -19,6 +19,8 @@
 | Retired layers and why they stay retired | [`RETIRED-FEATURES.md`](RETIRED-FEATURES.md) |
 | Input/UX research behind the engine feel | [`PLATFORMER-UX-RESEARCH.md`](PLATFORMER-UX-RESEARCH.md) |
 | External design sources behind current decisions (feel, difficulty, retention) | [`GAME-DESIGN-REFERENCES.md`](GAME-DESIGN-REFERENCES.md) |
+| Teardown of 12 shipped browser games (observed HUD/menus) — the benchmark we are measured against | [`BENCHMARK-GAME-DEV-2026-11-14.md`](BENCHMARK-GAME-DEV-2026-11-14.md) |
+| The pro-version proposal queue, each item with evidence + acceptance metric | [`PROPOSALS-PRO-VERSION-2026-11-14.md`](PROPOSALS-PRO-VERSION-2026-11-14.md) |
 | Run telemetry contract + how to read the death histogram | [`TELEMETRY.md`](TELEMETRY.md) |
 | The daily chart's authored pacing (sectors, invariants, evidence) | [`DIFFICULTY-DIRECTOR.md`](DIFFICULTY-DIRECTOR.md) |
 | The STYLE quality axis (late hops, forgiveness saves, fairness) | [`STYLE-SCORE.md`](STYLE-SCORE.md) |
