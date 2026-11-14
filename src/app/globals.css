@@ -530,6 +530,53 @@ button.cc-wallet-chip { cursor: pointer; }
   color: var(--cc-faint);
   letter-spacing: 0.06em;
 }
+/* P2 (2026-11-14) — the death panel diagnoses the run. Three lines: the cause,
+   where on the chart it happened, and the one thing to change next attempt
+   (audit §2 finding 5: `cause` was produced and never shown to the player). */
+.cc-diag {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--cc-hairline);
+  background: rgba(255, 255, 255, 0.03);
+  text-align: left;
+  font-family: var(--cc-mono);
+}
+.cc-diag-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cc-diag-cause {
+  font-family: var(--cc-display);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  color: #fff;
+}
+.cc-diag-crumbled { color: var(--cc-down-ink); }
+.cc-diag-wicked { color: #9A8FF0; }
+.cc-diag-place {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--cc-faint);
+}
+.cc-diag-what {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #d5d9dd;
+}
+.cc-diag-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--cc-faint);
+}
+.cc-diag-next {
+  color: var(--cc-lime);
+  letter-spacing: 0.12em;
+  margin-right: 2px;
+}
 .cc-rank {
   font-family: var(--cc-mono);
   color: var(--cc-lime);

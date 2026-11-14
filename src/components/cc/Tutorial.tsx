@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Zap, Flame, CalendarClock } from "lucide-react";
 import { TUTORIAL_KEY } from "@/lib/tutorial-key";
+import { trackFunnel } from "@/lib/funnel-client";
 
 interface Step {
   visual: "candles" | "jump" | "rush" | "combo" | "daily";
@@ -47,8 +48,16 @@ const steps: Step[] = [
 export default function Tutorial({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(0);
   const isLast = step === steps.length - 1;
+  // P1: the Escape handler lives in a mount-time effect, so it must read the
+  // current step from a ref rather than the closure it was created in.
+  const stepRef = useRef(0);
+  useEffect(() => { stepRef.current = step; }, [step]);
 
-  const finish = () => {
+  // P1 funnel: finishing and dismissing are different events — GOT IT is
+  // "tutorial read", SKIP / Escape is "tutorial skipped", and the count of
+  // steps shown says how far an abandoned player actually got.
+  const finish = (skipped: boolean) => {
+    trackFunnel("tutorial_complete", { steps: stepRef.current + 1, skipped });
     try { localStorage.setItem(TUTORIAL_KEY, "1"); } catch { /* private mode */ }
     onClose();
   };
@@ -62,16 +71,15 @@ export default function Tutorial({ onClose }: { onClose: () => void }) {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        finish();
+        finish(true);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const next = () => {
-    if (isLast) finish();
+    if (isLast) finish(false);
     else setStep((p) => p + 1);
   };
 
@@ -133,7 +141,7 @@ export default function Tutorial({ onClose }: { onClose: () => void }) {
           {step > 0 ? (
             <button className="cc-btn cc-btn-ghost cc-tut-btn" onClick={() => setStep((p) => p - 1)}>BACK</button>
           ) : (
-            <button className="cc-btn cc-btn-ghost cc-tut-btn" onClick={finish}>SKIP</button>
+            <button className="cc-btn cc-btn-ghost cc-tut-btn" onClick={() => finish(true)}>SKIP</button>
           )}
           <button ref={primaryRef} className="cc-btn cc-btn-start cc-tut-btn" onClick={next}>
             {isLast ? "GOT IT" : "NEXT"}

@@ -15,6 +15,8 @@ import { fetchMeter, ethHuman } from "@/lib/meter";
 import { graduationState, weightsFrozen, POST_GRAD_LANES } from "@/lib/graduation";
 import { getRunTelemetry } from "@/lib/run-telemetry-store"; // P0.1 death histogram
 import { HISTOGRAM_MAX_BIN, type TelemetrySummary } from "@/lib/run-telemetry";
+import { getFunnel } from "@/lib/funnel-telemetry-store"; // P1 pre-run funnel
+import type { FunnelSummary } from "@/lib/funnel-telemetry";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +47,12 @@ function Bar({ n, max }: { n: number; max: number }) {
       {"█".repeat(Math.max(n > 0 ? 1 : 0, filled))}
     </span>
   );
+}
+
+/** P1: a ratio row. "n/a" (never 0%) when the denominator has no sample — a
+ *  rate over nothing is not a number, it is a missing measurement. */
+function pct(n: number, d: number): string {
+  return d > 0 ? `${Math.min(100, Math.round((n / d) * 100))}%` : NA;
 }
 
 function Block({ title, children }: { title: string; children: ReactNode }) {  return (
@@ -95,6 +103,14 @@ export default async function OpsPage({
     const t = getRunTelemetry();
     teleStore = t.kind;
     tele = await t.summary(now);
+  } catch { /* fail-open */ }
+  // P1: the pre-run funnel (start / tutorial / retry). Same fail-open rule.
+  let funnel: FunnelSummary | null = null;
+  let funnelStore = NA;
+  try {
+    const f = getFunnel();
+    funnelStore = f.kind;
+    funnel = await f.summary(now);
   } catch { /* fail-open */ }
   try {
     const rs = getScoreReports();
@@ -193,6 +209,38 @@ export default async function OpsPage({
                 v={<><Bar n={b.count} max={histMax} /> {b.count}</>}
               />
             ))}
+          </>
+        )}
+      </Block>
+
+      <Block title="FUNNEL — 7D (P1)">
+        <Row k="store" v={funnelStore} note="append-only NDJSON next to the run lane" />
+        {!funnel || funnel.total === 0 ? (
+          <Row k="sample" v="0 events" note="run_start / tutorial_complete / retry — play a run to seed it" />
+        ) : (
+          <>
+            <Row k="run starts" v={String(funnel.counts.run_start)} note="every START CLIMB / RETRY" />
+            <Row
+              k="tutorial reached the end"
+              v={String(funnel.tutorialDone)}
+              note={`${funnel.tutorialSkipped} of them dismissed (SKIP / Esc)`}
+            />
+            <Row
+              k="tutorial → run"
+              v={pct(funnel.counts.run_start, funnel.tutorialDone)}
+              note="newcomers who read or dismissed the tutorial and then climbed"
+            />
+            <Row
+              k="start → finish"
+              v={pct(tele?.total ?? 0, funnel.counts.run_start)}
+              note="starts that ended in a recorded run — the dropout signal"
+            />
+            <Row k="retries" v={String(funnel.counts.retry)} note="starts from a death / summit panel" />
+            <Row
+              k="steps shown"
+              v={funnel.medianTutorialSteps === null ? NA : `median ${funnel.medianTutorialSteps} / 5`}
+              note="where the tutorial was left"
+            />
           </>
         )}
       </Block>

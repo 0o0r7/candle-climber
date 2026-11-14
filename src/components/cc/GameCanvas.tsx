@@ -22,6 +22,10 @@ import { deriveWeather } from "@/game/cc/weather";
 import { deriveBiome, type BiomeId } from "@/game/cc/biome";
 import { recordWreck, wrecksFor, loadWreckDB, saveWreckDB, type WreckDB, type Wreck } from "@/game/cc/wreckage";
 import { makeDeathCard, normalizeRivalTag } from "@/game/cc/deathcard";
+// P2: the death panel's diagnosis block (pure copy map + director sector).
+import DeathDiagnosis from "@/components/cc/DeathDiagnosis";
+// P1: the pre-run funnel lane (start / tutorial / retry).
+import { trackFunnel } from "@/lib/funnel-client";
 import { DEFAULT_CHAR_ID, getChar } from "@/game/cc/characters";
 import { sfx, setMuted, setVolume, unlockAudio } from "@/game/cc/sound";
 // The trailer's per-biome score, ported into the game (docs/MUSIC.md).
@@ -1124,6 +1128,11 @@ export default function GameCanvas() {
 
   const startRun = useCallback(() => {
     if (!data || !mutation || data.candles.length === 0) return;
+    // P1 funnel: every start is measured, and a start from an end panel is also
+    // a RETRY — the pressure signal the first-session work is tuned against.
+    const from = phaseRef.current;
+    trackFunnel("run_start");
+    if (from === "dead" || from === "graduated") trackFunnel("retry");
     // P2: RETRY from the summit panel abandons a graduated engine that will
     // never fire onDeath — record it into the ledger + self-ghost first.
     // (A run that graduated and CONTINUED records once, at its eventual death.)
@@ -2489,6 +2498,9 @@ export default function GameCanvas() {
                 candles climbed · {result.score.toLocaleString()} pts · best streak x{result.bestStreak}
               </span>
             </div>
+            {/* P2: the offer is still a death — say why BEFORE pricing the
+                revive, so the decision is informed by the mistake, not the cost. */}
+            <DeathDiagnosis result={result} total={data?.candles.length ?? 0} />
             <p className="cc-rescue-price">
               RESCUE COST <b>{RESCUE_COST} ✦</b> · YOU HAVE <b>{rescueSpendable.toLocaleString()} ✦</b>
             </p>
@@ -2535,6 +2547,9 @@ export default function GameCanvas() {
                 {result.candlesPassed} candles · best streak x{result.bestStreak} · style {result.style ?? 0} · PB {best.toLocaleString()}
               </span>
             </div>
+            {/* P2 — why this run ended, where on the chart, and the one change
+                that makes the next attempt different. */}
+            <DeathDiagnosis result={result} total={data?.candles.length ?? 0} />
             {/* RESCUE economy summary — credits earned are a SEPARATE number
                 from the ranked score above, and a rescued run says so here. */}
             {owns(ownedCosmetics, "flare") && <p className="cc-cosmetic-flare" aria-hidden>✦ ✦ ✦</p>}

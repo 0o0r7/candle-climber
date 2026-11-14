@@ -1,10 +1,13 @@
 # TELEMETRY — the run contract and how to read `/ops`
 
-> P0.1, extended by P0.5 (STYLE + sector deaths). Written 2026-11-10. Why this
-> exists, with sources: [`GAME-DESIGN-REFERENCES.md`](GAME-DESIGN-REFERENCES.md) §2.
+> P0.1, extended by P0.5 (STYLE + sector deaths) and P1 (the pre-run funnel).
+> Written 2026-11-10. Why this exists, with sources:
+> [`GAME-DESIGN-REFERENCES.md`](GAME-DESIGN-REFERENCES.md) §2.
 > Code: `src/lib/run-telemetry.ts` (pure math) ·
 > `src/lib/run-telemetry-store.ts` (memory / Mongo) ·
-> `src/app/api/telemetry/run/route.ts` (intake).
+> `src/app/api/telemetry/run/route.ts` (intake) ·
+> `src/lib/funnel-telemetry.ts` + `src/lib/funnel-telemetry-store.ts` +
+> `src/app/api/telemetry/event/route.ts` (P1 funnel lane, §3.3).
 
 ## 1. What is collected
 
@@ -123,7 +126,6 @@ Two rules the math keeps:
   been attributed to `THE SUMMIT` and read as "the clean runway got harder".
 
 ## 4. Intake rules
-
 - `POST /api/telemetry/run`, JSON, body capped at 2 KB.
 - Per-IP budget: 60 requests/minute (`telemetry-run` namespace). A human plays far
   fewer than 60 finished runs a minute.
