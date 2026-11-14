@@ -1,20 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Display voice for marketing surfaces — blocky/pixel, self-hosted so the CSP
-   stays font-src 'self'. Chosen from the owner's UI attunements (docs/STYLE-SPEC-VISUAL-DNA-2026-11-14.md §6).
-   Licences: Pixelify Sans & Silkscreen, SIL Open Font License 1.1. */
-@font-face {
-  font-family: "Pixelify Sans";
-  src: url("/fonts/pixelify-sans-latin.woff2") format("woff2");
-  font-weight: 400 700;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -2129,7 +2115,6 @@ html { scroll-behavior: smooth; }
   --lp-faint: #8A9099; /* G5: AA contrast on dark (was ~3.07:1) */
   --lp-text: #D8DEE3;
   --lp-display: 'Clash Display', 'Instrument Sans', sans-serif;
-  --lp-pixel: 'Pixelify Sans', 'Clash Display', sans-serif;
   --lp-ui: 'Instrument Sans', sans-serif;
   --lp-mono: var(--font-mono-cc), 'JetBrains Mono', monospace;
 
@@ -2166,10 +2151,10 @@ html { scroll-behavior: smooth; }
   object-fit: cover;
 }
 .lp-nav-logo-text {
-  font-family: var(--lp-pixel);
-  font-weight: 400;
-  font-size: 16px;
-  letter-spacing: 0.08em;
+  font-family: var(--lp-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.06em;
   color: #fff;
 }
 .lp-nav-links {
@@ -2294,31 +2279,6 @@ html { scroll-behavior: smooth; }
   height: auto;
   filter: drop-shadow(0 26px 54px rgba(0, 0, 0, 0.55));
 }
-/* Visual DNA §8.2 — the only two callouts in the system (GREEN HOLDS / RED CRUMBLES).
-   1px dashed chip; the meaning is carried by the word, not the colour alone. */
-.lp-hero-callouts {
-  margin-top: 28px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-start;
-}
-.lp-callout {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 10px;
-  border: 1px dashed currentColor;
-  border-radius: 4px;
-  font-family: var(--lp-mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  line-height: 1;
-  white-space: nowrap;
-}
-.lp-callout.up { color: var(--lp-up); }
-.lp-callout.down { color: var(--lp-down); }
-
 .lp-hero-eyebrow {
   font-family: var(--lp-mono);
   font-size: 11px;
@@ -2328,11 +2288,11 @@ html { scroll-behavior: smooth; }
   margin-bottom: 18px;
 }
 .lp-hero-title {
-  font-family: var(--lp-pixel);
-  font-weight: 400;
-  font-size: clamp(34px, 5.6vw, 72px);
-  line-height: 1.02;
-  letter-spacing: 0.01em;
+  font-family: var(--lp-display);
+  font-weight: 700;
+  font-size: clamp(32px, 5.4vw, 70px);
+  line-height: 0.94;
+  letter-spacing: -0.02em;
   color: #fff;
 }
 .lp-hero-title .lime {
@@ -2363,10 +2323,9 @@ html { scroll-behavior: smooth; }
 }
 .lp-hero-stat { text-align: left; }
 .lp-hero-stat-num {
-  font-family: var(--lp-pixel);
-  font-weight: 400;
-  font-size: 28px;
-  line-height: 1.1;
+  font-family: var(--lp-display);
+  font-weight: 700;
+  font-size: 26px;
   color: var(--lp-lime);
 }
 .lp-hero-stat-label {
@@ -2392,7 +2351,6 @@ html { scroll-behavior: smooth; }
   .lp-hero-stat { text-align: center; }
   .lp-hero-visual { margin-top: 12px; }
   .lp-hero-mascot { width: min(78vw, 320px); }
-  .lp-hero-callouts { justify-content: center; }
 }
 
 /* Sections */
@@ -2410,11 +2368,11 @@ html { scroll-behavior: smooth; }
   text-align: center;
 }
 .lp-section-title {
-  font-family: var(--lp-pixel);
-  font-weight: 400;
+  font-family: var(--lp-display);
+  font-weight: 700;
   font-size: clamp(26px, 5vw, 42px);
-  line-height: 1.12;
-  letter-spacing: 0.01em;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   color: #fff;
   text-align: center;
   margin-top: 10px;
